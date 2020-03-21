@@ -56,7 +56,7 @@ R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number")
 N_k = pop.popul.to_numpy()          # Populacia
 locs_len = len(N_k)                 # Pocet obci
 simul_len = 200   
-simul_cnt = 64
+simul_cnt = 256
 public_trans_high = 1
 public_trans_mid = 0.5
 public_trans_low = 0.2
@@ -64,3 +64,7 @@ public_trans_low = 0.2
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)
 data_senior=data_senior.sort_values(by=['munic'])
+
+N_k_s = N_k-data_senior.senior.to_numpy()
+locs_len_s = len(N_k_s)
+

@@ -10,24 +10,25 @@ import seaborn as sns
 import time
 import init as x
 
-def simul(public_trans): 
+def simul(public_trans):
     
-    SIR = np.zeros(shape=(x.locs_len, 3)) 
-    SIR[:,0] = x.N_k                      
+    SIR = np.zeros(shape=(x.locs_len_s, 3)) 
+    SIR[:,0] = x.N_k_s                     
 
     SIR[:, 0] = SIR[:, 0] - x.first_infections
     SIR[:, 1] = SIR[:, 1] + x.first_infections    
+    
     row_sums = SIR.sum(axis=1)
     SIR_n = SIR / row_sums[:, np.newaxis]
-    gamma_vec = np.full(x.locs_len, x.gamma)
-    public_trans_vec = np.full(x.locs_len, public_trans)
+    gamma_vec = np.full(x.locs_len_s, x.gamma)
+    public_trans_vec = np.full(x.locs_len_s, public_trans)
     SIR_sim = SIR.copy()
     SIR_nsim = SIR_n.copy()
     infected_pop_norm = np.zeros((x.simul_len,))
     susceptible_pop_norm = np.zeros((x.simul_len,))
     recovered_pop_norm = np.zeros((x.simul_len,))
     SIR_sim_arr=np.zeros((SIR_sim.shape[0],SIR_sim.shape[1],x.simul_len)) 
-    beta_mat = np.random.gamma(x.beta, 2, size=[x.locs_len,x.simul_len])
+    beta_mat = np.random.gamma(x.beta, 2, size=[x.locs_len_s,x.simul_len])
     cont = True
     while cont:
         j = 0
@@ -35,11 +36,11 @@ def simul(public_trans):
             for time_step in (range(x.simul_len)):        
                 beta_vec = beta_mat[:,j] #np.random.gamma(beta, 2, locs_len)
                 # Matice infekcii
-                infected_mat = np.array([SIR_nsim[:,1],]*x.locs_len).transpose()
+                infected_mat = np.array([SIR_nsim[:,1],]*x.locs_len_s).transpose()
                 OD_infected = np.round(x.OD*infected_mat)
                 inflow_infected = OD_infected.sum(axis=0)
                 inflow_infected = np.round(inflow_infected*public_trans_vec)
-                new_infect = beta_vec*SIR_sim[:, 0]*inflow_infected/(x.N_k + x.OD.sum(axis=0))
+                new_infect = beta_vec*SIR_sim[:, 0]*inflow_infected/(x.N_k_s + x.OD.sum(axis=0))
                 new_recovered = gamma_vec*SIR_sim[:, 1]
                 new_infect = np.where(new_infect>SIR_sim[:, 0], SIR_sim[:, 0], new_infect)
                 SIR_sim[:, 0] = SIR_sim[:, 0] - new_infect
