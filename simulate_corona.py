@@ -11,7 +11,7 @@ import time
 import init as x
 
 def simul(public_trans):   
-    
+    print("a")
     SIR = np.zeros(shape=(x.locs_len, 3)) 
     SIR[:,0] = x.N_k                      
 
@@ -27,7 +27,6 @@ def simul(public_trans):
     susceptible_pop_norm = np.zeros((x.simul_len,))
     recovered_pop_norm = np.zeros((x.simul_len,))
     SIR_sim_arr=np.zeros((SIR_sim.shape[0],SIR_sim.shape[1],x.simul_len)) 
-    np.random.seed()
     beta_mat = np.random.gamma(x.beta, 2, size=[x.locs_len,x.simul_len])
     cont = True
     while cont:

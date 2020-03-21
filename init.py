@@ -56,7 +56,7 @@ R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number")
 N_k = pop.popul.to_numpy()          # Populacia
 locs_len = len(N_k)                 # Pocet obci
 simul_len = 200   
-simul_cnt = 50
+simul_cnt = 8
 public_trans_glob = 0.5
 
 data_senior=pd.read_excel('./src/senior.xlsx')
