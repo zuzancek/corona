@@ -31,8 +31,9 @@ def save_file_pickle(data,filenameroot):
             else: 
                 idx = int((idx+idx1)/2) if idx1>0 else idx = int((idx+1)/2)-1
         else:
+            if idx1==idx or idx>=N-2: cont = False
+            else: idx = int((idx+idx0)/2)
             idx1 = idx
-            cont = False if idx>=N-2 else idx = int((idx+idx0)/2)
         k+=1  
     try
         fid.close()
@@ -44,9 +45,10 @@ def save_file_pickle(data,filenameroot):
     k=0
     for fidx in range(filecnt):
         filename0 = filenameroot+'_'+str(k)+'.pickle'
-        fid0 = open(filenameroot,'wb')
+        fid0 = open(filename0,'wb')
         lastidx = min((k+1)*filepartsize,N)-1
         y = data[k*filepartsize:lastidx]
         pickle.dump(y,fid0)
+        k+=1
         fid0.close()
     
