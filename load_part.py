@@ -15,19 +15,17 @@ import init as x
 def load_file_pickle(filepath,pattern):
     
     # get all files in a given directory
-    path = pathlib.Path(filepath)    
-    allfiles = []
+    path = pathlib.Path(filepath)   
     reqfiles = []
-    print(path)
-    filepattern = str(path)+"*"
-    print(filepattern)
+    
+    filepattern = str(path)+"/"+str(pattern)+"*"
     for fitem in path.iterdir():
-        allfiles.append(fitem)
         if fn.fnmatch(fitem,filepattern):
             reqfiles.append(fitem)
     
     # load files
     filecnt = len(reqfiles)
+    print(filecnt)
     if filecnt==0:
         data = []
     elif filecnt==1:
@@ -35,18 +33,12 @@ def load_file_pickle(filepath,pattern):
         data = pickle.load(fid)
         fid.close()        
     else:
-        fid = open(reqfiles[0],'rb')
-        y = pickle.load(fid)
-        data = np.full(len(y)*filecnt, 0)
-        fid.close()
-        k = 0
+        data = []
         for fitem in reqfiles:
             fid = open(fitem,'rb')
             y = pickle.load(fid)
-            data[idx:idx+len(y)] = y
+            data = data+y            
             fid.close()
-            idx=+len(y)
-        data = data[0:idx]
         
     return data
 

@@ -48,7 +48,7 @@ first_infections_original=first_infections
 first_infections=first_infections_original*6
 
 ## definition of key parameters
-beta = 0.24 # "Transmission rate" <------ TEST HERE 2.4 with confint <2.2,2.6>
+beta = 0.26 # "Transmission rate" <------ TEST HERE 2.4 with confint <2.2,2.6>
 gamma = 0.10 # "Recovery rate", length of sickness is 12 days approx.
 R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number") 
 

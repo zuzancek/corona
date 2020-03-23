@@ -55,7 +55,7 @@ def save_file_pickle(data,filenameroot):
         for fidx in range(filecnt):
             filename0 = filenameroot+'_'+str(k)+'.pickle'
             fid0 = open(filename0,'wb')
-            lastidx = min((k+1)*filepartsize,N)-1
+            lastidx = min((k+1)*filepartsize,N)
             y = data[k*filepartsize:lastidx]
             pickle.dump(y,fid0)
             k+=1
