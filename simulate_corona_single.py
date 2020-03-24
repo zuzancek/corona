@@ -20,6 +20,7 @@ def simul(public_trans):
     row_sums = SIR.sum(axis=1)
     SIR_n = SIR / row_sums[:, np.newaxis]
     gamma_vec = np.full(x.locs_len, x.gamma)
+    beta_vec = np.full(x.locs_len, x.beta)
     public_trans_vec = np.full(x.locs_len, public_trans)
     SIR_sim = SIR.copy()
     SIR_nsim = SIR_n.copy()
@@ -27,14 +28,14 @@ def simul(public_trans):
     susceptible_pop_norm = np.zeros((x.simul_len,))
     recovered_pop_norm = np.zeros((x.simul_len,))
     SIR_sim_arr=np.zeros((SIR_sim.shape[0],SIR_sim.shape[1],x.simul_len)) 
-    beta_mat = np.random.gamma(x.beta,x.beta_scale,size=[x.locs_len,x.simul_len])
+    #beta_mat = np.random.gamma(x.beta,x.beta_scale,size=[x.locs_len,x.simul_len])
     #beta_mat = np.random.beta(40,95,size=[x.locs_len,x.simul_len])
     cont = True
     while cont:
         j = 0
         try:
             for time_step in (range(x.simul_len)):        
-                beta_vec = beta_mat[:,j] #np.random.gamma(beta, 2, locs_len)
+                # beta_vec = beta_mat[:,j] #np.random.gamma(beta, 2, locs_len)
                 # Matice infekcii
                 infected_mat = np.array([SIR_nsim[:,1],]*x.locs_len).transpose()
                 OD_infected = np.round(x.OD*infected_mat)

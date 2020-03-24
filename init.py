@@ -55,17 +55,17 @@ gamma = 0.8 # "Recovery rate", length of sickness is 12 days approx.
 R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number") 
 
 ## ALTERNATIVE
-R0 = 2.4
+R0 = 2.2
 Tinf = 3
 Tinc = 5
-gamma = 1/(Tinf+Tinc)
+gamma = 1/(Tinf+0*Tinc)
 beta = R0*gamma
 
 ## technical params
 N_k = pop.popul.to_numpy()          # Populacia
 locs_len = len(N_k)                 # Pocet obci
-simul_len = 200   
-simul_cnt = 50
+simul_len = 400   
+simul_cnt = 40
 public_trans_high = 1
 public_trans_mid = 0.5
 public_trans_low = 0.2
