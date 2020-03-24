@@ -48,15 +48,24 @@ first_infections_original=first_infections
 first_infections=first_infections_original*6
 
 ## definition of key parameters
-beta = 0.26 # "Transmission rate" <------ TEST HERE 2.4 with confint <2.2,2.6>
-gamma = 0.10 # "Recovery rate", length of sickness is 12 days approx.
+beta = 0.3 # "Transmission rate" <------ TEST HERE 2.4 with confint <2.2,2.6>
+# also the parameter driving the shape of gamma dist.
+beta_scale = 1 # scaling factor in gamma distribution
+gamma = 0.8 # "Recovery rate", length of sickness is 12 days approx.
 R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number") 
+
+## ALTERNATIVE
+R0 = 2.4
+Tinf = 3
+Tinc = 5
+gamma = 1/(Tinf+Tinc)
+beta = R0*gamma
 
 ## technical params
 N_k = pop.popul.to_numpy()          # Populacia
 locs_len = len(N_k)                 # Pocet obci
 simul_len = 200   
-simul_cnt = 64
+simul_cnt = 50
 public_trans_high = 1
 public_trans_mid = 0.5
 public_trans_low = 0.2

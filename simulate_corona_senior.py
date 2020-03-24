@@ -28,7 +28,7 @@ def simul(public_trans):
     susceptible_pop_norm = np.zeros((x.simul_len,))
     recovered_pop_norm = np.zeros((x.simul_len,))
     SIR_sim_arr=np.zeros((SIR_sim.shape[0],SIR_sim.shape[1],x.simul_len)) 
-    beta_mat = np.random.gamma(x.beta, 2, size=[x.locs_len_s,x.simul_len])
+    beta_mat = np.random.gamma(x.beta,x.beta_scale, size=[x.locs_len_s,x.simul_len])
     cont = True
     while cont:
         j = 0
