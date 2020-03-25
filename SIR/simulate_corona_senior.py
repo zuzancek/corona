@@ -34,7 +34,7 @@ def simul(public_trans):
         j = 0
         try:
             for time_step in (range(x.simul_len)):        
-                beta_vec = beta_mat[:,j] #np.random.gamma(beta, 2, locs_len)
+                beta_vec = beta_mat[:,j]
                 # Matice infekcii
                 infected_mat = np.array([SIR_nsim[:,1],]*x.locs_len_s).transpose()
                 OD_infected = np.round(x.OD*infected_mat)

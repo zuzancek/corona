@@ -64,11 +64,11 @@ beta = R0*gamma
 ## technical params
 N_k = pop.popul.to_numpy()          # Populacia
 locs_len = len(N_k)                 # Pocet obci
-simul_len = 400   
-simul_cnt = 40
+simul_len = 200   
+simul_cnt = 64
 public_trans_high = 1
-public_trans_mid = 0.5
-public_trans_low = 0.2
+public_trans_mid = 0.8
+public_trans_low = 0.6
 
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)
