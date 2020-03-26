@@ -52,7 +52,7 @@ def simul(public_trans):
         infected_pop_norm[j] = I
         susceptible_pop_norm[j] = S
         recovered_pop_norm[j] = R
-        j=j+1
+        j+=1
         
     ## Vytvor konecnu maticu
     res = pd.DataFrame(list(zip(infected_pop_norm, susceptible_pop_norm, recovered_pop_norm)), columns = ['inf','sus','rec'])

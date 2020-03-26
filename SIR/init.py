@@ -55,10 +55,10 @@ gamma = 0.8 # "Recovery rate", length of sickness is 12 days approx.
 R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number") 
 
 ## ALTERNATIVE
-R0 = 2.2
+R0 = 2.0
 Tinf = 3
 Tinc = 5
-gamma = 1/(Tinf+0*Tinc)
+gamma = 1/5#(Tinf+0*Tinc)
 beta = R0*gamma
 
 ## technical params
