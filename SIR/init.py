@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
+import os
 sns.set(rc={'figure.figsize':(11, 4)})
 
 ## Funkcia pre výpočet priemeru zo simulácií
@@ -47,18 +48,13 @@ for i in np.arange(nakazy_sk.shape[0]):
 first_infections_original=first_infections
 first_infections=first_infections_original*6
 
-## definition of key parameters
-beta = 0.3 # "Transmission rate" <------ TEST HERE 2.4 with confint <2.2,2.6>
-# also the parameter driving the shape of gamma dist.
-beta_scale = 1 # scaling factor in gamma distribution
-gamma = 0.8 # "Recovery rate", length of sickness is 12 days approx.
-R0 = beta/gamma # Reprodukcne cislo ("Basic reproduction number") 
-
 ## ALTERNATIVE
-R0 = 2.0
+global R0
+R0 = 2.4
 Tinf = 3
 Tinc = 5
 gamma = 1/5#(Tinf+0*Tinc)
+global beta
 beta = R0*gamma
 
 ## technical params
@@ -70,10 +66,74 @@ public_trans_high = 1
 public_trans_mid = 0.8
 public_trans_low = 0.6
 
+global fnc_type
+global R0_type
+fnc_type = 0
+R0_type = 0
+
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)
 data_senior=data_senior.sort_values(by=['munic'])
 
 N_k_s = N_k-data_senior.senior.to_numpy()
 locs_len_s = len(N_k_s)
+
+## paths and directories
+out_filename_root = "./out"
+out_fig_root = "./fig"
+out_stat_root = "./stat"
+out_filename = "SIR.pickle"
+
+def setup_paths(fnc_type,R0_type):
+    out_filename_root = "./out"
+    out_fig_root = "./fig"
+    out_stat_root = "./stat"
+    try:
+        os.mkdir(out_filename_root)
+    except:  
+        ethrown=True
+    try:
+        os.mkdir(out_fig_root)
+    except:
+        ethrown=True
+    try:
+        os.mkdir(out_stat_root)
+    except:
+        ethrown=True
+    out_filename_ext = ""
+    out_fig_ext = ""
+    out_stat_ext = ""
+    if fnc_type == 0:
+        out_filename_dir = ""
+        out_fig_dir = ""
+        out_stat_dir = ""
+        if R0_type == 0:
+            return out_filename_root,out_fig_root,out_stat_root
+    else:        
+        out_filename_ext = "sen"
+        out_fig_ext = "sen"
+        out_stat_ext = "sen"
+    if R0_type == 1:
+        out_filename_ext = out_filename_ext+"R0low"
+    elif R0_type == 2:
+        out_filename_ext = out_filename_ext+"R0high"
+    
+    out_filename_root = out_filename_root+"/"+out_filename_ext
+    try:
+        os.mkdir(out_filename_root)
+    except:
+        ethrown=True
+    out_fig_root = out_fig_root+"/"+out_fig_ext
+    try:
+        os.mkdir(out_fig_root)
+    except:
+        ethrown=True
+    out_stat_root = out_stat_root+"/"+out_stat_ext
+    try:
+        os.mkdir(out_stat_root)
+    except:
+        ethrown=True
+    return out_filename_root,out_fig_root,out_stat_root  
+    
+    
 
