@@ -21,6 +21,9 @@ def sumlist(x):
 ## Údaje k počtu obyvateľov na obec 
 pop = pd.read_excel('./src/munic_pop.xlsx')
 pop_N = np.array(pop['popul'])
+N_popul = pop.popul.to_numpy()        # Populacia (vektor)
+N_popul_size = np.sum(N_popul)         # pocet obyvatelov
+N_locs = len(N_popul)                 # Pocet obci
 
 ## Priradenie GPS suradnic pre kazdu obec
 def get_coors_long(x):
@@ -33,20 +36,28 @@ data_i=pop
 data_i.loc[:,'long']=data_i.munic.apply(str).apply(get_coors_long)
 data_i.loc[:,'lat']=data_i.munic.apply(str).apply(get_coors_lat)
 
-with open('./src/OD_final_16.3.2020.pickle','rb') as f:
-    OD=pickle.load(f)
+# OD matrix
+# load data and process matrix
+def get_OD_matrix():
+    with open('./src/OD.pickle','rb') as f:
+        OD=pickle.load(f)
+        f.close()
+    np.fill_diagonal(OD,0)
+    for idx in range(N_locs):
+        sh = np.sum(OD[:,idx])/N_popul[idx]
+        if sh>1:
+            OD[:,idx] /= sh
+    return OD
 
-
-nakazy_sk=pd.DataFrame({'kod':[529346,529346,529320 , 512036,508063,500011,506338,598186,508438,506745,508217,503011,
-                    501433,527106,505315,505315,517461,505820,526355],
-                      'pocet':[4,3,25,7,4,3,3,2,2,2,2,2,1,1,1,1,1,1,1]})
-
-first_infections=np.zeros(2926)
+## load first infections
+nakazy_sk = pd.read_excel('./src/cases.xlsx')
+first_infections=np.zeros(N_locs)
 for i in np.arange(nakazy_sk.shape[0]):
-    first_infections[pop.munic==nakazy_sk.kod.iloc[i]]=nakazy_sk.pocet.iloc[i]
+    first_infections[pop.munic==nakazy_sk.KOD.iloc[i]]=nakazy_sk.ID.iloc[i]
     
 first_infections_original=first_infections
-first_infections=first_infections_original*6
+first_infections_correction_multiplier = 6
+first_infections=first_infections_original*first_infections_correction_multiplier
 
 ## ALTERNATIVE
 global R0
@@ -70,6 +81,7 @@ global fnc_type
 global R0_type
 fnc_type = 0
 R0_type = 0
+OD = get_OD_matrix()
 
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)
