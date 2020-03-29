@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
-import init as x
+import init_multi as x
 import os
 
 def save_file_pickle(data,filenameroot):

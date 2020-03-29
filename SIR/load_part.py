@@ -10,7 +10,7 @@ import seaborn as sns
 import time
 import os, pathlib
 import fnmatch as fn
-import init as x
+import init_multi as x
 
 def load_file_pickle(filepath,pattern):
     

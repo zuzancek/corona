@@ -9,11 +9,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 import os
-import init as x
+import init_common as x
 
-def set_params():
-    if x.R0_type == 1:
-        x.R0 = 2.2
-    elif x.R0_type == 2:
-        x.R0 = 2.6
-    x.beta = x.R0*x.gamma
+# global beta
+beta = x.R0*x.gamma
+beta_scale = 1/25
+
