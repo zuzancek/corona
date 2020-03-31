@@ -40,7 +40,7 @@ first_infections_correction_multiplier = 6
 first_infections=first_infections_original*first_infections_correction_multiplier
 
 # global R0
-R0 = 2.4
+R0 = 2.2
 Tinf = 3
 Tinc = 5
 gamma = 1/(Tinc+Tinf)
@@ -57,7 +57,7 @@ global R0_type
 fnc_type = 0
 R0_type = 0
 # OD = get_OD_matrix()
-with open('./src/OD.pickle','rb') as f:
+with open('./src/OD_old.pickle','rb') as f:
     OD=pickle.load(f)
     f.close()
 

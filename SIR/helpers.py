@@ -15,6 +15,13 @@ def power_law_pdf(y,a0,a1,k):
     z = ((a1**(1.0-k)-a0**(1.0-k))*y+a0**(1.0-k))**(1.0/(1.0-k))
     return z
 
+def adjust_beta(beta1,beta0,do_print=False):
+    beta0list = np.array(beta0)
+    beta1 = (beta1/np.average(beta0list))*beta0list
+    if do_print:
+        print('new beta mean = ',np.average(beta1))
+    return beta1.to_list()
+
 ## Funkcia pre výpočet priemeru a odchylky zo simulácií
 def mean_list(x,colname):
     z = pd.DataFrame(x[0][colname])
@@ -59,6 +66,7 @@ def get_OD_matrix():
 
 
 def setup_paths(R0_type):
+    
     out_filename_root = "./out"
     out_fig_root = "./fig"
     out_stat_root = "./stat"
@@ -81,20 +89,24 @@ def setup_paths(R0_type):
         return out_filename_root,out_fig_root,out_stat_root
     if R0_type == 1:
         out_filename_ext = out_filename_ext+"R0low"
+        out_fig_ext = out_fig_ext+"R0low"
     elif R0_type == 2:
         out_filename_ext = out_filename_ext+"R0high"
+        out_fig_ext = out_fig_ext+"R0hih"
     
     out_filename_root = out_filename_root+"/"+out_filename_ext
+    out_fig_root = out_fig_root+"/"+out_fig_ext
+    out_stat_root = out_stat_root+"/"+out_stat_ext
     try:
         os.mkdir(out_filename_root)
     except:
         ethrown=True
-    out_fig_root = out_fig_root+"/"+out_fig_ext
+    #out_fig_root = out_fig_root+"/"+out_fig_ext
     try:
         os.mkdir(out_fig_root)
     except:
         ethrown=True
-    out_stat_root = out_stat_root+"/"+out_stat_ext
+    #out_stat_root = out_stat_root+"/"+out_stat_ext
     try:
         os.mkdir(out_stat_root)
     except:
