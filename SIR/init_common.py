@@ -11,13 +11,6 @@ import time
 import os
 sns.set(rc={'figure.figsize':(11, 4)})
 
-## Funkcia pre výpočet priemeru zo simulácií
-def sumlist(x):
-    tmp=x[0]
-    for i in x[1:]:
-        tmp=tmp+i
-    return tmp/len(x)
-
 ## Údaje k počtu obyvateľov na obec 
 pop = pd.read_excel('./src/munic_pop.xlsx')
 pop_N = np.array(pop['popul'])
@@ -36,19 +29,6 @@ data_i=pop
 data_i.loc[:,'long']=data_i.munic.apply(str).apply(get_coors_long)
 data_i.loc[:,'lat']=data_i.munic.apply(str).apply(get_coors_lat)
 
-# OD matrix
-# load data and process matrix
-def get_OD_matrix():
-    with open('./src/OD.pickle','rb') as f:
-        OD=pickle.load(f)
-        f.close()
-    np.fill_diagonal(OD,0)
-    for idx in range(N_locs):
-        sh = np.sum(OD[:,idx])/N_popul[idx]
-        if sh>1:
-            OD[:,idx] /= sh
-    return OD
-
 ## load first infections
 nakazy_sk = pd.read_excel('./src/cases.xlsx')
 first_infections=np.zeros(N_locs)
@@ -63,14 +43,11 @@ first_infections=first_infections_original*first_infections_correction_multiplie
 R0 = 2.4
 Tinf = 3
 Tinc = 5
-gamma = 1/Tinc
-# global beta
-# beta = R0*gamma
-# beta_scale = 1/25
+gamma = 1/(Tinc+Tinf)
 
 ## technical params
 N_per = 200  # number of simulated periods (days)  
-N_simul = 40 # number of repetitions/independent runs
+N_simul = 60 # number of repetitions/independent runs
 public_trans_high = 1
 public_trans_mid = 0.8
 public_trans_low = 0.6
@@ -79,7 +56,10 @@ global fnc_type
 global R0_type
 fnc_type = 0
 R0_type = 0
-OD = get_OD_matrix()
+# OD = get_OD_matrix()
+with open('./src/OD.pickle','rb') as f:
+    OD=pickle.load(f)
+    f.close()
 
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)
@@ -95,49 +75,3 @@ out_fig_root = "./fig"
 out_stat_root = "./stat"
 out_filename_pct0 = "simul_SIR_pct"
 out_filename_raw0 = "simul_SIR_raw"
-
-def setup_paths(R0_type):
-    out_filename_root = "./out"
-    out_fig_root = "./fig"
-    out_stat_root = "./stat"
-    try:
-        os.mkdir(out_filename_root)
-    except:  
-        ethrown=True
-    try:
-        os.mkdir(out_fig_root)
-    except:
-        ethrown=True
-    try:
-        os.mkdir(out_stat_root)
-    except:
-        ethrown=True
-    out_filename_ext = ""
-    out_fig_ext = ""
-    out_stat_ext = ""
-    if R0_type == 0:
-        return out_filename_root,out_fig_root,out_stat_root
-    if R0_type == 1:
-        out_filename_ext = "R0low"
-    else:
-        out_filename_ext = "R0high"
-    
-    out_filename_root = out_filename_root+"/"+out_filename_ext
-    try:
-        os.mkdir(out_filename_root)
-    except:
-        ethrown=True
-    out_fig_root = out_fig_root+"/"+out_fig_ext
-    try:
-        os.mkdir(out_fig_root)
-    except:
-        ethrown=True
-    out_stat_root = out_stat_root+"/"+out_stat_ext
-    try:
-        os.mkdir(out_stat_root)
-    except:
-        ethrown=True
-    return out_filename_root,out_fig_root,out_stat_root  
-    
-    
-

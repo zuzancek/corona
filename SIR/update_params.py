@@ -11,9 +11,10 @@ import time
 import os
 import init as x
 
-def set_params():
-    if x.R0_type == 1:
-        x.R0 = 2.2
-    elif x.R0_type == 2:
-        x.R0 = 2.6
-    x.beta = x.R0*x.gamma
+def set_params(R0_type):
+    if R0_type == 1:
+        R0 = 2.2
+    elif R0_type == 2:
+        R0 = 2.6
+    beta = R0*x.gamma
+    return beta

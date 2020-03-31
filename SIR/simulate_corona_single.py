@@ -29,8 +29,7 @@ def simul(public_trans):
     recovered_pop_norm = np.zeros((x.simul_len,))
     SIR_sim_arr=np.zeros((SIR_sim.shape[0],SIR_sim.shape[1],x.simul_len)) 
     
-    j = 0
-    for time_step in (range(x.simul_len)):        
+    for j in (range(x.simul_len)):        
         # beta_vec = beta_mat[:,j] #np.random.gamma(beta, 2, locs_len)
         infected_mat = np.array([SIR_nsim[:,1],]*x.locs_len).transpose()
         OD_infected = np.round(x.OD*infected_mat)
@@ -52,8 +51,7 @@ def simul(public_trans):
         infected_pop_norm[j] = I
         susceptible_pop_norm[j] = S
         recovered_pop_norm[j] = R
-        j+=1
-        
+     
     ## Vytvor konecnu maticu
     res = pd.DataFrame(list(zip(infected_pop_norm, susceptible_pop_norm, recovered_pop_norm)), columns = ['inf','sus','rec'])
     

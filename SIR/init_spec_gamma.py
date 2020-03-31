@@ -14,4 +14,5 @@ import init_common as x
 # global beta
 beta = x.R0*x.gamma
 beta_scale = 1/25
+gamma_scale = 2
 
