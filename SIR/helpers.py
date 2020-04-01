@@ -90,9 +90,11 @@ def setup_paths(R0_type):
     if R0_type == 1:
         out_filename_ext = out_filename_ext+"R0low"
         out_fig_ext = out_fig_ext+"R0low"
+        out_stat_ext = out_stat_ext+"R0low"
     elif R0_type == 2:
         out_filename_ext = out_filename_ext+"R0high"
-        out_fig_ext = out_fig_ext+"R0hih"
+        out_fig_ext = out_fig_ext+"R0high"
+        out_stat_ext = out_stat_ext+"R0high"
     
     out_filename_root = out_filename_root+"/"+out_filename_ext
     out_fig_root = out_fig_root+"/"+out_fig_ext
@@ -101,12 +103,10 @@ def setup_paths(R0_type):
         os.mkdir(out_filename_root)
     except:
         ethrown=True
-    #out_fig_root = out_fig_root+"/"+out_fig_ext
     try:
         os.mkdir(out_fig_root)
     except:
         ethrown=True
-    #out_stat_root = out_stat_root+"/"+out_stat_ext
     try:
         os.mkdir(out_stat_root)
     except:
