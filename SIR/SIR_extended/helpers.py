@@ -65,7 +65,7 @@ def get_OD_matrix():
     return OD
 
 
-def setup_paths(R0_type):
+def setup_paths(R0_type,alpha_):
     
     out_filename_root = "./out"
     out_fig_root = "./fig"
@@ -85,8 +85,6 @@ def setup_paths(R0_type):
     out_filename_ext = ""
     out_fig_ext = ""
     out_stat_ext = ""
-    if R0_type == 0:
-        return out_filename_root,out_fig_root,out_stat_root
     if R0_type == 1:
         out_filename_ext = out_filename_ext+"R0low"
         out_fig_ext = out_fig_ext+"R0low"
@@ -95,7 +93,7 @@ def setup_paths(R0_type):
         out_filename_ext = out_filename_ext+"R0high"
         out_fig_ext = out_fig_ext+"R0high"
         out_stat_ext = out_stat_ext+"R0high"
-    
+        
     out_filename_root = out_filename_root+"/"+out_filename_ext
     out_fig_root = out_fig_root+"/"+out_fig_ext
     out_stat_root = out_stat_root+"/"+out_stat_ext
