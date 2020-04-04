@@ -25,6 +25,7 @@ Trec_sig = 0.62
 m0 = Trec_mean*(Trec_sig**2)
 s0 = 1/(Trec_sig**2)
 Trec_vec = np.random.gamma(m0,s0,N_nodes)
+Trec_vec_list = Trec_vec.tolist()
 Trec_mean = np.average(Trec_vec)
 gamma_mean = 1/Trec_mean 
 gamma_vec = 1/rec_vec
@@ -54,8 +55,15 @@ R0_mean = np.mean(R0_vec)
 R0_std = np.std(R0_vec)
 
 ## 3. exctract Beta
-Beta_vec = R0_vec/Trec_vec
-Beta_vec = Beta_vec[Beta_vec<2]
+beta_vec = R0_vec/Trec_vec
+beta_vec = beta_vec[beta_vec<2]
+beta_vec_mean = mean(beta_vec)
 ## use this -->>
-beta_vec_list = beta.tolist()
+beta_vec_list = beta_vec.tolist()
+
+
+def get_vectors(R0_scale=1):
+    beta_vec_new = R0_scale*beta_vec
+    beta_vec_list_new = beta_vec_new.tolist()
+    return beta_vec_list_new,Trec_vec_list
 

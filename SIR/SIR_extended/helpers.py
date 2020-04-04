@@ -65,7 +65,7 @@ def get_OD_matrix():
     return OD
 
 
-def setup_paths(R0_type,alpha_):
+def setup_paths(R0,alpha):
     
     out_filename_root = "./out"
     out_fig_root = "./fig"
@@ -82,34 +82,31 @@ def setup_paths(R0_type,alpha_):
         os.mkdir(out_stat_root)
     except:
         ethrown=True
-    out_filename_ext = ""
-    out_fig_ext = ""
-    out_stat_ext = ""
-    if R0_type == 1:
-        out_filename_ext = out_filename_ext+"R0low"
-        out_fig_ext = out_fig_ext+"R0low"
-        out_stat_ext = out_stat_ext+"R0low"
-    elif R0_type == 2:
-        out_filename_ext = out_filename_ext+"R0high"
-        out_fig_ext = out_fig_ext+"R0high"
-        out_stat_ext = out_stat_ext+"R0high"
-        
-    out_filename_root = out_filename_root+"/"+out_filename_ext
-    out_fig_root = out_fig_root+"/"+out_fig_ext
-    out_stat_root = out_stat_root+"/"+out_stat_ext
     try:
-        os.mkdir(out_filename_root)
+        R0_str = str(int(100*R0))
+    except:
+        R0_str = R0
+    try:
+        alpha_str = str(int(100*alpha))
+    except:
+        alpha_str = alpha
+    foldname = R0_str+"_"+alpha_str
+    out_filename_dir = out_filename_root+"/"+foldname
+    out_fig_dir = out_fig_root+"/"+foldname
+    out_stat_dir = out_stat_root+"/"+foldname
+    try:
+        os.mkdir(out_filename_dir)
     except:
         ethrown=True
     try:
-        os.mkdir(out_fig_root)
+        os.mkdir(out_fig_dir)
     except:
         ethrown=True
     try:
-        os.mkdir(out_stat_root)
+        os.mkdir(out_stat_dir)
     except:
         ethrown=True
-    return out_filename_root,out_fig_root,out_stat_root  
+    return out_filename_dir,out_fig_dir,out_stat_dir 
     
     
 

@@ -39,11 +39,8 @@ first_infections_original=first_infections
 first_infections_correction_multiplier = 6
 first_infections=first_infections_original*first_infections_correction_multiplier
 
-# global R0
-R0 = 2.2
-Tinf = 3
-Tinc = 5
-gamma = 1/(Tinc+Tinf)
+tau = 16/24
+R0_default = 1.47
 
 ## technical params
 N_per = 200  # number of simulated periods (days)  

@@ -1,12 +1,6 @@
 import sys
 import numpy as np
-from tqdm import tqdm_notebook
-import pickle
 import pandas as pd
-import plotly
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-import seaborn as sns
 import time
 import os
 import init_common as x
@@ -14,15 +8,14 @@ import helpers as hp
 from random import sample
 from sklearn.utils import shuffle
 
-sns.set(rc={'figure.figsize':(11, 4)})
-
-R0_target = 2.2
+# Trec = scalar (const), Beta ~ Pow & Gamma
 N_nodes = 1000000
 
 ## 1. add distribution for recovery time / gamma
 # Trec is deterministic in fact
 Trec_mean  = 6.5 
 Trec_vec = np.full(N_nodes,Trec_mean)
+Trec_vec_list = Trec_vec.tolist()
 gamma_mean = 1/Trec_mean 
 gamma_vec = 1/rec_vec
 ## use this -->>
@@ -51,8 +44,15 @@ R0_mean = np.mean(R0_vec)
 R0_std = np.std(R0_vec)
 
 ## 3. exctract Beta
-Beta_vec = R0_vec/Trec_vec
-Beta_vec = Beta_vec[Beta_vec<2]
+beta_vec = R0_vec/Trec_vec
+beta_vec = beta_vec[beta_vec<2]
+beta_mean = np.mean(beta_vec)
 ## use this -->>
-beta_vec_list = beta.tolist()
+beta_vec_list = beta_vec.tolist()
+
+
+def get_vectors(R0_scale=1):
+    beta_vec_new = R0_scale*beta_vec
+    beta_vec_list_new = beta_vec_new.tolist()
+    return beta_vec_list_new,Trec_vec_list
 
