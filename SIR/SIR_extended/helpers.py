@@ -64,7 +64,15 @@ def get_OD_matrix():
     #        OD[:,idx] = OD[:,idx]/sh
     return OD
 
-
+def create_alpha_matrix(idx_sel,init_sel,tar_sel,per,init_rem,tar_rem):
+    alpha_mat = np.full(shape=(x.N_locs,x.N_per),init_rem)
+    x0 = np.full(shape=(x.N_locs,1),init_rem)
+    x1 = np.full(shape=(x.N_locs,1),tar_rem)
+    alpha_mat = np.linspace(x0,x1,x.N_per)
+    alpha_mat[idx_sel,0:per] = np.linspace(init_sel,tar_sel,per)
+    return alpha_mat   
+    
+    
 def setup_paths(R0,alpha):
     
     out_filename_root = "./out"

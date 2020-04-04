@@ -44,7 +44,7 @@ R0_default = 1.47
 
 ## technical params
 N_per = 200  # number of simulated periods (days)  
-N_simul = 64 # number of repetitions/independent runs
+N_simul = 20 # number of repetitions/independent runs
 public_trans_high = 1
 public_trans_mid = 0.8
 public_trans_low = 0.6
@@ -70,5 +70,5 @@ N_locs_nosen = len(N_popul_nosen)
 out_filename_root = "./out"
 out_fig_root = "./fig"
 out_stat_root = "./stat"
-out_filename_pct0 = "simul_SIR_pct"
+out_filename = "simul_SIR"
 out_filename_raw0 = "simul_SIR_raw"

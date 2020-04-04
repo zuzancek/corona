@@ -7,7 +7,8 @@ import init_common as x
 from random import sample
 
 
-def simul(beta_list,Trec_list,alpha_mat): 
+def simul(beta_list,Trec_list,alpha_mat,it): 
+    
     SIR = np.zeros(shape=(x.N_locs, 3)) 
     SIR[:,0] = x.N_popul- x.first_infections
     SIR[:, 1] = SIR[:, 1] + x.first_infections    
@@ -16,7 +17,6 @@ def simul(beta_list,Trec_list,alpha_mat):
     SIR_sim = SIR.copy()
     SIR_nsim = SIR_n.copy()
     
-    public_trans_vec = np.full(x.N_locs, public_trans) ## <--- change this
     infected_pop_norm = np.zeros((x.N_per,))
     susceptible_pop_norm = np.zeros((x.N_per,))
     recovered_pop_norm = np.zeros((x.N_per,))
