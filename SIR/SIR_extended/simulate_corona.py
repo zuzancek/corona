@@ -7,7 +7,7 @@ import init_common as x
 from random import sample
 
 
-def simul(beta_list,Trec_list,alpha_mat,it): 
+def simul(beta_list,Trec_list,alpha_mat,alpha_mat1,it): 
     
     SIR = np.zeros(shape=(x.N_locs, 3)) 
     SIR[:,0] = x.N_popul- x.first_infections
@@ -58,5 +58,5 @@ def simul(beta_list,Trec_list,alpha_mat,it):
             print("exc")
         
     res = pd.DataFrame(list(zip(infected_pop_norm, susceptible_pop_norm, recovered_pop_norm)), columns = ['inf','sus','rec'])
-    
+    # print(infected_pop_norm)
     return res 

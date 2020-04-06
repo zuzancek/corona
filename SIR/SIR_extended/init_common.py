@@ -17,6 +17,7 @@ pop_N = np.array(pop['popul'])
 N_popul = pop.popul.to_numpy()        # Populacia (vektor)
 N_popul_size = np.sum(N_popul)         # pocet obyvatelov
 N_locs = len(N_popul)                 # Pocet obci
+np.random.seed(1000)
 
 ## Priradenie GPS suradnic pre kazdu obec
 def get_coors_long(x):
@@ -34,17 +35,21 @@ nakazy_sk = pd.read_excel('./src/cases.xlsx')
 first_infections=np.zeros(N_locs)
 for i in np.arange(nakazy_sk.shape[0]):
     first_infections[pop.munic==nakazy_sk.KOD.iloc[i]]=nakazy_sk.ID.iloc[i]
-    
+# corrrection for unobserved    
 first_infections_original=first_infections
-first_infections_correction_multiplier = 6
-first_infections=first_infections_original*first_infections_correction_multiplier
-
+first_infections_correction_multiplier = 16
+first_infections=first_infections_original*first_infections_correction_multiplier/4
+unobs_infection_num = int((first_infections_correction_multiplier*3/4)*sum(first_infections_original))
+unobs_idx = np.random.randint(0,N_locs,unobs_infection_num)
+for i in np.arange(unobs_infection_num):
+    ri = int(np.random.uniform(1)*N_locs)
+    first_infections[unobs_idx[i]]=first_infections[unobs_idx[i]]+1
 tau = 16/24
-R0_default = 1.47
+R0_default = 1.48#1.913 #1.47
 
 ## technical params
 N_per = 200  # number of simulated periods (days)  
-N_simul = 20 # number of repetitions/independent runs
+N_simul = 64  # number of repetitions/independent runs
 public_trans_high = 1
 public_trans_mid = 0.8
 public_trans_low = 0.6
@@ -54,7 +59,7 @@ global R0_type
 fnc_type = 0
 R0_type = 0
 # OD = get_OD_matrix()
-with open('./src/OD_old.pickle','rb') as f:
+with open('./src/OD.pickle','rb') as f:
     OD=pickle.load(f)
     f.close()
 

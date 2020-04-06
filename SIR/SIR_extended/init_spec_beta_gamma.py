@@ -28,7 +28,7 @@ Trec_vec = np.random.gamma(m0,s0,N_nodes)
 Trec_vec_list = Trec_vec.tolist()
 Trec_mean = np.average(Trec_vec)
 gamma_mean = 1/Trec_mean 
-gamma_vec = 1/rec_vec
+gamma_vec = 1/Trec_vec
 ## use this -->>
 gamma_vec_list = gamma_vec.tolist()
 
@@ -37,14 +37,14 @@ gamma_vec_list = gamma_vec.tolist()
 ## 2.A self-isolated
 isol_share = 0.7
 N_nodes_isol = round(isol_share*N_nodes)
-R0_scale = 64 #10**2
-R0_isol_mean = .97
+R0_scale = 100 #10**2
+R0_isol_mean = 0.25*3.96# 1.43
 R0_isol_vec = np.random.gamma(R0_scale*R0_isol_mean,1/R0_scale,N_nodes_isol)
 
 ## 2.B non-isolated
-a0 = R0_isol_mean+2*np.std(R0_isol_vec)
-a1 = 14
-scale_nonisol = 2
+a0 = R0_isol_mean+np.std(R0_isol_vec)#2
+a1 = 14#16
+scale_nonisol = 2.3#1.65
 N_nodes_nonisol = N_nodes-N_nodes_isol
 R0_nonisol_vec = hp.power_law_pdf(np.random.uniform(0,1,N_nodes_nonisol),a0,a1,scale_nonisol)
 
@@ -56,11 +56,9 @@ R0_std = np.std(R0_vec)
 
 ## 3. exctract Beta
 beta_vec = R0_vec/Trec_vec
-beta_vec = beta_vec[beta_vec<2]
-beta_vec_mean = mean(beta_vec)
+beta_vec_mean = np.mean(beta_vec)
 ## use this -->>
 beta_vec_list = beta_vec.tolist()
-
 
 def get_vectors(R0_scale=1):
     beta_vec_new = R0_scale*beta_vec
