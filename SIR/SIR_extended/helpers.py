@@ -44,6 +44,19 @@ def mean_list(x,colname,ma=False,w=6):
         z_mean[1:]=z_mean0[1:]
     return z_mean
 
+def quant_list(x,colname,val,ma=False,w=6):
+    z = pd.DataFrame(x[0][colname])
+    if len(z)>1:
+        for idx in x[1:]:
+            z = pd.concat([z,pd.DataFrame(idx[colname])],1)
+    z_quant = z.apply(np.quantile,axis=1,args=(val,))
+    if ma:
+        z_quant0 = z_quant.rolling(window=w).mean()
+        z_quant0[0:w-1] = z_quant.rolling(window=2).mean()[0:w-1]
+        z_quant[1:]=z_quant0[1:]
+    return z_quant
+
+
 def std_list(x,colname,ma=False,w=6):
     z = pd.DataFrame(x[0][colname])
     if len(z)>1:

@@ -36,8 +36,7 @@ def simul(beta_list,Trec_list,alpha_in_mat,alpha_out_mat,it):
                 gamma_vec = gamma_mat[:,j]
                 rec_time_vec = rec_mat[:,j]
                 alpha_in_vec = alpha_in_mat[:,j]
-                alpha_out_vec = alpha_out_mat[:,j]                
-                print(1)
+                alpha_out_vec = alpha_out_mat[:,j]   
                 # relative shares of S,I
                 y = SIR_sim[:,0]/x.N_popul
                 z = SIR_sim[:,1]/x.N_popul
@@ -45,22 +44,19 @@ def simul(beta_list,Trec_list,alpha_in_mat,alpha_out_mat,it):
                 out_work = beta_vec*y*SIR_sim[:,1]                
                 # term2: infected within their municipality by comuters from differnt munic., during working hours
                 denom = x.N_popul+OD.sum(axis=1)-OD.sum(axis=0)
-                print(2)
-                in_work_1 = np.zeros*(x.N_locs)
-                in_work_1 = (SIR_sim[:,0]-y*OD.sum(0))*((SIR_sim[:,1]-z*OD.sum(0))*beta_vec+np.sum(OD*(z*beta_vec),1))
+                # in_work_1 = np.zeros(x.N_locs)
+                in_work_1 = (SIR_sim[:,0]-y*OD.sum(0))*(np.sum(OD*(z*beta_vec),1)+(SIR_sim[:,1]-z*OD.sum(0))*beta_vec)
                 in_work_1 = in_work_1/denom
-                # term3
-                
-                print(3)
+                # term3               
+                # in_work_2 = np.zeros(x.N_locs)
+                in_work_2_nom = np.zeros(x.N_locs)
                 in_work_2_nom = (SIR_sim[:,1]-z*OD.sum(0))*beta_vec+np.sum(OD*beta_vec*z,1)
                 in_work_2 = y*np.sum(x.OD.transpose()*in_work_2_nom/denom,1)
                 I_new = x.tau*alpha_in_vec*out_work+alpha_out_vec*(1-x.tau)*(in_work_1+in_work_2)
                 # S cannot be negative...
-                I_new = np.where(new_I>SIR_sim[:,0],SIR_sim[:0],I_new)
+                I_new = np.where(I_new>SIR_sim[:,0],SIR_sim[:,0],I_new)
                 # Recovered
                 R_new = gamma_vec*SIR_sim[:,1]
-                
-                print(4)
                 # apply changes
                 SIR_sim[:,0] = SIR_sim[:,0]-I_new
                 SIR_sim[:,1] = SIR_sim[:,1]+I_new-R_new
@@ -70,12 +66,11 @@ def simul(beta_list,Trec_list,alpha_in_mat,alpha_out_mat,it):
                 # normalise
                 rsum = SIR_sim.sum(axis=1)
                 S = SIR_sim[:,0].sum()/x.N_popul_size
-                I = SIR_sum[:,1].sum()/x.N_popul_size
-                R = SIR_sum[:,2].sum()/x.N_popul_size
-                I_norm.append(I)
-                S_norm.append(S)
-                R_norm.append(R)
-                print(j)
+                I = SIR_sim[:,1].sum()/x.N_popul_size
+                R = SIR_sim[:,2].sum()/x.N_popul_size
+                I_norm[j]=I
+                S_norm[j]=S
+                R_norm[j]=R
             cont = False
         #except: 
             print("exc")

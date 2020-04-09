@@ -59,9 +59,18 @@ global R0_type
 fnc_type = 0
 R0_type = 0
 # OD = get_OD_matrix()
-with open('./src/OD.pickle','rb') as f:
-    OD=pickle.load(f)
-    f.close()
+
+def get_OD_matrix():
+    with open('./src/OD.pickle','rb') as f:
+        OD=pickle.load(f)
+        f.close()
+    np.fill_diagonal(OD,0)
+    for j in range(N_locs):
+        kappa = np.sum(OD[:,j])/N_popul[j]
+        if kappa>1:
+            OD[:,j] = OD[:,j]/kappa
+    return OD
+OD = get_OD_matrix()
 
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)
