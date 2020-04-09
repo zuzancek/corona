@@ -60,18 +60,13 @@ beta_vec_mean = np.mean(beta_vec)
 ## use this -->>
 beta_vec_list = beta_vec.tolist()
 
-
-def get_OD_matrix():
-    with open('./src/OD.pickle','rb') as f:
-        OD=pickle.load(f)
-        f.close()
-    np.fill_diagonal(OD,0)
-    for j in range(N_locs):
-        kappa = np.sum(OD[:,j])/N_popul[j]
-        if kappa>1:
-            OD[:,j] = OD[:,j]/kappa
-    return OD
-OD = get_OD_matrix()
+with open('./src/OD.pickle','rb') as f:
+    OD=pickle.load(f)
+np.fill_diagonal(OD,0)
+for j in range(x.N_locs):
+    kappa = np.sum(OD[:,j])/x.N_popul[j]
+    if kappa>1:
+        OD[:,j] = OD[:,j]/kappa
 
 
 def get_vectors(R0_scale=1):

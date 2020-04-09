@@ -60,10 +60,8 @@ fnc_type = 0
 R0_type = 0
 # OD = get_OD_matrix()
 
-def get_OD_matrix():
-    with open('./src/OD_old.pickle','rb') as f:
-        OD=pickle.load(f)
-        f.close()
+with open('./src/OD_old.pickle','rb') as f:
+    OD=pickle.load(f)
 
 data_senior=pd.read_excel('./src/senior.xlsx')
 data_senior.loc[:,'munic']=data_senior.munic.apply(lambda x: x[-6:]).apply(int)

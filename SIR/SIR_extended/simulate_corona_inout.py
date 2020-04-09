@@ -4,6 +4,7 @@ import pickle
 import pandas as pd
 import time
 import init_common as x
+import init_spec_inout as xx
 from random import sample
 
 
@@ -17,7 +18,7 @@ def simul(beta_list,Trec_list,alpha_in_mat,alpha_out_mat,it):
     SIR_sim = SIR.copy()
     SIR_nsim = SIR_n.copy()
     np.fill_diagonal(x.OD,0)
-    OD=x.OD
+    OD = xx.OD
     
     I_norm = np.zeros((x.N_per,))
     S_norm = np.zeros((x.N_per,))
@@ -49,7 +50,6 @@ def simul(beta_list,Trec_list,alpha_in_mat,alpha_out_mat,it):
                 in_work_1 = in_work_1/denom
                 # term3               
                 # in_work_2 = np.zeros(x.N_locs)
-                in_work_2_nom = np.zeros(x.N_locs)
                 in_work_2_nom = (SIR_sim[:,1]-z*OD.sum(0))*beta_vec+np.sum(OD*beta_vec*z,1)
                 in_work_2 = y*np.sum(x.OD.transpose()*in_work_2_nom/denom,1)
                 I_new = x.tau*alpha_in_vec*out_work+alpha_out_vec*(1-x.tau)*(in_work_1+in_work_2)
