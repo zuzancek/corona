@@ -116,7 +116,7 @@ def create_alpha_matrix(idx_sel,init_sel,tar_sel,per,init_rem,tar_rem):
     alpha_mat[idx_sel,0:per] = np.linspace(init_sel,tar_sel,per)
     return alpha_mat   
     
-def get_paths(R0,alpha):
+def get_paths(R0,alpha,prefix=""):
     out_filename_root = "./out"
     out_fig_root = "./fig"
     out_stat_root = "./stat"
@@ -128,14 +128,14 @@ def get_paths(R0,alpha):
         alpha_str = str(int(100*alpha))
     except:
         alpha_str = alpha
-    foldname = "R0_"+R0_str+"_alpha_"+alpha_str
+    foldname = prefix+"R0_"+R0_str+"_alpha_"+alpha_str
     out_filename_dir = out_filename_root+"/"+foldname
     out_fig_dir = out_fig_root+"/"+foldname
     out_stat_dir = out_stat_root+"/"+foldname
     return out_filename_dir,out_fig_dir,out_stat_dir 
     
     
-def setup_paths(R0,alpha):
+def setup_paths(R0,alpha,prefix=""):
     
     out_filename_root = "./out"
     out_fig_root = "./fig"
@@ -160,7 +160,7 @@ def setup_paths(R0,alpha):
         alpha_str = str(int(100*alpha))
     except:
         alpha_str = alpha
-    foldname = "R0_"+R0_str+"_alpha_"+alpha_str
+    foldname = prefix+"R0_"+R0_str+"_alpha_"+alpha_str
     out_filename_dir = out_filename_root+"/"+foldname
     out_fig_dir = out_fig_root+"/"+foldname
     out_stat_dir = out_stat_root+"/"+foldname

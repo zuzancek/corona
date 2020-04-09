@@ -7,7 +7,7 @@ import init_common as x
 from random import sample
 
 
-def simul(beta_list,Trec_list,alpha_mat,alpha_mat1,it): 
+def simul(beta_list,Trec_list,alpha_mat,it): 
     
     SIR = np.zeros(shape=(x.N_locs, 3)) 
     SIR[:,0] = x.N_popul- x.first_infections
