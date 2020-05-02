@@ -1,5 +1,0 @@
-Basic Statistics: number of infected people, R0 = 1.58
-Peak, mean value:  2271.0  day:  99
-Peak, median value:  2056.0  day:  112
-Peak, confidence interval at 95% :  4951.0  day:  67
-Peak, confidence interval at 5% :  931.0  day:  134
