@@ -5,6 +5,7 @@ import pandas as pd
 import time
 import init as x
 from random import sample
+import init_healthcare as xx
 
 
 def get_htc(inflow): 
@@ -17,24 +18,21 @@ def get_htc(inflow):
     HTC[0,4] = x.first_infections_hospital
     HTC[0,5] = x.first_infections_icu 
     
-    omega_obs = x.omega_obs
-    omega_unobs_asymp = x.omega_asymp
-    omega_obs_asymp = x.omega_asymp
-    prob_hosp_obs = x.prob_hosp
-    prob_hosp_unobs = x.prob_hosp
-    prob_icu = x.prob_icu
-    prob_vent = x.prob_vent
-    prob_surv = x.prob_surv  
-    T_hosp_obs = x.T_hosp
-    T_hosp_unobs = x.T_hosp
-    T_icu = x.T_icu
-    T_death = x.T_death
-    Trec_unobs_asymp = x.Tinf_mean
-    Trec_obs_asymp = x.Tinf_mean
-    Trec_unobs_symp = x.Trec_mild
-    Trec_mild = x.Trec_mild
-    Trec_hosp = x.Trec_hosp
-    Trec_icu = x.Trec_icu
+    omega_obs = xx.omega_obs
+    omega_unobs_asymp = xx.omega_asymp
+    omega_obs_asymp = xx.omega_asymp
+    prob_hosp_obs = xx.prob_hosp_obs/(1-omega_obs_asymp)
+    prob_hosp_unobs = xx.prob_hosp_unobs/(1-omega_unobs_asymp)
+    prob_icu = xx.prob_icu
+    prob_vent = xx.prob_vent
+    prob_surv = xx.prob_surv  
+    T_death = xx.T_death-xx.T_hosp
+    Trec_unobs_asymp = xx.Trec_asymp
+    Trec_obs_asymp = xx.Trec_asymp
+    Trec_unobs_symp = xx.Trec_mild
+    Trec_mild = xx.Trec_mild
+    Trec_hosp = xx.Trec_hosp-xx.T_hosp
+    Trec_icu = xx.Trec_icu-xx.T_hosp
     
     for t in range(x.N_per):
         # 0: unobserved, asymptomatic
