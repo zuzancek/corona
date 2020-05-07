@@ -28,9 +28,9 @@ Trec_icu = T_hosp+10
 T_death = 15+T_hosp
 Trec_mild = 8
 Trec_asymp = 4
-prob_hosp = .2*Trec_asymp/(Trec_hosp)*(1-omega_asymp)*omega_obs
-prob_hosp_obs = .2*Trec_asymp/(Trec_hosp)*(1-omega_asymp)
-prob_hosp_unobs = .02*Trec_asymp/(Trec_hosp)*(1-omega_asymp)*omega_obs
+# prob_hosp = .2*Trec_asymp/(Trec_hosp)*(1-omega_asymp)*omega_obs
+prob_hosp_obs = .10*Trec_asymp/(Trec_hosp)*(1-omega_asymp)
+prob_hosp_unobs = .05*Trec_asymp/(Trec_hosp)*(1-omega_asymp)*omega_obs
 
 first_infections_original_num = sum(init.first_infections_original)
 first_infections_observed_asymptomatic = int(init.first_infections_original_num*omega_asymp)

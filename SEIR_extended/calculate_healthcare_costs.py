@@ -10,7 +10,7 @@ import init_healthcare as xx
 
 def get_htc(inflow): 
     
-    HTC = np.zeros(shape=(x.N_per+1, 13)) 
+    HTC = np.zeros(shape=(x.N_per+1, 16)) 
     HTC[0,0] = x.first_infections_unobserved_asymptomatic
     HTC[0,1] = x.first_infections_unobserved_symptomatic
     HTC[0,2] = x.first_infections_observed_asymptomatic
@@ -75,6 +75,9 @@ def get_htc(inflow):
         HTC[t+1,11] = prob_vent*HTC[t+1,5]
         # 12: Hospital
         HTC[t+1,12] = HTC[t+1,5]+HTC[t+1,4]
-    
+        # 13: cummulative number of infectious (total, observed) and observed recovered
+        HTC[t+1,13] = HTC[t,13]+inflow[t]
+        HTC[t+1,14] = HTC[t,14]+omega_obs*inflow[t]+prob_hosp_unobs*HTC[t,1]
+        HTC[t+1,15] = HTC[t+1,6]+HTC[t+1,7]
     return HTC 
 
