@@ -37,9 +37,9 @@ for i in np.arange(nakazy_sk.shape[0]):
     first_infections[pop.munic==nakazy_sk.KOD.iloc[i]]=nakazy_sk.ID.iloc[i]
 # corrrection for unobserved    
 first_infections_original=first_infections
-first_infections_correction_multiplier = 16
-first_infections=first_infections_original*first_infections_correction_multiplier/4
-unobs_infection_num = int((first_infections_correction_multiplier*3/4)*sum(first_infections_original))
+first_infections_correction_multiplier = 4
+first_infections=first_infections_original*first_infections_correction_multiplier*1/2
+unobs_infection_num = int((first_infections_correction_multiplier*1/2)*sum(first_infections_original))
 unobs_idx = np.random.randint(0,N_locs,unobs_infection_num)
 for i in np.arange(unobs_infection_num):
     ri = int(np.random.uniform(1)*N_locs)
@@ -77,3 +77,5 @@ out_fig_root = "./fig"
 out_stat_root = "./stat"
 out_filename = "simul_SIR"
 out_filename_raw0 = "simul_SIR_raw"
+
+rho_eff = 1

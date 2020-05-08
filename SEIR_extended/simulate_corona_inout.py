@@ -8,7 +8,7 @@ import init_spec_inout as xx
 from random import sample
 
 
-def simul(beta0_list,beta1_list,Tinf_list,alpha0_mat,alpha1_mat,it): 
+def simul(beta0_list,beta1_list,Tinf_list,dump_vect0,dump_vect1,it): 
     
     SIR = np.zeros(shape=(x.N_locs, 3)) 
     SIR[:,0] = x.N_popul- x.first_infections
@@ -35,11 +35,11 @@ def simul(beta0_list,beta1_list,Tinf_list,alpha0_mat,alpha1_mat,it):
     while cont:
         if True:
             for j in (range(x.N_per)): 
-                beta0_vec = beta0_mat[:,j]
-                beta1_vec = beta1_mat[:,j]
+                dump0 = dump_vect0[j]
+                dump1 = dump_vect1[j]   
+                beta0_vec = dump0*beta0_mat[:,j]
+                beta1_vec = dump1*beta1_mat[:,j]
                 gamma_vec = gamma_mat[:,j]
-                alpha0_vec = alpha0_mat[:,j]
-                alpha1_vec = alpha1_mat[:,j]   
                 # relative shares of S,I
                 y = SIR_sim[:,0]/x.N_popul
                 z = SIR_sim[:,1]/x.N_popul
@@ -54,7 +54,7 @@ def simul(beta0_list,beta1_list,Tinf_list,alpha0_mat,alpha1_mat,it):
                 # in_work_2 = np.zeros(x.N_locs)
                 in_work_2_nom = (SIR_sim[:,1]-z*OD.sum(0))*beta1_vec+np.sum(OD*beta1_vec*z,1)
                 in_work_2 = y*np.sum(x.OD.transpose()*in_work_2_nom/denom,1)
-                I_new = x.tau*alpha0_vec*out_work+alpha1_vec*(1-x.tau)*(in_work_1+in_work_2)
+                I_new = x.tau*out_work+(1-x.tau)*(in_work_1+in_work_2)
                 # S cannot be negative...
                 I_new = np.where(I_new>SIR_sim[:,0],SIR_sim[:,0],I_new)
                 # Recovered

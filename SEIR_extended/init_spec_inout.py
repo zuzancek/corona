@@ -20,9 +20,9 @@ R0_target = 2.2
 N_nodes = 1000000
 
 ## 1. add distribution for recovery time / gamma
-Trec_mean  = 3.8 #6.5 is serial interval, this is very conservative estimate of infectious period, starts approx 2.5 days before the end of inc.period
+Trec_mean  = 6.5 #6.5 is serial interval, this is very conservative estimate of infectious period, starts approx 2.5 days before the end of inc.period
 Trec_sig = 0.62 
-Tinf_mean = 3.8
+Tinf_mean = 6.5
 m0 = Trec_mean*(Trec_sig**2)
 s0 = 1/(Trec_sig**2)
 Trec_vec = np.random.gamma(m0,s0,N_nodes)
