@@ -6,6 +6,7 @@ shape = T_inc.mean*(T_inc.std)^2; scale = 1/(T_inc.std)^2;
 delta_mat = 1./gamrnd(shape,scale,T,N);
 
 Rt_mat = get_R0(T,N,g1,g2,w);
+% obs: already adjusted for N
 x_init = get_first_infections(obs,obs_ratio,N);
 % indicator: 0 = noninfectious, 1 = infectious
 
