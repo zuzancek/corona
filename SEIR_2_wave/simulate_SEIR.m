@@ -1,4 +1,4 @@
-function [] = simulate_evolution_single(T_inf,T_inc,T,N,g1,g2,w,obs_ratio,obs)
+function [z,znorm] = simulate_SEIR(T_inf,T_inc,T,N,g1,g2,w,obs_ratio,obs)
 
 shape = T_inf.mean*(T_inf.std)^2; scale = 1/(T_inf.std)^2;
 gamma_mat = 1./gamrnd(shape,scale,T,N);
@@ -18,7 +18,7 @@ for t = 1:T
     Rt_vec = Rt_mat(t,:); gamma_vec = gamma_mat(t,:); delta_vec = delta_mat(t,:);
     betta_vec = Rt_vec.*gamma_vec;
     y0 = y;
-    dS_vec_out = betta_vec.*y0(1,:).*y0(3,:); dS_vec = -dS_vec_out;
+    dS_vec_out = betta_vec.*y0(1,:).*y0(3,:)/N; dS_vec = -dS_vec_out;
     dE_vec_out = delta_vec.*y0(2,:); dE_vec = dS_vec_out-dE_vec_out;
     dI_vec_out = gamma_vec.*y0(3,:); dI_vec = dE_vec_out-dI_vec_out;
     dR_vec = dI_vec_out;

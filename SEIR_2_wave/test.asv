@@ -1,0 +1,3 @@
+initialize;
+
+x = dbload('data/korona_data.csv','freq','daily');

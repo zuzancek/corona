@@ -1,3 +1,3 @@
 initialize;
 
-dbload('data/korona_data.csv');
+x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
