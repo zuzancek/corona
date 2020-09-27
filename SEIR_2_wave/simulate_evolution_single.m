@@ -1,4 +1,4 @@
-function [] = simulate_evolution_single(T_inf,T_inc,T,N,g1,g2,w,unobs_ratio,obs)
+function [] = simulate_evolution_single(T_inf,T_inc,T,N,g1,g2,w,obs_ratio,obs)
 
 shape = T_inf.mean*(T_inf.std)^2; scale = 1/(T_inf.std)^2;
 gamma_mat = 1./gamrnd(shape,scale,T,N);
@@ -6,7 +6,7 @@ shape = T_inc.mean*(T_inc.std)^2; scale = 1/(T_inc.std)^2;
 delta_mat = 1./gamrnd(shape,scale,T,N);
 
 Rt_mat = get_R0(T,N,g1,g2,w);
-x_init = get_first_infections(obs,unobs_ratio,N);
+x_init = get_first_infections(obs,obs_ratio,N);
 % indicator: 0 = noninfectious, 1 = infectious
 
 y = zeros(4,N);
