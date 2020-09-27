@@ -1,7 +1,7 @@
 function [s] = setparam()
 
 s = struct;
-s.pop_size = 5.4*10^7;
+s.pop_size = 5443120;
 s.sim_num = 10^6;
 s.T = 200;
 
@@ -25,6 +25,9 @@ s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.obs_ratio = 1/16;
 
+s.smooth_width = 3;
+s.smooth_type = 3;
+s.smooth_ends = 1;
 
 end
 
