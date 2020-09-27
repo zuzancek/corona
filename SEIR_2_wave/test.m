@@ -41,7 +41,7 @@ Rt_vec_raw = tseries(t0:t1,Rt_vec_raw);
 x.Rt_raw = Rt_vec_raw;
 
 Rt_vec_smooth = zeros(t1-t0+1,1);
-Rt_vec_smooth(dt+1:end) = Rt;
+Rt_vec_smooth(dt+1:end) = Rt_smooth;
 Rt_vec_smooth = tseries(t0:t1,Rt_vec_smooth);
 x.Rt_smooth = Rt_vec_smooth;
 

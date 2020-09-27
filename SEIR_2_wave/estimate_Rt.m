@@ -2,10 +2,10 @@ function [Rt,Rt_vec] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N)
 
 N = 1;
 T = length(dI_inflow);
-% shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
-% shape_vec = shape*ones(T*N,1);
-% scale_vec = scale*ones(T*N,1);
-% gamma_mat = reshape(1./gamrnd(shape_vec,scale_vec),T,[]);
+shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
+shape_vec = shape*ones(T*N,1);
+scale_vec = scale*ones(T*N,1);
+gamma_mat = reshape(1./gamrnd(shape_vec,scale_vec),T,[]);
 
 gamma_mat = 1/6.5+zeros(T,1);
 % S_vec = [S0;dS_outflow_cum];
