@@ -30,5 +30,7 @@ s.smooth_width = 5;
 s.smooth_type = 3;
 s.smooth_ends = 1;
 
+s.quant = [0.1, 0.25, 0.5, 0.75, 0.9];
+
 end
 

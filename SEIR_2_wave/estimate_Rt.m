@@ -1,4 +1,4 @@
-function [Rt,Rt_vec] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N)
+function [Rt,q_mat] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N,q_vec)
 
 T = length(dI_inflow);
 shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
@@ -30,4 +30,18 @@ Rt_vec = Rt_vec(idx,:); %#ok<FNDSB>
 
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
+end
+
+
+if (nargin)>5
+    M = length(q_vec);
+    q_mat = zeros(M,T);
+    for j = 1:M
+        q_mat(j,:) = quantile(Rt_vec,q_vec(j),1);
+    end
+else
+    q_mat = [];
+end
+
+
 end
