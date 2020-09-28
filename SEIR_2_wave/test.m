@@ -51,7 +51,7 @@ ax.XAxis.Color = s.color_grid;
 ax.YAxis.Color = s.color_grid;
 f.Color = s.color_bkg;
 xticks([0 30 60 90 120 150 180 210])
-xticklabels({'marec','aprÃ­l','mÃ¡j','jÃºn','jÃºl','august','september'})
+xticklabels({'marec','apríl','máj','jún','júl','august','september'})
 % legend(s.quant_legend);
 
 
