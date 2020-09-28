@@ -1,4 +1,4 @@
-function [lh, ph] = fanChart(xvals, paths, centerType, prctiles, varargin)
+function [lh, ph] = fanChart(xvals, quant_paths, centerline, quant,varargin)
 % FANCHART  Create a fan chart visualization
 %
 % A fan chart is a plot of time-varying distribution percentiles shown as
@@ -28,11 +28,8 @@ function [lh, ph] = fanChart(xvals, paths, centerType, prctiles, varargin)
 % See also fanChart_examples
 % Copyright 2014 The MathWorks, Inc.
 % Parse inputs
-if nargin < 3 || isempty(centerType)
-    centerType = 'median';
-end
-if nargin < 4 || isempty(prctiles)
-    prctiles = 5:5:95;
+if nargin <= 3 || isempty(quant)
+    prctiles = [0.1 0.25 0.5 0.75 0.9];
 end
 ip = inputParser;
 addParamValue(ip, 'parent', gca, @(x)ishandle(x)&&strcmp(get(x,'type'),'axes')); %#ok<*NVREPL>
@@ -45,18 +42,19 @@ alpha = results.alpha;
 cmapFun = results.colormap;
 % Calculate fan chart bands
 % Initially we will do this with percentiles
-bands = prctile(paths, prctiles, 2);
+bands = quant_paths;
 % Calculate centerline
-centerline = feval(lower(centerType), paths, 2);
+% centerline = feval(lower(centerType), paths, 2);
 % Xvalues for bands
 xplot = xvals([1:end end:-1:1]);
 % Create colormap
-ncolors = floor(length(prctiles)/2);
+ncolors = floor(length(quant)/2);
 if iscell(cmapFun)
     col = feval(cmapFun{1}, cmapFun{2:end}, ncolors);
 else
     col = feval(cmapFun, ncolors);
 end
+
 % Create plot
 if verLessThan('matlab', '8.4')
     ph = zeros(ncolors,1);
@@ -64,10 +62,11 @@ else
     ph = gobjects(ncolors,1);
 end
 for i = 1:ncolors
-    ph(i) = patch(xplot, [bands(:,0+i);  flipud(bands(:,end-i+1))]', col(i,:) ,'EdgeColor', col(i,:), 'Parent', parent, 'FaceAlpha', alpha);
+    ph(i) = patch(xplot, [bands(:,0+i);  flipud(bands(:,end-i+1))]', col(ncolors-i+1,:) ,'EdgeColor', col(ncolors-i+1,:), 'Parent', parent, 'FaceAlpha', alpha);
 end
-lh = line(xvals, centerline, 'LineWidth', 2, 'Color', 'k', 'Parent', parent);
+lh = line(xvals, centerline, 'LineWidth', 2, 'Color', [0.69 0.91 0.973], 'Parent', parent);
 ph = flipud(ph);
+
 function map = boeRedMap(ncolors)
 colors = [254 230 222
     252 211 196
@@ -77,7 +76,8 @@ colors = [254 230 222
     244 132 108
     243 113 92
     241 91 75
-    237 27 46];
+    237 27 46
+    255 0 0];
 map = colors/256;
 if nargin > 0
     map = interp1(1:size(map,1), map, 1:ncolors);

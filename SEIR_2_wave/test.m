@@ -7,7 +7,7 @@ s = setparam();
 % first case: 6.3.2020
 % T0 = 18.3.2020  ... 12 days
 % T1 = 1.6.2020 ..... 88 days
-dt = 12;
+dt = 1;
 t0 = startdate(x.ActiveCases);
 %t1 = t0+88-12-1;
 tt0 = t0+dt;
@@ -34,13 +34,21 @@ title('Wave 1: Rt');
 legend({'raw','smooth'});
 grid on;
 
-figure;
-for i=1:length(s.quant)
-    plot(q_mat(i,:));hold on;
-end
-plot(Rt_smooth,'k','linewidth',1);hold on;
+f = figure;
+q_mat = q_mat(:,1:end);
+fanChart(1:size(q_mat,2), q_mat', q_mat(s.quant_idx_central,:), s.quant,...
+    'alpha', .75, 'colormap', {'shadesOfColor',s.color_graph});
 grid on;
-
+set(gca,'color',s.color_bkg);
+% axis tight
+ax = gca;
+ax.GridColor = s.color_grid;
+ax.FontName = 'TimesNewRoman';
+ax.FontWeight = 'bold';
+ax.XAxis.Color = s.color_grid;
+ax.YAxis.Color = s.color_grid;
+f.Color = s.color_bkg;
+% legend(s.quant_legend);
 
 
 %% savig stuff
