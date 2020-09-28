@@ -35,7 +35,9 @@ legend({'raw','smooth'});
 grid on;
 
 f = figure;
-q_mat = q_mat(:,1:end);
+% q_mat_new = zeros(length(s.quant), 6+length(Rt));
+% q_mat_new(:,7:end) = q_mat; 
+% q_mat = q_mat_new;
 fanChart(1:size(q_mat,2), q_mat', q_mat(s.quant_idx_central,:), s.quant,...
     'alpha', .75, 'colormap', {'shadesOfColor',s.color_graph});
 grid on;
@@ -48,6 +50,8 @@ ax.FontWeight = 'bold';
 ax.XAxis.Color = s.color_grid;
 ax.YAxis.Color = s.color_grid;
 f.Color = s.color_bkg;
+xticks([0 30 60 90 120 150 180 210])
+xticklabels({'marec','apríl','máj','jún','júl','august','september'})
 % legend(s.quant_legend);
 
 
