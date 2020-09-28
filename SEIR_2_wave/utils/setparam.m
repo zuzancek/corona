@@ -2,7 +2,7 @@ function [s] = setparam()
 
 s = struct;
 s.pop_size = 5443120;
-s.sim_num = 10^4;
+s.sim_num = 10^5;
 s.T = 200;
 
 s.T_inf.mean = 2.9;

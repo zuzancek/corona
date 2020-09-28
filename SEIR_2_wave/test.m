@@ -17,7 +17,7 @@ dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 [Rt] = estimate_Rt(dI_inflow,I0,s.pop_size,s.T_rem,s.sim_num);
-[Rt_smooth] = estimate_Rt(dI_inflow_smooth,I0,s.pop_size,s.T_rem,s.sim_num);
+[Rt_smooth,Rt_smooth_vec] = estimate_Rt(dI_inflow_smooth,I0,s.pop_size,s.T_rem,s.sim_num);
 
 %% plotting stuff
 figure;
@@ -33,6 +33,9 @@ plot(Rt_smooth,'linewidth',1);hold on;
 title('Wave 1: Rt');
 legend({'raw','smooth'});
 grid on;
+
+figure;
+fanChart(1:size(Rt_smooth_vec,1), Rt_smooth_vec);
 
 %% savig stuff
 Rt_vec_raw = zeros(t1-t0+1,1);
