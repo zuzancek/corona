@@ -4,12 +4,8 @@ x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 s = setparam();
 
 %% handle data
-% first case: 6.3.2020
-% T0 = 18.3.2020  ... 12 days
-% T1 = 1.6.2020 ..... 88 days
 dt = 1;
 t0 = startdate(x.ActiveCases);
-%t1 = t0+88-12-1;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases);
 dI_inflow = x.NewCases(tt0:t1);
@@ -51,7 +47,7 @@ ax.XAxis.Color = s.color_grid;
 ax.YAxis.Color = s.color_grid;
 f.Color = s.color_bkg;
 xticks([0 30 60 90 120 150 180 210])
-xticklabels({'marec','apríl','máj','jún','júl','august','september'})
+xticklabels({'marec','aprï¿½l','mï¿½j','jï¿½n','jï¿½l','august','september'})
 % legend(s.quant_legend);
 
 
