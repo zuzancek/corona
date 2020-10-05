@@ -26,13 +26,13 @@ s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.obs_ratio = 1/10;
 s.threshold = 0.05;
-s.scale_fact = 0.25;
+s.scale_fact = 10;
 
 s.smooth_width = 10;
 s.smooth_type = 3;
 s.smooth_ends = 1;
 
-s.quant = [0.05:0.05:0.95];
+s.quant = [0.05:0.05:0.95]; %#ok<*NBRAK>
 s.quant_idx_central = 10;
 s.quant_legend = cellstr(strcat(num2str((s.quant*100)'),'%'));
 

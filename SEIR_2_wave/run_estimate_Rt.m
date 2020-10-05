@@ -30,7 +30,7 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 [Rt_smooth,q_mat] = estimate_Rt(double(dI_inflow_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
 [Rt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.T_rem,s.sim_num);
-[Rt_adj_smooth] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
+[Rt_adj_smooth,q_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
 % pos_test_ratio = x.NewCases./x.Tests;
 % pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
@@ -42,58 +42,53 @@ figure;
 plot(dI_inflow,'linewidth',1);hold on;
 plot(dI_inflow_smooth,'linewidth',2);hold on;
 plot(dI_inflow_adj,'linewidth',1,'linestyle','--');hold on;
-plot(dI_inflow_adj_smooth,'linewidth',1,'linestyle','--');hold on;
-title('New infections (observed & hypothetical)');
+plot(dI_inflow_adj_smooth,'linewidth',2,'linestyle','--');hold on;
+title('New infections (adjusted)');
 legend({'observed, raw','observed, smooth', 'hypothetical, raw','hypothetical,smooth'});
 grid on;
-
+figure;
+subplot(2,1,1);
+plot(dI_inflow,'linewidth',1);hold on;
+plot(dI_inflow_smooth,'linewidth',2);hold on;
+title('New infections (observed)');
+legend({'raw','smooth'});
+grid on;
+subplot(2,1,2);
+plot(dI_inflow_adj,'linewidth',1);hold on;
+plot(dI_inflow_adj_smooth,'linewidth',2);hold on;
+title('New infections (hypothetical)');
+legend({'raw','smooth'});
+grid on;
+%
 figure;
 plot(pos_test_ratio,'linewidth',1); hold on;
 plot(pos_test_ratio_smooth,'linewidth',1);
 title('Positive tests ratio');
 legend({'raw','smooth'});
 grid on;
-
+%
 figure;
+subplot(2,1,1);
 plot(0*dI_inflow+Rt,'linewidth',1);hold on;
 plot(0*dI_inflow+Rt_smooth,'linewidth',1);hold on;
 title('Rt');
 legend({'raw','smooth'});
 grid on;
-
-figure;
+subplot(2,1,2);
 plot(0*dI_inflow+Rt_adj,'linewidth',1);hold on;
 plot(0*dI_inflow+Rt_adj_smooth,'linewidth',1);hold on;
 title('Rt (with assumption)');
 legend({'raw','smooth'});
 grid on;
-
 figure;
 plot(0*dI_inflow+Rt_smooth,'linewidth',1);hold on;
 plot(0*dI_inflow+Rt_adj_smooth,'linewidth',1);hold on;
 title('Rt smooth');
 legend({'observed','adjusted'});
 grid on;
-
-f = figure;
-fanChart(1:size(q_mat,2), q_mat', q_mat(s.quant_idx_central,:), s.quant,...
-    'alpha', .75, 'colormap', {'shadesOfColor',s.color_graph});
-grid on;
-set(gca,'color',s.color_bkg);
-ax = gca;
-ax.GridColor = s.color_grid;
-ax.FontName = 'TimesNewRoman';
-ax.FontWeight = 'bold';
-ax.XAxis.Color = s.color_grid;
-ax.YAxis.Color = s.color_grid;
-f.Color = s.color_bkg;
-p0 = dt+(disp_from-t0+1);
-p1 = disp_to-t0+1;
-mt = [0 31 30 31 30 31 31 30];
-mtt = cumsum(mt);
-xticks(mtt)
-xticklabels({'marec','april','maj','jun','jul','august','september'})
-xlim([p0 p1]);
+% 
+plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0);
+plot_fanchart(q_mat_adj,s,dt,disp_from,disp_to,t0);
 
 %% saving stuff
 Rt_vec_raw = zeros(t1-t0+1,1);
