@@ -28,8 +28,8 @@ s.obs_ratio = 1/10;
 s.threshold = 0.05;
 s.scale_fact = 10;
 
-s.smooth_width = 10;
-s.smooth_type = 3;
+s.smooth_width = 7;
+s.smooth_type = 5;
 s.smooth_ends = 1;
 
 s.quant = [0.05:0.05:0.95]; %#ok<*NBRAK>
