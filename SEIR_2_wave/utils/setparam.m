@@ -24,9 +24,9 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
-s.obs_ratio = 1/10;
+s.obs_ratio = 1/16;
 s.threshold = 0.05;
-s.scale_fact = 10;
+s.scale_fact = 4/s.obs_ratio;
 
 s.smooth_width = 7;
 s.smooth_type = 5;

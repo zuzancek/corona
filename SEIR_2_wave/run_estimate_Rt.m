@@ -6,11 +6,12 @@ disp_from = dd(2020,4,1);
 
 %% handle data
 % start date: 6.3
+cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
-disp_to = enddate(x.ActiveCases);
+disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
-t1 = enddate(x.ActiveCases);
+t1 = enddate(x.ActiveCases)-cut;
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
     s.smooth_type,s.smooth_ends);
@@ -26,11 +27,11 @@ dI_inflow_adj_smooth = 0*dI_inflow+dI_inflow_adj_smooth;
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 
 %% calculations
-[Rt] = estimate_Rt(double(dI_inflow),I0,s.pop_size,s.T_rem,s.sim_num);
-[Rt_smooth,q_mat] = estimate_Rt(double(dI_inflow_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
+[Rt,~,~,Xt] = estimate_Rt(double(dI_inflow),I0,s.pop_size,s.T_rem,s.sim_num);
+[Rt_smooth,q_mat,~,Xt_smooth,x_mat] = estimate_Rt(double(dI_inflow_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
-[Rt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.T_rem,s.sim_num);
-[Rt_adj_smooth,q_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
+[Rt_adj,~,~,Xt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.T_rem,s.sim_num);
+[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
 % pos_test_ratio = x.NewCases./x.Tests;
 % pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
@@ -89,6 +90,8 @@ grid on;
 % 
 plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0);
 plot_fanchart(q_mat_adj,s,dt,disp_from,disp_to,t0);
+plot_fanchart(x_mat,s,dt,disp_from,disp_to,t0);
+plot_fanchart(x_mat_adj,s,dt,disp_from,disp_to,t0);
 
 %% saving stuff
 Rt_vec_raw = zeros(t1-t0+1,1);
