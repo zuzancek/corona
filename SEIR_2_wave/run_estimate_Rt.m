@@ -40,11 +40,20 @@ pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
 figure;
+subplot(2,1,1);
 plot(dI_inflow,'linewidth',1);hold on;
 plot(dI_inflow_smooth,'linewidth',2);hold on;
 title('New infections (observed)');
 legend({'raw','smooth'});
 grid on;
+
+subplot(2,1,2);
+plot(diff(dI_inflow_smooth),'linewidth',2);hold on;
+plot(diff(dI_inflow_adj_smooth),'linewidth',2,'linestyle','--');hold on;
+title('Change in infections (smooth)');
+legend({'observed','adjusted '});
+grid on;
+
 figure;
 plot(dI_inflow,'linewidth',1);hold on;
 plot(dI_inflow_smooth,'linewidth',2);hold on;
