@@ -3,6 +3,7 @@ initialize;
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 s = setparam();
 disp_from = dd(2020,4,1);
+indiff = true;
 
 %% handle data
 % start date: 6.3
@@ -15,7 +16,11 @@ t1 = enddate(x.ActiveCases)-cut;
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
     s.smooth_type,s.smooth_ends);
+dI_inflow_smooth2 = smooth_series(double(dI_inflow),s.smooth_width,...
+    s.smooth_type,s.smooth_ends,true);
+
 dI_inflow_smooth = 0*dI_inflow+dI_inflow_smooth;
+dI_inflow_smooth2 = 0*dI_inflow+dI_inflow_smooth2;
 
 pos_test_ratio = x.NewCases./x.Tests;
 pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
@@ -39,6 +44,14 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
+figure;
+plot(dI_inflow,'linewidth',1);hold on;
+plot(dI_inflow_smooth,'linewidth',2);hold on;
+plot(dI_inflow_smooth2,'linewidth',2);hold on;
+title('New infections (observed)');
+legend({'raw','A) smooth (in levels)', 'B) smooth (in difs)'});
+grid on;
+
 figure;
 subplot(2,1,1);
 plot(dI_inflow,'linewidth',1);hold on;

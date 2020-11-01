@@ -28,7 +28,7 @@ s.obs_ratio = 1/16;
 s.threshold = 0.05;
 s.scale_fact = 2;
 
-s.smooth_width = 7;
+s.smooth_width = 5;
 s.smooth_type = 5;
 s.smooth_ends = 1;
 
