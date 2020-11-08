@@ -3,7 +3,7 @@ initialize;
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 s = setparam();
 disp_from = dd(2020,4,1);
-indiff = true;
+indiff = true; 
 
 %% handle data
 % start date: 6.3

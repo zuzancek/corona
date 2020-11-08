@@ -26,9 +26,9 @@ s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.obs_ratio = 1/16;
 s.threshold = 0.05;
-s.scale_fact = 2;
+s.scale_fact = 4;
 
-s.smooth_width = 5;
+s.smooth_width = 7;
 s.smooth_type = 5;
 s.smooth_ends = 1;
 

@@ -17,7 +17,7 @@ p1 = disp_to-t0+1;
 mt = [0 31 30 31 30 31 31 30 31];
 mtt = cumsum(mt);
 xticks(mtt)
-xticklabels({'marec','april','maj','jun','jul','august','september','oktober'})
+xticklabels({'marec','april','maj','jun','jul','august','september','oktober','november'});
 xlim([p0 p1]);
 
 end
