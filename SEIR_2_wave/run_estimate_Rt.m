@@ -31,6 +31,7 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 %% calculations
 [Rt,~,~,Xt] = estimate_Rt(double(dI_inflow),I0,s.pop_size,s.T_rem,s.sim_num);
 [Rt_smooth,q_mat,~,Xt_smooth,x_mat] = estimate_Rt(double(dI_inflow_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
+forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
 [Rt_adj,~,~,Xt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.T_rem,s.sim_num);
 [Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
