@@ -1,6 +1,8 @@
 initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
+mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
+
 s = setparam();
 disp_from = dd(2020,4,1);
 indiff = true; 
@@ -36,12 +38,37 @@ forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.T_rem,s.sim_n
 [Rt_adj,~,~,Xt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.T_rem,s.sim_num);
 [Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
-% pos_test_ratio = x.NewCases./x.Tests;
-% pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
-%     s.smooth_type,s.smooth_ends);
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
+figure;
+fn = fieldnames(mob);
+mob_avg = 0;
+for i=1:length(fn)
+    yy = resize(mob.(fn{i}),t0:t1);
+    mob_avg = mob_avg+yy;    
+    plot(yy,'linewidth',1);hold on;
+end
+mob_avg = mob_avg/length(fn);
+plot(mob_avg,'k','linewidth',2);hold on;
+grid on;
+title('Mobility, raw data');
+legend(fn);
+
+figure;
+mob_avg = 0;
+for i=1:length(fn)
+    yy = resize(mob.(fn{i}),t0:t1);
+    zz = smooth_series(double(yy),s.smooth_width,s.smooth_type,s.smooth_ends);
+    yy = 0*yy+zz;
+    mob_avg = mob_avg+yy;
+    plot(yy,'linewidth',1);hold on;
+end
+mob_avg = mob_avg/length(fn);
+plot(mob_avg,'k','linewidth',2);hold on;
+grid on;
+title('Mobility, smooth data');
+legend(fn);
 
 figure;
 subplot(2,1,1);
