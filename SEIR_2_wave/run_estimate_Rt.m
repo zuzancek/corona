@@ -15,6 +15,9 @@ t0 = startdate(x.ActiveCases);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
+
+estimate_mobility(mob,60,t0,t1)
+
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
     s.smooth_type,s.smooth_ends);

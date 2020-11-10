@@ -17,7 +17,6 @@ shapeI_vec = shapeI*ones(1*N,1);
 scaleI_vec = scaleI*ones(1*N,1);
 Tinc_mat = reshape(gamrnd(shapeI_vec,scaleI_vec),N,1);
 
-
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
