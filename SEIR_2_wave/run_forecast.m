@@ -1,17 +1,33 @@
 %% initialization & cleanup
 initialize;
 
+%% setup
+fcastTo = dd(2020,12,31); % end of the year
+waveFrom = dd(2020,09,01); % start of the second wave
+
 %% loading stuff
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
 data = load('inputs.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');
 
-
 %% handle inputs
-s = data.s; % setparam
-startAt = s.t1;
+s = data.s; % s = setparam
+fcastFrom = data.t1+1;
+dateFrom = data.t0;
+Rt = data.Rt;
+It = data.It;
+St = data.St;
+
+%% forecast mobility evolution
+fcastPer = fcastTo-fcastFrom;
+mobilityFcast = estimate_mobility(mob,fcastPer,dateFrom,fcastFrom-1,waveFrom);
+
+%% simulate SIR
+alpha_vec = mobilityFcast.medium_norm;
+[res_mean,res_quant] = simulate_SIR(fcastPer,Rt,It,St,alpha_vec,fcastFrom,s);
 
 
+%% setup
 disp_from = dd(2020,4,1);
 indiff = true; 
 
