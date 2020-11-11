@@ -1,4 +1,4 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N,q_vec,varargin)
 
 T = length(dI_inflow);
 shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
@@ -25,7 +25,7 @@ Rt_vec = zeros(N,T);
 X_vec = zeros(N,T);
 dE_inflow = zeros(N,T);
 dE_outflow = zeros(N,T);
-Rt = zeros(T,1); It = Rt; Xt = Rt;Et = Rt;
+Rt = zeros(T,1); It = Rt; Xt = Rt;Et = Rt;St = Rt;
 idx = ones(N,1);
 d = T_rem.mean+14;
 
@@ -45,7 +45,8 @@ for t = 1:T
    idx = idx & I_vec(:,t+1)>0;
 end
 idx = find(idx>0);
-Rt_vec = Rt_vec(idx,:); 
+Rt_vec = Rt_vec(idx,:);
+S_vec = S_vec(idx,:);
 I_vec = I_vec(idx,:);
 X_vec = X_vec(idx,:);
 E_vec = E_vec(idx,:);
@@ -64,10 +65,10 @@ end
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
     It(t) = mean(I_vec(:,t));
+    St(t) = mean(S_vec(:,t));
     Xt(t) = mean(X_vec(:,t));
     Et(t) = mean(E_vec(:,t));
 end
-
 
 if (nargin)>5
     M = length(q_vec);
@@ -83,6 +84,5 @@ else
     q_mat = [];
     x_mat = [];
 end
-
 
 end

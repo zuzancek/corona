@@ -2,8 +2,9 @@ initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
+data = load('inputs.mat','q_mat','Rt','dIt','St','s','Rt_last');
 
-s = setparam();
+s = data.s;
 disp_from = dd(2020,4,1);
 indiff = true; 
 

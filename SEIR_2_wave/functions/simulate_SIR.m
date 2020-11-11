@@ -1,29 +1,47 @@
-function [z,znorm] = simulate_SIR(T_rem,T,N,g1,g2,w,obs_ratio,obs)
+function [res_mean,res_quant] = simulate_SIR(T,Rt,It,St,T_rem,alpha_vec,q_vec,t0,pop_size)%Rt_old, dI_old,per, I0,pop_size,T_rem,N,q_vec)
 
+% setup
+N = length(Rt);
 shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
-gamma_mat = 1./gamrnd(shape,scale,T,N);
+shape_vec = shape*ones(1*N,1);
+scale_vec = scale*ones(1*N,1);
+Trec_mat = reshape(gamrnd(shape_vec,scale_vec),N,1);
+gamma_vec = 1./Trec_mat;
 
-Rt_mat = get_R0(T,N,g1,g2,w);
-% obs: already adjusted for N
-x_init = get_first_infections(obs,obs_ratio,N);
-% indicator: 0 = noninfectious, 1 = infectious
+S_vec = zeros(N,T+1);   S_vec(:,1) = St(t0);
+I_vec = zeros(N,T+1);   I_vec(:,1) = It(t0);
+alpha_vec = alpha_vec(t0,end);
+idx = ones(N,1);
 
-y = zeros(3,N);
-y(1,:) = 1-x_init; y(2,:) = x_init;
-z = zeros(3,T);
+% calculation
+for t=1:T
+    dI_in = Rt.*alpha_vec(t).*gamma.*S_vec(:,t).*I_vec(:,t)/pop_size;
+    S_vec(:,t+1) = S_vec(:,t)-dI_in;
+    I_vec(:,t+1) = (1-gamma_vec).*I_vec(:,t)+dI_in;
+    idx = idx & I_vec(:,t+1)>0;
+end
+idx = find(idx>0);
+S_vec = S_vec(idx,:);
+I_vec = I_vec(idx,:);
 
+% mean values
+res_mean = struct;
 for t = 1:T
-    Rt_vec = Rt_mat(t,:); gamma_vec = gamma_mat(t,:); 
-    betta_vec = Rt_vec.*gamma_vec;
-    y0 = y;
-    dS_vec_out = betta_vec.*y0(1,:).*y0(2,:)/N; dS_vec = -dS_vec_out;
-    dI_vec_out = gamma_vec.*y0(2,:); dI_vec = dS_vec_out-dI_vec_out;
-    dR_vec = dI_vec_out;
-    y(1,:) = y0(1,:)+dS_vec;    z(1,t+1) = sum(y(1,:));
-    y(2,:) = y0(2,:)+dI_vec;    z(2,t+1) = sum(y(2,:));
-    y(3,:) = y0(3,:)+dR_vec;    z(3,t+1) = sum(y(3,:));  
+    It(t) = mean(I_vec(:,t));
+    St(t) = mean(S_vec(:,t));
 end
-znorm = z/N;
+res_mean.It = It;
+res_mean.St = St;
+
+M = length(q_vec);
+It_quant = zeros(M,T);
+St_quant = zeros(M,T);
+res_quant = struct;
+for j = 1:M
+    It_quant(j,:) = quantile(I_vec,q_vec(j),1);
+    St_quant(j,:) = quantile(S_vec,q_vec(j),1);
+end
+res_quant.It = It_quant;
+res_quant.St = St_quant;
 
 end
-
