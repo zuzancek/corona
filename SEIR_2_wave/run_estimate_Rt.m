@@ -151,4 +151,4 @@ dIt = dI_inflow_smooth;
 St = St_smooth;
 It = It_smooth;
 Rt = Rt_smooth;
-save('inputs.mat','q_mat','Rt','dIt','It','St','s','Rt_last');
+save('inputs.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');

@@ -1,14 +1,20 @@
+%% initialization & cleanup
 initialize;
 
+%% loading stuff
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
-data = load('inputs.mat','q_mat','Rt','dIt','St','s','Rt_last');
+data = load('inputs.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');
 
-s = data.s;
+
+%% handle inputs
+s = data.s; % setparam
+startAt = s.t1;
+
+
 disp_from = dd(2020,4,1);
 indiff = true; 
 
-%% handle data
 % start date: 6.3
 cut = 0;
 dt = 1;
