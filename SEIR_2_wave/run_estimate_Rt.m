@@ -15,8 +15,8 @@ t0 = startdate(x.ActiveCases);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
-
-estimate_mobility(mob,60,t0,t1)
+tw2 = dd(2020,09,01);
+estimate_mobility(mob,53,t0,t1,tw2)
 
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
