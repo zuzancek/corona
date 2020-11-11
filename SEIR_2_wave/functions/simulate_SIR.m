@@ -1,4 +1,10 @@
-function [res_mean,res_quant] = simulate_SIR(T,Rt,It,St,T_rem,alpha_vec,q_vec,t0,pop_size)%Rt_old, dI_old,per, I0,pop_size,T_rem,N,q_vec)
+function [res_mean,res_quant] = simulate_SIR(T,Rt,It,St,alpha_vec,t0,s)
+
+% initialize
+T_rem = s.T_rem;
+q_vec = s.quant;
+pop_size = s.pop_size;
+obs_ratio = s.obs_ratio;
 
 % setup
 N = length(Rt);
@@ -31,6 +37,7 @@ for t = 1:T
     St(t) = mean(S_vec(:,t));
 end
 res_mean.It = It;
+res_mean.It_norm = It*obs_ratio;
 res_mean.St = St;
 
 M = length(q_vec);
@@ -42,6 +49,7 @@ for j = 1:M
     St_quant(j,:) = quantile(S_vec,q_vec(j),1);
 end
 res_quant.It = It_quant;
+res_quant.It_norm = It_quant*obs_ratio;
 res_quant.St = St_quant;
 
 end
