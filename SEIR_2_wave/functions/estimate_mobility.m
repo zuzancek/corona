@@ -1,4 +1,4 @@
-function estimate_mobility(mob,fcast_days,t0,t1,tw2)
+function [mob] = estimate_mobility(mob,fcast_days,t0,t1,tw2)
 
 threshold = 100;
 s = setparam();
@@ -41,11 +41,11 @@ legend(fn);
 % w1 minimum
 w1 = resize(yy,t0:tw2);
 [min1,dw1] = min(w1);
-thd1 = min(find(resize(w1,dw1:tw2)>threshold));
+thd1 = min(find(resize(w1,dw1:tw2)>threshold)); %#ok<*MXFND>
 dt1 = thd1-dw1;
 w10 = w1(dw1:thd1-1);w11 = w1(dw1+1:thd1);
 gr1 = w11./w10-1;
-gr1_m = 100*mean(gr1);
+gr1_m = 100*mean(gr1); %#ok<*NASGU>
 delta1 = (threshold-min1)/dt1;
 
 % w2 minimum
@@ -77,7 +77,7 @@ y1 = 0*y1+zz;
 y2 = tseries(tw2:tt1+fcast_days,0);
 y2(dw2:end) = (0:tt1-dw2+fcast_days).^delta2;  
 y2(tw2:tt1) = w2; 
-y2(tt1+1:end) = w2(dw2)+y2(tt1+1:end).*(1-0*[0:fcast_days-1]'/fcast_days);
+y2(tt1+1:end) = w2(dw2)+y2(tt1+1:end).*(1-0*[0:fcast_days-1]'/fcast_days); %#ok<*NBRAK>
 zz = smooth_series(double(y2),s.smooth_width,s.smooth_type,s.smooth_ends);
 y2 = 0*y2+zz;
 y3 = tseries(tw2:tt1+fcast_days,0);
@@ -107,5 +107,12 @@ grid on;
 ylabel('%');
 title('Mobility (aggregate): forecast');
 legend([pp1 pp2 pp3],{'High','Low','Medium'});
+
+mob = struct();
+mob.low = y3;
+mob.medium = yy;
+mob.high = y0;
+mob.dateFrom = tt1+1;
+mob.days = fcast_days;
 
 end
