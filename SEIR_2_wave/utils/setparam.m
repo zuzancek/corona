@@ -40,5 +40,10 @@ s.color_bkg = [0.176 0.176 .427];
 s.color_grid = [0.69 0.91 0.973];
 s.color_graph = [0.122 0.478 0.847];
 
+pd = makedist('HalfNormal','mu',0,'sigma',1.5);
+xx = 0:s.smooth_width-1; % last 7 days
+weights = pdf(pd,xx);
+s.pweight = weights/sum(weights);
+
 end
 

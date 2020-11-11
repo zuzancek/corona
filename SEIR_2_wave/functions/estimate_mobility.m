@@ -114,5 +114,8 @@ mob.medium = yy;
 mob.high = y0;
 mob.dateFrom = tt1+1;
 mob.days = fcast_days;
+mob.low_norm = y3/y3(tt1);
+mob.medium_norm = yy/yy(tt1);
+mob.high_norm = y0/y0(tt1);
 
 end

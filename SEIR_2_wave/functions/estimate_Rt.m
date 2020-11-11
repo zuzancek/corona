@@ -1,4 +1,4 @@
-function [Rt,q_mat,It,Xt,x_mat] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N,q_vec)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last] = estimate_Rt(dI_inflow,I0,pop_size,T_rem,N,q_vec,varargin)
 
 T = length(dI_inflow);
 shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
@@ -10,7 +10,7 @@ T_inf.mean = 2.9; T_inf.std = T_rem.std;
 shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;
 shapeE_vec = shapeE*ones(1*N,1);
 scaleE_vec = scaleE*ones(1*N,1);
-Tinf_mat = reshape(gamrnd(shapeE_vec,scaleE_vec),N,1);
+Tinf_mat = reshape(gamrnd(shapeE_vec,scaleE_vec),N,1); %#ok<*NASGU>
 T_inc.mean = 5.1; T_inc.std = T_rem.std;
 shapeI = T_inc.mean*(T_inc.std)^2; scaleI = 1/(T_inc.std)^2;
 shapeI_vec = shapeI*ones(1*N,1);
@@ -49,6 +49,17 @@ Rt_vec = Rt_vec(idx,:);
 I_vec = I_vec(idx,:);
 X_vec = X_vec(idx,:);
 E_vec = E_vec(idx,:);
+
+if ~isempty(varargin)
+    weights = varargin{1};
+    last_num = length(weights);
+    nn = size(Rt_vec(:,T));
+    weights_mat = repmat(weights,nn,1);
+    Rt_last = Rt_vec(:,T-last_num+1:T);
+    Rt_last = sum(Rt_last.*weights_mat,2);
+else
+    Rt_last = Rt_vec(:,T);
+end
 
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
