@@ -148,7 +148,7 @@ x.Rt_smooth = Rt_vec_smooth;
 
 dbsave(x,'results.csv');
 dIt = dI_inflow_smooth;
-St = St_smooth;
-It = It_smooth;
-Rt = Rt_smooth;
+St = tseries(t0+1:t1,St_smooth);
+It = tseries(t0+1:t1,It_smooth);
+Rt = tseries(t0+1:t1,Rt_smooth);
 save('inputs.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');
