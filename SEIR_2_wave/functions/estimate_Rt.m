@@ -53,7 +53,7 @@ E_vec = E_vec(idx,:);
 if ~isempty(varargin)
     weights = varargin{1};
     last_num = length(weights);
-    nn = size(Rt_vec(:,T));
+    nn = size(Rt_vec(:,T),1);
     weights_mat = repmat(weights,nn,1);
     Rt_last = Rt_vec(:,T-last_num+1:T);
     Rt_last = sum(Rt_last.*weights_mat,2);
