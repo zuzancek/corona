@@ -13,7 +13,7 @@ s.T_overlay = 1.5;
 s.T_rem.mean = s.T_inf.mean+s.T_inc.mean-s.T_overlay;
 s.T_rem.std = 0.62;
 
-s.alpha_weight = 0.5;
+s.alpha_weight = 0.25;
 
 g1.r0_scale = 10^2;
 g1.mean = 0.98;
@@ -42,8 +42,8 @@ s.color_bkg = [0.176 0.176 .427];
 s.color_grid = [0.69 0.91 0.973];
 s.color_graph = [0.122 0.478 0.847];
 
-pd = makedist('HalfNormal','mu',0,'sigma',1.5);
-xx = 0:s.smooth_width-1; % last 7 days
+pd = makedist('HalfNormal','mu',0,'sigma',1);
+xx = 0:5; % last 6 days
 weights = pdf(pd,xx);
 s.pweight = weights/sum(weights);
 
