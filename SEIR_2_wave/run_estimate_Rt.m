@@ -15,8 +15,12 @@ t0 = startdate(x.ActiveCases);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
-tw2 = dd(2020,09,01);
-estimate_mobility(mob,53,t0,t1,tw2)
+
+% fcast
+second_wave_from = dd(2020,09,01);
+fcast_to = dd(2020,12,31);
+fcast_per = fcast_to-disp_to;
+mob_fcast = estimate_mobility(mob,fcast_per,t0,t1,second_wave_from);
 
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
@@ -36,7 +40,7 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 %% calculations
 [Rt,~,~,Xt] = estimate_Rt(double(dI_inflow),I0,s.pop_size,s.T_rem,s.sim_num);
 [Rt_smooth,q_mat,~,Xt_smooth,x_mat] = estimate_Rt(double(dI_inflow_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
-forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
+% forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
 
 [Rt_adj,~,~,Xt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.T_rem,s.sim_num);
 [Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.T_rem,s.sim_num,s.quant);
@@ -44,35 +48,6 @@ forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.T_rem,s.sim_n
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
-figure;
-fn = fieldnames(mob);
-mob_avg = 0;
-for i=1:length(fn)
-    yy = resize(mob.(fn{i}),t0:t1);
-    mob_avg = mob_avg+yy;    
-    plot(yy,'linewidth',1);hold on;
-end
-mob_avg = mob_avg/length(fn);
-plot(mob_avg,'k','linewidth',2);hold on;
-grid on;
-title('Mobility, raw data');
-legend(fn);
-
-figure;
-mob_avg = 0;
-for i=1:length(fn)
-    yy = resize(mob.(fn{i}),t0:t1);
-    zz = smooth_series(double(yy),s.smooth_width,s.smooth_type,s.smooth_ends);
-    yy = 0*yy+zz;
-    mob_avg = mob_avg+yy;
-    plot(yy,'linewidth',1);hold on;
-end
-mob_avg = mob_avg/length(fn);
-plot(mob_avg,'k','linewidth',2);hold on;
-grid on;
-title('Mobility, smooth data');
-legend(fn);
-
 figure;
 subplot(2,1,1);
 plot(dI_inflow,'linewidth',1);hold on;
