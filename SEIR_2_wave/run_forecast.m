@@ -16,6 +16,12 @@ disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
 
+%% forecast mobility
+second_wave_from = dd(2020,09,01);
+fcast_to = dd(2020,12,31);
+fcast_per = fcast_to-disp_to;
+mob_fcast = estimate_mobility(mob,fcast_per,t0,t1,second_wave_from);
+
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
     s.smooth_type,s.smooth_ends);
@@ -42,42 +48,6 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
-threshold = 100;
-figure;
-fn = fieldnames(mob);
-for i=1:length(fn)
-    yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
-    if i==length(fn)
-        plot(yy,'linewidth',2,'Color','k');hold on;
-    else
-        plot(yy,'linewidth',1);hold on;
-    end
-end
-xl = xlim;
-bench = tseries(xl(1):xl(2),0)+threshold;
-plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
-grid on;
-ylabel('%');
-title('Mobility, raw data');
-legend(fn);
-
-figure;
-for i=1:length(fn)
-    yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
-    zz = smooth_series(double(yy),s.smooth_width,s.smooth_type,s.smooth_ends);
-    yy = 0*yy+zz;
-    if i==length(fn)
-        plot(yy,'linewidth',2,'Color','k');hold on;
-    else
-        plot(yy,'linewidth',1);hold on;
-    end
-end
-plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
-grid on;
-ylabel('%');
-title('Mobility, smooth data');
-legend(fn);
-
 figure;
 subplot(2,1,1);
 plot(dI_inflow,'linewidth',1);hold on;
