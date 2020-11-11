@@ -13,6 +13,8 @@ s.T_overlay = 1.5;
 s.T_rem.mean = s.T_inf.mean+s.T_inc.mean-s.T_overlay;
 s.T_rem.std = 0.62;
 
+s.alpha_weight = 0.5;
+
 g1.r0_scale = 10^2;
 g1.mean = 0.98;
 g1.alpha = 1;
