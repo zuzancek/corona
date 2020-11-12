@@ -15,13 +15,17 @@ s = data.s; % s = setparam
 startFcast = data.t1+1;
 endHist = startFcast-1;
 startHist = data.t0;
+startEstim = dd(2020,10,10);
+delay = 8;
 Rt = data.Rt_last;
 It = data.It;
 St = data.St;
 
-%% forecast mobility evolution
+%% handle mobility 
 fcastPer = endFcast-startFcast+1;
-mobilityFcast = estimate_mobility(mob,fcastPer,startHist,startFcast-1,startWave);
+mobilityFcast = forecast_mobility(mob,fcastPer,startHist,startFcast-1,startWave);
+Rt_data = tseries(data.t0+1:data.t1,data.q_mat(s.quant_idx_central,:));
+estimate_mobility(mobilityFcast,Rt_data,startEstim,delay);
 
 %% simulate SIR
 alpha_vec = mobilityFcast.low_norm;
