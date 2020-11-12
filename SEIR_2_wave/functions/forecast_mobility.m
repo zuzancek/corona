@@ -45,11 +45,13 @@ for k=4:7
     zz = smooth_series(double(yy),k,s.smooth_type,s.smooth_ends);
     plot(0*yy+zz,'linewidth',1);hold on;
 end
+udata = 0*yy+zz;
 plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
 grid on;
 legend({'raw','smooth (k=4)','smooth (k=5)','smooth (k=6)','smooth (k=7)'});
 ylabel('%');
 title('Mobility, aggregate level');
+
 % w1 minimum
 w1 = resize(yy,t0:tw2);
 [min1,dw1] = min(w1);
@@ -68,13 +70,6 @@ w20 = w2(dw2:tt1-1);w21 = w2(dw2+1:tt1);
 gr2 = w21./w20-1;
 gr2_m = 100*mean(gr2);
 delta2 = log(w2(tt1)-min2)/log(tt1-dw2);
-
-figure;
-plot(w11,'linewidth',1);hold on;
-plot(w21,'linewidth',1);hold on;
-legend({'1st wave','2nd wave'});
-grid on;
-title('Mobility (aggregate level): from minimum to 100%');
 
 z0 = min2*(gr2_m/100+1)^(tt1-dw2+1+fcast_days);
 y0 = tseries(tw2:tt1+fcast_days,0);
@@ -105,9 +100,8 @@ y4(tw2:tt1) = w2;
 zz = smooth_series(double(y4),s.smooth_width,s.smooth_type,s.smooth_ends);
 y4 = 0*y4+zz;
 
-
 figure;
-plot(y0,'linewidth',1);hold on;
+plot(y3,'Color',[0 0.4470 0.7410],'linewidth',1);hold on; 
 ylim([50 150]);
 yl = ylim();
 area([tw2 tt1],[yl(2) yl(2)],'FaceColor',[0.75 0.75 0.75],'EdgeColor','k','FaceAlpha',0.25,'EdgeAlpha',0);
@@ -135,5 +129,6 @@ mob.days = fcast_days;
 mob.low_norm = y3/y3(tt1);
 mob.medium_norm = yy/yy(tt1);
 mob.high_norm = y0/y0(tt1);
+mob.orig = udata;
 
 end

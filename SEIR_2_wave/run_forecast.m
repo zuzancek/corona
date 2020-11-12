@@ -25,7 +25,7 @@ St = data.St;
 fcastPer = endFcast-startFcast+1;
 mobilityFcast = forecast_mobility(mob,fcastPer,startHist,startFcast-1,startWave);
 Rt_data = tseries(data.t0+1:data.t1,data.q_mat(s.quant_idx_central,:));
-estimate_mobility(mobilityFcast,Rt_data,startEstim,delay);
+estimate_mobility(mobilityFcast.orig,Rt_data,startEstim,delay);
 
 %% simulate SIR
 alpha_vec = mobilityFcast.low_norm;
