@@ -20,7 +20,7 @@ grid on;
 ylabel('%');
 title('Mobility, raw data');
 legend(fn);
-
+s.smooth_width = 4;
 figure;
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
@@ -38,6 +38,13 @@ ylabel('%');
 title('Mobility, smooth data');
 legend(fn);
 
+figure;
+yy = interp(resize(mob.SK,t0:t1),t0:t1);
+plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
+grid on;
+legend({'raw','smooth'});
+ylabel('%');
+title('Mobility, aggregate level');
 % w1 minimum
 w1 = resize(yy,t0:tw2);
 [min1,dw1] = min(w1);
