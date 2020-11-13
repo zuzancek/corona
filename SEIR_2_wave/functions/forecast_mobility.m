@@ -1,7 +1,8 @@
-function [mob] = forecast_mobility(mob,fcast_days,t0,t1,tw2)
+function [mob] = forecast_mobility(mob,fcast_days,t0,tw2)
 
 threshold = 100;
 s = setparam();
+t1 = enddate(mob.SK);
 
 figure;
 fn = fieldnames(mob);
@@ -53,7 +54,7 @@ ylabel('%');
 title('Mobility, aggregate level');
 
 % w1 minimum
-w1 = resize(yy,t0:tw2);
+w1 = resize(udata,t0:tw2);
 [min1,dw1] = min(w1);
 thd1 = min(find(resize(w1,dw1:tw2)>threshold)); %#ok<*MXFND>
 dt1 = thd1-dw1;
@@ -63,7 +64,7 @@ gr1_m = 100*mean(gr1); %#ok<*NASGU>
 delta1 = (threshold-min1)/dt1;
 
 % w2 minimum
-w2 = resize(yy,tw2:t1);
+w2 = resize(udata,tw2:t1);
 tt1 = enddate(w2);
 [min2,dw2] = min(w2);
 w20 = w2(dw2:tt1-1);w21 = w2(dw2+1:tt1);
@@ -90,7 +91,7 @@ y2 = 0*y2+zz;
 y3 = tseries(tw2:tt1+fcast_days,0);
 y3(dw2:end) = (0:tt1-dw2+fcast_days).^delta2;  
 y3(tw2:tt1) = w2; 
-y3(tt1+1:end) = w2(dw2)+y3(tt1+1:end).*(1-0.3*[0:fcast_days-1]'/fcast_days);
+y3(tt1+1:end) = w2(dw2)+y3(tt1+1:end).*(1-0.1*[0:fcast_days-1]'/fcast_days);
 zz = smooth_series(double(y3),s.smooth_width,s.smooth_type,s.smooth_ends);
 y3 = 0*y3+zz;
 w2s = resize(y3,tw2:tt1);
@@ -130,5 +131,6 @@ mob.low_norm = y3/y3(tt1);
 mob.medium_norm = yy/yy(tt1);
 mob.high_norm = y0/y0(tt1);
 mob.orig = udata;
+mob.raw = yy;
 
 end
