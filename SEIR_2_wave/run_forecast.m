@@ -16,6 +16,7 @@ startFcast = data.t1+1;
 endHist = startFcast-1;
 startHist = data.t0;
 startEstim = dd(2020,10,10);
+startEstimFull = dd(2020,9,15);
 delay = 8;
 Rt = data.Rt_last;
 It = data.It;
@@ -25,10 +26,10 @@ St = data.St;
 fcastPer = endFcast-startFcast+1;
 mobilityFcast = forecast_mobility(mob,fcastPer,startHist,startWave);
 Rt_data = tseries(data.t0+1:data.t1,data.q_mat(s.quant_idx_central,:));
-estimate_mobility(mobilityFcast,Rt_data,startEstim,delay);
+mobilityParams = estimate_mobility(mobilityFcast,Rt_data,startEstim,delay,startEstimFull);
 
 %% simulate SIR
-alpha_vec = mobilityFcast.low_norm;
+alpha_vec = mobilityFcast.medium_norm;
 [res_mean,res_quant] = simulate_SIR(fcastPer,Rt,It,St,alpha_vec,endHist,s);
 
 plot_fanchart(res_quant.dIt,s,1,startFcast,endFcast,startFcast);
