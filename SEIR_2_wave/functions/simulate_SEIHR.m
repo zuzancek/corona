@@ -1,4 +1,4 @@
-function [res_mean,res_quant] = simulate_SEIHR(T,Rt,init,alpha_vec,t0,s)
+function [res_mean,res_quant] = simulate_SEIHR(T,Rt,init,t0,s)
 
 % init values (observed)
 It = init.I;
@@ -10,15 +10,23 @@ Vt = init.V;
 % initialize
 T_inf_asymp = s.T_inf_asymp;
 T_inf_symp = s.T_inf_symp;
-T_inc = s.T_inc;
-q_vec = s.quant;
-pop_size = s.pop_size;
+T_inc = s.T_inc; 
+T_inf_novent = s.T_inf_novent_vec;
 obs_ratio = s.obs_ratio;
 symp_ratio_obs = s.symp_ratio_obs;
-eta = obs_ratio*symp_ratio_obs;
 lambda = s.lambda;
+omega_novent = s.omega_novent; 
+omega_vent = s.omega_vent;
+psi_novent = s.psi_novent; 
+psi_vent = s.psi_vent;
+xi = s.xi;
+iota = s.iota;
+q_vec = s.quant;
+pop_size = s.pop_size;
+gamma_novent = s.gamma_novent;
 
 % setup
+eta = obs_ratio*symp_ratio_obs;
 N = length(Rt);
 T_inc_vec = get_rv(T_inc);
 T_inf_asymp_vec = get_rv(T_inf_asymp);
@@ -27,7 +35,6 @@ T_inf_novent_vec = get_rv(T_inf_novent);
 
 gamma_asymp = 1./T_inf_asymp_vec;
 gamma_symp = 1./T_inf_symp_vec;
-gamma_novent = 1./T_novent_rec_vec;
 zeta = 1./T_inf_novent_vec;
 delta_asymp = 1./(T_inf_asymp_vec+T_inc_vec-s.T_overlay);
 delta_symp = 1./(T_inf_symp_vec+T_inc_vec-s.T_overlay);
@@ -41,6 +48,7 @@ R_vec = zeros(N,T+1);
 H_vec = zeros(N,T+1);       H_vec(:,1) = Ht(t0);
 V_vec = zeros(N,T+1);       V_vec(:,1) = Vt(t0);
 N_vec = zeros(N,T+1);       N_vec(:,1) = Ht(t0)-Vt(t0);
+C_vec = zeros(N,T+1);       C_vec(:,1) = N_vec(:,1)*iota;
 D_vec = zeros(N,T+1);       D_vec(:,1) = Dt(t0);
 dI_in_vec = zeros(N,T+1);   dI_in_vec(:,1) = Rt;
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt;
@@ -58,6 +66,7 @@ for t=1:T
     Iobs_vec(:,t+1) = Is_vec(:,t+1)+(1-symp_ratio_obs)*obs_ratio/(1-eta)*Ia_vec(:,t+1);
     % clinical part
     N_vec(:,t+1) = lambda*zeta.*Is_vec(:,t)+N_vec(:,t).*(omega_novent.*(1-psi_novent)+(1-omega_novent).*(1-gamma_novent-xi));
+    C_vec(:,t+1) = iota*N_vec(:,t+1);
     V_vec(:,t+1) = (1-omega_novent).*xi.*N_vec(:,t)+V_vec(:,t).*(omega_vent.*(1-psi_vent)+(1-omega_vent).*(1-gamma_vent));
     H_vec(:,t+1) = N_vec(:,t+1)+V_vec(:,t+1);
     % final stages
@@ -74,6 +83,7 @@ Is_vec = Is_vec(idx,:);
 Iobs_vec = Iobs_vec(idx,:);
 dI_in_vec = dI_in_vec(idx,:);
 N_vec = N_vec(idx,:);
+C_vec = C_vec(idx,:);
 V_vec = V_vec(idx,:);
 H_vec = H_vec(idx,:);
 R_vec = R_vec(idx,:);
@@ -85,6 +95,7 @@ Is_mean = Ia_mean;
 Iobs_mean = Ia_mean;
 dI_mean = Ia_mean;
 H_mean = Ia_mean;
+C_mean = Ia_mean;
 V_mean = Ia_mean;
 N_mean = Ia_mean;
 R_mean = Ia_mean;
@@ -96,6 +107,7 @@ for t = 1:T+1
     N_mean(t) = mean(N_vec(:,t));
     V_mean(t) = mean(V_vec(:,t));
     H_mean(t) = mean(H_vec(:,t));
+    C_mean(t) = mean(C_vec(:,t));
     R_mean(t) = mean(R_vec(:,t));
 end
 
@@ -103,7 +115,8 @@ res_mean.Inf_asymp = Ia_mean;
 res_mean.Inf_symp = Is_mean;
 res_mean.Inf_obs = Iobs_mean;
 res_mean.dInf = dI_mean;
-res_mean.Hosp_novent = N_mean;
+res_mean.Hosp_normal = N_mean-C_mean;
+res_mean.Hosp_icu = C_mean;
 res_mean.Hosp_vent = V_mean;
 res_mean.Hosp = H_mean;
 res_mean.Rec = R_mean;
