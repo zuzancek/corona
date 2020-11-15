@@ -16,8 +16,8 @@ s.T_inf_asymp.mean = 3.5;   s.T_inf_asymp.std = 0.62;
 % infectious period - symptomatic cases
 s.T_inf_symp.mean = 4.5;   s.T_inf_symp.std = 0.62;
 % days prior to hospital admission (from onset)
-s.T_inf_novent.mean = 7+s.T_pre.mean;  s.T_inf_novent.std = 0.62;
-s.zeta = 1/T_inf_novent.mean;
+s.T_inf_novent.mean = 7+s.T_pre;  s.T_inf_novent.std = 0.62;
+s.zeta = 1/s.T_inf_novent.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
 % share of symptomatic patients needed to be hospitalized 
