@@ -1,5 +1,6 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dI_in,I0,pop_size,SI,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,d,Et] = estimate_Rt_SEIR(dI_in,I0,pop_size,SI,N,q_vec,varargin)
 
+d = 1;
 T = length(dI_in);
 T_inf.mean = 2.9; T_inf.std = SI.std;
 shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;
@@ -33,7 +34,7 @@ for t = 1:T-1
     dE_in(:,t) = E_vec(:,t+1)-(1-1./T_inc_vec).*E_vec(:,t);
     S_vec(:,t+1) = S_vec(:,t)-dE_in(:,t);
     Rt_vec(:,t) = pop_size.*dE_in(:,t).*T_inf_vec./(S_vec(:,t).*I_vec(:,t));
-    idx = idx & I_vec(:,t+1)>0;
+    idx = idx & I_vec(:,t)>0 & E_vec(:,t)>0;
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
