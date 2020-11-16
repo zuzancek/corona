@@ -101,7 +101,6 @@ plot(pos_test_ratio_smooth,'linewidth',1);
 title('Positive tests ratio');
 legend({'raw','smooth'});
 grid on;
-%
 
 %% saving stuff
 mob_smooth = yy;
