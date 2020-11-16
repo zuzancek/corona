@@ -1,35 +1,20 @@
+%% initialization
 initialize;
 
-x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
-mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
-
+%% setup
 s = setparam();
 disp_from = dd(2020,4,1);
 indiff = true; 
-
-%% handle data
-% start date: 6.3
 cut = 0;
 dt = 1;
-t0 = startdate(x.ActiveCases);
-disp_to = enddate(x.ActiveCases)-cut;
+
+%% load data
+load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
+    'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1');
+% t0 = startdate(x.ActiveCases);
+% t1 = enddate(x.ActiveCases)-cut;
+disp_to = t1;
 tt0 = t0+dt;
-t1 = enddate(x.ActiveCases)-cut;
-
-dI_inflow = resize(x.NewCases,tt0:t1);
-dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
-    s.smooth_type,s.smooth_ends);
-
-dI_inflow_smooth = 0*dI_inflow+dI_inflow_smooth;
-
-pos_test_ratio = x.NewCases./x.Tests;
-pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
-    s.smooth_type,s.smooth_ends);
-[dI_inflow_adj_smooth,dI_inflow_adj] = adjust_series(double(dI_inflow),s.smooth_width,...
-    s.smooth_type,s.smooth_ends,s.scale_fact,s.threshold,double(resize(pos_test_ratio,tt0:t1)));
-dI_inflow_adj = 0*dI_inflow+dI_inflow_adj;
-dI_inflow_adj_smooth = 0*dI_inflow+dI_inflow_adj_smooth;
-I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 
 %% calculations
 [Rt,~,~,Xt] = estimate_Rt(double(dI_inflow),I0,s.pop_size,s.SI,s.sim_num);
@@ -62,10 +47,10 @@ title('Rt smooth');
 legend({'observed','adjusted'});
 grid on;
 % 
-plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0);
-plot_fanchart(q_mat_adj,s,dt,disp_from,disp_to,t0);
-plot_fanchart(x_mat,s,dt,disp_from,disp_to,t0);
-plot_fanchart(x_mat_adj,s,dt,disp_from,disp_to,t0);
+plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt)');
+plot_fanchart(q_mat_adj,s,dt,disp_from,disp_to,t0,'Adjusted effective reproduction number (Rt)');
+plot_fanchart(x_mat,s,dt,disp_from,disp_to,t0,'Active infections estimate (unobs.included)');
+plot_fanchart(x_mat_adj,s,dt,disp_from,disp_to,t0,'Adjusted active infections estimate (unobs.included)');
 
 %% saving stuff
 Rt_vec_raw = zeros(t1-t0+1,1);
@@ -83,4 +68,4 @@ dIt = dI_inflow_smooth;
 St = tseries(t0+1:t1,St_smooth);
 It = tseries(t0+1:t1,It_smooth);
 Rt = tseries(t0+1:t1,Rt_smooth);
-save('inputs.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');
+save('results_Rt.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');

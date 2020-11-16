@@ -104,8 +104,10 @@ grid on;
 %
 
 %% saving stuff
+mob_smooth = yy;
 save('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
-    'pos_test_ratio','pos_test_ratio_smooth','I0','s','t0','t1');
+    'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1');
 data.NewCases = x.NewCases;
 data.Tests = x.Tests;
+data.Mobility = mob.SK;
 save('raw.mat','data');

@@ -1,6 +1,6 @@
-function [] = plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0)
+function [] = plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,fname)
 
-f = figure;
+f = figure('Name',fname);
 fanChart(1:size(q_mat,2), q_mat', q_mat(s.quant_idx_central,:), s.quant,...
     'alpha', .75, 'colormap', {'shadesOfColor',s.color_graph});
 grid on;
