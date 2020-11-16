@@ -7,7 +7,7 @@ startWave = dd(2020,09,01); % start of the second wave
 
 %% loading stuff
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
-mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
+mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 data = load('results_Rt.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');
 
 %% handle inputs
