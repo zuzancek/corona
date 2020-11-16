@@ -4,7 +4,6 @@ initialize;
 %% setup
 disp_from = dd(2020,4,1);
 indiff = true; 
-seir_model = true;
 cut = 0;
 dt = 1;
 
@@ -13,7 +12,7 @@ load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
     'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1');
 tt0 = t0+dt;
 
-if seir_model
+if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
     del = 1;
 else

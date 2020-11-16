@@ -4,6 +4,7 @@ s = struct;
 s.pop_size = 5443120;
 s.sim_num = 10^4;
 s.T = 200;
+s.model_seir = true;
 
 % serial interval
 s.SI.mean = 6.5;            s.SI.std = 0.62;
