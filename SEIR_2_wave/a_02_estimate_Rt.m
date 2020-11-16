@@ -4,7 +4,7 @@ initialize;
 %% setup
 disp_from = dd(2020,4,1);
 indiff = true; 
-seir_model = false;
+seir_model = true;
 cut = 0;
 dt = 1;
 
@@ -24,7 +24,7 @@ end
     
 
 %% calculations
-[Rt,~,~,Xt] = model_fnc(double(dI_inflow),I0,s.pop_size,s.SI,s.sim_num);
+[Rt,~,~,Xt] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num);
 [Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant,s.pweight);
 % forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.SI,s.sim_num,s.quant);
 

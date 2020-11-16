@@ -1,6 +1,6 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dE_in,I0,pop_size,SI,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dI_in,I0,pop_size,SI,N,q_vec,varargin)
 
-T = length(dE_in);
+T = length(dI_in);
 T_inf.mean = 2.9; T_inf.std = SI.std;
 shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;
 shapeE_vec = shapeE*ones(1*N,1);
@@ -16,8 +16,7 @@ T_inc_vec = reshape(gamrnd(shapeI_vec,scaleI_vec),N,1);
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
 E_vec = zeros(N,T);
-Rt_vec = zeros(N,T); 
-dI_in = zeros(N,T);
+Rt_vec = zeros(N,T);
 dE_in = zeros(N,T);
 Rt = zeros(T,1); It = Rt; Et = Rt; St = Rt; Xt = Rt;
 idx = ones(N,1);
@@ -31,9 +30,9 @@ for t = 1:T-1
     E_vec(:,t) = dI_in(t).*T_inc_vec;
     E_vec(:,t+1) = dI_in(t+1).*T_inc_vec;
     I_vec(:,t+1) = (1-1./T_inf_vec).*I_vec(:,t)+dI_in(t);
-    dE_in(t) = E_vec(:,t+1)-(1-1./T_inc_vec).*E_vec(:,t);
-    S_vec(:,t+1) = S_vec(:,t)-dE_in(t);
-    Rt_vec(:,t) = pop_size.*dE_in(t).*T_inf_vec./(S_vec(:,t).*I_vec(:,t));
+    dE_in(:,t) = E_vec(:,t+1)-(1-1./T_inc_vec).*E_vec(:,t);
+    S_vec(:,t+1) = S_vec(:,t)-dE_in(:,t);
+    Rt_vec(:,t) = pop_size.*dE_in(:,t).*T_inf_vec./(S_vec(:,t).*I_vec(:,t));
     idx = idx & I_vec(:,t+1)>0;
 end
 idx = find(idx>0);
@@ -51,7 +50,7 @@ if ~isempty(varargin)
     Rt_last = Rt_vec(:,T-last_num+1:T);
     Rt_last = sum(Rt_last.*weights_mat,2);
 else
-    Rt_last = Rt_vec(:,T);
+    Rt_last = Rt_vec(:,T-1);
 end
 
 for t = 1:T
@@ -61,6 +60,7 @@ for t = 1:T
     Et(t) = mean(E_vec(:,t));
     Xt(t) = mean(X_vec(:,t));
 end
+Rt = Rt(1:end-1);
 
 if (nargin)>5
     M = length(q_vec);
@@ -70,7 +70,7 @@ if (nargin)>5
     end
     x_mat = zeros(M,T);
     for j = 1:M
-        x_mat(j,:) = quantile(X_vec(:,2:end),q_vec(j),1);
+        x_mat(j,:) = quantile(X_vec(:,1:end),q_vec(j),1);
     end
 else
     q_mat = [];
