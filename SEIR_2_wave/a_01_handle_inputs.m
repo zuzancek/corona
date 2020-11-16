@@ -1,20 +1,25 @@
 initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
-mob = dbload('data/mobility_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
+mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
+hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
 disp_from = dd(2020,4,1);
 indiff = true; 
 
 %% handle data
+% definitions
 cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
+h_t0 = startdate(hosp.ICU>0);
+h_t1 = enddate(hosp.ICU);
 
+% epidemiology data
 dI_inflow = resize(x.NewCases,tt0:t1);
 dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
     s.smooth_type,s.smooth_ends);
@@ -29,6 +34,8 @@ pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
 dI_inflow_adj = 0*dI_inflow+dI_inflow_adj;
 dI_inflow_adj_smooth = 0*dI_inflow+dI_inflow_adj_smooth;
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
+
+% clinical
 
 %% calculations
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
