@@ -18,7 +18,6 @@ m_data = double(m);
 [r_vmax,r_dmax] = max(r_full);
 assert(r_dmin-m_dmin==delay);
 
-%
 figure;
 plot(m,'linewidth',1); hold on;
 plot(r,'linewidth',1);

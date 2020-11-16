@@ -54,7 +54,7 @@ R_eff = zeros(N,T+1);       R_eff(:,1) = Rt;
 
 idx = ones(N,1);
 kappa_res = get_kappa_res();
-
+kappa_mob = get_kappa_mob();
 % calculation
 for t=1:T
     % epidemiological part
@@ -131,6 +131,12 @@ res_mean.Rec = R_mean;
     function [r] = get_kappa_res()
         dr = s.kappa_res_delta_0+restrictions.delta*min([0:T],restrictions.at)/restrictions.at;
         r = (1+dr.^s.kappa_res_alpha).*s.beta_res;
+    end
+
+    function [m] = get_kappa_mob()
+        m0 = interp1(mobility.x_grid,mobility.y_grid,mobility.values);
+        ms = interp1(mobility.x_grid,mobility.y_grid,mobility.scale);
+        m = m0/ms;
     end
 
 end

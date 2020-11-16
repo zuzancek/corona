@@ -28,6 +28,21 @@ mobilityFcast = forecast_mobility(mob,fcastPer,startHist,startWave);
 Rt_data = tseries(data.t0+1:data.t1,data.q_mat(s.quant_idx_central,:));
 mobilityParams = estimate_mobility(mobilityFcast,Rt_data,startEstim,delay,startEstimFull);
 
+%% simulate SEIHR
+% simulate augmented SEIR model with clinical section
+init.It = It;
+init.St = St;
+% todo: other init values
+% mobility
+mobility.values = mobilityFcast.medium(startFcast:end)/100;
+mobility.x_grid = mobilityParams.f.x_grid;
+mobility.y_grid = mobilityParams.f.y_grid;
+mobility.scale = mobilityFcast.medium(startFcast);
+% restrictions (NPC as for 15.11.2020 assumed)
+restrictions = s.kappa_res_0; % delta, at;
+t0 = startFcast;
+[res_mean,res_quant] = simulate_SEIHR(fcastPer,Rt,mobility,restrictions,init,t0,s);
+
 %% simulate SIR
 alpha_vec = mobilityFcast.medium_norm;
 [res_mean,res_quant] = simulate_SIR(fcastPer,Rt,It,St,alpha_vec,endHist,s);
