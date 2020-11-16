@@ -4,7 +4,6 @@ function [res_mean,res_quant] = simulate_SIR(T,Rt,It,st,alpha_vec,t0,s)
 T_rem = s.T_rem;
 q_vec = s.quant;
 pop_size = s.pop_size;
-obs_ratio = s.obs_ratio;
 w = s.alpha_weight;
 
 % setup
@@ -41,7 +40,7 @@ dI_in_vec = dI_in_vec(idx,:);
 res_mean = struct;
 for t = 1:T+1
     it(t) = mean(I_vec(:,t));
-    dit(t) = mean(dI_in_vec(:,t));
+    dit(t) = mean(dI_in_vec(:,t)); %#ok<AGROW>
     st(t) = mean(S_vec(:,t));
     ft(t) = mean(F_vec(:,t));
 end

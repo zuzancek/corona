@@ -1,4 +1,4 @@
-function [res_mean,res_quant] = simulate_SEIHR(T,Rt,init,t0,s)
+function [res_mean] = simulate_SEIHR(T,Rt,mobility,restrictions,init,t0,s)
 
 % init values (observed)
 It = init.I;
@@ -21,7 +21,6 @@ psi_novent = s.psi_novent;
 psi_vent = s.psi_vent;
 xi = s.xi;
 iota = s.iota;
-q_vec = s.quant;
 pop_size = s.pop_size;
 gamma_novent = s.gamma_novent;
 
@@ -54,11 +53,12 @@ dI_in_vec = zeros(N,T+1);   dI_in_vec(:,1) = Rt;
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt;
 
 idx = ones(N,1);
+kappa_res = get_kappa_res();
 
 % calculation
 for t=1:T
     % epidemiological part
-    R_eff(:,t+1) = Rt.*kappa_mob(t).*kappa_res(t);
+    R_eff(:,t+1) = Rt.*kappa_mob(t+1).*kappa_res(t+1);
     dI_in_vec(:,t+1) = R_eff(:,t+1).*S_vec(:,t)/pop_size.*(Ia_vec(:,t).*delta_asymp+Is_vec(:,t).*((1-lambda)*delta_symp+lambda*delta_symp_novent));
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t+1);
     Ia_vec(:,t+1) = (1-gamma_asymp).*Ia_vec(:,t)+(1-eta)*dI_in_vec(:,t);
@@ -121,27 +121,16 @@ res_mean.Hosp_vent = V_mean;
 res_mean.Hosp = H_mean;
 res_mean.Rec = R_mean;
 
-M = length(q_vec);
-It_quant = zeros(M,T+1);
-dIt_quant = zeros(M,T+1);
-St_quant = zeros(M,T+1);
-Ft_quant = zeros(M,T+1);
-res_quant = struct;
-for j = 1:M
-    dIt_quant(j,:) = quantile(dI_in_vec,q_vec(j),1);
-    It_quant(j,:) = quantile(I_vec,q_vec(j),1);
-    St_quant(j,:) = quantile(S_vec,q_vec(j),1);
-    Ft_quant(j,:) = quantile(F_vec,q_vec(j),1);
-end
-res_quant.dIt = dIt_quant;
-res_quant.It = It_quant;
-res_quant.St = St_quant;
-res_quant.Ft = Ft_quant;
-
     function [x] = get_rv(y)
         shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;
         shape0_vec = shape0*ones(1*N,1);
         scale0_vec = scale0*ones(1*N,1);
         x = reshape(gamrnd(shape0_vec,scale0_vec),N,1);
     end
+
+    function [r] = get_kappa_res()
+        dr = s.kappa_res_delta_0+restrictions.delta*min([0:T],restrictions.at)/restrictions.at;
+        r = (1+dr.^s.kappa_res_alpha).*s.beta_res;
+    end
+
 end

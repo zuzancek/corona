@@ -37,6 +37,13 @@ s.psi_vent = 1/4;
 s.omega_vent = 0.33;
 
 s.alpha_weight = 0.25;
+s.kappa_res_0 = 1/3;
+s.kappa_res_delta_0 = -0.5;
+s.kappa_res_alpha = 3;
+s.beta_res = s.kappa_res_0/(1+s.kappa_res_delta_0^s.kappa_res_alpha);
+s.kappa_res_0 = struct;
+s.kappa_res_0.at = 0;
+s.kappa_res_0.delta = 0;
 
 g1.r0_scale = 10^2;
 g1.mean = 0.98;
