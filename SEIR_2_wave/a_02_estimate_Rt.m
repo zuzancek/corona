@@ -20,7 +20,7 @@ else
     model_fnc = @estimate_Rt_SIR;
     del = 0;
 end
-disp_to = t1-del;
+disp_to = t1-del-1;
 
 
 %% calculations
