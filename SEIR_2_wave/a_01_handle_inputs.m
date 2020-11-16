@@ -110,4 +110,5 @@ save('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
 data.NewCases = x.NewCases;
 data.Tests = x.Tests;
 data.Mobility = mob.SK;
+data.Deaths = x.Deaths;
 save('raw.mat','data');
