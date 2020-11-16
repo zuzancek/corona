@@ -16,7 +16,8 @@ t0 = startdate(x.ActiveCases);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
-h_t0 = startdate(hosp.ICU>0);
+h_t0 = startdate(hosp.ICU);
+h_t00 = find(hosp.ICU>0);
 h_t1 = enddate(hosp.ICU);
 
 % epidemiology data
@@ -36,13 +37,49 @@ dI_inflow_adj_smooth = 0*dI_inflow+dI_inflow_adj_smooth;
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 
 % clinical
+hospit = hosp.Hospitalizations;
+hospit_smooth = 0*hospit+smooth_series(double(hospit),5,...
+    s.smooth_type,s.smooth_ends);
+icu = hosp.ICU;
+icu_smooth = 0*resize(icu,h_t00:h_t1)+smooth_series(icu(h_t00:h_t1),5,...
+    s.smooth_type,s.smooth_ends);
+vent = hosp.Ventilation;
+vent_smooth = 0*vent+smooth_series(double(vent),5,...
+    s.smooth_type,s.smooth_ends);
+death = resize(x.Deaths,h_t0:h_t1);
+death_smooth = 0*death+smooth_series(double(death),5,...
+    s.smooth_type,s.smooth_ends);
 
 %% calculations
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
+% clinical statistics
+figure('Name','Clinical statistics');
+subplot(2,2,1)
+plot(hospit,'linestyle','--');hold on;
+plot(hospit_smooth,'linewidth',1);
+grid on;
+title('Total hospitalizations');
+subplot(2,2,2)
+plot(icu,'linestyle','--');hold on;
+plot(icu_smooth,'linewidth',1);
+grid on;
+title('ICU beds');
+subplot(2,2,3)
+plot(vent,'linestyle','--');hold on;
+plot(vent_smooth,'linewidth',1);
+grid on;
+title('Ventilations');
+subplot(2,2,4)
+plot(death,'linestyle','--');hold on;
+plot(death_smooth,'linewidth',1);
+grid on;
+title('Deaths');
+
+% mobility
 threshold = 100;
-figure;
+figure('Name','Mobility');
 fn = fieldnames(mob);
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
@@ -77,6 +114,7 @@ ylabel('%');
 title('Mobility, smooth data');
 legend(fn);
 
+% epidemiology
 figure;
 subplot(2,1,1);
 plot(dI_inflow,'linewidth',1);hold on;
@@ -112,9 +150,13 @@ grid on;
 %% saving stuff
 mob_smooth = yy;
 save('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
-    'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1');
+    'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
+    'death_smooth','h_t0','h_t1','h_t00');
 data.NewCases = x.NewCases;
 data.Tests = x.Tests;
 data.Mobility = mob.SK;
 data.Deaths = x.Deaths;
+data.ICU = icu;
+data.Vent = vent;
+data.Hosp = hospit;
 save('raw.mat','data');
