@@ -2,9 +2,9 @@
 initialize;
 
 %% setup
-s = setparam();
 disp_from = dd(2020,4,1);
 indiff = true; 
+seir_model = false;
 cut = 0;
 dt = 1;
 
@@ -16,13 +16,20 @@ load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
 disp_to = t1;
 tt0 = t0+dt;
 
+if seir_model
+    model_fnc = @estimate_Rt_SEIR;
+else
+    model_fnc = @estimate_Rt_SIR;
+end
+    
+
 %% calculations
-[Rt,~,~,Xt] = estimate_Rt(double(dI_inflow),I0,s.pop_size,s.SI,s.sim_num);
-[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth] = estimate_Rt(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant,s.pweight);
+[Rt,~,~,Xt] = model_fnc(double(dI_inflow),I0,s.pop_size,s.SI,s.sim_num);
+[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant,s.pweight);
 % forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.SI,s.sim_num,s.quant);
 
-[Rt_adj,~,~,Xt_adj] = estimate_Rt(double(dI_inflow_adj),I0,s.pop_size,s.SI,s.sim_num);
-[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = estimate_Rt(double(dI_inflow_adj_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant);
+[Rt_adj,~,~,Xt_adj] = model_fnc(double(dI_inflow_adj),I0,s.pop_size,s.SI,s.sim_num);
+[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = model_fnc(double(dI_inflow_adj_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant);
 
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
