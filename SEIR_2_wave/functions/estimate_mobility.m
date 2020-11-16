@@ -64,11 +64,13 @@ res = struct();
 res.f1.x = x1;
 [yy,a] = modelfun(k_array(1),x1);
 res.f1.y = yy;
-res.f1.p = [r1 a k_array(1)];
+res.f1.p = [r_1 a k_array(1)];
 res.f2.x = x2;
 res.f2.y = y2;
 res.f2.s = sl;
 res.f2.k = r_1;
+res.f.x_grid = x;
+res.f.y_grid = z;
 
     function [yy,a]=modelfun(k,x)
         a = m_1^k*(r_1-1)/(1-r_1*m_1^k);
