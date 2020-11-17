@@ -9,9 +9,11 @@ s.model_seir = true;
 % serial interval
 s.SI.mean = 6.5;            s.SI.std = 0.62;
 % presymptomatic period
-s.T_pre = 2;
+s.T_pre.mean = 2;           s.T_pre.std = s.SI.std;
 % incubation period
-s.T_inc.mean = 5.2;         s.T_inc.std = 0.62;
+s.T_inc.mean = 5.2;         s.T_inc.std = s.SI.std;
+% latent period
+s.T_lat.mean = s.T_inc.mean-s.T_pre; s.T_lat.std  = s.SI.std;
 % infectious period - asymptomatic cases
 s.T_inf_asymp.mean = 3.5;   s.T_inf_asymp.std = 0.62;
 % infectious period - symptomatic cases

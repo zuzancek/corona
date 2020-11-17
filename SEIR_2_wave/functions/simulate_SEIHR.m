@@ -13,6 +13,8 @@ T_inf_asymp = s.T_inf_asymp;
 T_inf_symp = s.T_inf_symp;
 T_inc = s.T_inc; 
 T_inf_novent = s.T_inf_novent_vec;
+T_lat = s.T_lat;
+T_pre = s.T_re;
 obs_ratio = s.obs_ratio;
 symp_ratio_obs = s.symp_ratio_obs;
 lambda = s.lambda;
@@ -33,7 +35,11 @@ T_inc_vec = get_rv(T_inc);
 T_inf_asymp_vec = get_rv(T_inf_asymp);
 T_inf_symp_vec = get_rv(T_inf_symp);
 T_inf_novent_vec = get_rv(T_inf_novent);
+T_lat_vec = get_rv(T_lat);
+T_pre_vec = get_rv(T_pre);
 
+gamma_lat = 1./T_lat_vec;
+gamma_pre = 1./T_pre_vec;
 gamma_asymp = 1./T_inf_asymp_vec;
 gamma_symp = 1./T_inf_symp_vec;
 zeta = 1./T_inf_novent_vec;
@@ -42,6 +48,7 @@ delta_symp = 1./(T_inf_symp_vec+T_inc_vec-s.T_overlay);
 delta_symp_novent = 1./(T_inf_novent_vec+T_inc_vec-s.T_overlay);
 
 S_vec = zeros(N,T+1);       S_vec(:,1) = St(t0);
+E_vec = zeros(N,T+1);       E_vec(:,1) = Et(t0);
 Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = (1-eta)*It(t0);
 Is_vec = zeros(N,T+1);      Is_vec(:,1) = eta*It(t0);
 Iobs_vec = zeros(N,T+1);    Iobs_vec(:,1) = Is_vec(:,1)+(1-symp_ratio_obs)*obs_ratio/(1-eta)*Ia_vec(:,1);
@@ -62,13 +69,14 @@ kappa_mob = get_kappa_mob();
 % calculation
 for t=1:T
     % epidemiological part
-    R_eff(:,t+1) = Rt.*kappa_mob(t+1).*kappa_res(t+1);
-    dE_in_vec(:,t+1) = R_eff(:,t+1).*S_vec(:,t)/pop_size.*...
+    R_eff(:,t+1) = Rt.*kappa_mob(t).*kappa_res(t);
+    dE_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
         (Is_vec(:,t).*((1-lambda)*delta_symp+lambda*delta_symp_novent)+...
         Ia_vec(:,t).*delta_asymp*(obs_ratio*(1-symp_ratio_obs)+(1-obs_ratio)/sigma));
-    S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t+1);
-    Ia_vec(:,t+1) = (1-gamma_asymp).*Ia_vec(:,t)+(1-eta)*dI_in_vec(:,t);
-    Is_vec(:,t+1) = (1-(1-lambda)*gamma_symp-lambda*zeta).*Is_vec(:,t)+eta*dI_in_vec(:,t);
+    S_vec(:,t+1) = S_vec(:,t)-dE_in_vec(:,t);
+    E_vec(:,t+1) = E_vec(:,t).*(1-gamma_lat)+dE_in_vec(:,t);
+    Ia_vec(:,t+1) = Ia_vec(:,t)+gamma_lat.*E_vec(:,t)-eta.*gamma_pre.*Ia_vec(:,t)-(1-eta).*gamma_asymp.*Ia_vec(:,t);
+    Is_vec(:,t+1) = Is_vec(:,t)+eta.*gamma_pre.*Ia_vec(:,t)-lambda*zeta.*Is_vec(:,t)-(1-lambda).*gamma_symp.*Is_vec(:,t);
     Iobs_vec(:,t+1) = Is_vec(:,t+1)+(1-symp_ratio_obs)*obs_ratio/(1-eta)*Ia_vec(:,t+1);
     Iunobs_vec(:,t+1) = Is_vec(:,t+1)+Ia_vec(:,t+1)-Iobs_vec(:,t+1);
     % clinical part
@@ -77,7 +85,7 @@ for t=1:T
     V_vec(:,t+1) = (1-omega_novent).*xi.*N_vec(:,t)+V_vec(:,t).*(omega_vent.*(1-psi_vent)+(1-omega_vent).*(1-gamma_vent));
     H_vec(:,t+1) = N_vec(:,t+1)+V_vec(:,t+1);
     % final stages
-    R_vec(:,t+1) = R_vec(:,t)+gamma_asymp.*Ia_vec(:,t)+gamma_symp.*(1-lambda).*Is_vec(:,t)+(1-omega_novent).*gamma_novent.*N_vec(:,t)+(1-omega_vent).*gamma_vent.*V_vec(:,t);
+    R_vec(:,t+1) = R_vec(:,t)+(1-eta).*gamma_asymp.*Ia_vec(:,t)+gamma_symp.*(1-lambda).*Is_vec(:,t)+(1-omega_novent).*gamma_novent.*N_vec(:,t)+(1-omega_vent).*gamma_vent.*V_vec(:,t);
     D_vec(:,t+1) = D_vec(:,t)+omega_novent.*psi_novent.*N_vec(:,t)+omega_vent.*psi_vent.*V_vec(:,t);
     idx = idx & Ia_vec(:,t+1)>0 & Is_vec(:,t+1)>0;
 end
@@ -99,6 +107,7 @@ R_vec = R_vec(idx,:);
 res_mean = struct;
 Ia_mean = zeros(T+1,1); 
 Is_mean = Ia_mean;
+E_mean = Ia_mean;
 Iobs_mean = Ia_mean;
 dI_mean = Ia_mean;
 H_mean = Ia_mean;
@@ -106,9 +115,10 @@ C_mean = Ia_mean;
 V_mean = Ia_mean;
 N_mean = Ia_mean;
 R_mean = Ia_mean;
-S_mean = S_mean;
+S_mean = Ia_mean;
 for t = 1:T+1
     S_mean(t) = mean(S_vec(:,t));
+    E_mean(t) = mean(E_vec(:,t));
     Ia_mean(t) = mean(Ia_vec(:,t));
     Is_mean(t) = mean(Is_vec(:,t));
     Iobs_mean(t) = mean(Iobs_vec(:,t));
@@ -130,6 +140,7 @@ res_mean.Hosp_vent = V_mean;
 res_mean.Hosp = H_mean;
 res_mean.Rec = R_mean;
 res_mean.Sus = S_mean;
+res_mean.Exp = E_mean;
 
     function [x] = get_rv(y)
         shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;
@@ -139,7 +150,7 @@ res_mean.Sus = S_mean;
     end
 
     function [r] = get_kappa_res()
-        dr = s.kappa_res_delta_0+restrictions.delta*min([0:T],restrictions.at)/restrictions.at;
+        dr = s.kappa_res_delta_0+restrictions.delta*min([0:T],restrictions.at)/restrictions.at; %#ok<NBRAK>
         r = (1+dr.^s.kappa_res_alpha).*s.beta_res;
     end
 
