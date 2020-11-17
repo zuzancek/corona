@@ -43,9 +43,6 @@ gamma_pre = 1./T_pre_vec;
 gamma_asymp = 1./T_inf_asymp_vec;
 gamma_symp = 1./T_inf_symp_vec;
 zeta = 1./T_inf_novent_vec;
-delta_asymp = 1./(T_inf_asymp_vec+T_inc_vec-s.T_overlay);
-delta_symp = 1./(T_inf_symp_vec+T_inc_vec-s.T_overlay);
-delta_symp_novent = 1./(T_inf_novent_vec+T_inc_vec-s.T_overlay);
 
 S_vec = zeros(N,T+1);       S_vec(:,1) = St(t0);
 E_vec = zeros(N,T+1);       E_vec(:,1) = Et(t0);
@@ -71,8 +68,8 @@ for t=1:T
     % epidemiological part
     R_eff(:,t+1) = Rt.*kappa_mob(t).*kappa_res(t);
     dE_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
-        (Is_vec(:,t).*((1-lambda)*delta_symp+lambda*delta_symp_novent)+...
-        Ia_vec(:,t).*delta_asymp*(obs_ratio*(1-symp_ratio_obs)+(1-obs_ratio)/sigma));
+        (Is_vec(:,t).*((1-lambda)*gamma_symp+lambda*zeta)+...
+        Ia_vec(:,t).*gamma_asymp*(obs_ratio*(1-symp_ratio_obs)+(1-obs_ratio)/sigma));
     S_vec(:,t+1) = S_vec(:,t)-dE_in_vec(:,t);
     E_vec(:,t+1) = E_vec(:,t).*(1-gamma_lat)+dE_in_vec(:,t);
     Ia_vec(:,t+1) = Ia_vec(:,t)+gamma_lat.*E_vec(:,t)-eta.*gamma_pre.*Ia_vec(:,t)-(1-eta).*gamma_asymp.*Ia_vec(:,t);
