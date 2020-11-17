@@ -139,7 +139,6 @@ title('New infections (adjusted)');
 legend({'observed, raw','observed, smooth', 'hypothetical, raw','hypothetical,smooth'});
 grid on;
 
-%
 figure;
 plot(pos_test_ratio,'linewidth',1); hold on;
 plot(pos_test_ratio_smooth,'linewidth',1);
