@@ -58,6 +58,7 @@ s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.obs_ratio = 1/10;
+s.self_isolation_effect = 1-0.12;
 s.threshold = 0.05;
 s.scale_fact = 4;
 

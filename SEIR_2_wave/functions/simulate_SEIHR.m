@@ -2,6 +2,7 @@ function [res_mean] = simulate_SEIHR(T,Rt,mobility,restrictions,init,t0,s)
 
 % init values (observed)
 It = init.I;
+Et = init.E;
 St = init.S;
 Ht = init.H;
 Dt = init.D;
@@ -23,6 +24,7 @@ xi = s.xi;
 iota = s.iota;
 pop_size = s.pop_size;
 gamma_novent = s.gamma_novent;
+sigma = s.self_isolation_effect;
 
 % setup
 eta = obs_ratio*symp_ratio_obs;
@@ -43,6 +45,7 @@ S_vec = zeros(N,T+1);       S_vec(:,1) = St(t0);
 Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = (1-eta)*It(t0);
 Is_vec = zeros(N,T+1);      Is_vec(:,1) = eta*It(t0);
 Iobs_vec = zeros(N,T+1);    Iobs_vec(:,1) = Is_vec(:,1)+(1-symp_ratio_obs)*obs_ratio/(1-eta)*Ia_vec(:,1);
+Iunobs_vec = zeros(N,T+1);  Iunobs_vec(:,1) = Is_vec(:,1)+Ia_vec(:,1)-Iobs_vec(:,1);
 R_vec = zeros(N,T+1);
 H_vec = zeros(N,T+1);       H_vec(:,1) = Ht(t0);
 V_vec = zeros(N,T+1);       V_vec(:,1) = Vt(t0);
@@ -50,6 +53,7 @@ N_vec = zeros(N,T+1);       N_vec(:,1) = Ht(t0)-Vt(t0);
 C_vec = zeros(N,T+1);       C_vec(:,1) = N_vec(:,1)*iota;
 D_vec = zeros(N,T+1);       D_vec(:,1) = Dt(t0);
 dI_in_vec = zeros(N,T+1);   dI_in_vec(:,1) = Rt;
+dE_in_vec = zeros(N,T+1);   dE_in_vec(:,1) = Rt;
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt;
 
 idx = ones(N,1);
@@ -59,11 +63,14 @@ kappa_mob = get_kappa_mob();
 for t=1:T
     % epidemiological part
     R_eff(:,t+1) = Rt.*kappa_mob(t+1).*kappa_res(t+1);
-    dI_in_vec(:,t+1) = R_eff(:,t+1).*S_vec(:,t)/pop_size.*(Ia_vec(:,t).*delta_asymp+Is_vec(:,t).*((1-lambda)*delta_symp+lambda*delta_symp_novent));
+    dE_in_vec(:,t+1) = R_eff(:,t+1).*S_vec(:,t)/pop_size.*...
+        (Is_vec(:,t).*((1-lambda)*delta_symp+lambda*delta_symp_novent)+...
+        Ia_vec(:,t).*delta_asymp*(obs_ratio*(1-symp_ratio_obs)+(1-obs_ratio)/sigma));
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t+1);
     Ia_vec(:,t+1) = (1-gamma_asymp).*Ia_vec(:,t)+(1-eta)*dI_in_vec(:,t);
     Is_vec(:,t+1) = (1-(1-lambda)*gamma_symp-lambda*zeta).*Is_vec(:,t)+eta*dI_in_vec(:,t);
     Iobs_vec(:,t+1) = Is_vec(:,t+1)+(1-symp_ratio_obs)*obs_ratio/(1-eta)*Ia_vec(:,t+1);
+    Iunobs_vec(:,t+1) = Is_vec(:,t+1)+Ia_vec(:,t+1)-Iobs_vec(:,t+1);
     % clinical part
     N_vec(:,t+1) = lambda*zeta.*Is_vec(:,t)+N_vec(:,t).*(omega_novent.*(1-psi_novent)+(1-omega_novent).*(1-gamma_novent-xi));
     C_vec(:,t+1) = iota*N_vec(:,t+1);
@@ -99,7 +106,9 @@ C_mean = Ia_mean;
 V_mean = Ia_mean;
 N_mean = Ia_mean;
 R_mean = Ia_mean;
+S_mean = S_mean;
 for t = 1:T+1
+    S_mean(t) = mean(S_vec(:,t));
     Ia_mean(t) = mean(Ia_vec(:,t));
     Is_mean(t) = mean(Is_vec(:,t));
     Iobs_mean(t) = mean(Iobs_vec(:,t));
@@ -120,6 +129,7 @@ res_mean.Hosp_icu = C_mean;
 res_mean.Hosp_vent = V_mean;
 res_mean.Hosp = H_mean;
 res_mean.Rec = R_mean;
+res_mean.Sus = S_mean;
 
     function [x] = get_rv(y)
         shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;

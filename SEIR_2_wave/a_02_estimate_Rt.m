@@ -24,7 +24,7 @@ disp_to = t1-del-1;
 
 %% calculations
 [Rt,~,~,Xt] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num);
-[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant,s.pweight);
+[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth,Et_smooth] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant,s.pweight);
 % forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.SI,s.sim_num,s.quant);
 
 [Rt_adj,~,~,Xt_adj] = model_fnc(double(dI_inflow_adj),I0,s.pop_size,s.SI,s.sim_num);
@@ -74,5 +74,6 @@ dbsave(x,'results.csv');
 dIt = dI_inflow_smooth;
 St = tseries(t0+1:t1,St_smooth);
 It = tseries(t0+1:t1,It_smooth);
+Et = tseries(t0+1:t1,Et_smooth);
 Rt = tseries(t0+1:t1-del,Rt_smooth);
-save('results_Rt.mat','q_mat','Rt','dIt','It','St','s','Rt_last','t0','t1');
+save('results_Rt.mat','q_mat','Rt','dIt','It','Et','St','s','Rt_last','t0','t1');

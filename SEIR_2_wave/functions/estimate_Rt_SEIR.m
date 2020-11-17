@@ -1,6 +1,5 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,d,Et] = estimate_Rt_SEIR(dI_in,I0,pop_size,SI,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dI_in,I0,pop_size,SI,N,q_vec,varargin)
 
-d = 1;
 T = length(dI_in);
 T_inf.mean = 2.9; T_inf.std = SI.std;
 shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;

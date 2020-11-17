@@ -1,4 +1,4 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,d] = estimate_Rt_SIR(dI_inflow,I0,pop_size,SI,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SIR(dI_inflow,I0,pop_size,SI,N,q_vec,varargin)
 
 T = length(dI_inflow);
 shape = SI.mean*(SI.std)^2; scale = 1/(SI.std)^2;
@@ -84,7 +84,5 @@ else
     q_mat = [];
     x_mat = [];
 end
-
-d = 0;
 
 end
