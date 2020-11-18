@@ -24,7 +24,7 @@ disp_to = t1-del-1;
 
 %% calculations
 [Rt,~,~,Xt] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s);
-[Rt_smooth,q_mat,y,x_mat,Rt_last] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
+[Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
 
 [Rt_adj,~,~,Xt_adj] = model_fnc(double(resize(dI_inflow_adj,t0:t1)),I0,s);
 [Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(double(resize(dI_inflow_adj_smooth,t0:t1)),I0,s,s.quant);
@@ -70,6 +70,5 @@ Rt_vec_smooth = tseries(t0:t1-del,Rt_vec_smooth);
 x.Rt_smooth = Rt_vec_smooth;
 
 dbsave(x,'results.csv');
-Yt = y;
 Rt = tseries(t0+1:t1-del,Rt_smooth);
 save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1');

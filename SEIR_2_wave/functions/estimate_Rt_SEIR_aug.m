@@ -85,17 +85,6 @@ I_vec = Iu_vec+Io_vec;
 E_vec = E_vec(idx,:);
 X_vec = I_vec+E_vec;
 
-if ~isempty(varargin)
-    weights = varargin{1};
-    last_num = length(weights);
-    nn = size(Rt_vec(:,T),1);
-    weights_mat = repmat(weights,nn,1);
-    Rt_last = Rt_vec(:,T-last_num+1:T);
-    Rt_last = sum(Rt_last.*weights_mat,2);
-else
-    Rt_last = Rt_vec(:,T-1);
-end
-
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
     Iat(t) = mean(Ia_vec(:,t));
@@ -132,6 +121,17 @@ res.It = It;
 res.St = St;
 res.Et = Et;
 res.Xt = Xt;
+
+if ~isempty(varargin)
+    weights = varargin{1};
+    last_num = length(weights);
+    nn = size(Rt_vec(:,T),1);
+    weights_mat = repmat(weights,nn,1);
+    Rt_last = Rt_vec(:,T-last_num+1:T);
+    Rt_last = sum(Rt_last.*weights_mat,2);
+else
+    Rt_last = Rt_vec(:,T-1);
+end
 
     function [x] = get_rv(y)
         shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;
