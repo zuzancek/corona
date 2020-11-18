@@ -35,9 +35,7 @@ d = s.SI.mean+14;
 % I(t+1) = I(t)+R(t)*gamma*S(t)*I(t)/pop_size-gamma*I(t);
 % dI_inflow(t) = R(t)*gamma*S(t)*I(t)/pop_size;
 for t = 1:T
-   % gamma_vec = gamma_mat(:,t);
    Trec_vec = Trec_mat;%(:,t);
-   % Rt_vec(:,t) = pop_size.*dI_inflow(t)./(gamma_vec.*S_vec(:,t).*I_vec(:,t));
    Rt_vec(:,t) = pop_size.*dI_inflow(t).*Trec_vec./(S_vec(:,t).*I_vec(:,t));
    S_vec(:,t+1) = S_vec(:,t)-dI_inflow(t);
    dE_inflow(:,t) = Trec_mat./T_inf.mean.*dI_inflow(t); dE_outflow(:,t) = E_vec(:,t)./T_inc.mean;
