@@ -1,7 +1,9 @@
-function [res_mean] = simulate_SEIHR(T,Rt,mobility,restrictions,init,t0,s)
+function [res_mean,res_q] = simulate_SEIHR(T,Rt,mobility,restrictions,init,t0,s)
 
 % init values (observed)
-It = init.I;
+Iat = init.Ia;
+Ist = init.Is;
+Iut = init.Iu;
 Et = init.E;
 St = init.S;
 Ht = init.H;
@@ -16,7 +18,7 @@ T_inf_hosp = s.T_inf_hosp_vec;
 T_lat = s.T_lat;
 T_pre = s.T_pre;
 rho = s.obs_ratio;
-sigma = s.symp_ratio_obs;
+% sigma = s.symp_ratio_obs;
 theta = s.p_a_s;
 lambda = s.lambda;
 omega_novent = s.omega_novent; 
@@ -28,6 +30,7 @@ iota = s.iota;
 pop_size = s.pop_size;
 gamma_novent = s.gamma_novent;
 varsigma = s.self_isolation_effect;
+q_vec = s.q_vec;
 
 % setup
 N = length(Rt);
@@ -47,9 +50,9 @@ gamma_hosp = 1./T_inf_hosp_vec;
 
 S_vec = zeros(N,T+1);       S_vec(:,1) = St(t0);
 E_vec = zeros(N,T+1);       E_vec(:,1) = Et(t0);
-Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = rho*(1-sigma)*It(t0);
-Is_vec = zeros(N,T+1);      Is_vec(:,1) = rho*sigma*It(t0);
-Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = (1-rho)*It(t0);
+Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = Iat(t0); % rho*(1-sigma)*It(t0);
+Is_vec = zeros(N,T+1);      Is_vec(:,1) = Ist(t0); % rho*sigma*It(t0);
+Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = Iut(t0); % (1-rho)*It(t0);
 R_vec = zeros(N,T+1);
 H_vec = zeros(N,T+1);       H_vec(:,1) = Ht(t0);
 V_vec = zeros(N,T+1);       V_vec(:,1) = Vt(t0);
@@ -101,6 +104,7 @@ Io_vec = Ia_vec+Is_vec;
 dI_in_vec = dI_in_vec(idx,:);
 N_vec = N_vec(idx,:);
 C_vec = iota*N_vec;
+N_vec = N_vec-C_vec;
 C_vec = C_vec(idx,:);
 V_vec = V_vec(idx,:);
 H_vec = H_vec(idx,:);
@@ -134,13 +138,13 @@ for t = 1:T+1
     C_mean(t) = mean(C_vec(:,t));
     R_mean(t) = mean(R_vec(:,t));
 end
-
+% outputs
 res_mean.Inf_asymp = Ia_mean;
 res_mean.Inf_symp = Is_mean;
 res_mean.Inf_obs = Io_mean;
 res_mean.Inf_unobs = Iu_mean;
 res_mean.dInf = dI_mean;
-res_mean.Hosp_normal = N_mean-C_mean;
+res_mean.Hosp_normal = N_mean;
 res_mean.Hosp_icu = C_mean;
 res_mean.Hosp_vent = V_mean;
 res_mean.Hosp = H_mean;
@@ -148,11 +152,34 @@ res_mean.Rec = R_mean;
 res_mean.Sus = S_mean;
 res_mean.Exp = E_mean;
 
+% quantiles & distribution
+M = length(q_vec);
+res_q.Inf_asymp = get_quant(Ia_vec);
+res_q.Inf_symp = get_quant(Is_vec);
+res_q.Inf_obs = get_quant(Io_vec);
+res_q.Inf_unobs = get_quant(Iu_vec);
+res_q.dInf = get_quant(dI_in_vec);
+res_q.Hosp_normal = get_quant(N_vec);
+res_q.Hosp_icu = get_quant(C_vec);
+res_q.Hosp_vent = get_quant(V_vec);
+res_q.Hosp = get_quant(H_vec);
+res_q.Rec = get_quant(R_vec);
+res_q.Sus = get_quant(S_vec);
+res_q.Exp = get_quant(E_vec);
+
+% helpers
     function [x] = get_rv(y)
         shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;
         shape0_vec = shape0*ones(1*N,1);
         scale0_vec = scale0*ones(1*N,1);
         x = reshape(gamrnd(shape0_vec,scale0_vec),N,1);
+    end
+
+    function [x] = get_quant(vec)
+        x = zeros(M,T);
+        for j = 1:M
+            x(j,:) = quantile(vec,q_vec(j),1);
+        end
     end
 
     function [r] = get_kappa_res()
