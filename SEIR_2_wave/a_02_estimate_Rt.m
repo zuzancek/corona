@@ -23,6 +23,9 @@ end
 disp_to = t1-del-1;
 
 %% calculations
+s.obs_ratio_adj = 1/10*s.T_inf_unobs.mean/((1-s.symp_ratio_obs)*s.T_inf_asymp.mean+...
+    s.symp_ratio_obs*((1-s.lambda)*s.T_inf_symp.mean+s.lambda*s.T_inf_hosp.mean));
+% s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean*s.lambda+(1-s.lambda)*s.T_inf_hosp.mean);
 [Rt,~,~,Xt] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s);
 [Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
 
@@ -72,3 +75,26 @@ x.Rt_smooth = Rt_vec_smooth;
 dbsave(x,'results.csv');
 Rt = tseries(t0+1:t1-del,Rt_smooth);
 save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1');
+
+%% optional: statistics
+% model training
+if s.model_seir
+    tm0 = dd(2020,9,15);
+    tm1 = t1;
+    % tune theta
+    x = tseries(t0:t1-1,Yt.Ist./Yt.Iat);
+    x_tar = s.symp_ratio_obs/(1-s.symp_ratio_obs);
+    dx = 100*(x./x_tar-1);
+    figure; 
+    plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
+    ylabel('%');
+    title('I_{symp}/I_{asymp} (%)');
+    % tune obs_ratio
+    x = tseries(t0:t1-1,Yt.Iot./Yt.It);
+    x_tar = s.obs_ratio;
+    dx = 100*(x./x_tar-1);
+    figure; 
+    plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
+    ylabel('%');
+    title('I_{obs}/I (%)');
+end
