@@ -23,8 +23,7 @@ end
 disp_to = t1-del-1;
 
 %% calculations
-s.obs_ratio_adj = 1/10*s.T_inf_unobs.mean/((1-s.symp_ratio_obs)*s.T_inf_asymp.mean+...
-    s.symp_ratio_obs*((1-s.lambda)*s.T_inf_symp.mean+s.lambda*s.T_inf_hosp.mean));
+s = setparam();
 % s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean*s.lambda+(1-s.lambda)*s.T_inf_hosp.mean);
 [Rt,~,~,Xt] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s);
 [Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
@@ -91,7 +90,7 @@ if s.model_seir
     title('I_{symp}/I_{asymp} (%)');
     % tune obs_ratio
     x = tseries(t0:t1-1,Yt.Iot./Yt.It);
-    x_tar = s.obs_ratio;
+    x_tar = s.obs_ratio_tar;
     dx = 100*(x./x_tar-1);
     figure; 
     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;

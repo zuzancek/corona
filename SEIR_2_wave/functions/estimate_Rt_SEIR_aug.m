@@ -12,7 +12,7 @@ T_inf_symp = s.T_inf_symp;
 T_inf_unobs = s.T_inf_unobs;
 T_inf_hosp = s.T_inf_hosp;
 
-rho = s.obs_ratio_adj;
+rho = s.obs_ratio;
 sigma = s.symp_ratio_obs;
 theta = s.p_a_s;
 lambda = s.lambda;

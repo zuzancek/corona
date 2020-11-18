@@ -22,13 +22,13 @@ s.T_inf_symp.mean = 4.5;   s.T_inf_symp.std = 0.62;
 % infectious period - unobserved cases
 s.T_inf_unobs.mean = 3.75;   s.T_inf_unobs.std = 0.62;
 % days prior to hospital admission (from onset)
-s.T_inf_hosp.mean = 7+s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
+s.T_inf_hosp.mean = 7+0*s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_hosp.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
 % share of symptomatic patients needed to be hospitalized 
 s.lambda = 0.0743; % <-- test here higher rate
-s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean*s.lambda+(1-s.lambda)*s.T_inf_hosp.mean);
+s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
 % ICU rate
 s.iota = 0.1375;
 % discharge rate (non-ventilation case)
@@ -63,8 +63,11 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
-s.obs_ratio_adj = 1/10*s.T_inf_asymp.mean/(s.T_inf_symp.mean*s.lambda+(1-s.lambda)*s.T_inf_hosp.mean);
-s.obs_ratio = 1/10;
+s.obs_ratio_tar = 1/10;
+s.obs_ratio = s.obs_ratio_tar*s.T_inf_unobs.mean/((1-s.symp_ratio_obs)*s.T_inf_asymp.mean+...
+    s.symp_ratio_obs*((1-s.lambda)*s.T_inf_symp.mean+s.lambda*s.T_inf_hosp.mean));
+% s.obs_ratio = s.obs_ratio_tar*s.T_inf_unobs.mean/((1-s.symp_ratio_obs)*s.T_inf_asymp.mean+...
+%     s.symp_ratio_obs*s.T_inf_symp.mean);
 s.self_isolation_effect = 1-0.12;
 s.threshold = 0.05;
 s.scale_fact = 4;
