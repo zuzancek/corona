@@ -66,7 +66,7 @@ for t = 1:T
 end
 Rt = Rt(1:end-1);
 
-if (nargin)>5
+if (nargin)>3
     M = length(q_vec);
     q_mat = zeros(M,T);
     for j = 1:M

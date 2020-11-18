@@ -1,6 +1,6 @@
 function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SIR(dI_inflow,I0,s,q_vec,varargin)
 
-N = s.N;
+N = s.sim_num;
 pop_size = s.pop_size;
 T = length(dI_inflow);
 shape = s.SI.mean*(s.std)^2; scale = 1/(s.SI.std)^2;
@@ -72,7 +72,7 @@ for t = 1:T
     Et(t) = mean(E_vec(:,t));
 end
 
-if (nargin)>5
+if (nargin)>3
     M = length(q_vec);
     q_mat = zeros(M,T);
     for j = 1:M
