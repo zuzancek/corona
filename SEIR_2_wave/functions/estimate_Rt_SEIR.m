@@ -1,18 +1,20 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dI_in,I0,pop_size,SI,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dI_in,I0,s,q_vec,varargin)
 
+N = s.N;
 T = length(dI_in);
-T_inf.mean = 2.9; T_inf.std = SI.std;
+T_inf = s.T_inf;
 shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;
 shapeE_vec = shapeE*ones(1*N,1);
 scaleE_vec = scaleE*ones(1*N,1);
 T_inf_vec = reshape(gamrnd(shapeE_vec,scaleE_vec),N,1); %#ok<*NASGU>
-T_inc.mean = 5.1; T_inc.std = SI.std;
+T_inc = s.T_inc;
 shapeI = T_inc.mean*(T_inc.std)^2; scaleI = 1/(T_inc.std)^2;
 shapeI_vec = shapeI*ones(1*N,1);
 scaleI_vec = scaleI*ones(1*N,1);
 T_inc_vec = reshape(gamrnd(shapeI_vec,scaleI_vec),N,1);
 
 % set initial values
+pop_size = s.pop_size;
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
 E_vec = zeros(N,T);

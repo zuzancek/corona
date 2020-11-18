@@ -1,17 +1,19 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SIR(dI_inflow,I0,pop_size,SI,N,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SIR(dI_inflow,I0,s,q_vec,varargin)
 
+N = s.N;
+pop_size = s.pop_size;
 T = length(dI_inflow);
-shape = SI.mean*(SI.std)^2; scale = 1/(SI.std)^2;
+shape = s.SI.mean*(s.std)^2; scale = 1/(s.SI.std)^2;
 shape_vec = shape*ones(1*N,1);
 scale_vec = scale*ones(1*N,1);
 Trec_mat = reshape(gamrnd(shape_vec,scale_vec),N,1);
 
-T_inf.mean = 2.9; T_inf.std = SI.std;
+T_inf = s.T_inf;
 shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;
 shapeE_vec = shapeE*ones(1*N,1);
 scaleE_vec = scaleE*ones(1*N,1);
 Tinf_mat = reshape(gamrnd(shapeE_vec,scaleE_vec),N,1); %#ok<*NASGU>
-T_inc.mean = 5.1; T_inc.std = SI.std;
+T_inc = s.T_inc;
 shapeI = T_inc.mean*(T_inc.std)^2; scaleI = 1/(T_inc.std)^2;
 shapeI_vec = shapeI*ones(1*N,1);
 scaleI_vec = scaleI*ones(1*N,1);
@@ -27,7 +29,7 @@ dE_inflow = zeros(N,T);
 dE_outflow = zeros(N,T);
 Rt = zeros(T,1); It = Rt; Xt = Rt;Et = Rt;St = Rt;
 idx = ones(N,1);
-d = SI.mean+14;
+d = s.mean+14;
 
 % S(t+1) = S(t)-R(t)*gamma*S(t)*I(t)/pop_size;
 % I(t+1) = I(t)+R(t)*gamma*S(t)*I(t)/pop_size-gamma*I(t);

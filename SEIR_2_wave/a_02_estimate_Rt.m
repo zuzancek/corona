@@ -23,12 +23,11 @@ disp_to = t1-del-1;
 
 
 %% calculations
-[Rt,~,~,Xt] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num);
-[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth,Et_smooth] = model_fnc(double(dI_inflow_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant,s.pweight);
-% forecast_Rt(Rt_smooth,double(dI_inflow_smooth), 50,I0,s.pop_size,s.SI,s.sim_num,s.quant);
+[Rt,~,~,Xt] = model_fnc(double(dI_inflow_smooth),I0,s);
+[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth,Et_smooth] = model_fnc(double(dI_inflow_smooth),I0,s,s.quant,s.pweight);
 
-[Rt_adj,~,~,Xt_adj] = model_fnc(double(dI_inflow_adj),I0,s.pop_size,s.SI,s.sim_num);
-[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = model_fnc(double(dI_inflow_adj_smooth),I0,s.pop_size,s.SI,s.sim_num,s.quant);
+[Rt_adj,~,~,Xt_adj] = model_fnc(double(dI_inflow_adj),I0,s);
+[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = model_fnc(double(dI_inflow_adj_smooth),I0,s,s.quant);
 
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
