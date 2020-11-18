@@ -7,10 +7,12 @@ indiff = true;
 cut = 0;
 dt = 1;
 
+
 %% load data
 load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
     'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1');
 tt0 = t0+dt;
+t1 = dd(2020,11,14);
 
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR_aug;
@@ -21,13 +23,12 @@ else
 end
 disp_to = t1-del-1;
 
-
 %% calculations
-[Rt,~,~,Xt] = model_fnc(double(dI_inflow_smooth),I0,s);
-[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth,Et_smooth] = model_fnc(double(dI_inflow_smooth),I0,s,s.quant,s.pweight);
+[Rt,~,~,Xt] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s);
+[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth,Et_smooth] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
 
-[Rt_adj,~,~,Xt_adj] = model_fnc(double(dI_inflow_adj),I0,s);
-[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = model_fnc(double(dI_inflow_adj_smooth),I0,s,s.quant);
+[Rt_adj,~,~,Xt_adj] = model_fnc(double(resize(dI_inflow_adj,t0:t1)),I0,s);
+[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = model_fnc(double(resize(dI_inflow_adj_smooth,t0:t1)),I0,s,s.quant);
 
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
