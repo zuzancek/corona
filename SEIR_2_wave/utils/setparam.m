@@ -14,15 +14,18 @@ s.T_pre.mean = 2;           s.T_pre.std = s.SI.std;
 s.T_inc.mean = 5.2;         s.T_inc.std = s.SI.std;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre; s.T_lat.std  = s.SI.std;
-% infectious period - asymptomatic cases
+% infectious period - observed asymptomatic cases
 s.T_inf_asymp.mean = 3.5;   s.T_inf_asymp.std = 0.62;
-% infectious period - symptomatic cases
+% infectious period - observed symptomatic cases
 s.T_inf_symp.mean = 4.5;   s.T_inf_symp.std = 0.62;
+% infectious period - unobserved cases
+s.T_inf_unobs.mean = 3.75;   s.T_inf_unobs.std = 0.62;
 % days prior to hospital admission (from onset)
-s.T_inf_novent.mean = 7+s.T_pre;  s.T_inf_novent.std = 0.62;
+s.T_inf_hosp.mean = 7+s.T_pre;  s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_novent.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
+s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/s.T_inf_symp.mean;
 % share of symptomatic patients needed to be hospitalized 
 s.lambda = 0.0743; % <-- test here higher rate
 % ICU rate
