@@ -1,44 +1,86 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR_aug(dI_in,I0,s,q_vec,varargin)
+function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,varargin)
 
-T = length(dI_in);
-T_inf.mean = 2.9; T_inf.std = s.std;
-shapeE = T_inf.mean*(T_inf.std)^2; scaleE = 1/(T_inf.std)^2;
-shapeE_vec = shapeE*ones(1*N,1);
-scaleE_vec = scaleE*ones(1*N,1);
-T_inf_vec = reshape(gamrnd(shapeE_vec,scaleE_vec),N,1); %#ok<*NASGU>
-T_inc.mean = 5.1; T_inc.std = s.std;
-shapeI = T_inc.mean*(T_inc.std)^2; scaleI = 1/(T_inc.std)^2;
-shapeI_vec = shapeI*ones(1*N,1);
-scaleI_vec = scaleI*ones(1*N,1);
-T_inc_vec = reshape(gamrnd(shapeI_vec,scaleI_vec),N,1);
+% initialization
+T = length(z);
+N = s.N;
+pop_size = s.pop_size;
+
+T_lat = s.T_lat;
+T_pre = s.T_pre;
+T_inf_asymp = s.T_inf_asymp;
+T_inf_symp = s.T_inf_symp;
+T_inf_unobs = s.T_inf_unobs;
+T_inf_hosp = s.T_inf_hosp_vec;
+
+rho = s.obs_ratio;
+sigma = s.symp_ratio_obs;
+theta = s.p_a_s;
+lambda = s.lambda;
+
+T_inf_asymp_vec = get_rv(T_inf_asymp);
+T_inf_symp_vec = get_rv(T_inf_symp);
+T_inf_unobs_vec = get_rv(T_inf_unobs);
+T_inf_hosp_vec = get_rv(T_inf_hosp);
+T_lat_vec = get_rv(T_lat);
+T_pre_vec = get_rv(T_pre);
+gamma_lat = 1./T_lat_vec;
+gamma_pre = 1./T_pre_vec;
+gamma_asymp = 1./T_inf_asymp_vec;
+gamma_symp = 1./T_inf_symp_vec;
+gamma_unobs = 1./T_inf_unobs_vec;
+gamma_hosp = 1./T_inf_hosp_vec;
 
 % set initial values
-S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
-I_vec = zeros(N,T); I_vec(:,1) = I0;
-E_vec = zeros(N,T);
+S_vec = zeros(N,T);       S_vec(:,1) = pop_size-I0;
+E_vec = zeros(N,T);       E_vec(:,1) = 0; % first few periods are irrelevant
+Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho*(1-sigma)*I0;
+Is_vec = zeros(N,T);      Is_vec(:,1) = rho*sigma*I0;
+Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho)*I0;
 Rt_vec = zeros(N,T);
-dE_in = zeros(N,T);
-Rt = zeros(T,1); It = Rt; Et = Rt; St = Rt; Xt = Rt;
+
+Rt = zeros(T,1); 
+Iat = Rt; It = Rt; Iot = Rt; Iut = Rt; Ist = Rt; Et = Rt; St = Rt; Xt = Rt;
 idx = ones(N,1);
 
-% S(t+1) = S(t)-R(t)/T_inf*S(t)*I(t)/pop_size;
-% E(t+1) = E(t)+R(t)*gamma*S(t)*I(t)/pop_size-E(t)/T_inc;
-% I(t+1) = I(t)+E(t)/T_inc-I(t)/T_inf;
-% dI_in(t) = E(t)/T_inc;
-% dE_in(t) = R(t)/T_inf*S(t)*I(t)/pop_size
+% model
+% S(t+1) = S(t)-F(t);
+% E(t+1) = E(t)+F(t)-E(t)/T_lat;
+% Iu(t+1) = Iu(t)+(1-rho)*E(t)/T_lat-Iu(t)/T_inf_u;
+% Ia(t+1) = Ia(t)+(1-rho)*E(t)/T_lat-[theta/T_pre-(1-theta)/T_inf_a]*Ia(t);
+% Ia(t+1) = Ia(t)+rho*E(t)/T_lat-[theta/T_pre-(1-theta)/T_inf_a]*Ia(t);
+% Is(t+1) = Is(t)+theta*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
+%
+% input data
+% z(t) = rho*E(t)/T_lat+theta*Ia(t)/T_pre
+% z(t+1) = rho*E(t+1)/T_lat+theta*Ia(t+1)/T_pre
+% 
+% reprod.number R(t)
+% F(t) = R(t)*S(t)/pop_size*(Iu(t)/(varsigma*T_inf_u)+Ia(t)/T_inf_a+
+%   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
 for t = 1:T-1
-    E_vec(:,t) = dI_in(t).*T_inc_vec;
-    E_vec(:,t+1) = dI_in(t+1).*T_inc_vec;
-    I_vec(:,t+1) = (1-1./T_inf_vec).*I_vec(:,t)+dI_in(t);
-    dE_in(:,t) = E_vec(:,t+1)-(1-1./T_inc_vec).*E_vec(:,t);
-    S_vec(:,t+1) = S_vec(:,t)-dE_in(:,t);
-    Rt_vec(:,t) = pop_size.*dE_in(:,t).*T_inf_vec./(S_vec(:,t).*I_vec(:,t));
-    idx = idx & I_vec(:,t)>0 & E_vec(:,t)>0;
+    E_vec(:,t) = (z(t)-theta*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho;
+    Is_vec(:,t+1) = Is_vec(:,t)+theta*Ia_vec(:,t).*gamma_pre...
+        -(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
+    Ia_vec(:,t+1) = Ia_vec(:,t)+rho*E_vec(:,t).*gamma_lat...
+        -(theta.*gamma_pre+(1-theta).*gamma_asymp).*Ia_vec(:,t);
+    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho)*E_vec(:,t).*gamma_lat...
+        -gamma_unobs.*Iu_vec(:,t);
+    E_vec(:,t+1) = (z(t+1)-theta*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho;
+    F = E_vec(:,t+1)-(1-gamma_lat).*E_vec(:,t);
+    S_vec(:,t+1) = S_vec(:,t)-F;
+    I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp.*Ia_vec(:,t)...
+       +(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Ia_vec(:,t);
+    Rt_vec(:,t) = pop_size./S_vec(:,t)*F./I;
+    idx = idx & Is_vec(:,t)>0 & Ia_vec(:,t)>0 & Iu_vec(:,t)> 0 & E_vec(:,t)>0;
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
 S_vec = S_vec(idx,:);
-I_vec = I_vec(idx,:);
+Ia_vec = Ia_vec(idx,:);
+Is_vec = Is_vec(idx,:);
+Iu_vec = Iu_vec(idx,:);
+Io_vec = Ia_vec+Is_vec;
+I_vec = Iu_vec+Io_vec;
 E_vec = E_vec(idx,:);
 X_vec = I_vec+E_vec;
 
@@ -55,6 +97,10 @@ end
 
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
+    Iat(t) = mean(Ia_vec(:,t));
+    Ist(t) = mean(Is_vec(:,t));
+    Iut(t) = mean(Iu_vec(:,t));
+    Iot(t) = mean(Io_vec(:,t));
     It(t) = mean(I_vec(:,t));
     St(t) = mean(S_vec(:,t));
     Et(t) = mean(E_vec(:,t));
@@ -77,4 +123,10 @@ else
     x_mat = [];
 end
 
+    function [x] = get_rv(y)
+        shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;
+        shape0_vec = shape0*ones(1*N,1);
+        scale0_vec = scale0*ones(1*N,1);
+        x = reshape(gamrnd(shape0_vec,scale0_vec),N,1);
+    end
 end
