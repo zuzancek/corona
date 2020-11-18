@@ -13,7 +13,7 @@ load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
 tt0 = t0+dt;
 
 if s.model_seir
-    model_fnc = @estimate_Rt_SEIR;
+    model_fnc = @estimate_Rt_SEIR_aug;
     del = 1;
 else
     model_fnc = @estimate_Rt_SIR;

@@ -2,7 +2,7 @@ function [Rt,q_mat,Iot,Xt,x_mat,Rt_last,St,Et,It] = estimate_Rt_SEIR_aug(z,I0,s,
 
 % initialization
 T = length(z);
-N = s.N;
+N = s.sim_num;
 pop_size = s.pop_size;
 
 T_lat = s.T_lat;
@@ -10,7 +10,7 @@ T_pre = s.T_pre;
 T_inf_asymp = s.T_inf_asymp;
 T_inf_symp = s.T_inf_symp;
 T_inf_unobs = s.T_inf_unobs;
-T_inf_hosp = s.T_inf_hosp_vec;
+T_inf_hosp = s.T_inf_hosp;
 
 rho = s.obs_ratio;
 sigma = s.symp_ratio_obs;
@@ -70,8 +70,8 @@ for t = 1:T-1
     F = E_vec(:,t+1)-(1-gamma_lat).*E_vec(:,t);
     S_vec(:,t+1) = S_vec(:,t)-F;
     I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp.*Ia_vec(:,t)...
-       +(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Ia_vec(:,t);
-    Rt_vec(:,t) = pop_size./S_vec(:,t)*F./I;
+       +(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
+    Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
     idx = idx & Is_vec(:,t)>0 & Ia_vec(:,t)>0 & Iu_vec(:,t)> 0 & E_vec(:,t)>0;
 end
 idx = find(idx>0);
