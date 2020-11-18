@@ -7,7 +7,6 @@ indiff = true;
 cut = 0;
 dt = 1;
 
-
 %% load data
 load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
     'pos_test_ratio','pos_test_ratio_smooth','I0','mob','s','t0','t1');
