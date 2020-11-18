@@ -1,4 +1,4 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR(dI_in,I0,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR(dI_in,I0,s,q_vec,varargin)
 
 N = s.sim_num;
 T = length(dI_in);
@@ -65,6 +65,11 @@ for t = 1:T
     Xt(t) = mean(X_vec(:,t));
 end
 Rt = Rt(1:end-1);
+
+res.It = It;
+res.St = St;
+res.Et = Et;
+res.Xt = Xt;
 
 if (nargin)>3
     M = length(q_vec);

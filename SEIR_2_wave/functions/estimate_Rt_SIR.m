@@ -1,4 +1,4 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SIR(dI_inflow,I0,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SIR(dI_inflow,I0,s,q_vec,varargin)
 
 N = s.sim_num;
 pop_size = s.pop_size;
@@ -69,6 +69,12 @@ for t = 1:T
     Xt(t) = mean(X_vec(:,t));
     Et(t) = mean(E_vec(:,t));
 end
+
+res.It = It;
+res.Iot = It*s.obs_ratio;
+res.St = St;
+res.Xt = Xt;
+res.Et = Et;
 
 if (nargin)>3
     M = length(q_vec);

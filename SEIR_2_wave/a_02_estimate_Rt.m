@@ -25,10 +25,10 @@ disp_to = t1-del-1;
 
 %% calculations
 [Rt,~,~,Xt] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s);
-[Rt_smooth,q_mat,It_smooth,Xt_smooth,x_mat,Rt_last,St_smooth,Et_smooth] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
+[Rt_smooth,q_mat,y,x_mat,Rt_last] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
 
 [Rt_adj,~,~,Xt_adj] = model_fnc(double(resize(dI_inflow_adj,t0:t1)),I0,s);
-[Rt_adj_smooth,q_mat_adj,~,Xt_adj_smooth,x_mat_adj] = model_fnc(double(resize(dI_inflow_adj_smooth,t0:t1)),I0,s,s.quant);
+[Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(double(resize(dI_inflow_adj_smooth,t0:t1)),I0,s,s.quant);
 
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
@@ -71,9 +71,6 @@ Rt_vec_smooth = tseries(t0:t1-del,Rt_vec_smooth);
 x.Rt_smooth = Rt_vec_smooth;
 
 dbsave(x,'results.csv');
-dIt = dI_inflow_smooth;
-St = tseries(t0+1:t1,St_smooth);
-It = tseries(t0+1:t1,It_smooth);
-Et = tseries(t0+1:t1,Et_smooth);
+Yt = y;
 Rt = tseries(t0+1:t1-del,Rt_smooth);
-save('results_Rt.mat','q_mat','Rt','dIt','It','Et','St','s','Rt_last','t0','t1');
+save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1');

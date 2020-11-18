@@ -1,4 +1,4 @@
-function [Rt,q_mat,Iot,Xt,x_mat,Rt_last,St,Et,It] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,varargin)
 
 % initialization
 T = length(z);
@@ -123,6 +123,15 @@ else
     q_mat = [];
     x_mat = [];
 end
+
+res.Iat = Iat;
+res.Ist = Ist;
+res.Iut = Iut;
+res.Iot = Iot;
+res.It = It;
+res.St = St;
+res.Et = Et;
+res.Xt = Xt;
 
     function [x] = get_rv(y)
         shape0 = y.mean*(y.std)^2; scale0 = 1/(y.std)^2;
