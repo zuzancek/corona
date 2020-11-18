@@ -23,9 +23,11 @@ dE_in = zeros(N,T);
 Rt = zeros(T,1); It = Rt; Et = Rt; St = Rt; Xt = Rt;
 idx = ones(N,1);
 
+% model
 % S(t+1) = S(t)-R(t)/T_inf*S(t)*I(t)/pop_size;
 % E(t+1) = E(t)+R(t)*gamma*S(t)*I(t)/pop_size-E(t)/T_inc;
 % I(t+1) = I(t)+E(t)/T_inc-I(t)/T_inf;
+% procedure
 % dI_in(t) = E(t)/T_inc;
 % dE_in(t) = R(t)/T_inf*S(t)*I(t)/pop_size
 for t = 1:T-1

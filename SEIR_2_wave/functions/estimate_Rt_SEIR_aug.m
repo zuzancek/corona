@@ -1,4 +1,4 @@
-function [Rt,q_mat,It,Xt,x_mat,Rt_last,St,Et] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,varargin)
+function [Rt,q_mat,Iot,Xt,x_mat,Rt_last,St,Et,It] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,varargin)
 
 % initialization
 T = length(z);
@@ -57,6 +57,7 @@ idx = ones(N,1);
 % reprod.number R(t)
 % F(t) = R(t)*S(t)/pop_size*(Iu(t)/(varsigma*T_inf_u)+Ia(t)/T_inf_a+
 %   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
+
 for t = 1:T-1
     E_vec(:,t) = (z(t)-theta*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho;
     Is_vec(:,t+1) = Is_vec(:,t)+theta*Ia_vec(:,t).*gamma_pre...
