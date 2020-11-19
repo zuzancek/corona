@@ -5,6 +5,8 @@ s.pop_size = 5443120;
 s.sim_num = 10^4;
 s.T = 200;
 s.model_seir = true;
+s.tests_min = 4000;
+s.wave_2_from = dd(2020,9,1);
 
 % serial interval
 s.SI.mean = 6.5;            s.SI.std = 0.62;
@@ -73,6 +75,7 @@ s.threshold = 0.05;
 s.scale_fact = 4;
 
 s.smooth_width = 7;
+s.smooth_width_hosp = 5;
 s.smooth_type = 5;
 s.smooth_ends = 1;
 

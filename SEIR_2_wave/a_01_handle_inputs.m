@@ -3,6 +3,7 @@ initialize;
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
+as = dbload('data/AS.csv');
 
 s = setparam();
 disp_from = dd(2020,4,1);
@@ -13,6 +14,7 @@ indiff = true;
 cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
+t_tests = dd(2020,10,15);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
@@ -23,36 +25,27 @@ h_t1 = enddate(hosp.ICU);
 
 % epidemiology data
 dI_inflow = resize(x.NewCases,tt0:t1);
-dI_inflow_smooth = smooth_series(double(dI_inflow),s.smooth_width,...
+dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
-
-dI_inflow_smooth = 0*dI_inflow+dI_inflow_smooth;
 
 pos_test_ratio = x.NewCases./x.Tests;
-pos_test_ratio_smooth = smooth_series(double(pos_test_ratio),s.smooth_width,...
+pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
-[dI_inflow_adj_smooth,dI_inflow_adj] = adjust_series(double(dI_inflow),s.smooth_width,...
-    s.smooth_type,s.smooth_ends,s.scale_fact,s.threshold,double(resize(pos_test_ratio,tt0:t1)));
-dI_inflow_adj = 0*dI_inflow+dI_inflow_adj;
-dI_inflow_adj_smooth = 0*dI_inflow+dI_inflow_adj_smooth;
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 
 % clinical
 hospit = hosp.Hospitalizations;
-hospit_smooth = 0*hospit+smooth_series(double(hospit),5,...
-    s.smooth_type,s.smooth_ends);
+hospit_smooth = smooth_series(hospit,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 icu = hosp.ICU;
-icu_smooth = 0*resize(icu,h_t00:h_t1)+smooth_series(icu(h_t00:h_t1),5,...
-    s.smooth_type,s.smooth_ends);
+icu_smooth = smooth_series(resize(icu,h_t00:h_t1),s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 vent = hosp.Ventilation;
-vent_smooth = 0*vent+smooth_series(double(vent),5,...
-    s.smooth_type,s.smooth_ends);
+vent_smooth = smooth_series(vent,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 death = resize(x.Deaths,h_t0:h_t1);
-death_smooth = 0*death+smooth_series(double(death),5,...
-    s.smooth_type,s.smooth_ends);
+death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
 %% calculations
-pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
+[obs_ratio_smooth,obs_ratio,dI_inflow_adj_smooth,dI_inflow_adj] = adjust_observed_ratio(...
+    pos_test_ratio_smooth,dI_inflow_smooth,s,t_tests);
 
 %% plotting stuff
 % clinical statistics
@@ -132,18 +125,25 @@ legend({'observed','adjusted '});
 grid on;
 
 figure;
-plot(dI_inflow,'linewidth',1);hold on;
+plot(dI_inflow,'linewidth',1,'linestyle','-.');hold on;
 plot(dI_inflow_smooth,'linewidth',2);hold on;
-plot(dI_inflow_adj,'linewidth',1,'linestyle','--');hold on;
-plot(dI_inflow_adj_smooth,'linewidth',2,'linestyle','--');hold on;
+plot(dI_inflow_adj,'linewidth',1,'linestyle','-.');hold on;
+plot(dI_inflow_adj_smooth,'linewidth',2);hold on;
 title('New infections (adjusted)');
 legend({'observed, raw','observed, smooth', 'hypothetical, raw','hypothetical,smooth'});
 grid on;
 
 figure;
+subplot(2,1,1)
 plot(pos_test_ratio,'linewidth',1); hold on;
 plot(pos_test_ratio_smooth,'linewidth',1);
 title('Positive tests ratio');
+legend({'raw','smooth'});
+grid on;
+subplot(2,1,2)
+plot(obs_ratio,'linewidth',1); hold on;
+plot(obs_ratio_smooth,'linewidth',1);
+title('Hypothetical observed ratio');
 legend({'raw','smooth'});
 grid on;
 
