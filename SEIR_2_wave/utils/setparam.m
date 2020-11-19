@@ -22,7 +22,7 @@ s.T_inf_symp.mean = 4.5;   s.T_inf_symp.std = 0.62;
 % infectious period - unobserved cases
 s.T_inf_unobs.mean = 3.75;   s.T_inf_unobs.std = 0.62;
 % days prior to hospital admission (from onset)
-s.T_inf_hosp.mean = 7+0*s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
+s.T_inf_hosp.mean = 5.5+0*s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_hosp.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
