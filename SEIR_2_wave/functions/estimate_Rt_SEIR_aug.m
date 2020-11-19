@@ -1,4 +1,4 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,rh,varargin)
 
 % initialization
 T = length(z);
@@ -12,7 +12,11 @@ T_inf_symp = s.T_inf_symp;
 T_inf_unobs = s.T_inf_unobs;
 T_inf_hosp = s.T_inf_hosp;
 
-rho = s.obs_ratio;
+if nargin<5
+    rho = zeros(T,1)+s.obs_ratio;
+else
+    rho = rh;
+end
 sigma = s.symp_ratio_obs;
 theta = s.p_a_s;
 lambda = s.lambda;
@@ -33,9 +37,9 @@ gamma_hosp = 1./T_inf_hosp_vec;
 % set initial values
 S_vec = zeros(N,T);       S_vec(:,1) = pop_size-I0;
 E_vec = zeros(N,T);       E_vec(:,1) = 0; % first few periods are irrelevant
-Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho*(1-sigma)*I0;
-Is_vec = zeros(N,T);      Is_vec(:,1) = rho*sigma*I0;
-Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho)*I0;
+Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho(1)*(1-sigma)*I0;
+Is_vec = zeros(N,T);      Is_vec(:,1) = rho(1)*sigma*I0;
+Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho(1))*I0;
 Rt_vec = zeros(N,T);
 
 Rt = zeros(T,1); 
@@ -59,14 +63,14 @@ idx = ones(N,1);
 %   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
 
 for t = 1:T-1
-    E_vec(:,t) = (z(t)-theta*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho;
+    E_vec(:,t) = (z(t)-theta*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho(t);
     Is_vec(:,t+1) = Is_vec(:,t)+theta*Ia_vec(:,t).*gamma_pre...
         -(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
-    Ia_vec(:,t+1) = Ia_vec(:,t)+rho*E_vec(:,t).*gamma_lat...
+    Ia_vec(:,t+1) = Ia_vec(:,t)+rho(t)*E_vec(:,t).*gamma_lat...
         -(theta.*gamma_pre+(1-theta).*gamma_asymp).*Ia_vec(:,t);
-    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho)*E_vec(:,t).*gamma_lat...
+    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho(t))*E_vec(:,t).*gamma_lat...
         -gamma_unobs.*Iu_vec(:,t);
-    E_vec(:,t+1) = (z(t+1)-theta*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho;
+    E_vec(:,t+1) = (z(t+1)-theta*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho(t);
     F = E_vec(:,t+1)-(1-gamma_lat).*E_vec(:,t);
     S_vec(:,t+1) = S_vec(:,t)-F;
     I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp.*Ia_vec(:,t)...

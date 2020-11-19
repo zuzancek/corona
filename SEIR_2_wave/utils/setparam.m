@@ -27,7 +27,7 @@ s.zeta = 1/s.T_inf_hosp.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
 % share of symptomatic patients needed to be hospitalized 
-s.lambda = 0.0743; % <-- test here higher rate
+s.lambda = 0.06; %0.0743; % <-- test here higher rate
 s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
 % ICU rate
 s.iota = 0.1375;
