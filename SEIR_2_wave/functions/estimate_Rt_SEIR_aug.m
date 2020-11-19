@@ -1,6 +1,18 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(z,I0,s,q_vec,rh,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(inputs,s,q_vec,varargin)
+
+% structure of inputs:
+% I0: initial number of observed infectious
+% z: daily data of inflow of newly observed infections
+% obs_ratio: daily data of observed ratio of new infections (wrt all daily
+%       data on new infections)
+% sigma: daily data on proportion of observed new cases with symptoms
 
 % initialization
+z = inputs.z;
+I0 = inputs.I0;
+obs_ratio = z.obs_ratio;
+sigma = obs.sigma;
+
 T = length(z);
 N = s.sim_num;
 pop_size = s.pop_size;
