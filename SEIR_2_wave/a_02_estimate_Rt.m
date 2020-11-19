@@ -9,7 +9,9 @@ dt = 1;
 
 %% load data
 load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
-    'pos_test_ratio','pos_test_ratio_smooth','obs_ratio_smooth','I0','mob','s','t0','t1');
+    'pos_test_ratio','pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
+    'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
+    'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
 t1 = dd(2020,11,14);
 
