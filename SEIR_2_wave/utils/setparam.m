@@ -5,7 +5,8 @@ s.pop_size = 5443120;
 s.sim_num = 10^4;
 s.T = 200;
 s.model_seir = true;
-s.tests_min = 4000;
+s.tests_min = 4700;
+s.env_from = dd(2020,9,21);
 s.wave_2_from = dd(2020,9,1);
 
 % serial interval
