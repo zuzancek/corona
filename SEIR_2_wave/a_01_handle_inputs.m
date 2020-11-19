@@ -14,7 +14,6 @@ indiff = true;
 cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
-t_tests = dd(2020,10,8);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
@@ -44,8 +43,8 @@ death = resize(x.Deaths,h_t0:h_t1);
 death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
 %% calculations
-[obs_ratio_smooth,obs_ratio,dI_inflow_adj_smooth,dI_inflow_adj] = adjust_observed_ratio(...
-    pos_test_ratio_smooth,dI_inflow_smooth,s,t_tests);
+[obs_ratio_smooth,obs_ratio,dI_inflow_adj_smooth,dI_inflow_adj,t_tests] = adjust_observed_ratio(...
+    pos_test_ratio_smooth,dI_inflow_smooth,s);
 
 %% plotting stuff
 % clinical statistics

@@ -1,8 +1,9 @@
-function [rho,rho_raw,tests,tests_raw] = adjust_observed_ratio(ratio,tests,s,t0)
+function [rho,rho_raw,tests,tests_raw,t0] = adjust_observed_ratio(ratio,tests,s)
 
 rho_def = s.obs_ratio_tar;
 total_tests = tests./ratio;
 d0 = min(find(resize(total_tests,s.env_from:enddate(total_tests))>s.tests_min)); %#ok<MXFND>
+t0 = min(find(resize(ratio,d0:enddate(ratio))>s.ratio_threshold));
 ratio0 = ratio(t0);
 tests0 = tests(t0);
 tests_hyp = tests0.*ratio./ratio0;
