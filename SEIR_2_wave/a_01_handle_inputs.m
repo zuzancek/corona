@@ -3,7 +3,7 @@ initialize;
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
-as = dbload('data/AS.csv');
+as = dbload('data/AS.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
 disp_from = dd(2020,4,1);
