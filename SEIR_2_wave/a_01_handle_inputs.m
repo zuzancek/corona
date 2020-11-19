@@ -162,6 +162,8 @@ save('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
     'death_smooth','h_t0','h_t1','h_t00');
 data.NewCases = x.NewCases;
 data.Tests = x.Tests;
+data.Asymp = asymp_ratio;
+data.Obs = obs_ratio;
 data.Mobility = mob.SK;
 data.Deaths = x.Deaths;
 data.ICU = icu;
