@@ -3,7 +3,6 @@ initialize;
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
-as = dbload('data/AS.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
 disp_from = dd(2020,4,1);
@@ -45,6 +44,9 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 %% calculations
 [obs_ratio_smooth,obs_ratio,dI_inflow_adj_smooth,dI_inflow_adj,t_tests] = adjust_observed_ratio(...
     pos_test_ratio_smooth,dI_inflow_smooth,s);
+
+final.date = t1; final.value = 15;
+[asymp_ratio,asymp_ratio_smooth] = process_as('data/as_data.xlsx',dd(2020,3,13),dd(2020,10,13),s,final);
 
 %% plotting stuff
 % clinical statistics
@@ -117,11 +119,17 @@ legend({'raw','smooth'});
 grid on;
 
 subplot(2,1,2);
-plot(diff(dI_inflow_smooth),'linewidth',2);hold on;
-plot(diff(dI_inflow_adj_smooth),'linewidth',2,'linestyle','--');hold on;
-title('Change in infections (smooth)');
-legend({'observed','adjusted '});
+plot(asymp_ratio,'linewidth',1);hold on;
+plot(asymp_ratio_smooth,'linewidth',2);hold on;
+title('Share of asymptomatic new cases (observed, %)');
+legend({'raw','smooth'});
 grid on;
+
+% plot(diff(dI_inflow_smooth),'linewidth',2);hold on;
+% plot(diff(dI_inflow_adj_smooth),'linewidth',2,'linestyle','--');hold on;
+% title('Change in infections (smooth)');
+% legend({'observed','adjusted '});
+% grid on;
 
 figure;
 plot(dI_inflow,'linewidth',1,'linestyle','-.');hold on;
@@ -149,7 +157,8 @@ grid on;
 %% saving stuff
 mob_smooth = yy;
 save('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
-    'pos_test_ratio','pos_test_ratio_smooth','obs_ratio_smooth','I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
+    'pos_test_ratio','pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
+    'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 data.NewCases = x.NewCases;
 data.Tests = x.Tests;
