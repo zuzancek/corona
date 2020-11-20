@@ -18,4 +18,7 @@ try
 catch err %#ok<NASGU>
 end
 
+z = z/100;
+z_smooth = z_smooth/100;
+
 end

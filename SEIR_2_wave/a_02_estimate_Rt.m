@@ -26,12 +26,18 @@ disp_to = t1-del-1;
 
 %% calculations
 s = setparam();
-% s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean*s.lambda+(1-s.lambda)*s.T_inf_hosp.mean);
-[Rt,~,~,Xt] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s);
-[Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(double(resize(dI_inflow_smooth,t0:t1)),I0,s,s.quant,s.pweight);
+inputs_fnc = struct();
+inputs_fnc.I0 = I0;
+inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
+inputs_fnc.obs_ratio = obs_ratio_smooth;
+inputs_fnc.asymp_ratio = asymp_ratio_smooth;
+[Rt,~,~,Xt] = model_fnc(inputs_fnc,s);
+[Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(inputs_fnc,s,s.quant,s.pweight);
 
-[Rt_adj,~,~,Xt_adj] = model_fnc(double(resize(dI_inflow_adj,t0:t1)),I0,s);
-[Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(double(resize(dI_inflow_adj_smooth,t0:t1)),I0,s,s.quant);
+inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
+inputs_fnc.obs_ratio = obs_ratio_smooth;
+[Rt_adj,~,~,Xt_adj] = model_fnc(inputs_fnc,s);
+[Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(inputs_fnc,s,s.quant);
 
 pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 

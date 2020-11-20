@@ -5,17 +5,28 @@ function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(inputs,s,q_vec,vara
 % z: daily data of inflow of newly observed infections
 % obs_ratio: daily data of observed ratio of new infections (wrt all daily
 %       data on new infections)
-% sigma: daily data on proportion of observed new cases with symptoms
+% asymp_ratio: daily data of observed ratio of asymptomatic new infections (wrt all daily
+%       observed data on new infections)
 
 % initialization
 z = inputs.z;
-I0 = inputs.I0;
-obs_ratio = z.obs_ratio;
-sigma = obs.sigma;
-
 T = length(z);
+I0 = inputs.I0;
+try
+    rho = double(z.obs_ratio);
+catch err %#ok<*NASGU>
+    rho = zeros(T,1)+s.obs_ratio;
+end
+try
+    alpha = double(obs.asymp_ratio);
+catch err
+    alpha = zeros(T,1)+(1-s.symp_ratio_obs);
+end
+
 N = s.sim_num;
 pop_size = s.pop_size;
+lambda = s.lambda;
+theta = 0.*alpha;
 
 T_lat = s.T_lat;
 T_pre = s.T_pre;
@@ -23,17 +34,6 @@ T_inf_asymp = s.T_inf_asymp;
 T_inf_symp = s.T_inf_symp;
 T_inf_unobs = s.T_inf_unobs;
 T_inf_hosp = s.T_inf_hosp;
-
-rho = s.obs_ratio;
-if nargin<5
-    sigma = zeros(T,1)+s.symp_ratio_obs;
-    theta = zeros(T,1)+s.p_a_s;
-else
-    sigma = 1-rh/100;
-    theta = 0.1*sigma*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
-end
-lambda = s.lambda;
-
 T_inf_asymp_vec = get_rv(T_inf_asymp);
 T_inf_symp_vec = get_rv(T_inf_symp);
 T_inf_unobs_vec = get_rv(T_inf_unobs);
@@ -62,25 +62,27 @@ idx = ones(N,1);
 % model
 % S(t+1) = S(t)-F(t);
 % E(t+1) = E(t)+F(t)-E(t)/T_lat;
-% Iu(t+1) = Iu(t)+(1-rho)*E(t)/T_lat-Iu(t)/T_inf_u;
-% Ia(t+1) = Ia(t)+rho*E(t)/T_lat-[theta/T_pre-(1-theta)/T_inf_a]*Ia(t);
-% Is(t+1) = Is(t)+theta*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
+% Iu(t+1) = Iu(t)+(1-rho(t))*E(t)/T_lat-Iu(t)/T_inf_u;
+% Ia(t+1) = Ia(t)+rho(t)*E(t)/T_lat-[theta(t)/T_pre-(1-theta)/T_inf_a]*Ia(t);
+% Is(t+1) = Is(t)+theta(t)*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
 %
 % input data
-% z(t) = rho*E(t)/T_lat+theta*Ia(t)/T_pre
-% z(t+1) = rho*E(t+1)/T_lat+theta*Ia(t+1)/T_pre
+% z(t) = rho(t)*E(t)/T_lat+theta*Ia(t)/T_pre
+% z(t+1) = rho(t)*E(t+1)/T_lat+theta*Ia(t+1)/T_pre
+% alpha(t)*z(t) = rho(t) 
 % 
 % reprod.number R(t)
 % F(t) = R(t)*S(t)/pop_size*(Iu(t)/(varsigma*T_inf_u)+Ia(t)/T_inf_a+
 %   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
 
 for t = 1:T-1
-    E_vec(:,t) = (z(t)-theta(t)*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho;
-    Is_vec(:,t+1) = Is_vec(:,t)+theta(t)*Ia_vec(:,t).*gamma_pre...
+    E_vec(:,t) = alpha(t).*z(t)./rho(t);
+    theta(t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);
+    Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*z(t)...
         -(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
-    Ia_vec(:,t+1) = Ia_vec(:,t)+rho*E_vec(:,t).*gamma_lat...
+    Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*z(t)...
         -(theta(t).*gamma_pre+(1-theta(t)).*gamma_asymp).*Ia_vec(:,t);
-    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho)*E_vec(:,t).*gamma_lat...
+    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho(t))*E_vec(:,t).*gamma_lat...
         -gamma_unobs.*Iu_vec(:,t);
     E_vec(:,t+1) = (z(t+1)-theta(t)*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho;
     F = E_vec(:,t+1)-(1-gamma_lat).*E_vec(:,t);

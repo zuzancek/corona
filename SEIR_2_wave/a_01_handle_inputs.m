@@ -119,8 +119,8 @@ legend({'raw','smooth'});
 grid on;
 
 subplot(2,1,2);
-plot(asymp_ratio,'linewidth',1);hold on;
-plot(asymp_ratio_smooth,'linewidth',2);hold on;
+plot(100*asymp_ratio,'linewidth',1);hold on;
+plot(100*asymp_ratio_smooth,'linewidth',2);hold on;
 title('Share of asymptomatic new cases (observed, %)');
 legend({'raw','smooth'});
 grid on;
