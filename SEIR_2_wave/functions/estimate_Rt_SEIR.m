@@ -12,6 +12,7 @@ function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR(inputs,s,do_quant,do_we
 z = inputs.z;
 T = length(z);
 I0 = inputs.I0;
+lambda = s.lambda;
 try
     rho = inputs.obs_ratio;
     assert(length(rho)>=T);
@@ -24,11 +25,11 @@ try
 catch err
     alpha = zeros(T,1)+(1-s.symp_ratio_obs);
 end
-theta = (1-alpha).*.5*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
+theta = (1-alpha).*.3*s.T_inf_asymp.mean...
+    /((1-lambda)*s.T_inf_symp.mean+lambda*s.T_inf_hosp.mean);
 
 N = s.sim_num;
 pop_size = s.pop_size;
-lambda = s.lambda;
 
 T_lat = s.T_lat;
 T_pre = s.T_pre;
