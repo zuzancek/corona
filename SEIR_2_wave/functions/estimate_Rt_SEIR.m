@@ -14,6 +14,7 @@ T = length(z);
 I0 = inputs.I0;
 try
     rho = inputs.obs_ratio;
+    assert(length(rho)>=T);
 catch err %#ok<*NASGU>
     rho = zeros(T,1)+s.obs_ratio;
 end

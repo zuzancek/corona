@@ -2,7 +2,7 @@
 initialize;
 
 %% setup
-disp_from = dd(2020,4,1);
+disp_from = dd(2020,9,1);
 indiff = true; 
 cut = 0;
 dt = 1;
@@ -28,37 +28,25 @@ disp_to = t1-del-1;
 s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
-inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
+% inputs_fnc.z = double(resize(dI_inflow,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-[Rt,~,~,Xt] = model_fnc(inputs_fnc,s);
+% [Rt,~,~,Xt] = model_fnc(inputs_fnc,s);
+inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
 [Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(inputs_fnc,s,s.quant,s.pweight);
 
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-inputs_fnc.obs_ratio = obs_ratio_smooth;
-[Rt_adj,~,~,Xt_adj] = model_fnc(inputs_fnc,s);
+inputs_fnc.obs_ratio = [];
 [Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(inputs_fnc,s,s.quant);
 
 %% plotting stuff
-y = 0*resize(dI_inflow,t0:t1-del);
 figure;
-subplot(2,1,1);
-plot(y+Rt,'linewidth',1);hold on;
-plot(y+Rt_smooth,'linewidth',1);hold on;
-title('Rt');
-legend({'raw','smooth'});
-grid on;
-subplot(2,1,2);
-plot(y+Rt_adj,'linewidth',1);hold on;
-plot(y+Rt_adj_smooth,'linewidth',1);hold on;
-title('Rt (with assumption)');
-legend({'raw','smooth'});
-grid on;
-figure;
-plot(y+Rt_smooth,'linewidth',1);hold on;
-plot(y+Rt_adj_smooth,'linewidth',1);hold on;
-title('Rt smooth');
-legend({'observed','adjusted'});
+Rt_adj_series = tseries(t0+1:t1-del,Rt_adj_smooth);
+Rt_smooth_series = tseries(t0+1:t1-del,Rt_smooth);
+plot(resize(Rt_smooth_series,disp_from:t1-del),'linewidth',1);hold on;
+plot(resize(Rt_adj_series,disp_from:t1-del),'linewidth',1);hold on;
+title('Rt (smooth inputs)');
+legend({'observed inputs','adjusted'});
 grid on;
 % 
 plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt)');
