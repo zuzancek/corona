@@ -4,7 +4,7 @@ tbl = readtable(filename);
 x = tbl.x;
 y = tbl.y;
 xx = 1:dateTo-dateFrom+1;
-yy = interp1(x,y,xx,'cubic');
+yy = interp1(x,y,xx,'pchip');
 z = tseries(dateFrom:dateTo,yy);
 z_smooth = smooth_series(z,s.smooth_width,s.smooth_type,s.smooth_ends);
 

@@ -1,4 +1,5 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SIR(inputs,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SIR(inputs,s,do_quant,do_weight)
+
 
 % structure of inputs:
 % I0: initial number of observed infectious
@@ -59,8 +60,8 @@ I_vec = I_vec(idx,:);
 X_vec = X_vec(idx,:);
 E_vec = E_vec(idx,:);
 
-if ~isempty(varargin)
-    weights = varargin{1};
+if do_weight
+    weights = s.pweight;
     last_num = length(weights);
     nn = size(Rt_vec(:,T),1);
     weights_mat = repmat(weights,nn,1);
@@ -84,7 +85,8 @@ res.St = St;
 res.Xt = Xt;
 res.Et = Et;
 
-if (nargin)>3
+if do_quant
+    q_vec = s.quant;
     M = length(q_vec);
     q_mat = zeros(M,T);
     for j = 1:M

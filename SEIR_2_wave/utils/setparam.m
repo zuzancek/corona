@@ -12,19 +12,19 @@ s.wave_2_from = dd(2020,9,1);
 
 % serial interval
 s.SI.mean = 6.5;            s.SI.std = 0.62;
-% presymptomatic period
-s.T_pre.mean = 2;           s.T_pre.std = s.SI.std;
-% incubation period
+% presymptomatic period % 2
+s.T_pre.mean = 1.5;         s.T_pre.std = s.SI.std;
+% incubation period 
 s.T_inc.mean = 5.2;         s.T_inc.std = s.SI.std;
 s.T_inf.mean = 2.9;         s.T_inf.std = 0.62;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
-% infectious period - observed asymptomatic cases
-s.T_inf_asymp.mean = 3.5;   s.T_inf_asymp.std = 0.62;
+% infectious period - observed asymptomatic cases % 3.5
+s.T_inf_asymp.mean = 2.9;   s.T_inf_asymp.std = 0.62;
 % infectious period - observed symptomatic cases
-s.T_inf_symp.mean = 4.5;   s.T_inf_symp.std = 0.62;
-% infectious period - unobserved cases
-s.T_inf_unobs.mean = 3.75;   s.T_inf_unobs.std = 0.62;
+s.T_inf_symp.mean = 4;      s.T_inf_symp.std = 0.62;
+% infectious period - unobserved cases 3.75
+s.T_inf_unobs.mean = 2.9;   s.T_inf_unobs.std = 0.62;
 % days prior to hospital admission (from onset)
 s.T_inf_hosp.mean = 5.5+0*s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_hosp.mean;

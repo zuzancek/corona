@@ -1,4 +1,4 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR(inputs,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR(inputs,s,do_quant,do_weight)
 
 % structure of inputs:
 % I0: initial number of observed infectious
@@ -20,24 +20,26 @@ catch err %#ok<*NASGU>
 end
 try
     alpha = inputs.asymp_ratio;
+    assert(length(alpha)>=T);
 catch err
     alpha = zeros(T,1)+(1-s.symp_ratio_obs);
 end
-theta = (1-alpha).*0.4.*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
+theta = (1-alpha).*.5*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
 
 N = s.sim_num;
 pop_size = s.pop_size;
 lambda = s.lambda;
-%theta = 0.*alpha;
 
 T_lat = s.T_lat;
 T_pre = s.T_pre;
 T_inf_asymp = s.T_inf_asymp;
 T_inf_symp = s.T_inf_symp;
+T_inf_symp0 = s.T_inf_symp; T_inf_symp0.mean = T_inf_symp.mean-T_pre.mean;
 T_inf_unobs = s.T_inf_unobs;
 T_inf_hosp = s.T_inf_hosp;
 T_inf_asymp_vec = get_rv(T_inf_asymp);
 T_inf_symp_vec = get_rv(T_inf_symp);
+T_inf_symp0_vec = get_rv(T_inf_symp0);
 T_inf_unobs_vec = get_rv(T_inf_unobs);
 T_inf_hosp_vec = get_rv(T_inf_hosp);
 T_lat_vec = get_rv(T_lat);
@@ -46,6 +48,7 @@ gamma_lat = 1./T_lat_vec;
 gamma_pre = 1./T_pre_vec;
 gamma_asymp = 1./T_inf_asymp_vec;
 gamma_symp = 1./T_inf_symp_vec;
+gamma_symp0 = 1./T_inf_symp0_vec;
 gamma_unobs = 1./T_inf_unobs_vec;
 gamma_hosp = 1./T_inf_hosp_vec;
 
@@ -56,7 +59,6 @@ Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho(1)*(1-alpha(1))*I0;
 Is_vec = zeros(N,T);      Is_vec(:,1) = rho(1)*alpha(1)*I0;
 Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho(1))*I0;
 Rt_vec = zeros(N,T);
-theta = E_vec;
 
 Rt = zeros(T,1); 
 Iat = Rt; It = Rt; Iot = Rt; Iut = Rt; Ist = Rt; Et = Rt; St = Rt; Xt = Rt;
@@ -66,7 +68,7 @@ idx = ones(N,1);
 % S(t+1) = S(t)-F(t);
 % E(t+1) = E(t)+F(t)-E(t)/T_lat;
 % Iu(t+1) = Iu(t)+(1-rho(t))*E(t)/T_lat-Iu(t)/T_inf_u;
-% Ia(t+1) = Ia(t)+rho(t)*E(t)/T_lat-[theta(:,t)/T_pre-(1-theta)/T_inf_a]*Ia(t);
+% Ia(t+1) = Ia(t)+rho(t)*E(t)/T_lat-[theta/T_pre-(1-theta)/(T_inf_a-T_pre)]*Ia(t);
 % Is(t+1) = Is(t)+theta(:,t)*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
 %
 % input data
@@ -84,7 +86,7 @@ for t = 1:T-1
     % theta(:,t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);
     % Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*z(t)...
     Is_vec(:,t+1) = Is_vec(:,t)+theta(t)*Ia_vec(:,t).*gamma_pre...
-        -(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
+        -(lambda.*gamma_hosp+(1-lambda).*gamma_symp0).*Is_vec(:,t);
     Ia_vec(:,t+1) = Ia_vec(:,t)+rho(t)*E_vec(:,t).*gamma_lat...
         -(theta(t).*gamma_pre+(1-theta(t)).*gamma_asymp).*Ia_vec(:,t);
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho(t))*E_vec(:,t).*gamma_lat...
@@ -126,7 +128,8 @@ for t = 1:T
 end
 Rt = Rt(1:end-1);
 
-if (nargin)>3
+if do_quant
+    q_vec = s.quant;
     M = length(q_vec);
     q_mat = zeros(M,T);
     for j = 1:M
@@ -150,8 +153,8 @@ res.St = St;
 res.Et = Et;
 res.Xt = Xt;
 
-if ~isempty(varargin)
-    weights = varargin{1};
+if do_weight
+    weights = s.pweight;
     last_num = length(weights);
     nn = size(Rt_vec(:,T),1);
     weights_mat = repmat(weights,nn,1);
