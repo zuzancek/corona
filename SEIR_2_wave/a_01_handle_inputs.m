@@ -42,11 +42,14 @@ death = resize(x.Deaths,h_t0:h_t1);
 death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
 %% calculations
+% observed ratio
 [obs_ratio_smooth,obs_ratio,dI_inflow_adj_smooth,dI_inflow_adj,t_tests] = adjust_observed_ratio(...
-    pos_test_ratio_smooth,dI_inflow_smooth,s);
+    pos_test_ratio_smooth,dI_inflow_smooth,s,t0);
 
+% asymptomatic share
 final.date = t1; final.value = 15;
-[asymp_ratio,asymp_ratio_smooth] = process_as('data/as_data.xlsx',dd(2020,3,13),dd(2020,10,13),s,final);
+initial.date = t0; initial.value = 25; 
+[asymp_ratio,asymp_ratio_smooth] = process_as('data/as_data.xlsx',dd(2020,3,13),dd(2020,10,13),s,initial,final);
 
 %% plotting stuff
 % clinical statistics
