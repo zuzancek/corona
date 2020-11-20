@@ -13,20 +13,21 @@ z = inputs.z;
 T = length(z);
 I0 = inputs.I0;
 try
-    rho = z.obs_ratio;
+    rho = inputs.obs_ratio;
 catch err %#ok<*NASGU>
     rho = zeros(T,1)+s.obs_ratio;
 end
 try
-    alpha = obs.asymp_ratio;
+    alpha = inputs.asymp_ratio;
 catch err
     alpha = zeros(T,1)+(1-s.symp_ratio_obs);
 end
+theta = (1-alpha).*0.4.*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
 
 N = s.sim_num;
 pop_size = s.pop_size;
 lambda = s.lambda;
-theta = 0.*alpha;
+%theta = 0.*alpha;
 
 T_lat = s.T_lat;
 T_pre = s.T_pre;
@@ -54,6 +55,7 @@ Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho(1)*(1-alpha(1))*I0;
 Is_vec = zeros(N,T);      Is_vec(:,1) = rho(1)*alpha(1)*I0;
 Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho(1))*I0;
 Rt_vec = zeros(N,T);
+theta = E_vec;
 
 Rt = zeros(T,1); 
 Iat = Rt; It = Rt; Iot = Rt; Iut = Rt; Ist = Rt; Et = Rt; St = Rt; Xt = Rt;
@@ -63,8 +65,8 @@ idx = ones(N,1);
 % S(t+1) = S(t)-F(t);
 % E(t+1) = E(t)+F(t)-E(t)/T_lat;
 % Iu(t+1) = Iu(t)+(1-rho(t))*E(t)/T_lat-Iu(t)/T_inf_u;
-% Ia(t+1) = Ia(t)+rho(t)*E(t)/T_lat-[theta(t)/T_pre-(1-theta)/T_inf_a]*Ia(t);
-% Is(t+1) = Is(t)+theta(t)*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
+% Ia(t+1) = Ia(t)+rho(t)*E(t)/T_lat-[theta(:,t)/T_pre-(1-theta)/T_inf_a]*Ia(t);
+% Is(t+1) = Is(t)+theta(:,t)*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
 %
 % input data
 % z(t) = rho(t)*E(t)/T_lat+theta*Ia(t)/T_pre
@@ -76,15 +78,22 @@ idx = ones(N,1);
 %   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
 
 for t = 1:T-1
-    E_vec(:,t) = alpha(t).*z(t)./rho(t);
-    theta(t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);
-    Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*z(t)...
+    % E_vec(:,t) = alpha(t).*z(t)./rho(t);
+    E_vec(:,t) = (z(t)-theta(t)*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho(t);
+    % theta(:,t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);
+    % Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*z(t)...
+    Is_vec(:,t+1) = Is_vec(:,t)+theta(t)*Ia_vec(:,t).*gamma_pre...
         -(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
-    Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*z(t)...
+    Ia_vec(:,t+1) = Ia_vec(:,t)+rho(t)*E_vec(:,t).*gamma_lat...
         -(theta(t).*gamma_pre+(1-theta(t)).*gamma_asymp).*Ia_vec(:,t);
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho(t))*E_vec(:,t).*gamma_lat...
         -gamma_unobs.*Iu_vec(:,t);
-    E_vec(:,t+1) = (z(t+1)-theta(t)*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho;
+    E_vec(:,t+1) = (z(t+1)-theta(t)*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho(t);
+    % Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*z(t)...
+    %     -(theta(:,t).*gamma_pre+(1-theta(:,t)).*gamma_asymp).*Ia_vec(:,t);
+    % Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho(t))*E_vec(:,t).*gamma_lat...
+    %     -gamma_unobs.*Iu_vec(:,t);
+    % E_vec(:,t+1) = (z(t+1)-theta(:,t).*Ia_vec(:,t+1).*gamma_pre).*T_lat_vec./rho(t);
     F = E_vec(:,t+1)-(1-gamma_lat).*E_vec(:,t);
     S_vec(:,t+1) = S_vec(:,t)-F;
     I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp.*Ia_vec(:,t)...

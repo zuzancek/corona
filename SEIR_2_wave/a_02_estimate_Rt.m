@@ -9,7 +9,7 @@ dt = 1;
 
 %% load data
 load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
-    'pos_test_ratio','pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
+    'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
@@ -38,8 +38,6 @@ inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
 inputs_fnc.obs_ratio = obs_ratio_smooth;
 [Rt_adj,~,~,Xt_adj] = model_fnc(inputs_fnc,s);
 [Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(inputs_fnc,s,s.quant);
-
-pos_test_ratio_smooth = 0*pos_test_ratio+pos_test_ratio_smooth;
 
 %% plotting stuff
 y = 0*resize(dI_inflow,t0:t1-del);

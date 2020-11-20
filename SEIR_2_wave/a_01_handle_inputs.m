@@ -159,14 +159,18 @@ grid on;
 
 %% saving stuff
 mob_smooth = yy;
+obs_ratio_smooth = resize(obs_ratio_smooth,startdate(dI_inflow_smooth):enddate(dI_inflow_smooth));
+asymp_ratio_smooth = resize(asymp_ratio_smooth,startdate(dI_inflow_smooth):enddate(dI_inflow_smooth));
+pos_test_ratio_smooth = resize(pos_test_ratio_smooth,startdate(dI_inflow_smooth):enddate(dI_inflow_smooth));
 save('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_smooth',...
-    'pos_test_ratio','pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
+    'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 data.NewCases = x.NewCases;
 data.Tests = x.Tests;
 data.Asymp = asymp_ratio;
 data.Obs = obs_ratio;
+data.TestRatio = pos_test_ratio;
 data.Mobility = mob.SK;
 data.Deaths = x.Deaths;
 data.ICU = icu;
