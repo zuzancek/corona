@@ -16,7 +16,7 @@ tt0 = t0+dt;
 t1 = dd(2020,11,14);
 
 if s.model_seir
-    model_fnc = @estimate_Rt_SEIR_aug;
+    model_fnc = @estimate_Rt_SEIR;
     del = 1;
 else
     model_fnc = @estimate_Rt_SIR;

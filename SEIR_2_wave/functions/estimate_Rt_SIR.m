@@ -1,8 +1,15 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SIR(dI_inflow,I0,s,q_vec,varargin)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SIR(inputs,s,q_vec,varargin)
 
+% structure of inputs:
+% I0: initial number of observed infectious
+% z: daily data of inflow of newly observed infections
+
+% initialization
+z = inputs.z;
+I0 = inputs.I0;
 N = s.sim_num;
 pop_size = s.pop_size;
-T = length(dI_inflow);
+T = length(z);
 shape = s.SI.mean*(s.SI.std)^2; scale = 1/(s.SI.std)^2;
 shape_vec = shape*ones(1*N,1);
 scale_vec = scale*ones(1*N,1);
@@ -31,16 +38,17 @@ Rt = zeros(T,1); It = Rt; Xt = Rt;Et = Rt;St = Rt;
 idx = ones(N,1);
 d = s.SI.mean+14;
 
+% model
 % S(t+1) = S(t)-R(t)*gamma*S(t)*I(t)/pop_size;
 % I(t+1) = I(t)+R(t)*gamma*S(t)*I(t)/pop_size-gamma*I(t);
-% dI_inflow(t) = R(t)*gamma*S(t)*I(t)/pop_size;
+% z(t) = R(t)*gamma*S(t)*I(t)/pop_size;
 for t = 1:T
-   Trec_vec = Trec_mat;%(:,t);
-   Rt_vec(:,t) = pop_size.*dI_inflow(t).*Trec_vec./(S_vec(:,t).*I_vec(:,t));
-   S_vec(:,t+1) = S_vec(:,t)-dI_inflow(t);
-   dE_inflow(:,t) = Trec_mat./T_inf.mean.*dI_inflow(t); dE_outflow(:,t) = E_vec(:,t)./T_inc.mean;
+   Trec_vec = Trec_mat;
+   Rt_vec(:,t) = pop_size.*z(t).*Trec_vec./(S_vec(:,t).*I_vec(:,t));
+   S_vec(:,t+1) = S_vec(:,t)-z(t);
+   dE_inflow(:,t) = Trec_mat./T_inf.mean.*z(t); dE_outflow(:,t) = E_vec(:,t)./T_inc.mean;
    E_vec(:,t+1) = E_vec(:,t)+dE_inflow(:,t)-dE_outflow(:,t);
-   I_vec(:,t+1) = I_vec(:,t).*(1-1./Trec_vec)+dI_inflow(t);%+dI_inflow(t);
+   I_vec(:,t+1) = I_vec(:,t).*(1-1./Trec_vec)+z(t);%+z(t);
    X_vec(:,t+1) = X_vec(:,t).*(1-1/d)+dE_inflow(:,t);
    idx = idx & I_vec(:,t+1)>0;
 end
