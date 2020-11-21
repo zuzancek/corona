@@ -49,7 +49,7 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 % asymptomatic share
 final.date = t1; final.value = 15;
 initial.date = t0; initial.value = 25; 
-[asymp_ratio,asymp_ratio_smooth] = process_as('data/as_data.xlsx',dd(2020,3,13),dd(2020,10,13),s,initial,final);
+[asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,13),s,initial,final);
 
 %% plotting stuff
 % clinical statistics
