@@ -13,7 +13,7 @@ s.wave_2_from = dd(2020,9,1);
 % serial interval
 s.SI.mean = 6.5;            s.SI.std = 0.62;
 % presymptomatic period % 2
-s.T_pre.mean = 1.5;         s.T_pre.std = s.SI.std;
+s.T_pre.mean = 2;           s.T_pre.std = s.SI.std;
 % incubation period 
 s.T_inc.mean = 5.2;         s.T_inc.std = s.SI.std;
 s.T_inf.mean = 2.9;         s.T_inf.std = 0.62;

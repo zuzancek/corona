@@ -13,6 +13,7 @@ load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
+s = setparam();
 % s.model_seir = false;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
@@ -75,13 +76,13 @@ if s.model_seir
     figure; 
     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
     ylabel('%');
-    title('I_{asymp}/I_{obs} (%)');
+    title('inflow I_{asymp}/I_{obs} (%)');
     % tune obs_ratio
-    x = tseries(t0+1:t1,Yt.Iot./Yt.It);
+    x = tseries(t0+1:t1,Yt.Ioint./(Yt.Ioint+Yt.Iuint));
     x_tar = resize(obs_ratio_smooth,t0:t1);
     dx = 100*(x./x_tar-1);
     figure; 
     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
     ylabel('%');
-    title('I_{obs}/I (%)');
+    title('inflow I_{obs}/I (%)');
 end
