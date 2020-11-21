@@ -69,6 +69,7 @@ if s.model_seir
     tm1 = t1;
     % tune theta
     x = tseries(t0+1:t1,Yt.Iat./Yt.Iot);
+    x = tseries(t0+1:t1,Yt.Iaint./(Yt.Iaint+Yt.Isint));
     x_tar = resize(asymp_ratio_smooth,t0:t1);
     dx = 100*(x./x_tar-1);
     figure; 

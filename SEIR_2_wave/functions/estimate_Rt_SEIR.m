@@ -25,8 +25,9 @@ try
 catch err
     alpha = zeros(T,1)+(1-s.symp_ratio_obs);
 end
-theta = (1-alpha).*.3*s.T_inf_asymp.mean...
+k = s.T_inf_asymp.mean...
     /((1-lambda)*s.T_inf_symp.mean+lambda*s.T_inf_hosp.mean);
+theta = (1-alpha);
 
 N = s.sim_num;
 pop_size = s.pop_size;
@@ -60,9 +61,10 @@ Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho(1)*(1-alpha(1))*I0;
 Is_vec = zeros(N,T);      Is_vec(:,1) = rho(1)*alpha(1)*I0;
 Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho(1))*I0;
 Rt_vec = zeros(N,T);
+Is_in = 0*Is_vec; Ia_in = 0*Is_vec;
 
 Rt = zeros(T,1); 
-Iat = Rt; It = Rt; Iot = Rt; Iut = Rt; Ist = Rt; Et = Rt; St = Rt; Xt = Rt;
+Iat = Rt; It = Rt; Iot = Rt; Iut = Rt; Ist = Rt; Et = Rt; St = Rt; Xt = Rt; Isint = Rt; Iaint = Rt;
 idx = ones(N,1);
 
 % model
@@ -86,8 +88,10 @@ for t = 1:T-1
     E_vec(:,t) = (z(t)-theta(t)*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho(t);
     % theta(:,t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);
     % Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*z(t)...
-    Is_vec(:,t+1) = Is_vec(:,t)+theta(t)*Ia_vec(:,t).*gamma_pre...
+    Is_in(:,t) = theta(t)*Ia_vec(:,t).*gamma_pre;
+    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)...
         -(lambda.*gamma_hosp+(1-lambda).*gamma_symp0).*Is_vec(:,t);
+    Ia_in(:,t) = rho(t)*E_vec(:,t).*gamma_lat;
     Ia_vec(:,t+1) = Ia_vec(:,t)+rho(t)*E_vec(:,t).*gamma_lat...
         -(theta(t).*gamma_pre+(1-theta(t)).*gamma_asymp).*Ia_vec(:,t);
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-rho(t))*E_vec(:,t).*gamma_lat...
@@ -110,6 +114,8 @@ Rt_vec = Rt_vec(idx,:);
 S_vec = S_vec(idx,:);
 Ia_vec = Ia_vec(idx,:);
 Is_vec = Is_vec(idx,:);
+Is_in = Is_in(idx,:);
+Ia_in = Ia_in(idx,:);
 Iu_vec = Iu_vec(idx,:);
 Io_vec = Ia_vec+Is_vec;
 I_vec = Iu_vec+Io_vec;
@@ -120,6 +126,8 @@ for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
     Iat(t) = mean(Ia_vec(:,t));
     Ist(t) = mean(Is_vec(:,t));
+    Isint(t) = mean(Is_in(:,t));
+    Iaint(t) = mean(Ia_in(:,t));
     Iut(t) = mean(Iu_vec(:,t));
     Iot(t) = mean(Io_vec(:,t));
     It(t) = mean(I_vec(:,t));
@@ -145,6 +153,8 @@ else
     x_mat = [];
 end
 
+res.Iaint = Iaint;
+res.Isint = Isint;
 res.Iat = Iat;
 res.Ist = Ist;
 res.Iut = Iut;
