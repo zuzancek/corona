@@ -71,12 +71,13 @@ idx = ones(N,1);
 % model
 % S(t+1) = S(t)-F(t);
 % E(t+1) = E(t)+F(t)-E(t)/T_lat;
-% Iu(t+1) = Iu(t)+(1-rho(t))*E(t)/T_lat-Iu(t)/T_inf_u;
-% Ia(t+1) = Ia(t)+rho(t)*E(t)/T_lat-[theta/T_pre-(1-theta)/(T_inf_a-T_pre)]*Ia(t);
-% Is(t+1) = Is(t)+theta(:,t)*Ia(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t);
+% Iu(t+1) = Iu(t)+E(t)/T_lat-tau/T_test*Iu(t)-(1-tau)/T_inf_u*Iu(t);
+% Ia(t+1) = Ia(t)+alpha*tau/T_test*Iu(t)-[sigma/T_pre+(1-sigma)/T_inf_a]*Ia(t);
+% Is(t+1) = Is(t)+(1-alpha)*tau/T_test*Iu(t)+sigma*Is(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t)
 %
 % input data
-% z(t) = rho(t)*E(t)/T_lat+theta*Ia(t)/T_pre
+% z(t) = daily inflow of observed newly detected cases
+% z(t) = tau/T_test*Iu(t) = z_a(t)+z_s(t);
 % z(t+1) = rho(t)*E(t+1)/T_lat+theta*Ia(t+1)/T_pre
 % alpha(t)*z(t) = rho(t) 
 % 
