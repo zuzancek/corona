@@ -27,7 +27,7 @@ s.T_inf_asymp.mean = 2.9;   s.T_inf_asymp.std = 0.62;
 % infectious period - observed symptomatic cases
 s.T_inf_symp.mean = 4;      s.T_inf_symp.std = 0.62;
 % infectious period - unobserved cases 3.75
-s.T_inf_unobs.mean = 2.9;   s.T_inf_unobs.std = 0.62;
+s.share_reas = 0.8;
 % days prior to hospital admission (from onset)
 s.T_inf_hosp.mean = 5.5+0*s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_hosp.mean;
@@ -49,6 +49,8 @@ s.xi = s.iota*0.5;
 % time from vent-admission to death
 s.psi_vent = 1/4;
 s.omega_vent = 0.33;
+% unobserved
+s.varsigma0 = 1/1.1;
 
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
