@@ -25,6 +25,12 @@ try
 catch err
     alpha = zeros(T,1)+(1-s.symp_ratio_obs);
 end
+try
+    T_test = reshape(inputs.T_test,1,[]);
+    assert(length(T_test)>=T);
+catch err
+    T_test = zeros(1,T)+s.T_test0;
+end
 k = s.T_inf_asymp.mean/(s.T_inf_symp.mean);
 theta = (1-alpha);
 % rho = rho*k;
@@ -53,7 +59,12 @@ gamma_symp = 1./T_inf_symp_vec;
 gamma_symp0 = 1./T_inf_symp0_vec;
 gamma_unobs = 1./T_inf_unobs_vec;
 gamma_hosp = 1./T_inf_hosp_vec;
+T_test_vec = repmat(T_test,N,1)+repmat(T_pre_vec,1,T);
+T_inf_hosp0_vec = repmat(T_test,N,1)-repmat(T_inf_hosp_vec,1,T);
+gamma_hosp0 = 1./T_inf_hosp0_vec;
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
+sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
+
 
 % set initial values
 S_vec = zeros(N,T);       S_vec(:,1) = pop_size-I0;
@@ -72,7 +83,7 @@ idx = ones(N,1);
 % model
 % S(t+1) = S(t)-F(t);
 % E(t+1) = E(t)+F(t)-E(t)/T_lat;
-% Iu(t+1) = Iu(t)+E(t)/T_lat-tau(t)/T_test*Iu(t)-(1-tau(t))/T_inf_u*Iu(t);
+% Iu(t+1) = Iu(t)+E(t)/T_lat-tau(t)/T_test(t)*Iu(t)-(1-tau(t))/T_inf_u*Iu(t);
 % Ia(t+1) = Ia(t)+alpha*tau(t)/T_test*Iu(t)-[sigma/T_pre+(1-sigma)/T_inf_a]*Ia(t);
 % Is(t+1) = Is(t)+(1-alpha)*tau(t)/T_test*Iu(t)+sigma*Is(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t)
 %
@@ -88,10 +99,9 @@ idx = ones(N,1);
 for t = 1:T-1
     Is_in(:,t) = (1-alpha(t)).*z(t);
     Ia_in(:,t) = alpha(t).*z(t);
-    Iu_vec(:,t+1) = z(t+1).*T_test_vec(t+1)./tau(t);
-    
-    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma.*gamma_pre+(1-sigma).*gamma_asymp).*Ia_vec(:,t);
-    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma.*gamma_pre-(lambda.*gamma_hosp+(1-lambda).*gamma_symp0).*Is_vec(:,t);
+    Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t);    
+    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp).*Ia_vec(:,t);    
+    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0+(1-lambda).*gamma_symp0).*Is_vec(:,t);
     
     % E_vec(:,t) = alpha(t).*z(t)./rho(t);
     E_vec(:,t) = (z(t)-theta(t)*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho(t);
