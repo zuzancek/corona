@@ -85,6 +85,7 @@ idx = ones(N,1);
 %   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
 
 for t = 1:T-1
+    
     % E_vec(:,t) = alpha(t).*z(t)./rho(t);
     E_vec(:,t) = (z(t)-theta(t)*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho(t);
     % theta(:,t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);

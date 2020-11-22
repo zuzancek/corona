@@ -53,6 +53,7 @@ gamma_symp = 1./T_inf_symp_vec;
 gamma_symp0 = 1./T_inf_symp0_vec;
 gamma_unobs = 1./T_inf_unobs_vec;
 gamma_hosp = 1./T_inf_hosp_vec;
+T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
 
 % set initial values
 S_vec = zeros(N,T);       S_vec(:,1) = pop_size-I0;
@@ -71,21 +72,27 @@ idx = ones(N,1);
 % model
 % S(t+1) = S(t)-F(t);
 % E(t+1) = E(t)+F(t)-E(t)/T_lat;
-% Iu(t+1) = Iu(t)+E(t)/T_lat-tau/T_test*Iu(t)-(1-tau)/T_inf_u*Iu(t);
-% Ia(t+1) = Ia(t)+alpha*tau/T_test*Iu(t)-[sigma/T_pre+(1-sigma)/T_inf_a]*Ia(t);
-% Is(t+1) = Is(t)+(1-alpha)*tau/T_test*Iu(t)+sigma*Is(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t)
+% Iu(t+1) = Iu(t)+E(t)/T_lat-tau(t)/T_test*Iu(t)-(1-tau(t))/T_inf_u*Iu(t);
+% Ia(t+1) = Ia(t)+alpha*tau(t)/T_test*Iu(t)-[sigma/T_pre+(1-sigma)/T_inf_a]*Ia(t);
+% Is(t+1) = Is(t)+(1-alpha)*tau(t)/T_test*Iu(t)+sigma*Is(t)/T_pre-[lambda/T_hosp-(1-lambda)/T_inf_s]*Is(t)
 %
 % input data
 % z(t) = daily inflow of observed newly detected cases
-% z(t) = tau/T_test*Iu(t) = z_a(t)+z_s(t);
-% z(t+1) = rho(t)*E(t+1)/T_lat+theta*Ia(t+1)/T_pre
-% alpha(t)*z(t) = rho(t) 
+% z(t) = tau(t)/T_test*Iu(t) = z_a(t)+z_s(t);
+% z(t+1) = tau(t+1)/T_test*Iu(t+1)
 % 
 % reprod.number R(t)
 % F(t) = R(t)*S(t)/pop_size*(Iu(t)/(varsigma*T_inf_u)+Ia(t)/T_inf_a+
 %   Is(t)[lambda/T_hosp+(1-lambda)/T_inf_s]
 
 for t = 1:T-1
+    Is_in(:,t) = (1-alpha(t)).*z(t);
+    Ia_in(:,t) = alpha(t).*z(t);
+    Iu_vec(:,t+1) = z(t+1).*T_test_vec(t+1)./tau(t);
+    
+    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma.*gamma_pre+(1-sigma).*gamma_asymp).*Ia_vec(:,t);
+    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma.*gamma_pre-(lambda.*gamma_hosp+(1-lambda).*gamma_symp0).*Is_vec(:,t);
+    
     % E_vec(:,t) = alpha(t).*z(t)./rho(t);
     E_vec(:,t) = (z(t)-theta(t)*Ia_vec(:,t).*gamma_pre).*T_lat_vec./rho(t);
     % theta(:,t) = (1-alpha(t)).*z(t).*T_pre_vec./Ia_vec(:,t);
