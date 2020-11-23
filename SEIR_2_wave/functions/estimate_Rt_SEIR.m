@@ -65,8 +65,8 @@ if N>1
     T_inf_symp0_vec = get_rv(T_inf_symp0);
     T_inf_symp_vec = get_rv(T_inf_symp); %T_inf_symp0_vec+T_test_vec;
     T_inf_asymp_vec = get_rv(T_inf_asymp);%T_inf_asymp0_vec+T_test_vec;
-    share_reas = 1; %s.share_reas; 
-    share_asymp = 1-s.symp_ratio_obs;
+    share_reas = 1;%s.share_reas; 
+    share_asymp = 1;%1-s.symp_ratio_obs;
     T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp); 
     % hospital admission    
     T_inf_hosp0_vec = get_rv(T_inf_hosp0);
@@ -97,7 +97,7 @@ gamma_hosp = 1./T_inf_hosp_vec;
 gamma_hosp0 = 1./T_inf_hosp0_vec;
 
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
-sigma = 0*s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
+sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
 varsigma = s.self_isolation_effect*ones(T,1);
 
 % set initial values
@@ -144,7 +144,7 @@ for t = 1:T-2
     Iu_vec(:,t+2) = z(t+2).*T_test_vec(:,t+2)./tau(t+2);    
     %Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1).*gamma_pre+(1-sigma(t+1)).*gamma_asymp0(:,t+1)).*Ia_vec(:,t+1);    
     %Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1).*gamma_pre-(lambda.*gamma_hosp0(:,t+1)+(1-lambda).*gamma_symp0(:,t+1)).*Is_vec(:,t+1);
-    E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs(:,t+1)));
+    E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*(:,t+1)));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
     I = gamma_unobs(:,t).*Iu_vec(:,t)+0*gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
@@ -152,7 +152,7 @@ for t = 1:T-2
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
 %     idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
 %     idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;
-    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0 & Iu_vec(:,t+1)> 0 & Iu_vec(:,t+2)> 0;
+    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0 & E_vec(:,t)>=0 & Iu_vec(:,t+1)>= 0 & Iu_vec(:,t+2)>= 0;
     disp(length(find(idx>0)));
 end
 idx = find(idx>0);
@@ -244,8 +244,8 @@ end
         s.T_inf_unobs.d1.mean = sh0; s.T_inf_unobs.d1.std = s.T_inf_asymp.std; 
         n1 = N-n0;
         if n1>0
-            x1 = rand(n1,1); a0 = sh0-2*s.T_inf_asymp.std; a1 = 10; sc = 2.3;
-            x1 = repmat(power_law(x1,a0,a1,sc),1,T);
+            x1 = rand(n1,T); a0 = sh0; a1 = 10; sc = 2.3;
+            x1 = (power_law(x1,a0(n0+1:end,:),a1,sc));
             s.T_inf_unobs.d2.a0 = a0; s.T_inf_unobs.d2.a1 = a1;s.T_inf_unobs.d2.k = sc;
             s.T_inf_unobs.s0 = share_reas;
             x = [x0;x1];
