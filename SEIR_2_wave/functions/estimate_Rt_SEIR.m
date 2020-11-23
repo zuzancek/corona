@@ -63,46 +63,37 @@ if N>1
     T_inf_asymp_vec = T_inf_asymp0_vec+T_test_vec;
     share_reas = s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
-    T_inf_unobs_vec = mean(get_rv_I_unobs(share_reas,share_asymp))+u; %
+    T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp); 
     % hospital admission    
     T_inf_hosp0_vec = get_rv(T_inf_hosp0);
     T_inf_hosp_vec = T_inf_hosp.mean+u;%get_rv(T_inf_hosp); %
     T_lat_vec = get_rv(T_lat);
     T_inf_asymp_vec = T_pre_vec+T_inf_asymp0_vec;
     T_inf_symp_vec = T_pre_vec+T_inf_symp0_vec;
-    gamma_lat = 1./T_lat_vec;
-    gamma_pre = 1./T_pre_vec;
-    gamma_asymp = 1./T_inf_asymp_vec;
-    gamma_asymp0 = 1./T_inf_asymp0_vec;
-    gamma_symp = 1./T_inf_symp_vec;
-    gamma_symp0 = 1./T_inf_symp0_vec;
-    gamma_unobs = 1./T_inf_unobs_vec;
-    gamma_hosp = 1./T_inf_hosp_vec;
-    gamma_hosp0 = 1./T_inf_hosp0_vec;
 else    
     T_pre_vec = T_pre.mean;
     T_test_vec = repmat(T_test,N,1)+repmat(T_pre_vec,1,T);
-    T_inf_asymp_vec = T_inf_asymp.mean;
     T_inf_asymp0_vec = T_inf_asymp.mean-T_test;
-    T_inf_symp_vec = T_inf_symp.mean;
+    T_inf_asymp_vec = T_inf_asymp0_vec+T_test;
     T_inf_symp0_vec = T_inf_symp0.mean-T_test;
+    T_inf_symp_vec = T_inf_symp0_vec+T_test;
     share_reas = s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = T_inf_asymp_vec.*share_asymp+(1-share_asymp)*T_inf_symp_vec;
     T_inf_hosp_vec = T_inf_hosp.mean;
     T_inf_hosp0_vec = T_inf_hosp.mean-T_test;
     T_lat_vec = T_lat.mean;
-    gamma_lat = 1./T_lat_vec;
-    gamma_pre = 1./T_pre_vec;
-    gamma_asymp = 1./T_inf_asymp_vec;
-    gamma_asymp0 = 1./T_inf_asymp0_vec;
-    gamma_symp = 1./T_inf_symp_vec;
-    gamma_symp0 = 1./T_inf_symp0_vec;
-    gamma_unobs = 1./T_inf_unobs_vec;
-    gamma_hosp = 1./T_inf_hosp_vec;
 end
-
+gamma_lat = 1./T_lat_vec;
+gamma_pre = 1./T_pre_vec;
+gamma_asymp = 1./T_inf_asymp_vec;
+gamma_asymp0 = 1./T_inf_asymp0_vec;
+gamma_symp = 1./T_inf_symp_vec;
+gamma_symp0 = 1./T_inf_symp0_vec;
+gamma_unobs = 1./T_inf_unobs_vec;
+gamma_hosp = 1./T_inf_hosp_vec;
 gamma_hosp0 = 1./T_inf_hosp0_vec;
+
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
 sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
 varsigma = s.self_isolation_effect*ones(T,1);
@@ -142,20 +133,20 @@ for t = 1:T-2
     Ia_in(:,t) = alpha(t).*z(t);
     Io_in(:,t) = z(t);
     Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t+1);    
-    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp0).*Ia_vec(:,t);    
-    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0).*Is_vec(:,t);
-    E_vec(:,t) = T_lat_vec.*(Iu_vec(:,t+1)-Iu_vec(:,t).*(1-tau(t)./T_test_vec(:,t)-(1-tau(t)).*gamma_unobs));
+    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp0(:,t)).*Ia_vec(:,t);    
+    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0(:,t)).*Is_vec(:,t);
+    E_vec(:,t) = T_lat_vec.*(Iu_vec(:,t+1)-Iu_vec(:,t).*(1-tau(t)./T_test_vec(:,t)-(1-tau(t)).*gamma_unobs(:,t)));
     Is_in(:,t+1) = (1-alpha(t+1)).*z(t+1);
     Ia_in(:,t+1) = alpha(t+1).*z(t+1);
     Io_in(:,t+1) = z(t+1);
     Iu_vec(:,t+2) = z(t+2).*T_test_vec(:,t+2)./tau(t+2);    
-    Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1).*gamma_pre+(1-sigma(t+1)).*gamma_asymp0).*Ia_vec(:,t+1);    
-    Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1).*gamma_pre-(lambda.*gamma_hosp0(:,t+1)+(1-lambda).*gamma_symp0).*Is_vec(:,t+1);
-    E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs));
+    Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1).*gamma_pre+(1-sigma(t+1)).*gamma_asymp0(:,t+1)).*Ia_vec(:,t+1);    
+    Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1).*gamma_pre-(lambda.*gamma_hosp0(:,t+1)+(1-lambda).*gamma_symp0(:,t+1)).*Is_vec(:,t+1);
+    E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs(:,t+1)));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
-    I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp.*Ia_vec(:,t)/2.5...
-       +((1-lambda).*gamma_symp).*Is_vec(:,t)/2.5;
+    I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
+       +((1-lambda).*gamma_symp(:,t)).*Is_vec(:,t)/2.5;
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
     idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
     idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;
@@ -236,20 +227,21 @@ end
     function [x] = get_rv(y)
         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
         L = length(shape0);
-        assert(L==length(scale0));
-        shape0_vec = shape0*ones(N,L);
+        shape0_vec = repmat(shape0,N,1);
         scale0_vec = scale0*ones(N,L);
-        x = reshape(gamrnd(shape0_vec,scale0_vec),N,L);
+        x = gamrnd(shape0_vec,scale0_vec);
     end
 
     function [x] = get_rv_I_unobs(share_reas,share_asymp)
-        sh0 = s.T_inf_asymp.mean*share_asymp+(1-share_asymp)*s.T_inf_symp.mean;
+        L = size(s.T_inf_asymp.mean,1);
+        sh0 = s.T_inf_asymp.mean.*repmat(share_asymp,L,1)+repmat((1-share_asymp),L,1)*s.T_inf_symp.mean;
         n0 = ceil(N*share_reas);
-        x0 = gamrnd(sh0*s.T_inf_asymp.std^2,1/s.T_inf_asymp.std^2,n0,1);
+        x0 = gamrnd(sh0*s.T_inf_asymp.std^2,1/s.T_inf_asymp.std^2);
+        x0 = x0(1:n0,:);
         s.T_inf_unobs.d1.mean = sh0; s.T_inf_unobs.d1.std = s.T_inf_asymp.std; 
         n1 = N-n0;
         x1 = rand(n1,1); a0 = sh0-2*s.T_inf_asymp.std; a1 = 10; sc = 2.3;
-        x1 = power_law(x1,a0,a1,sc);
+        x1 = repmat(power_law(x1,a0,a1,sc),1,T);
         s.T_inf_unobs.d2.a0 = a0; s.T_inf_unobs.d2.a1 = a1;s.T_inf_unobs.d2.k = sc;
         s.T_inf_unobs.s0 = share_reas;
         x = [x0;x1];
