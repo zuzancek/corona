@@ -14,10 +14,10 @@ T = length(z);
 I0 = inputs.I0;
 lambda = s.lambda;
 try
-    rho = inputs.obs_ratio;
-    assert(length(rho)>=T);
+    tau = inputs.obs_ratio;
+    assert(length(tau)>=T);
 catch err %#ok<*NASGU>
-    rho = zeros(T,1)+s.obs_ratio;
+    tau = zeros(T,1)+s.obs_ratio;
 end
 try
     alpha = inputs.asymp_ratio;
@@ -31,8 +31,6 @@ try
 catch err
     T_test = zeros(1,T)+s.T_test0;
 end
-k = s.T_inf_asymp.mean/(s.T_inf_symp.mean);
-theta = (1-alpha);
 
 N = s.sim_num;
 pop_size = s.pop_size;
@@ -42,7 +40,7 @@ T_pre = s.T_pre;
 T_inf_asymp = s.T_inf_asymp;
 T_inf_symp = s.T_inf_symp;
 T_inf_symp0 = s.T_inf_symp; T_inf_symp0.mean = T_inf_symp.mean-T_pre.mean;
-T_inf_unobs = s.T_inf_unobs;
+% T_inf_unobs = s.T_inf_unobs;
 T_inf_hosp = s.T_inf_hosp;
 T_inf_asymp_vec = get_rv(T_inf_asymp);
 T_inf_symp_vec = get_rv(T_inf_symp);
@@ -65,18 +63,18 @@ T_inf_hosp0_vec = repmat(T_test,N,1)-repmat(T_inf_hosp_vec,1,T);
 gamma_hosp0 = 1./T_inf_hosp0_vec;
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
 sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
-varsigma = s.varsigma0*ones(T,1);
+varsigma = s.self_isolation_effect*ones(T,1);
 
 % set initial values
 S_vec = zeros(N,T);       S_vec(:,1) = pop_size-I0;
 E_vec = zeros(N,T);       E_vec(:,1) = 0; % first few periods are irrelevant
-Ia_vec = zeros(N,T);      Ia_vec(:,1) = rho(1)*(1-alpha(1))*I0;
-Is_vec = zeros(N,T);      Is_vec(:,1) = rho(1)*alpha(1)*I0;
-Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-rho(1))*I0;
+Ia_vec = zeros(N,T);      Ia_vec(:,1) = tau(1)*(1-alpha(1))*I0;
+Is_vec = zeros(N,T);      Is_vec(:,1) = tau(1)*alpha(1)*I0;
+Iu_vec = zeros(N,T);      Iu_vec(:,1) = (1-tau(1))*I0;
 Rt_vec = zeros(N,T);
 Is_in = 0*Is_vec; Ia_in = 0*Is_vec; Iu_in = 0*Is_vec; Io_in = 0*Is_vec;
 
-Rt = zeros(T,1); 
+Rt = zeros(T-1,1); 
 Iat = Rt; It = Rt; Iot = Rt; Iut = Rt; Ist = Rt; Et = Rt; St = Rt; Xt = Rt; 
 Isint = Rt; Iaint = Rt; Ioint = Rt; Iuint = Rt;
 idx = ones(N,1);
@@ -102,22 +100,24 @@ for t = 1:T-2
     Ia_in(:,t) = alpha(t).*z(t);
     Io_in(:,t) = z(t);
     Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t+1);    
-    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t,:).*gamma_pre+(1-sigma(t,:)).*gamma_asymp).*Ia_vec(:,t);    
-    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t,:).*gamma_pre-(lambda.*gamma_hosp0(t,:)+(1-lambda).*gamma_symp0).*Is_vec(:,t);
+    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp).*Ia_vec(:,t);    
+    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0).*Is_vec(:,t);
     E_vec(:,t) = T_lat_vec.*(Iu_vec(:,t+1)-Iu_vec(:,t).*(1-tau(t)./T_test_vec(:,t)-(1-tau(t)).*gamma_unobs));
     Is_in(:,t+1) = (1-alpha(t+1)).*z(t+1);
     Ia_in(:,t+1) = alpha(t+1).*z(t+1);
     Io_in(:,t+1) = z(t+1);
     Iu_vec(:,t+2) = z(t+2).*T_test_vec(:,t+2)./tau(t+2);    
-    Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1,:).*gamma_pre+(1-sigma(t+1,:)).*gamma_asymp).*Ia_vec(:,t+1);    
-    Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1,:).*gamma_pre-(lambda.*gamma_hosp0(t+1,:)+(1-lambda).*gamma_symp0).*Is_vec(:,t+1);
+    Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1).*gamma_pre+(1-sigma(t+1)).*gamma_asymp).*Ia_vec(:,t+1);    
+    Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1).*gamma_pre-(lambda.*gamma_hosp0(:,t+1)+(1-lambda).*gamma_symp0).*Is_vec(:,t+1);
     E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
     I = gamma_unobs.*Iu_vec(:,t)/varsigma(t)+gamma_asymp.*Ia_vec(:,t)...
        +(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
-    idx = idx & Is_vec(:,t)>0 & Ia_vec(:,t)>0 & Iu_vec(:,t)> 0 & E_vec(:,t)>0;
+    idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
+    idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;
+    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0;
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
@@ -134,7 +134,7 @@ I_vec = Iu_vec+Io_vec;
 E_vec = E_vec(idx,:);
 X_vec = I_vec+E_vec;
 
-for t = 1:T
+for t = 1:T-1
     Rt(t) = mean(Rt_vec(:,t));
     Iat(t) = mean(Ia_vec(:,t));
     Ist(t) = mean(Is_vec(:,t));
@@ -205,9 +205,10 @@ end
         s.T_inf_unobs.d1.mean = sh0; s.T_inf_unobs.d1.std = s.T_inf_asymp.std; 
         n1 = N-n0;
         x1 = rand(n1,1); a0 = sh0-2*s.T_inf_asymp.std; a1 = 10; sc = 2.3;
-        x1 = power_law_pdf(x1,a0,a1,sc);
+        x1 = power_law(x1,a0,a1,sc);
         s.T_inf_unobs.d2.a0 = a0; s.T_inf_unobs.d2.a1 = a1;s.T_inf_unobs.d2.k = sc;
         s.T_inf_unobs.s0 = share_reas;
         x = [x0;x1];
     end
+
 end

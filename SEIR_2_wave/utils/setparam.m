@@ -13,7 +13,7 @@ s.wave_2_from = dd(2020,9,1);
 % serial interval
 s.SI.mean = 6.5;            s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test0 = 3.5;        
+s.T_test0 = 1.5;        
 % incubation period 
 s.T_inc.mean = 5.3;         s.T_inc.std = s.SI.std;
 s.T_inf.mean = 2.9;         s.T_inf.std = 0.62;
@@ -49,8 +49,6 @@ s.xi = s.iota*0.5;
 % time from vent-admission to death
 s.psi_vent = 1/4;
 s.omega_vent = 0.33;
-% unobserved
-s.varsigma0 = 1/1.1;
 
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
@@ -72,11 +70,8 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
-s.obs_ratio_tar = 1/10;
-s.obs_ratio = s.obs_ratio_tar*s.T_inf_unobs.mean/((1-s.symp_ratio_obs)*s.T_inf_asymp.mean+...
-    s.symp_ratio_obs*((1-s.lambda)*s.T_inf_symp.mean+s.lambda*s.T_inf_hosp.mean));
-% s.obs_ratio = s.obs_ratio_tar*s.T_inf_unobs.mean/((1-s.symp_ratio_obs)*s.T_inf_asymp.mean+...
-%     s.symp_ratio_obs*s.T_inf_symp.mean);
+s.obs_ratio_tar = 1/5;
+s.obs_ratio = s.obs_ratio_tar;
 s.self_isolation_effect = 1-0.12;
 s.threshold = 0.05;
 s.scale_fact = 4;
