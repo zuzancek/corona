@@ -5,7 +5,7 @@ mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
-disp_from = dd(2020,4,1);
+disp_from = dd(2020,9,1);
 indiff = true; 
 
 %% handle data
@@ -28,6 +28,9 @@ dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,...
 
 pos_test_ratio = x.NewCases./x.Tests;
 pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,...
+    s.smooth_type,s.smooth_ends);
+tests = x.NewCases./x.Tests;
+tests_smooth = smooth_series(tests,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 
@@ -115,44 +118,46 @@ legend(fn);
 % epidemiology
 figure;
 subplot(2,1,1);
-plot(dI_inflow,'linewidth',1);hold on;
-plot(dI_inflow_smooth,'linewidth',2);hold on;
+plot(resize(dI_inflow,disp_from:t1),'linewidth',1);hold on;
+plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 title('New infections (observed)');
 legend({'raw','smooth'});
 grid on;
 
 subplot(2,1,2);
-plot(100*asymp_ratio,'linewidth',1);hold on;
-plot(100*asymp_ratio_smooth,'linewidth',2);hold on;
+plot(resize(100*asymp_ratio,disp_from:t1),'linewidth',1);hold on;
+plot(resize(100*asymp_ratio_smooth,disp_from:t1),'linewidth',2);hold on;
 title('Share of asymptomatic new cases (observed, %)');
 legend({'raw','smooth'});
 grid on;
 
-% plot(diff(dI_inflow_smooth),'linewidth',2);hold on;
-% plot(diff(dI_inflow_adj_smooth),'linewidth',2,'linestyle','--');hold on;
-% title('Change in infections (smooth)');
-% legend({'observed','adjusted '});
-% grid on;
+figure;
+subplot(2,1,1)
+plot(resize(pos_test_ratio,disp_from:t1),'linewidth',1); hold on;
+plot(resize(pos_test_ratio_smooth,disp_from:t1),'linewidth',2);
+title('Positive tests ratio');
+legend({'raw','smooth'});
+grid on;
+subplot(2,1,2);
+plot(resize(tests,disp_from:t1),'linewidth',1);hold on;
+plot(resize(tests_smooth,disp_from:t1),'linewidth',2);hold on;
+title('Tests (observed)');
+legend({'raw','smooth'});
+grid on;
 
 figure;
-plot(dI_inflow,'linewidth',1,'linestyle','-.');hold on;
-plot(dI_inflow_smooth,'linewidth',2);hold on;
-plot(dI_inflow_adj,'linewidth',1,'linestyle','-.');hold on;
-plot(dI_inflow_adj_smooth,'linewidth',2);hold on;
+plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
+plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(resize(dI_inflow_adj,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
+plot(resize(dI_inflow_adj_smooth,disp_from:t1),'linewidth',2);hold on;
 title('New infections (adjusted)');
 legend({'observed, raw','observed, smooth', 'hypothetical, raw','hypothetical,smooth'});
 grid on;
 
 figure;
 subplot(2,1,1)
-plot(pos_test_ratio,'linewidth',1); hold on;
-plot(pos_test_ratio_smooth,'linewidth',1);
-title('Positive tests ratio');
-legend({'raw','smooth'});
-grid on;
-subplot(2,1,2)
-plot(obs_ratio,'linewidth',1); hold on;
-plot(obs_ratio_smooth,'linewidth',1);
+plot(resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
+plot(resize(obs_ratio_smooth,disp_from:t1),'linewidth',1);
 title('Hypothetical observed ratio');
 legend({'raw','smooth'});
 grid on;
