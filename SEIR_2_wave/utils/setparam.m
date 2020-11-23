@@ -28,8 +28,8 @@ s.T_inf_asymp.mean = 2.5;   s.T_inf_asymp.std = 0.62;
 s.T_inf_symp.mean = 3.5;    s.T_inf_symp.std = 0.62;
 % infectious period - unobserved cases 3.75
 s.share_reas = 0.8;
-% days prior to hospital admission (from onset)
-s.T_inf_hosp.mean = 5.5;    s.T_inf_hosp.std = 0.62;
+% days prior to hospital admission (from onset,adjusted for test period)
+s.T_inf_hosp.mean = 6-s.T_test0;    s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_hosp.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
