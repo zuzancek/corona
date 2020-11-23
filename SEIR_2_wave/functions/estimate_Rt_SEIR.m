@@ -57,35 +57,33 @@ T_inf_hosp.mean = T_inf_hosp0.mean+m0;
 if N>1
     u = zeros(N,1);    
     % symptoms onset
-    T_pre_vec = get_rv(T_pre);    
+    T_pre_vec = T_pre.mean*ones(N,1); %get_rv(T_pre);    
     % test taken
     T_test_vec = repmat(T_test,N,1)+repmat(T_pre_vec,1,T);
     % infectious periods
     T_inf_asymp0_vec = get_rv(T_inf_asymp0);
     T_inf_symp0_vec = get_rv(T_inf_symp0);
-    T_inf_symp_vec = T_inf_symp0_vec+T_test_vec;
-    T_inf_asymp_vec = T_inf_asymp0_vec+T_test_vec;
+    T_inf_symp_vec = get_rv(T_inf_symp); %T_inf_symp0_vec+T_test_vec;
+    T_inf_asymp_vec = get_rv(T_inf_asymp);%T_inf_asymp0_vec+T_test_vec;
     share_reas = 1; %s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp); 
     % hospital admission    
     T_inf_hosp0_vec = get_rv(T_inf_hosp0);
-    T_inf_hosp_vec = T_inf_hosp.mean+u;%get_rv(T_inf_hosp); %
+    T_inf_hosp_vec = get_rv(T_inf_hosp); 
     T_lat_vec = get_rv(T_lat);
-    T_inf_asymp_vec = T_pre_vec+T_inf_asymp0_vec;
-    T_inf_symp_vec = T_pre_vec+T_inf_symp0_vec;
 else    
     T_pre_vec = T_pre.mean;
     T_test_vec = repmat(T_test,N,1)+repmat(T_pre_vec,1,T);
-    T_inf_asymp0_vec = T_inf_asymp.mean-T_test;
-    T_inf_asymp_vec = T_inf_asymp0_vec+T_test;
-    T_inf_symp0_vec = T_inf_symp.mean-T_test;
-    T_inf_symp_vec = T_inf_symp0_vec+T_test;
+    T_inf_asymp0_vec = T_inf_asymp.mean-m0;
+    T_inf_asymp_vec = T_inf_asymp0_vec+m0;
+    T_inf_symp0_vec = T_inf_symp.mean-m0;
+    T_inf_symp_vec = T_inf_symp0_vec+m0;
     share_reas = s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = T_inf_asymp_vec.*share_asymp+(1-share_asymp)*T_inf_symp_vec;
     T_inf_hosp_vec = T_inf_hosp.mean;
-    T_inf_hosp0_vec = T_inf_hosp.mean-T_test;
+    T_inf_hosp0_vec = T_inf_hosp.mean-m0;
     T_lat_vec = T_lat.mean;
 end
 gamma_lat = 1./T_lat_vec;
@@ -99,7 +97,7 @@ gamma_hosp = 1./T_inf_hosp_vec;
 gamma_hosp0 = 1./T_inf_hosp0_vec;
 
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
-sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
+sigma = 0*s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
 varsigma = s.self_isolation_effect*ones(T,1);
 
 % set initial values
@@ -137,24 +135,25 @@ for t = 1:T-2
     Ia_in(:,t) = alpha(t).*z(t);
     Io_in(:,t) = z(t);
     Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t+1);    
-    Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp0(:,t)).*Ia_vec(:,t);    
-    Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0(:,t)).*Is_vec(:,t);
+    %Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp0(:,t)).*Ia_vec(:,t);    
+    %Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0(:,t)).*Is_vec(:,t);
     E_vec(:,t) = T_lat_vec.*(Iu_vec(:,t+1)-Iu_vec(:,t).*(1-tau(t)./T_test_vec(:,t)-(1-tau(t)).*gamma_unobs(:,t)));
     Is_in(:,t+1) = (1-alpha(t+1)).*z(t+1);
     Ia_in(:,t+1) = alpha(t+1).*z(t+1);
     Io_in(:,t+1) = z(t+1);
     Iu_vec(:,t+2) = z(t+2).*T_test_vec(:,t+2)./tau(t+2);    
-    Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1).*gamma_pre+(1-sigma(t+1)).*gamma_asymp0(:,t+1)).*Ia_vec(:,t+1);    
-    Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1).*gamma_pre-(lambda.*gamma_hosp0(:,t+1)+(1-lambda).*gamma_symp0(:,t+1)).*Is_vec(:,t+1);
+    %Ia_vec(:,t+2) = Ia_vec(:,t+1)+Ia_in(:,t+1)-(sigma(t+1).*gamma_pre+(1-sigma(t+1)).*gamma_asymp0(:,t+1)).*Ia_vec(:,t+1);    
+    %Is_vec(:,t+2) = Is_vec(:,t+1)+Is_in(:,t+1)+sigma(t+1).*gamma_pre-(lambda.*gamma_hosp0(:,t+1)+(1-lambda).*gamma_symp0(:,t+1)).*Is_vec(:,t+1);
     E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs(:,t+1)));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
-    I = gamma_unobs(:,t).*Iu_vec(:,t)+gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
-       +((1-lambda).*gamma_symp(:,t)).*Is_vec(:,t)/2.5;
+    I = gamma_unobs(:,t).*Iu_vec(:,t)+0*gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
+       +0*((1-lambda).*gamma_symp(:,t)).*Is_vec(:,t)/2.5; 
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
-    idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
-    idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;
-    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0;
+%     idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
+%     idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;
+    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0 & Iu_vec(:,t+1)> 0 & Iu_vec(:,t+2)> 0;
+    disp(length(find(idx>0)));
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);

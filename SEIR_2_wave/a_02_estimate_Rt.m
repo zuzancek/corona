@@ -2,7 +2,7 @@
 initialize;
 
 %% setup
-disp_from = dd(2020,8,1);
+disp_from = dd(2020,4,1);
 indiff = true; 
 cut = 0;
 dt = 1;
@@ -14,7 +14,7 @@ load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
 s = setparam();
-% s.model_seir = false;
+s.model_seir = false;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
     del = 2;
@@ -28,6 +28,7 @@ disp_to = t1-del-1;
 % s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
+% inputs_fnc.sim_num = 1;
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
