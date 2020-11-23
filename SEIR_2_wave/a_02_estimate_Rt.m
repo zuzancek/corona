@@ -65,24 +65,24 @@ save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1');
 
 %% optional: statistics
 % model training
-if s.model_seir
-    tm0 = dd(2020,9,15);
-    tm1 = t1;
-    % tune theta
-    x = tseries(t0+1:t1,Yt.Iat./Yt.Iot);
-    x = tseries(t0+1:t1,Yt.Iaint./(Yt.Iaint+Yt.Isint));
-    x_tar = resize(asymp_ratio_smooth,t0:t1);
-    dx = 100*(x./x_tar-1);
-    figure; 
-    plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-    ylabel('%');
-    title('inflow I_{asymp}/I_{obs} (%)');
-    % tune obs_ratio
-    x = tseries(t0+1:t1,Yt.Ioint./(Yt.Ioint+Yt.Iuint));
-    x_tar = resize(obs_ratio_smooth,t0:t1);
-    dx = 100*(x./x_tar-1);
-    figure; 
-    plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-    ylabel('%');
-    title('inflow I_{obs}/I (%)');
-end
+% if s.model_seir
+%     tm0 = dd(2020,9,15);
+%     tm1 = t1;
+%     % tune theta
+%     x = tseries(t0+1:t1,Yt.Iat./Yt.Iot);
+%     x = tseries(t0+1:t1,Yt.Iaint./(Yt.Iaint+Yt.Isint));
+%     x_tar = resize(asymp_ratio_smooth,t0:t1);
+%     dx = 100*(x./x_tar-1);
+%     figure; 
+%     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
+%     ylabel('%');
+%     title('inflow I_{asymp}/I_{obs} (%)');
+%     % tune obs_ratio
+%     x = tseries(t0+1:t1,Yt.Ioint./(Yt.Ioint+Yt.Iuint));
+%     x_tar = resize(obs_ratio_smooth,t0:t1);
+%     dx = 100*(x./x_tar-1);
+%     figure; 
+%     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
+%     ylabel('%');
+%     title('inflow I_{obs}/I (%)');
+% end
