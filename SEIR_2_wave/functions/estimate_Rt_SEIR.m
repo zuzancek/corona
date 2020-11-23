@@ -1,4 +1,4 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR_aug(inputs,s,do_quant,do_weight)
+function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR(inputs,s,do_quant,do_weight)
 
 % structure of inputs:
 % I0: initial number of observed infectious
