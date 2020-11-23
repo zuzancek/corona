@@ -65,8 +65,8 @@ if N>1
     T_inf_symp0_vec = get_rv(T_inf_symp0);
     T_inf_symp_vec = get_rv(T_inf_symp); %T_inf_symp0_vec+T_test_vec;
     T_inf_asymp_vec = get_rv(T_inf_asymp);%T_inf_asymp0_vec+T_test_vec;
-    share_reas = 1;%s.share_reas; 
-    share_asymp = 1;%1-s.symp_ratio_obs;
+    share_reas = s.share_reas; 
+    share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp); 
     % hospital admission    
     T_inf_hosp0_vec = get_rv(T_inf_hosp0);
@@ -147,12 +147,12 @@ for t = 1:T-2
     E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs(:,t+1)));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
-    I = gamma_unobs(:,t).*Iu_vec(:,t)+0*gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
+    I = gamma_unobs(:,t).*Iu_vec(:,t)/varsigma(t)+0*gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
        +0*((1-lambda).*gamma_symp(:,t)).*Is_vec(:,t)/2.5; 
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
 %     idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
 %     idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;
-    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0 & E_vec(:,t)>=0 & Iu_vec(:,t+1)>= 0 & Iu_vec(:,t+2)>= 0;
+    idx = idx & S_vec(:,t+1)>0 & S_vec(:,t)>0 & F>0 & E_vec(:,t)>0 & Iu_vec(:,t+1)> 0 & Iu_vec(:,t+2)> 0;
     disp(length(find(idx>0)));
 end
 idx = find(idx>0);
