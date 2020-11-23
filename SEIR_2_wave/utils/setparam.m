@@ -11,7 +11,7 @@ s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
 % serial interval
-extra = 0.5*0;
+extra = 0.5;
 s.SI.mean = 6.5+extra;      s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0 = 1.5;        

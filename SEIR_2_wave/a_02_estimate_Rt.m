@@ -28,11 +28,8 @@ disp_to = t1-del-1;
 % s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
-inputs_fnc.sim_num = 1;
-% inputs_fnc.z = double(resize(dI_inflow,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-% [Rt,~,~,Xt] = model_fnc(inputs_fnc,s);
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
 [Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(inputs_fnc,s,true,true);
 

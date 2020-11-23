@@ -50,7 +50,10 @@ T_inf_hosp = s.T_inf_hosp;
 m0 = T_pre.mean+T_test;
 T_inf_symp0 = s.T_inf_symp; T_inf_symp0.mean = T_inf_symp.mean-m0;
 T_inf_asymp0 = s.T_inf_asymp; T_inf_asymp0.mean = T_inf_asymp.mean-m0;
+T_inf_symp.mean= T_inf_symp0.mean+m0;
+T_inf_asymp.mean = T_inf_asymp0.mean+m0;
 T_inf_hosp0 = s.T_inf_hosp; T_inf_hosp0.mean = T_inf_hosp.mean-m0;
+T_inf_hosp.mean = T_inf_hosp0.mean+m0;
 if N>1
     u = zeros(N,1);    
     % symptoms onset
@@ -62,7 +65,7 @@ if N>1
     T_inf_symp0_vec = get_rv(T_inf_symp0);
     T_inf_symp_vec = T_inf_symp0_vec+T_test_vec;
     T_inf_asymp_vec = T_inf_asymp0_vec+T_test_vec;
-    share_reas = s.share_reas; 
+    share_reas = 1; %s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp); 
     % hospital admission    
@@ -234,18 +237,22 @@ end
     end
 
     function [x] = get_rv_I_unobs(share_reas,share_asymp)
-        L = size(s.T_inf_asymp.mean,1);
-        sh0 = s.T_inf_asymp.mean.*repmat(share_asymp,L,1)+repmat((1-share_asymp),L,1)*s.T_inf_symp.mean;
-        n0 = ceil(N*share_reas);
-        x0 = gamrnd(sh0*s.T_inf_asymp.std^2,1/s.T_inf_asymp.std^2);
+        L = size(T_inf_asymp.mean,2);
+        sh0 = T_inf_asymp.mean.*repmat(share_asymp,N,1)+repmat((1-share_asymp),N,1)*T_inf_symp.mean;
+        n0 = floor(N*share_reas);
+        x0 = gamrnd(sh0*T_inf_asymp.std^2,1/T_inf_asymp.std^2);
         x0 = x0(1:n0,:);
         s.T_inf_unobs.d1.mean = sh0; s.T_inf_unobs.d1.std = s.T_inf_asymp.std; 
         n1 = N-n0;
-        x1 = rand(n1,1); a0 = sh0-2*s.T_inf_asymp.std; a1 = 10; sc = 2.3;
-        x1 = repmat(power_law(x1,a0,a1,sc),1,T);
-        s.T_inf_unobs.d2.a0 = a0; s.T_inf_unobs.d2.a1 = a1;s.T_inf_unobs.d2.k = sc;
-        s.T_inf_unobs.s0 = share_reas;
-        x = [x0;x1];
+        if n1>0
+            x1 = rand(n1,1); a0 = sh0-2*s.T_inf_asymp.std; a1 = 10; sc = 2.3;
+            x1 = repmat(power_law(x1,a0,a1,sc),1,T);
+            s.T_inf_unobs.d2.a0 = a0; s.T_inf_unobs.d2.a1 = a1;s.T_inf_unobs.d2.k = sc;
+            s.T_inf_unobs.s0 = share_reas;
+            x = [x0;x1];
+        else
+            x = x0;
+        end
     end
 
 end
