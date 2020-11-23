@@ -16,6 +16,7 @@ lambda = s.lambda;
 try
     tau = inputs.obs_ratio;
     assert(length(tau)>=T);
+    assert(1==0);
 catch err %#ok<*NASGU>
     tau = zeros(T,1)+s.obs_ratio;
 end

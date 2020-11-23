@@ -17,7 +17,7 @@ s = setparam();
 % s.model_seir = false;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
-    del = 1;
+    del = 2;
 else
     model_fnc = @estimate_Rt_SIR;
     del = 0;
