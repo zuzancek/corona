@@ -50,17 +50,23 @@ T_inf_asymp0 = s.T_inf_asymp; T_inf_asymp0.mean = T_inf_asymp.mean-T_pre.mean;
 % T_inf_unobs = s.T_inf_unobs;
 T_inf_hosp = s.T_inf_hosp;
 if N>1
-    u = zeros(N,1);
-    T_inf_asymp_vec = get_rv(T_inf_asymp);
+    u = zeros(N,1);    
+    % symptoms onset
+    T_pre_vec = get_rv(T_pre);    
+    % test taken
+    T_test_vec = repmat(T_test,N,1)+repmat(T_pre_vec,1,T);
+    
+    T_inf_hosp0_vec = repmat(T_test,N,1)-repmat(T_inf_hosp_vec,1,T);
     T_inf_asymp0_vec = get_rv(T_inf_asymp0);
     T_inf_symp_vec = get_rv(T_inf_symp);
     T_inf_symp0_vec = get_rv(T_inf_symp0);
-    share_reas = 1;%s.share_reas; 
-    share_asymp = 1;%-s.symp_ratio_obs;
-    T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp);
-    T_inf_hosp_vec = T_inf_hosp.mean+u;%get_rv(T_inf_hosp);
+    share_reas = s.share_reas; 
+    share_asymp = 1-s.symp_ratio_obs;
+    T_inf_unobs_vec = mean(get_rv_I_unobs(share_reas,share_asymp))+u; %
+    T_inf_hosp_vec = T_inf_hosp.mean+u;%get_rv(T_inf_hosp); %
     T_lat_vec = get_rv(T_lat);
-    T_pre_vec = get_rv(T_pre);
+    T_inf_asymp_vec = T_pre_vec+T_inf_asymp0_vec;
+    T_inf_symp_vec = T_pre_vec+T_inf_symp0_vec;
     gamma_lat = 1./T_lat_vec;
     gamma_pre = 1./T_pre_vec;
     gamma_asymp = 1./T_inf_asymp_vec;
