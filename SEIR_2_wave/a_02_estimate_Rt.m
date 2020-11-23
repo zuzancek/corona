@@ -14,7 +14,7 @@ load('inputs.mat','dI_inflow','dI_inflow_smooth','dI_inflow_adj','dI_inflow_adj_
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
 s = setparam();
-% s.model_seir = false;
+s.model_seir = false;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
     del = 2;

@@ -15,9 +15,9 @@ s = data.s; % s = setparam
 startFcast = data.t1+1;
 endHist = startFcast-1;
 startHist = data.t0;
-startEstim = dd(2020,10,10);
-startEstimFull = dd(2020,9,15);
-delay = 9;
+startEstim = s.env_from;
+startEstimFull = s.wave_2_from;
+delay = 14;
 
 %% handle mobility 
 fcastPer = endFcast-startFcast+1;

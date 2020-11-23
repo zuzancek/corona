@@ -16,13 +16,14 @@ lambda = s.lambda;
 try
     tau = inputs.obs_ratio;
     assert(length(tau)>=T);
-    assert(1==0);
+    assert(0==1);
 catch err %#ok<*NASGU>
     tau = zeros(T,1)+s.obs_ratio;
 end
 try
     alpha = inputs.asymp_ratio;
     assert(length(alpha)>=T);
+    assert(0==1);
 catch err
     alpha = zeros(T,1)+(1-s.symp_ratio_obs);
 end
@@ -46,8 +47,8 @@ T_inf_hosp = s.T_inf_hosp;
 T_inf_asymp_vec = get_rv(T_inf_asymp);
 T_inf_symp_vec = get_rv(T_inf_symp);
 T_inf_symp0_vec = get_rv(T_inf_symp0);
-share_reas = s.share_reas; 
-share_asymp = 1-s.symp_ratio_obs;
+share_reas = 1;%s.share_reas; 
+share_asymp = 1;%-s.symp_ratio_obs;
 T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp);
 T_inf_hosp_vec = get_rv(T_inf_hosp);
 T_lat_vec = get_rv(T_lat);
@@ -113,8 +114,8 @@ for t = 1:T-2
     E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
-    I = gamma_unobs.*Iu_vec(:,t)/varsigma(t)+gamma_asymp.*Ia_vec(:,t)...
-       +(lambda.*gamma_hosp+(1-lambda).*gamma_symp).*Is_vec(:,t);
+    I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp.*Ia_vec(:,t)/2.5...
+       +((1-lambda).*gamma_symp).*Is_vec(:,t)/2.5;
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
     idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
     idx = idx & Is_vec(:,t+2)>0 & Ia_vec(:,t+2)>0 & Iu_vec(:,t+2)> 0 & E_vec(:,t+1)>0;

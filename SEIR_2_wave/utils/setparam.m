@@ -15,7 +15,7 @@ s.SI.mean = 6.5;            s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0 = 2;        
 % incubation period 
-s.T_inc.mean = 5.3;         s.T_inc.std = s.SI.std;
+s.T_inc.mean = 5.2;         s.T_inc.std = s.SI.std;
 s.T_inf.mean = 2.9;         s.T_inf.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
@@ -23,13 +23,13 @@ s.T_pre.std = s.SI.std;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 % infectious period - observed asymptomatic cases % 3.5
-s.T_inf_asymp.mean = 2.9;   s.T_inf_asymp.std = 0.62;
+s.T_inf_asymp.mean = 2.5;   s.T_inf_asymp.std = 0.62;
 % infectious period - observed symptomatic cases
-s.T_inf_symp.mean = 4;      s.T_inf_symp.std = 0.62;
+s.T_inf_symp.mean = 3.5;    s.T_inf_symp.std = 0.62;
 % infectious period - unobserved cases 3.75
 s.share_reas = 0.8;
 % days prior to hospital admission (from onset)
-s.T_inf_hosp.mean = 5.5+0*s.T_pre.mean;  s.T_inf_hosp.std = 0.62;
+s.T_inf_hosp.mean = 5.5;    s.T_inf_hosp.std = 0.62;
 s.zeta = 1/s.T_inf_hosp.mean;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
@@ -70,7 +70,7 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
-s.obs_ratio_tar = 1/5;
+s.obs_ratio_tar = 1/10;
 s.obs_ratio = s.obs_ratio_tar;
 s.self_isolation_effect = 1-0.12;
 s.threshold = 0.05;
