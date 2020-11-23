@@ -11,21 +11,22 @@ s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
 % serial interval
-s.SI.mean = 6.5;            s.SI.std = 0.62;
+extra = 0.5*0;
+s.SI.mean = 6.5+extra;      s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0 = 1.5;        
 % incubation period 
 s.T_inc.mean = 5.2;         s.T_inc.std = s.SI.std;
-s.T_inf.mean = 2.9;         s.T_inf.std = 0.62;
+s.T_inf.mean = 2.9+extra;   s.T_inf.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 % infectious period - observed asymptomatic cases % 3.5
-s.T_inf_asymp.mean = 2.5;   s.T_inf_asymp.std = 0.62;
+s.T_inf_asymp.mean = 2.9+extra;   s.T_inf_asymp.std = 0.62;
 % infectious period - observed symptomatic cases
-s.T_inf_symp.mean = 3.5;    s.T_inf_symp.std = 0.62;
+s.T_inf_symp.mean = 3.4+extra;    s.T_inf_symp.std = 0.62;
 % infectious period - unobserved cases 3.75
 s.share_reas = 0.8;
 % days prior to hospital admission (from onset,adjusted for test period)

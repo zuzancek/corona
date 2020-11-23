@@ -7,6 +7,7 @@ function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SEIR(inputs,s,do_quant,do_we
 %       data on new infections)
 % asymp_ratio: daily data of observed ratio of asymptomatic new infections (wrt all daily
 %       observed data on new infections)
+% T_test: testing delay (after symptoms onset)
 
 % initialization
 z = inputs.z;
@@ -75,7 +76,7 @@ else
     T_test_vec = repmat(T_test,N,1)+repmat(T_pre_vec,1,T);
     T_inf_asymp0_vec = T_inf_asymp.mean-T_test;
     T_inf_asymp_vec = T_inf_asymp0_vec+T_test;
-    T_inf_symp0_vec = T_inf_symp0.mean-T_test;
+    T_inf_symp0_vec = T_inf_symp.mean-T_test;
     T_inf_symp_vec = T_inf_symp0_vec+T_test;
     share_reas = s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
@@ -145,7 +146,7 @@ for t = 1:T-2
     E_vec(:,t+1) = T_lat_vec.*(Iu_vec(:,t+2)-Iu_vec(:,t+1).*(1-tau(t+1)./T_test_vec(:,t+1)-(1-tau(t+1)).*gamma_unobs(:,t+1)));
     F = E_vec(:,t+1)-E_vec(:,t).*(1-gamma_lat);
     S_vec(:,t+1) = S_vec(:,t)-F;
-    I = gamma_unobs.*Iu_vec(:,t)+gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
+    I = gamma_unobs(:,t).*Iu_vec(:,t)+gamma_asymp(:,t).*Ia_vec(:,t)/2.5...
        +((1-lambda).*gamma_symp(:,t)).*Is_vec(:,t)/2.5;
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F./I;
     idx = idx & Is_vec(:,t+1)>0 & Ia_vec(:,t+1)>0 & Iu_vec(:,t+1)> 0 & E_vec(:,t)>0;
