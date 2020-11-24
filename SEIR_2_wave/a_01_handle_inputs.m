@@ -14,20 +14,28 @@ indiff = true;
 cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
+t0_ag = startdate(y.Tests);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut-0;
+t1_ag = enddate(y.Tests)-cut-0;
 % t1 = dd(2020,11,14);
 h_t0 = startdate(hosp.ICU);
 h_t00 = find(hosp.ICU>0);
 h_t1 = enddate(hosp.ICU);
 
 % epidemiology data
+y = process_inputs(y,t0,t1);
+dI_inflow_ag = y.NewCases;
 dI_inflow_pcr = resize(x.NewCases,tt0:t1);
 dI_inflow_pcr_smooth = smooth_series(dI_inflow_pcr,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
+dI_inflow = dI_inflow_pcr+dI_inflow_ag;
+dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,...
+    s.smooth_type,s.smooth_ends);
 
 pos_test_ratio = x.NewCases./x.Tests;
+pos_test_ratio_ag = y.NewCases./y.Tests;
 pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 tests = x.NewCases./x.Tests;
@@ -121,8 +129,10 @@ figure;
 subplot(2,1,1);
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1);hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(resize(dI_inflow,disp_from:t1),'linewidth',1);hold on;
+plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 title('New infections (observed)');
-legend({'PCR only: raw','PCR only: smooth'});
+legend({'PCR only: raw','PCR only: smooth','PCR+AG: raw','PCR+AG: smooth'});
 grid on;
 
 subplot(2,1,2);
@@ -151,8 +161,9 @@ plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(resize(dI_inflow_pcr_adj,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_adj_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 title('New infections (PCR only)');
-legend({'observed, raw','observed, smooth', 'hypothetical, raw','hypothetical,smooth'});
+legend({'observed, raw','observed, smooth', 'hypothetical, raw','hypothetical,smooth','AG included in observed'});
 grid on;
 
 figure;
@@ -168,7 +179,7 @@ mob_smooth = yy;
 obs_ratio_smooth = resize(obs_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
 asymp_ratio_smooth = resize(asymp_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
 pos_test_ratio_smooth = resize(pos_test_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
-save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_pcr_adj_smooth',...
+save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_smooth','dI_inflow_pcr_adj_smooth',...
     'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
