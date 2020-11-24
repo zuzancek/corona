@@ -44,16 +44,17 @@ pop_size = s.pop_size;
 
 T_lat = s.T_lat;
 T_pre = s.T_pre;
-T_inf_asymp = s.T_inf_asymp;
-T_inf_symp = s.T_inf_symp;
-T_inf_hosp = s.T_inf_hosp;
+T_inf_obs = s.T_inf;
+T_hosp = s.T_hosp;
 m0 = T_pre.mean+T_test;
+
+
 T_inf_symp0 = s.T_inf_symp; T_inf_symp0.mean = T_inf_symp.mean-m0;
 T_inf_asymp0 = s.T_inf_asymp; T_inf_asymp0.mean = T_inf_asymp.mean-m0;
 T_inf_symp.mean= T_inf_symp0.mean+m0;
 T_inf_asymp.mean = T_inf_asymp0.mean+m0;
-T_inf_hosp0 = s.T_inf_hosp; T_inf_hosp0.mean = T_inf_hosp.mean-m0;
-T_inf_hosp.mean = T_inf_hosp0.mean+m0;
+T_hosp0 = s.T_hosp; T_hosp0.mean = T_hosp.mean-m0;
+T_hosp.mean = T_hosp0.mean+m0;
 if N>1
     u = zeros(N,1);    
     % symptoms onset
@@ -69,8 +70,8 @@ if N>1
     share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = get_rv_I_unobs(share_reas,share_asymp); 
     % hospital admission    
-    T_inf_hosp0_vec = get_rv(T_inf_hosp0);
-    T_inf_hosp_vec = get_rv(T_inf_hosp); 
+    T_hosp0_vec = get_rv(T_hosp0);
+    T_hosp_vec = get_rv(T_hosp); 
     T_lat_vec = get_rv(T_lat);
 else    
     T_pre_vec = T_pre.mean;
@@ -82,8 +83,8 @@ else
     share_reas = s.share_reas; 
     share_asymp = 1-s.symp_ratio_obs;
     T_inf_unobs_vec = T_inf_asymp_vec.*share_asymp+(1-share_asymp)*T_inf_symp_vec;
-    T_inf_hosp_vec = T_inf_hosp.mean;
-    T_inf_hosp0_vec = T_inf_hosp.mean-m0;
+    T_hosp_vec = T_hosp.mean;
+    T_hosp0_vec = T_hosp.mean-m0;
     T_lat_vec = T_lat.mean;
 end
 gamma_lat = 1./T_lat_vec;
@@ -93,8 +94,8 @@ gamma_asymp0 = 1./T_inf_asymp0_vec;
 gamma_symp = 1./T_inf_symp_vec;
 gamma_symp0 = 1./T_inf_symp0_vec;
 gamma_unobs = 1./T_inf_unobs_vec;
-gamma_hosp = 1./T_inf_hosp_vec;
-gamma_hosp0 = 1./T_inf_hosp0_vec;
+gamma_hosp = 1./T_hosp_vec;
+gamma_hosp0 = 1./T_hosp0_vec;
 
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
 sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
