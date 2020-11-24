@@ -51,8 +51,9 @@ m0 = T_pre.mean+T_test;
 % T_inf_asymp0 = s.T_inf_asymp; T_inf_asymp0.mean = T_inf_asymp.mean-m0;
 % T_inf_symp.mean= T_inf_symp0.mean+m0;
 % T_inf_asymp.mean = T_inf_asymp0.mean+m0;
+T_inf_obs0 = T_inf_obs; T_inf_obs0.mean = T_inf_obs.mean-m0;
+T_inf_obs.mean = T_inf_obs0.mean+m0;
 T_hosp0 = s.T_hosp; T_hosp0.mean = T_hosp.mean-m0;
-T_inf_obs0 = s.T_inf; T_inf_obs0.mean = T_inf_obs.mean-m0;
 T_hosp.mean = T_hosp0.mean+m0;
 if N>1
     u = zeros(N,1);    
@@ -139,7 +140,7 @@ idx = ones(N,1);
 % F(t) =
 % R(t)*S(t)/pop_size*[Iu(t)/(varsigma*(T_inf_u+T_lat))+Io(t)/(T_inf_o+T_lat)]
 
-for t = 1:T-2
+for t = 1:T-1
     Iu_vec(:,t) = z(t).*T_test_vec(:,t)./tau(t);
     Io_vec(:,t+1) = z(t)+Io_vec(:,t).*(1-alpha(t).*lambda.*gamma_hosp0(:,t)-(1-alpha(t)*lambda).*gamma_obs0(:,t));
     Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t+1);
@@ -219,7 +220,8 @@ end
         % L = size(T_inf_asymp.mean,2);
         % sh0 = T_inf_asymp.mean.*repmat(share_asymp,N,1)+repmat((1-share_asymp),N,1)*T_inf_symp.mean;
         n0 = floor(N*share_reas);
-        x0 = gamrnd(T_inf_obs.mean.*T_inf_obs.std.^2,1/T_inf_asymp.std^2);
+        sh0 = (T_inf_obs.mean).*ones(N,1);
+        x0 = gamrnd(sh0.*T_inf_obs.std.^2,1/T_inf_obs.std^2);
         x0 = x0(1:n0,:);
         s.T_inf_unobs.d1.mean = sh0; s.T_inf_unobs.d1.std = s.T_inf_asymp.std; 
         n1 = N-n0;
