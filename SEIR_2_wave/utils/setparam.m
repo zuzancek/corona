@@ -11,15 +11,16 @@ s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
 % serial interval
-s.SI.mean = 6.5;       s.SI.std = 0.62;
+extra = 1;
+s.SI.mean = 6.5+extra;       s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0 = 1;        
 % incubation period 
 s.T_inc.mean = 5.1;    s.T_inc.std = s.SI.std;
 % infectious period
-s.T_inf.mean = 3.0;    s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 3.0;    s.T_inf_asymp.std = 0.62;
-s.T_inf_symp.mean =  3.5;    s.T_inf_symp.std = 0.62;
+s.T_inf.mean = 3.0+extra;    s.T_inf.std = 0.62;
+s.T_inf_asymp.mean = 3.0+extra;    s.T_inf_asymp.std = 0.62;
+s.T_inf_symp.mean = 4.5+extra;    s.T_inf_symp.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -67,7 +68,7 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
-s.obs_ratio_tar = 1/10;
+s.obs_ratio_tar = 1/5;
 s.obs_ratio = s.obs_ratio_tar;
 s.self_isolation_effect = 1-0.12;
 s.case_isolation_effect = 1/(1-0.5);

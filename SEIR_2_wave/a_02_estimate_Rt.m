@@ -25,7 +25,7 @@ end
 disp_to = t1-del-1;
 
 %% calculations
-% s = setparam();
+s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
 inputs_fnc.sim_num = 1;

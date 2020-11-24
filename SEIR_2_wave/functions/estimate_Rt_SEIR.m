@@ -107,8 +107,8 @@ gamma_hosp0 = 1./T_hosp0_vec;
 
 T_pre_pd = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std^2,'b',1/s.T_pre.std^2);
 sigma = s.symp_ratio_obs*(1-cdf(T_pre_pd,T_test+s.T_pre.mean));
-varsigma_unobs = 1./s.self_isolation_effect*ones(T,1);
-varsigma_obs = 1./s.case_isolation_effect*ones(T,1);
+varsigma_unobs = s.self_isolation_effect*ones(T,1);
+varsigma_obs = s.case_isolation_effect*ones(T,1);
 
 % set initial values
 S_vec = zeros(N,T);       S_vec(:,1) = pop_size-I0;
@@ -141,16 +141,16 @@ idx = ones(N,1);
 
 for t = 1:T-2
     Iu_vec(:,t) = z(t).*T_test_vec(:,t)./tau(t);
-    Io_vec(:,t+1) = Io_vec(:,t).*(1-alpha(t).*lambda.*gamma_hosp0(:,t)-(1-alpha(t)*lambda).*gamma_obs0(:,t));
+    Io_vec(:,t+1) = z(t)+Io_vec(:,t).*(1-alpha(t).*lambda.*gamma_hosp0(:,t)-(1-alpha(t)*lambda).*gamma_obs0(:,t));
     Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t+1);
     F_vec(:,t) = Iu_vec(:,t+1)-Iu_vec(:,t).*(1-tau(t)./T_test_vec(:,t)-(1-tau(t)).*gamma_unobs(:,t));
     S_vec(:,t+1) = S_vec(:,t)-F_vec(:,t);
     %Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp0(:,t)).*Ia_vec(:,t);    
     %Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0(:,t)).*Is_vec(:,t);
-    I = varsigma_unobs(t).*Iu_vec(:,t)./T_SI_unobs_vec+varsigma_obs(t).*Io_vec(:,t)./T_SI_obs_vec; 
+    I = varsigma_unobs(t).*Iu_vec(:,t).*gamma_unobs(:,t)+varsigma_obs(t).*Io_vec(:,t).*gamma_obs0(:,t); 
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F_vec(:,t)./I;
     idx = idx & S_vec(:,t+1)>0 & F_vec(:,t)>0 & Io_vec(:,t+1)> 0 & Iu_vec(:,t+1)> 0;
-    disp(length(find(idx>0)));
+    % disp(length(find(idx>0)));
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
@@ -183,7 +183,7 @@ if do_quant
     end
     x_mat = zeros(M,T);
     for j = 1:M
-        x_mat(j,:) = quantile(I_vec(:,2:end),q_vec(j),1);
+        x_mat(j,:) = quantile(I_vec(:,1:end),q_vec(j),1);
     end
 else
     q_mat = [];

@@ -15,7 +15,7 @@ dt = 1;
 t0 = startdate(x.ActiveCases);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
-t1 = enddate(x.ActiveCases)-cut-2;
+t1 = enddate(x.ActiveCases)-cut-0;
 % t1 = dd(2020,11,14);
 h_t0 = startdate(hosp.ICU);
 h_t00 = find(hosp.ICU>0);
@@ -58,23 +58,23 @@ initial.date = t0; initial.value = 25;
 % clinical statistics
 figure('Name','Clinical statistics');
 subplot(2,2,1)
-plot(hospit,'linestyle','--');hold on;
-plot(hospit_smooth,'linewidth',1);
+plot(hospit,'linewidth',1);hold on;
+plot(hospit_smooth,'linewidth',2);
 grid on;
 title('Total hospitalizations');
 subplot(2,2,2)
-plot(icu,'linestyle','--');hold on;
-plot(icu_smooth,'linewidth',1);
+plot(icu,'linewidth',1);hold on;
+plot(icu_smooth,'linewidth',2);
 grid on;
 title('ICU beds');
 subplot(2,2,3)
-plot(vent,'linestyle','--');hold on;
-plot(vent_smooth,'linewidth',1);
+plot(vent,'linewidth',1);hold on;
+plot(vent_smooth,'linewidth',2);
 grid on;
 title('Ventilations');
 subplot(2,2,4)
-plot(death,'linestyle','--');hold on;
-plot(death_smooth,'linewidth',1);
+plot(death,'linewidth',1);hold on;
+plot(death_smooth,'linewidth',2);
 grid on;
 title('Deaths');
 
