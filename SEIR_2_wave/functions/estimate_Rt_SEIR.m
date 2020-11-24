@@ -139,19 +139,20 @@ idx = ones(N,1);
 % reprod.number R(t)
 % F(t) =
 % R(t)*S(t)/pop_size*[Iu(t)/(varsigma*(T_inf_u+T_lat))+Io(t)/(T_inf_o+T_lat)]
+lambda = 0;
 
 for t = 1:T-1
     Iu_vec(:,t) = z(t).*T_test_vec(:,t)./tau(t);
-    Io_vec(:,t+1) = z(t)+Io_vec(:,t).*(1-alpha(t).*lambda.*gamma_hosp0(:,t)-(1-alpha(t)*lambda).*gamma_obs0(:,t));
+    Io_vec(:,t+1) = z(t)+Io_vec(:,t).*(1-alpha(t).*lambda.*min(1,gamma_hosp0(:,t))-(1-alpha(t)*lambda).*min(1,gamma_obs0(:,t)));
     Iu_vec(:,t+1) = z(t+1).*T_test_vec(:,t+1)./tau(t+1);
     F_vec(:,t) = Iu_vec(:,t+1)-Iu_vec(:,t).*(1-tau(t)./T_test_vec(:,t)-(1-tau(t)).*gamma_unobs(:,t));
     S_vec(:,t+1) = S_vec(:,t)-F_vec(:,t);
     %Ia_vec(:,t+1) = Ia_vec(:,t)+Ia_in(:,t)-(sigma(t).*gamma_pre+(1-sigma(t)).*gamma_asymp0(:,t)).*Ia_vec(:,t);    
     %Is_vec(:,t+1) = Is_vec(:,t)+Is_in(:,t)+sigma(t).*gamma_pre-(lambda.*gamma_hosp0(:,t)+(1-lambda).*gamma_symp0(:,t)).*Is_vec(:,t);
-    I = varsigma_unobs(t).*Iu_vec(:,t).*gamma_unobs(:,t)+varsigma_obs(t).*Io_vec(:,t).*gamma_obs0(:,t); 
+    I = varsigma_unobs(t).*Iu_vec(:,t).*gamma_unobs(:,t)+0*varsigma_obs(t).*Io_vec(:,t).*min(1,gamma_obs0(:,t)); 
     Rt_vec(:,t) = pop_size./S_vec(:,t).*F_vec(:,t)./I;
-    idx = idx & S_vec(:,t+1)>0 & F_vec(:,t)>0 & Io_vec(:,t+1)> 0 & Iu_vec(:,t+1)> 0;
-    % disp(length(find(idx>0)));
+    idx = idx & S_vec(:,t+1)>0 & F_vec(:,t)>0 & Iu_vec(:,t+1)> 0 & Io_vec(:,t+1)> 0; 
+    % disp(length(find(idx>0))); varsigma_unobs(t).*
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);

@@ -1,14 +1,14 @@
 function [res_mean,res_quant] = simulate_SIR(T,Rt,It,st,alpha_vec,t0,s)
 
 % initialize
-T_rem = s.T_rem;
+T_SI = s.T_SI;
 q_vec = s.quant;
 pop_size = s.pop_size;
 w = s.alpha_weight;
 
 % setup
 N = length(Rt);
-shape = T_rem.mean*(T_rem.std)^2; scale = 1/(T_rem.std)^2;
+shape = T_SI.mean*(T_SI.std)^2; scale = 1/(T_SI.std)^2;
 shape_vec = shape*ones(1*N,1);
 scale_vec = scale*ones(1*N,1);
 Trec_mat = reshape(gamrnd(shape_vec,scale_vec),N,1);

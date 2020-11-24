@@ -49,7 +49,7 @@ for t = 1:T
    S_vec(:,t+1) = S_vec(:,t)-z(t);
    dE_inflow(:,t) = Trec_mat./T_inf.mean.*z(t); dE_outflow(:,t) = E_vec(:,t)./T_inc.mean;
    E_vec(:,t+1) = E_vec(:,t)+dE_inflow(:,t)-dE_outflow(:,t);
-   I_vec(:,t+1) = I_vec(:,t).*(1-1./Trec_vec)+z(t);%+z(t);
+   I_vec(:,t+1) = I_vec(:,t).*(1-1./Trec_vec)+z(t);
    X_vec(:,t+1) = X_vec(:,t).*(1-1/d)+dE_inflow(:,t);
    idx = idx & I_vec(:,t+1)>0;
 end
