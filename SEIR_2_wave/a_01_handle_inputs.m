@@ -60,8 +60,18 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 % asymptomatic share
 final.date = t1; final.value = 15;
 initial.date = t0; initial.value = 25; 
-[asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,13),s,initial,final);
-
+try
+    [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,13),s,initial,final);
+catch err
+    pr = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_smooth','dI_inflow_pcr_adj_smooth',...
+        'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
+        'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
+        'death_smooth','h_t0','h_t1','h_t00');
+    asymp_ratio_smooth = pr.asymp_ratio_smooth;
+    pr = load('raw.mat','data');
+    asymp_ratio = pr.data.Asymp;
+end
+    
 %% plotting stuff
 % clinical statistics
 figure('Name','Clinical statistics');
