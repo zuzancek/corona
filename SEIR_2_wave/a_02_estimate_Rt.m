@@ -29,38 +29,36 @@ s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
 % inputs_fnc.sim_num = 1;
-inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
-inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt_smooth,q_mat,Yt,x_mat,Rt_last] = model_fnc(inputs_fnc,s,true,true);
-
-inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
-[Rt_adj_smooth,q_mat_adj,~,x_mat_adj] = model_fnc(inputs_fnc,s,true,true);
+inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
+[Rt,q_mat,Yt,x_mat,Rt_last] = model_fnc(inputs_fnc,s,true,true);
+
+inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
+inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
+inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
+[Rt_pcr,q_mat_pcr,Yt_pcr,x_mat_pcr,Rt_last_pcr]  = model_fnc(inputs_fnc,s,true,true);
 
 %% plotting stuff
 figure;
-Rt_adj_series = tseries(t0+1:t1-del,Rt_adj_smooth);
-Rt_smooth_series = tseries(t0+1:t1-del,Rt_smooth);
+Rt_smooth_series_pcr = tseries(t0+1:t1-del,Rt_pcr);
+Rt_smooth_series = tseries(t0+1:t1-del,Rt);
 plot(resize(Rt_smooth_series,disp_from:t1-del),'linewidth',1);hold on;
-plot(resize(Rt_adj_series,disp_from:t1-del),'linewidth',1);hold on;
+plot(resize(Rt_smooth_series_pcr,disp_from:t1-del),'linewidth',1);hold on;
 title('Rt (smooth inputs)');
-legend({'observed inputs','adjusted'});
+legend({'PCR + AG','PCR only'});
 grid on;
 % 
-plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt)');
-plot_fanchart(q_mat_adj,s,dt,disp_from,disp_to,t0,'Adjusted effective reproduction number (Rt)');
-plot_fanchart(x_mat,s,dt,disp_from,disp_to,t0,'Active infections estimate (unobs.included)');
-plot_fanchart(x_mat_adj,s,dt,disp_from,disp_to,t0,'Adjusted active infections estimate (unobs.included)');
+plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only)');
+plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG)');
 
 %% saving stuff
 x.Rt_smooth = Rt_smooth_series;
-x.Rt_adj_smooth = Rt_adj_series;
+x.Rt_smooth_pcr = Rt_smooth_series_pcr;
 dbsave(x,'results.csv');
 
-Rt = tseries(t0+1:t1-del,Rt_smooth);
-save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1');
+Rt = tseries(t0+1:t1-del,Rt);
+save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1','q_mat_pcr','Rt_pcr','Yt_pcr','s','Rt_last_pcr');
 
 %% optional: statistics
 % model training
