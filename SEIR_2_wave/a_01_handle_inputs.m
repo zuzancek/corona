@@ -37,7 +37,7 @@ pos_test_ratio = x.NewCases./x.Tests;
 pos_test_ratio_ag = y.NewCases./y.Tests;
 pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
-tests = x.NewCases./x.Tests;
+tests = x.Tests;
 tests_smooth = smooth_series(tests,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
