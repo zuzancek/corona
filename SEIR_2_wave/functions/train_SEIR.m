@@ -10,9 +10,12 @@ q_vec = s.quant;
 pop_size = s.pop_size;
 init = inputs.init;
 Rt = inputs.Rt(dateFrom:dateFrom+T);
+N = length(Rt);
 T_test0 = inputs.T_test;
 alpha = inputs.asymp_ratio;
 tau = inputs.obs_ratio;
+s.share_reas = 0.8;
+T_inf_unobs = get_rv_I_unobs();
 
 % init values (observed)
 St = init.S(dateFrom);
@@ -30,7 +33,7 @@ end
 if isfield(init,'E')
     Et = init.E(dateFrom);
 else    
-    Et = (Iut_next-Iut.*(1-1./s.T_.mean)).*s.T_inc.mean;
+    Et = (Iut_next-Iut.*(1-1./s.T_inf_unobs.mean)).*s.T_inc.mean;
 end
 
 % setup
@@ -52,7 +55,6 @@ T_pre = get_rv(s.T_pre);
 T_test = T_test0+T_pre;
 T_inf_obs0 = get_rv(s.T_inf_obs0);
 T_inf_obs = T_inf_obs0+T_test;
-T_inf_unobs = get_rv(s.T_inf_unobs);
 T_hosp = get_rv(s.T_hosp);
 gamma_lat = 1./T_lat;
 gamma_unobs = 1./T_inf_unobs;
@@ -151,6 +153,28 @@ res_quant.St = get_quant(St_vec);
         else
             m = ones(T,1);
         end
+    end
+
+    function [x] = get_rv_I_unobs()
+        L = size(s.T_inf_obs.mean,2);
+        % L = size(T_inf_asymp.mean,2);
+        % sh0 = T_inf_asymp.mean.*repmat(share_asymp,N,1)+repmat((1-share_asymp),N,1)*T_inf_symp.mean;
+        n0 = floor(N*share_reas);
+        sh0 = (s.T_inf_obs.mean).*ones(N,1);
+        x0 = gamrnd(sh0.*s.T_inf_obs.std.^2,1/s.T_inf_obs.std^2);
+        x0 = x0(1:n0,:);
+        s.T_inf_unobs.d1.mean = sh0; s.T_inf_unobs.d1.std = s.T_inf_asymp.std; 
+        n1 = N-n0;
+        if n1>0
+            x1 = rand(n1,T); a0 = sh0; a1 = 10; sc = 2.3;
+            x1 = (power_law(x1,a0(n0+1:end,:),a1,sc));
+            s.T_inf_unobs.d2.a0 = a0; s.T_inf_unobs.d2.a1 = a1;s.T_inf_unobs.d2.k = sc;
+            s.T_inf_unobs.s0 = share_reas;
+            x = [x0;x1];
+        else
+            x = x0;
+        end
+        s.T_inf_unobs.mean = mean(x); s.T_inf_unobs.std = std(x);
     end
 
 end
