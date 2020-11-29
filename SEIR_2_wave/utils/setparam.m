@@ -19,8 +19,9 @@ s.T_test0 = 1;
 s.T_inc.mean = 5.1;    s.T_inc.std = s.SI.std;
 % infectious period
 s.T_inf.mean = 3.0+extra;    s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 3.0+extra;    s.T_inf_asymp.std = 0.62;
+s.T_inf_asymp.mean = 3.0+extra;   s.T_inf_asymp.std = 0.62;
 s.T_inf_symp.mean = 4.5+extra;    s.T_inf_symp.std = 0.62;
+s.T_inf_obs.mean = 5;             s.T_inf_obs.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
