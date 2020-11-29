@@ -1,5 +1,5 @@
 %% initialization & cleanup
-initialize;
+% initialize;
 
 %% setup
 endFcast = dd(2020,12,31); % end of the year
