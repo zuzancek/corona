@@ -18,6 +18,8 @@ load('mobility_estimation.mat','mobilityParams','startEstim','delay','startEstim
 %% training dates
 train_from = dd(2020,3,19);
 train_to = dd(2020,7,1);
+time_interval.dateFrom = train_from;
+time_interval.dateTo = train_to;
 
 %% handle inputs
 % ******* Mobility
@@ -34,11 +36,26 @@ mobility.forecast = false;
 % restrictions = s.kappa_res_0; % delta, at;
 restrictions.forecast = false;
 % ******* Testing
-obs_ratio = double(resize(data.obs_ratio_smooth,t0:t1));
-asymp_ratio = double(resize(data.asymp_ratio_smooth,t0:t1));
-
+obs_ratio = double(resize(data.obs_ratio_smooth,train_from:train_to));
+asymp_ratio = double(resize(data.asymp_ratio_smooth,train_from:train_to));
+T_test = 1+zeros(train_to-train_from+1,1);
+% ******* Initial values
+init.S = tseries(data.t0:data.t1-1,data_Rt.Yt_pcr.St);
+init.Io = tseries(data.t0:data.t1-1,data_Rt.Yt_pcr.Iot);
+init.I = tseries(data.t0:data.t1-1,data_Rt.Yt_pcr.It);
+% ******* collect
+inputs.init = init;
+inputs.T_test = T_test;
+inputs.obs_ratio = obs_ratio;
+inputs.asymp_ratio = asymp_ratio;
+inputs.mobility = mobility;
+inputs.restrictions = restrictions;
+inputs.Rt = tseries(data.t0:data.t1-1,data_Rt.Rt_pcr);
 
 %% model training
+[res_mean,res_quant] = train_SEIR(time_interval,inputs,data.s);
+
+%% display results
 tm0 = dd(2020,9,15);
 tm1 = t1;
 % tune theta

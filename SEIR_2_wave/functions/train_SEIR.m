@@ -9,7 +9,7 @@ restrictions = inputs.restrictions;
 q_vec = s.quant;
 pop_size = s.pop_size;
 init = inputs.init;
-Rt = inputs.Rt(dateFrom,dateFrom+T);
+Rt = inputs.Rt(dateFrom:dateFrom+T);
 T_test0 = inputs.T_test;
 alpha = inputs.asymp_ratio;
 tau = inputs.obs_ratio;
@@ -20,6 +20,9 @@ Iot = init.Io(dateFrom);
 if isfield(init,'Iu') 
     Iut = init.Iu(dateFrom);
     Iut_next = init.Iu(dateFrom+1);
+elseif isfield (init,'I')
+    Iut = init.I(dateFrom)-Iot;
+    Iut_next = init.I(dateFrom+1)-init.Io(dateFrom+1);
 else
     Iut = Iot*(1-1/inputs.obs_ratio(dateFrom));
     Iut_next = init.Io(dateFrom+1)*(1-1/inputs.obs_ratio(dateFrom+1));    
