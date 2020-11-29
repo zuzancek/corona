@@ -65,7 +65,7 @@ varsigma_unobs = s.self_isolation_effect*ones(T,1);
 varsigma_obs = s.case_isolation_effect*ones(T,1);
 
 for t=1:T
-    R_eff(:,t+1) = Rt.*kappa_mob(t).*kappa_res(t);
+    R_eff(:,t) = Rt.*kappa_mob(t).*kappa_res(t);
     dE_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
         (varsigma_obs(t).*Io_vec(:,t).*((1-lambda)*gamma_obs+lambda*gamma_hosp)...
          +varsigma_unobs(t).*Iu_vec(:,t).*gamma_unobs/varsigma);
@@ -132,14 +132,22 @@ res_quant.St = get_quant(St_vec);
     end
 
     function [r] = get_kappa_res()
-        dr = s.kappa_res_delta_0+restrictions.delta*min([0:T],restrictions.at)/restrictions.at; %#ok<NBRAK>
-        r = (1+dr.^s.kappa_res_alpha).*s.beta_res;
+        if restrictions.forecast
+            dr = s.kappa_res_delta_0+restrictions.delta*min([0:T],restrictions.at)/restrictions.at; %#ok<NBRAK>
+            r = (1+dr.^s.kappa_res_alpha).*s.beta_res;
+        else
+            r = ones(T,1);
+        end
     end
 
     function [m] = get_kappa_mob()
-        m0 = interp1(mobility.x_grid,mobility.y_grid,mobility.values);
-        ms = interp1(mobility.x_grid,mobility.y_grid,mobility.scale);
-        m = m0/ms;
+        if mobility.forecast
+            m0 = interp1(mobility.x_grid,mobility.y_grid,mobility.values);
+            ms = interp1(mobility.x_grid,mobility.y_grid,mobility.scale);
+            m = m0/ms;
+        else
+            m = ones(T,1);
+        end
     end
 
 end
