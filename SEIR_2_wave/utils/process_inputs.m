@@ -14,8 +14,6 @@ try
         t1y = enddate(y.(fn{i}));
         x = z;
         x(t0y:t1y) = double(y.(fn{i})(t0y:t1y));
-        % x(find(isnan(x))) = 0;
-        % x(t0:t0y-1) = 0;
         y.(fn{i}) = x;
     end
 catch er
