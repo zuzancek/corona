@@ -1,6 +1,6 @@
 % initialize;
 
-y = dbload('data/antigen_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
+% y = dbload('data/antigen_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -14,18 +14,18 @@ indiff = true;
 cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
-t0_ag = startdate(y.Tests);
+t0_ag = startdate(x.AgTests);
 disp_to = enddate(x.ActiveCases)-cut;
 tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut-0;
-t1_ag = enddate(y.Tests)-cut-0;
+t1_ag = enddate(x.AgTests)-cut-0;
 h_t0 = startdate(hosp.ICU);
 h_t00 = find(hosp.ICU>0);
 h_t1 = enddate(hosp.ICU);
 
 % epidemiology data
-y = process_inputs(y,t0,t1);
-dI_inflow_ag = y.NewCases;
+y = process_inputs(x,tt0,t1);
+dI_inflow_ag = y.AgPosit;
 dI_inflow_pcr = resize(x.NewCases,tt0:t1);
 dI_inflow_pcr_smooth = smooth_series(dI_inflow_pcr,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
@@ -34,7 +34,7 @@ dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 
 pos_test_ratio = x.NewCases./x.Tests;
-pos_test_ratio_ag = y.NewCases./y.Tests;
+pos_test_ratio_ag = y.AgPosit./y.AgTests;
 pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 tests = x.Tests;
