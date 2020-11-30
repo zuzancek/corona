@@ -13,16 +13,8 @@ load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
-s = setparam();
-s.model_seir = false;
-if s.model_seir
-    model_fnc = @estimate_Rt_SEIR;
-    del = 2;
-else
-    model_fnc = @estimate_Rt_SIR;
-    del = 0;
-end
-disp_to = t1-del-1;
+model_fnc = @estimate_Rt_SIR;
+disp_to = t1-1;
 
 %% calculations
 s = setparam();
@@ -41,10 +33,10 @@ inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
 
 %% plotting stuff
 figure;
-Rt_smooth_series_pcr = tseries(t0+1:t1-del,Rt_pcr);
-Rt_smooth_series = tseries(t0+1:t1-del,Rt);
-plot(resize(Rt_smooth_series,disp_from:t1-del),'linewidth',1);hold on;
-plot(resize(Rt_smooth_series_pcr,disp_from:t1-del),'linewidth',1);hold on;
+Rt_smooth_series_pcr = tseries(t0+1:t1,Rt_pcr);
+Rt_smooth_series = tseries(t0+1:t1,Rt);
+plot(resize(Rt_smooth_series,disp_from:t1),'linewidth',1);hold on;
+plot(resize(Rt_smooth_series_pcr,disp_from:t1),'linewidth',1);hold on;
 title('Rt (smooth inputs)');
 legend({'PCR + AG','PCR only'});
 grid on;
@@ -57,7 +49,7 @@ x.Rt_smooth = Rt_smooth_series;
 x.Rt_smooth_pcr = Rt_smooth_series_pcr;
 dbsave(x,'results.csv');
 
-Rt = tseries(t0+1:t1-del,Rt);
+Rt = tseries(t0+1:t1,Rt);
 save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1','q_mat_pcr','Rt_pcr','Yt_pcr','s','Rt_last_pcr');
 
 %% optional: statistics
