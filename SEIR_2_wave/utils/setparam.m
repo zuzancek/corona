@@ -25,6 +25,8 @@ s.T_inf_obs.mean = 5;             s.T_inf_obs.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
+s.T_inf_obs0.mean = s.T_inf_obs.mean-s.T_pre.mean;
+s.T_inf_obs0.std = s.T_inf_obs.std;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 0.8;
