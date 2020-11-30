@@ -11,17 +11,16 @@ s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
 % serial interval
-extra = 1;
-s.SI.mean = 6.5+extra;       s.SI.std = 0.62;
+s.SI.mean = 6.5;       s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0 = 1;        
 % incubation period 
 s.T_inc.mean = 5.1;    s.T_inc.std = s.SI.std;
 % infectious period
-s.T_inf.mean = 3.0+extra;    s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 3.0+extra;   s.T_inf_asymp.std = 0.62;
-s.T_inf_symp.mean = 4.5+extra;    s.T_inf_symp.std = 0.62;
-s.T_inf_obs.mean = 5;             s.T_inf_obs.std = 0.62;
+s.T_inf.mean = 3.0;    s.T_inf.std = 0.62;
+s.T_inf_asymp.mean = 3.0;   s.T_inf_asymp.std = 0.62;
+s.T_inf_symp.mean = 4.5;    s.T_inf_symp.std = 0.62;
+s.T_inf_obs.mean = 5;       s.T_inf_obs.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -95,6 +94,12 @@ pd = makedist('HalfNormal','mu',0,'sigma',1);
 xx = 0:5; % last 6 days
 weights = pdf(pd,xx);
 s.pweight = weights/sum(weights);
+
+% Rt distribution (kernel-smoothing & time-dependent)
+s.min_pts = 100;
+s.max_pts = 200;
+s.min_dif = 1;
+s.max_dif = 4;
 
 end
 

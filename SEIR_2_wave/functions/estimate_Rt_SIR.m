@@ -1,4 +1,4 @@
-function [Rt,q_mat,res,x_mat,Rt_last] = estimate_Rt_SIR(inputs,s,do_quant,do_weight)
+function [Rt,q_mat,res,x_mat,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_quant,do_weight,do_dist)
 
 
 % structure of inputs:
@@ -99,6 +99,36 @@ if do_quant
 else
     q_mat = [];
     x_mat = [];
+end
+
+if do_dist
+    Rt_dist = cell(T,1);
+    Rt_rnd = zeros(N,T);
+    % create time-varying estimator of Rt
+    for t = 1:T
+        r_min = min(Rt_vec(:,t));
+        r_max = max(Rt_vec(:,t));
+        num_pts = s.min_pts+(min(s.max_dif,max(s.min_dif,r_max-r_min))-s.min_dif)/(s.max_dif-s.min_dif)*(s.max_pts-s.min_pts);
+        pts = linspace(r_min,r_max,num_pts);
+        % [cdf_x,x] = ksdensity(Rt_vec(:,t),pts,'Support','positive','BoundaryCorrection','reflection','Function','cdf');
+        [cdf_x,x] = ksdensity(Rt_vec(:,t),pts,'Function','cdf');
+        idx = find(cdf_x(2:end)-cdf_x(1:end-1)<=0,1);
+        if ~isempty(idx)
+            x = x(1:idx); cdf_x = cdf_x(1:idx);
+        end
+        Rt_dist{t} = {x,cdf_x};
+        cutoff = max([1e-5,cdf_x(1),1-cdf_x(end)]);
+        u_r = random('uniform',0+cutoff,1-cutoff,N,1);
+        try
+            x_r = interp1(cdf_x,x,u_r,'pchip','extrap');
+        catch err
+            disp(t);
+        end
+        Rt_rnd(:,t) = reshape(x_r,[],1);
+    end
+else
+    Rt_dist = [];
+    Rt_rnd = [];
 end
 
 end
