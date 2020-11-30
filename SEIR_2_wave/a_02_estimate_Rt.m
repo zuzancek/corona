@@ -20,7 +20,6 @@ disp_to = t1-1;
 s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
-% inputs_fnc.sim_num = 1;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));

@@ -6,8 +6,13 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_qua
 % z: daily data of inflow of newly observed infections
 
 % initialization
+obs_ratio = inputs.obs_ratio;
+if isempty(obs_ratio)
+    obs_ratio = s.obs_ratio+0*inputs.z;
+end
 z = inputs.z;
-I0 = inputs.I0;
+z = z./obs_ratio;
+I0 = inputs.I0/obs_ratio(1);
 N = s.sim_num;
 pop_size = s.pop_size;
 T = length(z);
@@ -57,7 +62,7 @@ for t = 1:T
 end
 
 res.It = It;
-res.Iot = It*s.obs_ratio;
+res.Iot = It.*obs_ratio;
 res.St = St;
 
 if do_quant
