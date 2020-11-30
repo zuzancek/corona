@@ -32,12 +32,12 @@ inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt,q_mat,Yt,x_mat,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false);
+[Rt,q_mat,Yt,Rt_last] = model_fnc(inputs_fnc,s,true,true,false);
 
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-[Rt_pcr,q_mat_pcr,Yt_pcr,x_mat_pcr,Rt_last_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
+[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
 
 %% plotting stuff
 figure;
