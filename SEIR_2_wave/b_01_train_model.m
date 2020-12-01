@@ -9,8 +9,10 @@ data = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_a
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 % reproduction number
-data_Rt = load('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1',...
-    'q_mat_pcr','Rt_pcr','Yt_pcr','s','Rt_last_pcr');
+data_Rt = load('results_Rt.mat','s','t0','t1','q_mat',...
+    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+data_Rt = load('results_Rt.mat','s','t0','t1','q_mat',...
+    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 % mobility
 load('mobility_forecast.mat','mobilityFcast','startHist','fcastPer','startWave');
 load('mobility_estimation.mat','mobilityParams','startEstim','delay','startEstimFull');
@@ -40,9 +42,9 @@ obs_ratio = double(resize(data.obs_ratio_smooth,train_from:train_to));
 asymp_ratio = double(resize(data.asymp_ratio_smooth,train_from:train_to));
 T_test = 1+zeros(train_to-train_from+1,1);
 % ******* Initial values
-init.S = tseries(data.t0:data.t1-1,data_Rt.Yt_pcr.St);
-init.Io = tseries(data.t0:data.t1-1,data_Rt.Yt_pcr.Iot);
-init.I = tseries(data.t0:data.t1-1,data_Rt.Yt_pcr.It);
+init.S = tseries(data.t0:data.t1-1,data_Rt.Yt.St);
+init.Io = tseries(data.t0:data.t1-1,data_Rt.Yt.Iot);
+init.I = tseries(data.t0:data.t1-1,data_Rt.Yt.It);
 % ******* collect
 inputs.init = init;
 inputs.T_test = T_test;
@@ -50,7 +52,7 @@ inputs.obs_ratio = obs_ratio;
 inputs.asymp_ratio = asymp_ratio;
 inputs.mobility = mobility;
 inputs.restrictions = restrictions;
-inputs.Rt = tseries(data.t0:data.t1-1,data_Rt.Rt_pcr);
+inputs.Rt = tseries(data.t0:data.t1-1,data_Rt.Rt_rnd);
 
 %% model training
 [res_mean,res_quant] = train_SEIR(time_interval,inputs,data.s);

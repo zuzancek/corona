@@ -51,8 +51,9 @@ dbsave(x,'results.csv');
 Rt = tseries(t0+1:t1,Rt);
 save('results_Rt.mat','s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-save('results_Rt_pcr.mat','s','t0','t1','q_mat_pcr',...
-    'Rt_pcr','Yt_pcr','Rt_last_pcr','Rt_dist_pcr','Rt_rnd_pcr');
+q_mat = q_mat_pcr; Rt = Rt_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
+save('results_Rt_pcr.mat','s','t0','t1','q_mat',...
+    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 
 %% optional: statistics
 % model training
