@@ -46,10 +46,15 @@ function h = drawbrace(start, stop, width, varargin)
     
     % Find brace points
     th = atan2(stop(2)-start(2), stop(1)-start(1));
-    c1 = start + width*[cos(th) sin(th)];
+    if width>0
+        c1 = start + width*[cos(th) sin(th)];
+        c4 = stop - width*[cos(th) sin(th)];
+    else
+        c4 = start - width*[cos(th) sin(th)];
+        c1 = stop + width*[cos(th) sin(th)];
+    end
     c2 = 0.5*(start+stop) + 2*width*[-sin(th) cos(th)] - width*[cos(th) sin(th)];
     c3 = 0.5*(start+stop) + 2*width*[-sin(th) cos(th)] + width*[cos(th) sin(th)];
-    c4 = stop - width*[cos(th) sin(th)];
     
     % Assemble brace coordinates
     q = linspace(0+th, pi/2+th, 50)';

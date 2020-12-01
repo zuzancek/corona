@@ -23,7 +23,7 @@ text((T_lat+T_pre+0.5*T_test0)/ax,T_lat/ax+0.01,'T_{test}','color',p3.Color);
 drawbrace([(T_lat+T_pre+T_test0)/ax ay],[(T_lat+T_pre+T_test0+T_inf_obs_0)/ax ay],10,'Color',p4.Color);
 text((T_lat+T_pre+T_test0+0.5*T_inf_obs_0)/ax,T_lat/ax+0.01,'T_{inf}^{obs,0}','color',p4.Color);
 drawbrace([(T_lat)/ax ay],[(T_lat+T_pre+T_test0+T_inf_obs_0)/ax ay],-10,'Color',p5.Color);
-text((T_lat++0.5*(T_pre+T_test0+T_inf_obs_0))/ax,T_lat/ax-0.01,'T_{inf}^{unobs}','color',p5.Color);
+text((T_lat++0.5*(T_pre+T_test0+T_inf_obs_0))/ax,T_lat/ax-0.01,'T_{inf}^{unobs,obs}','color',p5.Color);
 
 
 
