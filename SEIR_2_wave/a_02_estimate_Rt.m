@@ -23,7 +23,7 @@ inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt,q_mat,Yt,Rt_last] = model_fnc(inputs_fnc,s,true,true,false);
+[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,true);
 
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
@@ -49,7 +49,10 @@ x.Rt_smooth_pcr = Rt_smooth_series_pcr;
 dbsave(x,'results.csv');
 
 Rt = tseries(t0+1:t1,Rt);
-save('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1','q_mat_pcr','Rt_pcr','Yt_pcr','s','Rt_last_pcr');
+save('results_Rt.mat','s','t0','t1','q_mat',...
+    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+save('results_Rt_pcr.mat','s','t0','t1','q_mat_pcr',...
+    'Rt_pcr','Yt_pcr','Rt_last_pcr','Rt_dist_pcr','Rt_rnd_pcr');
 
 %% optional: statistics
 % model training
