@@ -1,5 +1,5 @@
 %% initialization
-% initialize;
+initialize;
 
 %% setup
 disp_from = dd(2020,8,1);
