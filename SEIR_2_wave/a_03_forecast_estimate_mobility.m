@@ -12,7 +12,8 @@ data = load('results_Rt.mat','q_mat_pcr','Rt_pcr','Yt','s','Rt_last','t0','t1');
 
 %% handle inputs
 s = data.s; % s = setparam
-startFcast = data.t1+1;
+t1 = dd(2020,11,26);
+startFcast = t1+1;
 endHist = startFcast-1;
 startHist = data.t0;
 startEstim = s.env_from;
@@ -21,9 +22,10 @@ delay = 14;
 
 %% handle mobility 
 fcastPer = endFcast-startFcast+1;
-mobilityFcast = forecast_mobility(mob,fcastPer,startHist,startWave);
+mobilityFcast = forecast_mobility(mob,fcastPer,startHist,endHist,startWave);
 % PCR data only	
 Rt_data = tseries(data.t0+1:data.t1,data.q_mat_pcr(s.quant_idx_central,:));
+Rt_data = resize(Rt_data,data.t0+1:t1);
 mobilityParams = estimate_mobility(mobilityFcast,Rt_data,startEstim,delay,startEstimFull);
 
 %% saving results

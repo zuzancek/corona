@@ -31,12 +31,12 @@ inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
 
 %% plotting stuff
-figure;
+figure('Name','Effective reproduction number, mean (PCR/PCR+AG)');
 Rt_smooth_series_pcr = tseries(t0+1:t1,Rt_pcr);
 Rt_smooth_series = tseries(t0+1:t1,Rt);
-plot(resize(Rt_smooth_series,disp_from:t1),'linewidth',1);hold on;
-plot(resize(Rt_smooth_series_pcr,disp_from:t1),'linewidth',1);hold on;
-title('Rt (smooth inputs)');
+plot(resize(Rt_smooth_series,disp_from:t1),'linewidth',2);hold on;
+plot(resize(Rt_smooth_series_pcr,disp_from:t1),'linewidth',2);hold on;
+title('Mean Rt (smooth inputs)');
 legend({'PCR + AG','PCR only'});
 grid on;
 % 

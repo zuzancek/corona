@@ -1,10 +1,9 @@
-function [mob] = forecast_mobility(mob,fcast_days,t0,tw2)
+function [mob] = forecast_mobility(mob,fcast_days,t0,t1,tw2)
 
 threshold = 100;
 s = setparam();
-t1 = enddate(mob.SK);
 
-figure;
+figure('Name','Mobility (raw data)');
 fn = fieldnames(mob);
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
@@ -22,7 +21,7 @@ ylabel('%');
 title('Mobility, raw data');
 legend(fn);
 %
-figure;
+figure('Name','Mobility (smooth data)');
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
     zz = smooth_series(double(yy),s.smooth_width,s.smooth_type,s.smooth_ends);
@@ -39,7 +38,7 @@ ylabel('%');
 title('Mobility, smooth data');
 legend(fn);
 
-figure;
+figure('Name','Mobility, smoothing window');
 yy = interp(resize(mob.SK,t0:t1),t0:t1);
 plot(yy,'linewidth',1);hold on;
 for k=4:7
@@ -101,7 +100,7 @@ y4(tw2:tt1) = w2;
 zz = smooth_series(double(y4),s.smooth_width,s.smooth_type,s.smooth_ends);
 y4 = 0*y4+zz;
 
-figure;
+figure('Name','Mobility forecast');
 plot(y3,'Color',[0 0.4470 0.7410],'linewidth',1);hold on; 
 ylim([50 150]);
 yl = ylim();
