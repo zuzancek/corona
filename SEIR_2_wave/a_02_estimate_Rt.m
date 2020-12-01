@@ -40,8 +40,8 @@ title('Mean Rt (smooth inputs)');
 legend({'PCR + AG','PCR only'});
 grid on;
 % 
-plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only)');
-plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG)');
+plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only)',true);
+plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG)',true);
 
 %% saving stuff
 x.Rt_smooth = Rt_smooth_series;

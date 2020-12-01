@@ -1,6 +1,5 @@
 % initialize;
 
-% y = dbload('data/antigen_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');

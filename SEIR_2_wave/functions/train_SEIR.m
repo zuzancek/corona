@@ -3,35 +3,35 @@ function [res_mean,res_quant] = train_SEIR(time_interval,inputs,s)
 %% handle inputs
 dateFrom = time_interval.dateFrom;
 dateTo = time_interval.dateTo;
-T = dateTo-dateFrom;
+T = dateTo-dateFrom+1;
 mobility = inputs.mobility;
 restrictions = inputs.restrictions;
 q_vec = s.quant;
 pop_size = s.pop_size;
 init = inputs.init;
-Rt = inputs.Rt(dateFrom:dateFrom+T);
+Rt = inputs.Rt;
 N = s.sim_num;
 T_test0 = inputs.T_test;
 alpha = inputs.asymp_ratio;
 tau = inputs.obs_ratio;
-s.share_reas = 0.8;
+lambda = s.lambda;
 T_inf_unobs = get_rv_I_unobs();
 
 % init values (observed)
-St = init.S(dateFrom);
-Iot = init.Io(dateFrom);
+St = init.S(1);
+Iot = init.Io(1);
 if isfield(init,'Iu') 
-    Iut = init.Iu(dateFrom);
-    Iut_next = init.Iu(dateFrom+1);
+    Iut = init.Iu(1);
+    Iut_next = init.Iu(2);
 elseif isfield (init,'I')
-    Iut = init.I(dateFrom)-Iot;
-    Iut_next = init.I(dateFrom+1)-init.Io(dateFrom+1);
+    Iut = init.I(1)-Iot;
+    Iut_next = init.I(2)-init.Io(2);
 else
-    Iut = Iot*(1-1/inputs.obs_ratio(dateFrom));
-    Iut_next = init.Io(dateFrom+1)*(1-1/inputs.obs_ratio(dateFrom+1));    
+    Iut = Iot*(1-1/inputs.obs_ratio(1));
+    Iut_next = init.Io(2)*(1-1/inputs.obs_ratio(2));    
 end
 if isfield(init,'E')
-    Et = init.E(dateFrom);
+    Et = init.E(1);
 else    
     Et = (Iut_next-Iut.*(1-1./s.T_inf_unobs.mean(1))).*s.T_inc.mean;
 end
@@ -43,15 +43,15 @@ Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = Iut;
 Io_vec = zeros(N,T+1);      Io_vec(:,1) = Iot;
 Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = alpha(1)*Iot; 
 Is_vec = zeros(N,T+1);      Is_vec(:,1) = (1-alpha(1))*Iot; 
-R_eff = zeros(N,T+1);       R_eff(:,1) = Rt;
-dE_in_vec = zeros(N,T+1);   dE_in_vec(:,1) = Rt;
+R_eff = zeros(N,T+1);       R_eff(:,1) = Rt(:,1);
+dE_in_vec = zeros(N,T+1);   
 st = zeros(T+1,1);
 it = st; iot = st; iut = st; ist = st; iat = st;
 
 %% initialize
 T_lat = get_rv(s.T_lat);
 T_pre = get_rv(s.T_pre);
-T_test = T_test0+T_pre;
+T_test = repmat(T_test0',N,1)+repmat(T_pre,1,T);
 T_inf_obs0 = get_rv(s.T_inf_obs0);
 T_inf_obs = T_inf_obs0+T_test;
 T_hosp = get_rv(s.T_hosp);
@@ -69,16 +69,16 @@ varsigma_unobs = s.self_isolation_effect*ones(T,1);
 varsigma_obs = s.case_isolation_effect*ones(T,1);
 
 for t=1:T
-    R_eff(:,t) = Rt.*kappa_mob(t).*kappa_res(t);
+    R_eff(:,t) = Rt(t).*kappa_mob(t).*kappa_res(t);
     dE_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
-        (varsigma_obs(t).*Io_vec(:,t).*((1-lambda)*gamma_obs+lambda*gamma_hosp)...
-         +varsigma_unobs(t).*Iu_vec(:,t).*gamma_unobs/varsigma);
+        (varsigma_obs(t).*Io_vec(:,t).*((1-lambda)*gamma_obs(:,t)+lambda*gamma_hosp)...
+         +varsigma_unobs(t).*Iu_vec(:,t).*gamma_unobs(:,t));
     S_vec(:,t+1) = S_vec(:,t)-dE_in_vec(:,t);     
     E_vec(:,t+1) = E_vec(:,t).*(1-gamma_lat)+dE_in_vec(:,t);
-    Iu_vec(:,t+1) = Iu_vec(:,t)+gamma_lat.*E_vec(:,t)-tau(t).*Iu_vec(:,t).*gamma_test...
-        -(1-tau(t)).*Iu_vec(:,t).*gamma_unobs;
-    Io_vec(:,t+1) = Io_vec(:,t)+tau(t).*Iu_vec(:,t).*gamma_test...
-        -(lambda(t).*alpha(t).*gamma_hosp+(1-lambda(t).*alpha(t)).*gamma_obs0).*Io_vec(:,t);
+    Iu_vec(:,t+1) = Iu_vec(:,t)+gamma_lat.*E_vec(:,t)-tau(t).*Iu_vec(:,t).*gamma_test(:,t)...
+        -(1-tau(t)).*Iu_vec(:,t).*gamma_unobs(:,t);
+    Io_vec(:,t+1) = Io_vec(:,t)+tau(t).*Iu_vec(:,t).*gamma_test(:,t)...
+        -(lambda.*alpha(t).*gamma_hosp+(1-lambda.*alpha(t)).*gamma_obs0).*Io_vec(:,t);
     Ia_vec(:,t) = alpha(t).*Io_vec(:,t); Is_vec(:,t) = Io_vec(:,t)-Ia_vec(:,t);
     idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & E_vec(:,t+1)>=0;
 end

@@ -1,4 +1,4 @@
-function [] = plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,fname)
+function [] = plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,fname,maketit)
 
 f = figure('Name',fname);
 fanChart(1:size(q_mat,2), q_mat', q_mat(s.quant_idx_central,:), s.quant,...
@@ -19,5 +19,8 @@ mtt = cumsum(mt);
 xticks(mtt)
 xticklabels({'marec','april','maj','jun','jul','august','september','oktober','november','december'});
 xlim([p0 p1]);
+if maketit
+    title(fname,'Color',s.color_grid);
+end
 
 end
