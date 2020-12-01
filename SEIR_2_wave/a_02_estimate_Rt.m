@@ -23,7 +23,7 @@ inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,true);
+[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,true); %#ok<*ASGLU>
 
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
@@ -48,7 +48,7 @@ x.Rt_smooth = Rt_smooth_series;
 x.Rt_smooth_pcr = Rt_smooth_series_pcr;
 dbsave(x,'results.csv');
 
-Rt = tseries(t0+1:t1,Rt);
+Rt = tseries(t0+1:t1,Rt); %#ok<*NASGU>
 save('results_Rt.mat','s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 q_mat = q_mat_pcr; Rt = Rt_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
