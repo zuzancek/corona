@@ -11,7 +11,7 @@ indiff = true;
 
 %% handle data
 % definitions
-cut = 2;
+cut = 3;
 dt = 1;
 t0 = startdate(x.ActiveCases);
 t0_ag = startdate(x.AgTests);
