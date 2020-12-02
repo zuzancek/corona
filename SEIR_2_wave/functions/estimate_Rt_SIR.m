@@ -10,35 +10,43 @@ obs_ratio = inputs.obs_ratio;
 if isempty(obs_ratio)
     obs_ratio = s.obs_ratio+0*inputs.z;
 end
-z = inputs.z;
-z = z./obs_ratio;
+z_obs = inputs.z;
+z = z_obs./obs_ratio;
+z_unobs = z-z_obs;
+
 I0 = inputs.I0/obs_ratio(1);
 N = s.sim_num;
 pop_size = s.pop_size;
 T = length(z);
-T_SI_vec = get_rv(s.SI);
-
+T_si_vec = get_rv(s.SI);
+alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
+I_obs_vec = zeros(N,T); I_obs_vec(:,1) = I0*obs_ratio(1);
+I_unobs_vec = zeros(N,T); I_unobs_vec(:,1) = I0-I_obs_vec(:,1);
 Rt_vec = zeros(N,T); 
-Rt = zeros(T,1); It = Rt; St = Rt;
+Rt = zeros(T,1); It = Rt; St = Rt; Iobst = Rt; Iunobst = Rt;
 idx = ones(N,1);
 
 % model
 % S(t+1) = S(t)-R(t)*gamma*S(t)*I(t)/pop_size;
 % I(t+1) = I(t)+R(t)*gamma*S(t)*I(t)/pop_size-gamma*I(t);
-% z(t) = R(t)*gamma*S(t)*I(t)/pop_size;
+% z(t) = R(t)*S(t)/pop_size*<gamma,I(t)>;
 for t = 1:T
-   Rt_vec(:,t) = pop_size.*z(t).*T_SI_vec./(S_vec(:,t).*I_vec(:,t));
+   Rt_vec(:,t) = pop_size.*z(t)./S_vec(:,t).*T_si_vec./(I_unobs_vec(:,t)+alpha*I_obs_vec(:,t));
    S_vec(:,t+1) = S_vec(:,t)-z(t);
-   I_vec(:,t+1) = I_vec(:,t).*(1-1./T_SI_vec)+z(t);
-   idx = idx & I_vec(:,t+1)>0;
+   I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);
+   I_obs_vec(:,t+1) = I_obs_vec(:,t).*(1-1./T_si_vec)+z_obs(t);
+   I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
+   idx = idx & I_unobs_vec(:,t+1)>0 & I_obs_vec(:,t+1)>0;
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
 S_vec = S_vec(idx,:);
 I_vec = I_vec(idx,:);
+I_unobs_vec = I_unobs_vec(idx,:);
+I_obs_vec = I_obs_vec(idx,:);
 
 if do_weight
     weights = s.pweight;
@@ -54,11 +62,14 @@ end
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
     It(t) = mean(I_vec(:,t));
+    Iobst(t) = mean(I_obs_vec(:,t));
+    Iunobst(t) = mean(I_unobs_vec(:,t));
     St(t) = mean(S_vec(:,t));
 end
 
 res.It = It;
-res.Iot = It.*obs_ratio;
+res.Iot = Iobst;
+res.Iut = Iunobst;
 res.St = St;
 
 if do_quant
