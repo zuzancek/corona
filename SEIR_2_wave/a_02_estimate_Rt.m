@@ -22,7 +22,7 @@ end
 disp_to = t1-1;
 
 %% calculations
-s = setparam();
+% s = setparam();
 inputs_fnc = struct();
 inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
