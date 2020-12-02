@@ -9,7 +9,7 @@ data = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_a
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 % reproduction number (PCR tests exclusively/both PCR and AG)
-data_Rt = load('results_Rt_pcr.mat','s','t0','t1','q_mat',...
+data_Rt = load('results_Rt_SIR_pcr.mat','s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 % data_Rt = load('results_Rt.mat','s','t0','t1','q_mat',...
 %     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
@@ -57,7 +57,7 @@ inputs.restrictions = restrictions;
 inputs.Rt = data_Rt.Rt_rnd(:,train_from:train_to);
 
 %% model training
-[res_mean,res_quant] = train_SEIR(time_interval,inputs,data.s);
+[res_mean,res_quant] = train_SIR(time_interval,inputs,data.s);
 
 %% display results
 tm0 = dd(2020,9,15);
