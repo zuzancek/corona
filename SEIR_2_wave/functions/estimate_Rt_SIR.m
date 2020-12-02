@@ -16,10 +16,7 @@ I0 = inputs.I0/obs_ratio(1);
 N = s.sim_num;
 pop_size = s.pop_size;
 T = length(z);
-shape = s.SI.mean*(s.SI.std)^2; scale = 1/(s.SI.std)^2;
-shape_vec = shape*ones(1*N,1);
-scale_vec = scale*ones(1*N,1);
-Trec_mat = reshape(gamrnd(shape_vec,scale_vec),N,1);
+T_SI_vec = get_rv(s.SI);
 
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
@@ -33,10 +30,9 @@ idx = ones(N,1);
 % I(t+1) = I(t)+R(t)*gamma*S(t)*I(t)/pop_size-gamma*I(t);
 % z(t) = R(t)*gamma*S(t)*I(t)/pop_size;
 for t = 1:T
-   Trec_vec = Trec_mat;
-   Rt_vec(:,t) = pop_size.*z(t).*Trec_vec./(S_vec(:,t).*I_vec(:,t));
+   Rt_vec(:,t) = pop_size.*z(t).*T_SI_vec./(S_vec(:,t).*I_vec(:,t));
    S_vec(:,t+1) = S_vec(:,t)-z(t);
-   I_vec(:,t+1) = I_vec(:,t).*(1-1./Trec_vec)+z(t);
+   I_vec(:,t+1) = I_vec(:,t).*(1-1./T_SI_vec)+z(t);
    idx = idx & I_vec(:,t+1)>0;
 end
 idx = find(idx>0);
@@ -110,5 +106,13 @@ else
     Rt_dist = [];
     Rt_rnd = [];
 end
+
+    function [x] = get_rv(y)
+        shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
+        L = length(shape0);
+        shape0_vec = repmat(shape0,N,1);
+        scale0_vec = scale0*ones(N,L);
+        x = gamrnd(shape0_vec,scale0_vec);
+    end
 
 end
