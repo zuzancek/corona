@@ -13,7 +13,11 @@ load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
-model_fnc = @estimate_Rt_SEIR;
+if s.model_seir
+    model_fnc = @estimate_Rt_SEIR;
+else
+    model_fnc = @estimate_Rt_SIR;
+end
 disp_to = t1-1;
 
 %% calculations
@@ -23,12 +27,12 @@ inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false); %#ok<*ASGLU>
+[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,true); %#ok<*ASGLU>
 
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
+[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
 
 %% plotting stuff
 figure('Name','Effective reproduction number, mean (PCR/PCR+AG)');
@@ -49,10 +53,11 @@ x.Rt_smooth_pcr = Rt_smooth_series_pcr;
 dbsave(x,'results.csv');
 
 Rt = tseries(t0+1:t1,Rt); %#ok<*NASGU>
-save('results_Rt.mat','s','t0','t1','q_mat',...
+ext_opt = {'_SIR','_SEIR'};
+save(strcat('results_Rt',ext_opt{1+s.model_seir},'.mat'),'s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 q_mat = q_mat_pcr; Rt = Rt_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
-save('results_Rt_pcr.mat','s','t0','t1','q_mat',...
+save(strcat('results_Rt',ext_opt{1+s.model_seir},'_pcr.mat'),'s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 
 %% optional: statistics
