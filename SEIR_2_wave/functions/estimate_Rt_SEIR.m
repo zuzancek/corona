@@ -18,11 +18,16 @@ I0 = inputs.I0/obs_ratio(1);
 N = s.sim_num;
 pop_size = s.pop_size;
 T = length(z);
-T_si_vec = get_rv(s.SI);
-alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
+T_lat_vec = get_rv(s.T_lat);
+T_inf_vec = get_rv(s.T_inf);
+gamma_inf_unobs = 1./T_inf_vec;
+s.T_inf_obs.mean = s.T_inf_obs.mean-s.T_inf_obs0.mean;
+T_inf_obs_vec = get_rv(s.T_inf_obs);
+gamma_inf_obs = 1./T_inf_obs_vec;
+alpha = (s.T_inf_obs.mean+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
-E_vec = zeros(N,T); 
+E_vec = zeros(N,T); E_vec(:,1) = z(1).*T_lat_vec;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
 I_obs_vec = zeros(N,T); I_obs_vec(:,1) = I0*obs_ratio(1);
 I_unobs_vec = zeros(N,T); I_unobs_vec(:,1) = I0-I_obs_vec(:,1);
@@ -31,21 +36,25 @@ Rt = zeros(T,1); It = Rt; St = Rt; Et = Rt; Iobst = Rt; Iunobst = Rt;
 idx = ones(N,1);
 
 % model
-% S(t+1) = S(t)-R(t)*gamma*S(t)*I(t)/pop_size;
-% E(t+1) = E(t)+R(t)*gamma*S(t)*I(t)/pop_size-E(t)/T_lat;
-% I(t+1) = I(t)+E(t)/T_lat-gamma*I(t);
-% z(t) = E(t)/T_lat;
-for t = 1:T
-   Rt_vec(:,t) = pop_size.*z(t)./S_vec(:,t).*T_si_vec./(I_unobs_vec(:,t)+alpha*I_obs_vec(:,t));
-   S_vec(:,t+1) = S_vec(:,t)-z(t);
-   I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);
-   I_obs_vec(:,t+1) = I_obs_vec(:,t).*(1-1./T_si_vec)+z_obs(t);
-   I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
-   idx = idx & I_unobs_vec(:,t+1)>0 & I_obs_vec(:,t+1)>0;
+% S(t+1) = S(t)-R(t)*gamma_inf*S(t)*I(t)/pop_size;
+% E(t+1) = E(t)+R(t)*gamma_inf*S(t)*I(t)/pop_size-E(t)*gamma_lat;
+% I(t+1) = I(t)+E(t)*gamma_lat-gamma_inf*I(t);
+% z(t) = E(t)*gamma_lat;
+for t = 1:T-1
+    E_vec(:,t+1) = z(t+1).*T_lat_vec;
+    x = E_vec(:,t+1)-E_vec(:,t)+z(t);
+    S_vec(:,t+1) = S_vec(:,t)-x; 
+    Rt_vec(:,t) = pop_size.*x./S_vec(:,t).*T_inf_vec./(I_unobs_vec(:,t)+alpha*I_obs_vec(:,t));
+    I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-gamma_inf_unobs)+z_unobs(t);
+    I_obs_vec(:,t+1) = I_obs_vec(:,t).*(1-gamma_inf_obs)+z_obs(t);
+    I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
+    idx = idx & I_unobs_vec(:,t+1)>0 & I_obs_vec(:,t+1)>0 & x>0;
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
+Rt_vec(:,T) = Rt_vec(:,T-1);
 S_vec = S_vec(idx,:);
+E_vec = E_vec(idx,:);
 I_vec = I_vec(idx,:);
 I_unobs_vec = I_unobs_vec(idx,:);
 I_obs_vec = I_obs_vec(idx,:);
@@ -64,12 +73,14 @@ end
 for t = 1:T
     Rt(t) = mean(Rt_vec(:,t));
     It(t) = mean(I_vec(:,t));
+    Et(t) = mean(E_vec(:,t));
     Iobst(t) = mean(I_obs_vec(:,t));
     Iunobst(t) = mean(I_unobs_vec(:,t));
     St(t) = mean(S_vec(:,t));
 end
 
 res.It = It;
+res.Et = Et;
 res.Iot = Iobst;
 res.Iut = Iunobst;
 res.St = St;

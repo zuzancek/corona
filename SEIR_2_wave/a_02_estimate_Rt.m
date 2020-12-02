@@ -13,7 +13,7 @@ load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
-model_fnc = @estimate_Rt_SIR;
+model_fnc = @estimate_Rt_SEIR;
 disp_to = t1-1;
 
 %% calculations
@@ -23,12 +23,12 @@ inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,true); %#ok<*ASGLU>
+[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false); %#ok<*ASGLU>
 
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
+[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
 
 %% plotting stuff
 figure('Name','Effective reproduction number, mean (PCR/PCR+AG)');
