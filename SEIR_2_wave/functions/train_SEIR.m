@@ -15,6 +15,7 @@ T_test0 = inputs.T_test;
 alpha = inputs.asymp_ratio;
 tau = inputs.obs_ratio;
 lambda = s.lambda;
+s.share_reas =1;
 T_inf_unobs = get_rv_I_unobs();
 
 % init values (observed)
