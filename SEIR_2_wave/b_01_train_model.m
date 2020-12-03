@@ -60,9 +60,22 @@ s.quant = 0.25:0.025:0.75;
 [res_mean,res_quant] = train_SIR(time_interval,inputs,data.s);
 
 %% display results
+% infectious in distributions
 plot_fanchart(res_quant.It,s,dt,train_from,train_to,train_from,'Total active infections (SIR, PCR only)',true,8);
 plot_fanchart(res_quant.Iot,s,dt,train_from,train_to,train_from,'Observed active infections (SIR, PCR only)',true,8);
 
+% 
+figure('Name','Data vs. model-implied observed infectious');
+plot(init.Io,'linewidth',1);hold on;
+plot(res_mean.Iot,'linewidth',1);hold on;
+plot(res_quant.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
+grid on;
+legend({'data implied','model-implied mean','model-implied median'});
+
+% TODO
+% komparacie: (SIR, epi)
+% - observed/unobserved;
+% - asymptomatical/symptomatical
 % tm0 = dd(2020,9,15);
 % tm1 = t1;
 % % tune theta

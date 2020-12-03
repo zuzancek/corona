@@ -104,13 +104,6 @@ res_quant.Iot = get_quant(Io_vec(:,1:T));
 res_quant.It = get_quant(I_vec(:,1:T));
 res_quant.St = get_quant(S_vec(:,1:T));
 
-figure('Name','Observed');
-plot(init.Io);hold on;
-plot(res_mean.Iot);hold on;
-plot(res_quant.Iot(10,:));hold on;
-grid on;
-legend({'data implied','sim mean','sim median'});
-
 %% helpers
 
     function [x] = get_rv(y)
