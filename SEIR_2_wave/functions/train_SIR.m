@@ -7,6 +7,7 @@ T = dateTo-dateFrom+1;
 mobility = inputs.mobility;
 restrictions = inputs.restrictions;
 q_vec = s.quant;
+obs_ratio_effect = inputs.obs_ratio_effect;
 pop_size = s.pop_size;
 init = inputs.init;
 Rt = inputs.Rt;
@@ -24,7 +25,7 @@ Iot = init.Io(1);
 
 % setup
 S_vec = zeros(N,T+1);       S_vec(:,1) = St;
-Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = Iut;
+Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = (1/tau(1)-1)*Iot;
 Io_vec = zeros(N,T+1);      Io_vec(:,1) = Iot;
 Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = alpha(1)*Iot; 
 Is_vec = zeros(N,T+1);      Is_vec(:,1) = (1-alpha(1))*Iot; 
@@ -35,6 +36,8 @@ it = st; iot = st; iut = st; ist = st; iat = st;
 
 %% initialize
 T_si_vec = get_rv(s.SI);
+shift = min(floor(get_rv(s.SI),2*s.SI.mean));
+A = Rt';
 gamma = 1./T_si_vec;
 
 % T_pre = get_rv(s.T_pre);
@@ -54,15 +57,15 @@ kappa_mob = get_kappa_mob();
 % varsigma_unobs = s.self_isolation_effect*ones(T,1);
 % varsigma_obs = s.case_isolation_effect*ones(T,1);
 
-alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
+varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 
 for t=1:T
-    R_eff(:,t) = Rt(t).*kappa_mob(t).*kappa_res(t);
+    R_eff(:,t) = Rt(:,t).*kappa_mob(t).*kappa_res(t).*obs_ratio_effect(t);
     dI_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
-        (alpha.*Io_vec(:,t)+Iu_vec(:,t)).*gamma;
+        (varsigma.*Io_vec(:,t)+Iu_vec(:,t)/varsigma).*gamma;
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t);   
-    Io_vec(:,t+1) = Io_vec(:,t)+tau(t).*dI_in_vec(:,t)-gamma.*Io_vec(:,t);
-    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-tau(t)).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
+    Io_vec(:,t+1) = Io_vec(:,t)+s.obs_ratio.*dI_in_vec(:,t)-gamma.*Io_vec(:,t);
+    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
     Ia_vec(:,t) = alpha(t).*Io_vec(:,t); Is_vec(:,t) = Io_vec(:,t)-Ia_vec(:,t);
     idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0;
 end
@@ -93,13 +96,24 @@ res_mean.Iut = iut;
 res_mean.St = st;
 
 M = length(q_vec);
-res_quant.Iat = get_quant(Iat_vec);
-res_quant.Ist = get_quant(Ist_vec);
-res_quant.Iut = get_quant(Iut_vec);
-res_quant.Iot = get_quant(Iot_vec);
-res_quant.It = get_quant(It_vec);
-res_quant.St = get_quant(St_vec);
+res_quant.Iat = get_quant(Ia_vec(:,1:T));
+res_quant.Ist = get_quant(Is_vec(:,1:T));
+res_quant.Iut = get_quant(Iu_vec(:,1:T));
+res_quant.Iot = get_quant(Io_vec(:,1:T));
+res_quant.It = get_quant(I_vec(:,1:T));
+res_quant.St = get_quant(S_vec(:,1:T));
 
+figure('Name','Observed');
+plot(init.Io);hold on;
+plot(res_mean.Iot);hold on;
+plot(res_quant.Iot(10,:));hold on;
+grid on;
+legend({'data implied','sim mean','sim median'});
+
+% figure;
+% plot(Rt);hold on;
+% plot(R_eff);
+% grid on;
 
 %% helpers
 

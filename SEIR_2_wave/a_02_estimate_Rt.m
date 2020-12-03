@@ -10,7 +10,7 @@ dt = 1;
 %% load data
 load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_pcr_adj_smooth',...
     'pos_test_ratio_smooth','obs_ratio_smooth','dI_inflow_smooth','asymp_ratio_smooth',...
-    'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
+    'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth','obs_ratio',...
     'death_smooth','h_t0','h_t1','h_t00');
 tt0 = t0+dt;
 s.model_seir = false;
@@ -28,7 +28,7 @@ inputs_fnc.I0 = I0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
-[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,true); %#ok<*ASGLU>
+[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false); %#ok<*ASGLU>
 
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_smooth,t0:t1));

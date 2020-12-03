@@ -10,7 +10,7 @@ indiff = true;
 
 %% handle data
 % definitions
-cut = 3;
+cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
 t0_ag = startdate(x.AgTests);
@@ -190,7 +190,7 @@ pos_test_ratio_smooth = resize(pos_test_ratio_smooth,startdate(dI_inflow_pcr_smo
 save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_smooth','dI_inflow_pcr_adj_smooth',...
     'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-    'death_smooth','h_t0','h_t1','h_t00');
+    'death_smooth','h_t0','h_t1','h_t00','obs_ratio');
 data.NewCases_PCR = x.NewCases;
 data.Tests_PCR = x.Tests;
 data.Asymp = asymp_ratio;

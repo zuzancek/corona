@@ -1,5 +1,5 @@
 %% initialization
-initialize;
+% initialize;
 
 %% load data
 % inputs, ratios (asympt, obs), hospitals
@@ -18,8 +18,8 @@ load('mobility_forecast.mat','mobilityFcast','startHist','fcastPer','startWave')
 load('mobility_estimation.mat','mobilityParams','startEstim','delay','startEstimFull');
 
 %% training dates
-train_from_date = dd(2020,3,19);
-train_to_date = dd(2020,7,1);
+train_from_date = dd(2020,9,1);
+train_to_date = dd(2020,11,27-1);
 train_from = train_from_date-data_Rt.t0+1;
 train_to = train_to_date-data_Rt.t0+1;
 time_interval.dateFrom = train_from;
@@ -51,31 +51,32 @@ init.I = data_Rt.Yt.It(train_from:train_to);
 inputs.init = init;
 inputs.T_test = T_test;
 inputs.obs_ratio = obs_ratio;
+inputs.obs_ratio_effect = (data.s.obs_ratio./obs_ratio-1)+1;
 inputs.asymp_ratio = asymp_ratio;
 inputs.mobility = mobility;
 inputs.restrictions = restrictions;
-inputs.Rt = data_Rt.Rt_rnd(:,train_from:train_to);
+inputs.Rt = data_Rt.Rt_rnd(:,train_from-7:train_to-7);
 
 %% model training
 [res_mean,res_quant] = train_SIR(time_interval,inputs,data.s);
 
-%% display results
-tm0 = dd(2020,9,15);
-tm1 = t1;
-% tune theta
-x = tseries(t0:t1-1,Yt.Ist./Yt.Iat);
-as = as(2:end)/100;
-x_tar = as./(1-as);
-dx = 100*(x./x_tar-1);
-figure; 
-plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-ylabel('%');
-title('I_{symp}/I_{asymp} (%)');
-% tune obs_ratio
-x = tseries(t0:t1-1,Yt.Iot./Yt.It);
-x_tar = s.obs_ratio_tar;
-dx = 100*(x./x_tar-1);
-figure; 
-plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-ylabel('%');
-title('I_{obs}/I (%)');
+% %% display results
+% tm0 = dd(2020,9,15);
+% tm1 = t1;
+% % tune theta
+% x = tseries(t0:t1-1,Yt.Ist./Yt.Iat);
+% as = as(2:end)/100;
+% x_tar = as./(1-as);
+% dx = 100*(x./x_tar-1);
+% figure; 
+% plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
+% ylabel('%');
+% title('I_{symp}/I_{asymp} (%)');
+% % tune obs_ratio
+% x = tseries(t0:t1-1,Yt.Iot./Yt.It);
+% x_tar = s.obs_ratio_tar;
+% dx = 100*(x./x_tar-1);
+% figure; 
+% plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
+% ylabel('%');
+% title('I_{obs}/I (%)');

@@ -11,7 +11,7 @@ if isempty(obs_ratio)
     obs_ratio = s.obs_ratio+0*inputs.z;
 end
 z_obs = inputs.z;
-z = z_obs./obs_ratio;
+z = z_obs./obs_ratio(1:length(z_obs));
 z_unobs = z-z_obs;
 
 I0 = inputs.I0/obs_ratio(1);

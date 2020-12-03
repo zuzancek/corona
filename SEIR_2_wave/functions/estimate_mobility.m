@@ -1,4 +1,4 @@
-function [res] = estimate_mobility(mob,Rt,dateFrom,delay,dateFrom_fullSample)
+function [res] = estimate_mobility(mob,Rt,dI,dateFrom,delay,dateFrom_fullSample)
 
 r_dateFrom = dateFrom;
 r_dateTo = enddate(Rt);
@@ -13,6 +13,9 @@ m = resize(mob.orig/100,m_dateFrom:m_dateTo);
 m_full = double(resize(mob.orig/100,dateFrom_fullSample-delay:m_dateTo));
 m_data = double(m);
 
+di = resize(dI,r_dateFrom:r_dateTo); 
+di = di/di(r_dateFrom);
+
 [~,m_dmin] = min(m);
 [~,r_dmin] = min(r);
 [r_vmax,r_dmax] = max(r_full);
@@ -21,8 +24,9 @@ m_data = double(m);
 figure('Name','Mobility as a predictor of Rt');
 plot(m,'linewidth',2); hold on;
 plot(r,'linewidth',2);
+plot(di,'linewidth',2);
 grid on;
-legend({'mobility','Rt'});
+legend({'mobility','Rt','dI_in'});
 
 % curve fitting: R(m) = (1/(a_0-m^k)-a_1)*c_2
 m_idx = find(m_data<1,1); a_m = interp1([m_data(m_idx-1) m_data(m_idx)],[0 1],1);
@@ -58,6 +62,20 @@ grid on;
 xlabel('Mobility (%)');
 ylabel('R_t');
 
+%
+[~,p0] = min(m_full);
+xm_1 = m_full(1:p0); yr_1 = r_full(1:p0);
+xm_2 = m_full(p0:end); yr_2 = r_full(p0:end);
+iidx = find(m_full(1:p0)<1,1);
+xm_2(end+1) = 1; yr_2(end+1) = r_full(iidx);
+yr_3 = interp1(xm_1,yr_1,xm_2);
+yr_mean = 0.5*(yr_2+yr_3);
+figure;
+plot(xm_1,yr_1);hold on;
+plot(xm_2,yr_2);hold on;
+plot(xm_2,yr_mean);hold on;
+grid on;
+
 figure('Name','Mobility, impact on Rt (smooth function)');
 x = [x1 x2(2:end)];
 y = [y1 y2(2:end)];
@@ -86,8 +104,8 @@ res.f.y_grid = z;
         yy = r_1*(a+1).*(1-a./(a+x.^k));
     end
     function [yy,a]=modelfun2(k,x)
-        a = exp((m_1-1)*k)*(r_1-1)/(1-r_1*exp((m_1-1)*k));
-        yy = r_1*(a+1).*(1-a./(a+exp((x-1).*k)));
+        a = exp((m_1^3-1)*k)*(r_1-1)/(1-r_1*exp((m_1^3-1)*k));
+        yy = r_1*(a+1).*(1-a./(a+exp((x.^3-1).*k)));
     end
 
 end
