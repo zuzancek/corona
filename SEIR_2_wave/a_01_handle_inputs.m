@@ -19,7 +19,6 @@ tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut-0;
 t1_ag = enddate(x.AgTests)-cut-0;
 h_t0 = startdate(hosp.ICU);
-h_t00 = find(hosp.ICU>0);
 h_t1 = enddate(hosp.ICU);
 
 % epidemiology data
@@ -45,7 +44,7 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 hospit = hosp.Hospitalizations;
 hospit_smooth = smooth_series(hospit,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 icu = hosp.ICU;
-icu_smooth = smooth_series(resize(icu,h_t00:h_t1),s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+icu_smooth = smooth_series(resize(icu,h_t0:h_t1),s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 vent = hosp.Ventilation;
 vent_smooth = smooth_series(vent,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 death = resize(x.Deaths,h_t0:h_t1);
@@ -55,7 +54,8 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 % observed ratio
 [obs_ratio_smooth,obs_ratio,dI_inflow_pcr_adj_smooth,dI_inflow_pcr_adj,t_tests] = adjust_observed_ratio(...
     pos_test_ratio_smooth,dI_inflow_pcr_smooth,s,t0);
-[rho_obs, rho_obs_tot,dI_inflow_real] = adjust_observed_ratio_by_test(x,s,t0,t1);
+[rho_obs, rho_obs_tot,dI_inflow_test] = adjust_observed_ratio_by_test(x,s,t0,t1);
+[dI_inflow_hosp, I_hosp] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1);
 
 % asymptomatic share
 final.date = t1; final.value = 15;
@@ -66,7 +66,7 @@ catch err
     pr = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_smooth','dI_inflow_pcr_adj_smooth',...
         'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
         'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-        'death_smooth','h_t0','h_t1','h_t00');
+        'death_smooth','h_t0','h_t1');
     asymp_ratio_smooth = pr.asymp_ratio_smooth;
     pr = load('raw.mat','data');
     asymp_ratio = pr.data.Asymp;
@@ -196,7 +196,7 @@ ylabel('% of total cases');
 figure;
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
-plot(resize(dI_inflow_real,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
+plot(resize(dI_inflow_test,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 title('New infections (PCR only, test adjusted)');
 legend({'observed, raw','observed, smooth', 'hypothetical,smooth','AG included in observed'});
@@ -211,7 +211,7 @@ obs_ratio_smooth = resize(rho_obs_tot,startdate(dI_inflow_pcr_smooth):enddate(dI
 save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_smooth','dI_inflow_pcr_adj_smooth',...
     'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-    'death_smooth','h_t0','h_t1','h_t00');
+    'death_smooth','h_t0','h_t1');
 data.NewCases_PCR = x.NewCases;
 data.Tests_PCR = x.Tests;
 data.Asymp = asymp_ratio;
