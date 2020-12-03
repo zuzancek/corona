@@ -55,7 +55,7 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 % observed ratio
 [obs_ratio_smooth,obs_ratio,dI_inflow_pcr_adj_smooth,dI_inflow_pcr_adj,t_tests] = adjust_observed_ratio(...
     pos_test_ratio_smooth,dI_inflow_pcr_smooth,s,t0);
-[rho_obs, rho_obs_tot] = adjust_observed_ratio_by_test(x,s,t0,t1);
+[rho_obs, rho_obs_tot,dI_inflow_real] = adjust_observed_ratio_by_test(x,s,t0,t1);
 
 % asymptomatic share
 final.date = t1; final.value = 15;
@@ -193,19 +193,29 @@ legend({'steady state','data-implied'});
 grid on;
 ylabel('% of total cases');
 
+figure;
+plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
+plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(resize(dI_inflow_real,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
+plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
+title('New infections (PCR only, test adjusted)');
+legend({'observed, raw','observed, smooth', 'hypothetical,smooth','AG included in observed'});
+grid on;
+
 %% saving stuff
 mob_smooth = yy;
-obs_ratio_smooth = resize(obs_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
+% obs_ratio_smooth = resize(obs_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
 asymp_ratio_smooth = resize(asymp_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
 pos_test_ratio_smooth = resize(pos_test_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
+obs_ratio_smooth = resize(rho_obs_tot,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
 save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_adj','dI_inflow_smooth','dI_inflow_pcr_adj_smooth',...
     'pos_test_ratio_smooth','obs_ratio_smooth','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-    'death_smooth','h_t0','h_t1','h_t00','obs_ratio');
+    'death_smooth','h_t0','h_t1','h_t00');
 data.NewCases_PCR = x.NewCases;
 data.Tests_PCR = x.Tests;
 data.Asymp = asymp_ratio;
-data.Obs_PCR = obs_ratio;
+data.Obs_PCR = rho_obs_tot;
 data.TestRatio_PCR = pos_test_ratio;
 data.Mobility = mob.SK;
 data.Deaths = x.Deaths;
