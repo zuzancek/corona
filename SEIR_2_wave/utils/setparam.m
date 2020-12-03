@@ -75,7 +75,7 @@ s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.obs_ratio_tar = 1/10;
 s.obs_ratio = s.obs_ratio_tar;
-s.self_isolation_effect = 1-0*0.15;
+s.self_isolation_effect = 1-0.075;
 s.case_isolation_effect = 1/(1-1/3);
 s.threshold = 0.05;
 s.scale_fact = 4;

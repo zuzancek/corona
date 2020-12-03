@@ -11,8 +11,6 @@ data = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_pcr_a
 % reproduction number (PCR tests exclusively/both PCR and AG)
 data_Rt = load('results_Rt_SIR_pcr.mat','s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-% data_Rt = load('results_Rt.mat','s','t0','t1','q_mat',...
-%     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 % mobility
 load('mobility_forecast.mat','mobilityFcast','startHist','fcastPer','startWave');
 load('mobility_estimation.mat','mobilityParams','startEstim','delay','startEstimFull');
@@ -51,11 +49,11 @@ init.I = data_Rt.Yt.It(train_from:train_to);
 inputs.init = init;
 inputs.T_test = T_test;
 inputs.obs_ratio = obs_ratio;
-inputs.obs_ratio_effect = (data.s.obs_ratio./obs_ratio-1)+1;
+inputs.obs_ratio_effect = (data.s.obs_ratio./obs_ratio-1)*1.5+1;
 inputs.asymp_ratio = asymp_ratio;
 inputs.mobility = mobility;
 inputs.restrictions = restrictions;
-inputs.Rt = data_Rt.Rt_rnd(:,train_from-7:train_to-7);
+inputs.Rt = data_Rt.Rt_rnd;%(:,train_from-2*data.s.SI.mean:train_to-2*data.s.SI.mean);
 
 %% model training
 [res_mean,res_quant] = train_SIR(time_interval,inputs,data.s);

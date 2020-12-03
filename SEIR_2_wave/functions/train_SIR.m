@@ -17,7 +17,6 @@ alpha = inputs.asymp_ratio;
 tau = inputs.obs_ratio;
 % lambda = s.lambda;
 s.share_reas =1;
-% T_inf_unobs = get_rv_I_unobs();
 
 % init values (observed)
 St = init.S(1);
@@ -36,8 +35,8 @@ it = st; iot = st; iut = st; ist = st; iat = st;
 
 %% initialize
 T_si_vec = get_rv(s.SI);
-shift = min(floor(get_rv(s.SI),2*s.SI.mean));
-A = Rt';
+shift = min(floor(get_rv(s.SI)),ceil(2.5*s.SI.mean));
+shift_vec = [1:N]'-shift.*N;
 gamma = 1./T_si_vec;
 
 % T_pre = get_rv(s.T_pre);
@@ -54,15 +53,17 @@ gamma = 1./T_si_vec;
 idx = ones(N,1);
 kappa_res = get_kappa_res();
 kappa_mob = get_kappa_mob();
-% varsigma_unobs = s.self_isolation_effect*ones(T,1);
-% varsigma_obs = s.case_isolation_effect*ones(T,1);
+
+s.self_isolation_effect = 1-0.07;
+varsigma_unobs = 1/s.self_isolation_effect*ones(T,1);
 
 varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 
 for t=1:T
-    R_eff(:,t) = Rt(:,t).*kappa_mob(t).*kappa_res(t).*obs_ratio_effect(t);
+    r_idx = (t+dateFrom-1).*N+shift_vec;
+    R_eff(:,t) = Rt(r_idx).*kappa_mob(t).*kappa_res(t).*obs_ratio_effect(t);
     dI_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
-        (varsigma.*Io_vec(:,t)+Iu_vec(:,t)/varsigma).*gamma;
+        (varsigma.*Io_vec(:,t)+varsigma_unobs(t).*Iu_vec(:,t)).*gamma;
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t);   
     Io_vec(:,t+1) = Io_vec(:,t)+s.obs_ratio.*dI_in_vec(:,t)-gamma.*Io_vec(:,t);
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
