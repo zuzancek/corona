@@ -111,11 +111,6 @@ plot(res_quant.Iot(10,:));hold on;
 grid on;
 legend({'data implied','sim mean','sim median'});
 
-% figure;
-% plot(Rt);hold on;
-% plot(R_eff);
-% grid on;
-
 %% helpers
 
     function [x] = get_rv(y)
