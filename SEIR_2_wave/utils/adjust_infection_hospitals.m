@@ -1,7 +1,7 @@
 function [X,I] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo)
 
 alpha_hr = 7.73/100;
-T_inf = 4.4;
+T_inf = 4.3;
 T_hosp = 4;
 alpha_ih = 6.37/100*(1/T_hosp);
 alpha_ir = 1/T_inf-alpha_ih;
@@ -16,7 +16,7 @@ H = smooth_series(H,s.smooth_width,s.smooth_type,s.smooth_ends);
 d_H_R = alpha_hr.*H;
 d_I_H = zeros(T-1,1); d_I_R = zeros(T-1,1);
 I = zeros(T-1,1);  X = zeros(T-2,1);
-dI_data = smooth_series(x.NewCases(dateFrom:dateTo-2),s.smooth_width,s.smooth_type,s.smooth_ends);
+dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 
 for t=1:T-2
     d_I_H(t) = H(t+1)-H(t)+d_H_R(t)+d_H_D(t);
@@ -27,8 +27,10 @@ for t=1:T-2
     X(t) = I(t+1)-I(t)+d_I_H(t)+d_I_R(t);
 end
 
-X = tseries(dateFrom+2:dateTo,X);
-dI_data = tseries(dateFrom:dateTo-2,dI_data);
+dx = X(T-3)-X(T-4);
+X(T-2:T) = X(T-3);
+X = tseries(dateFrom+2:dateTo+2,smooth_series(X,s.smooth_width,s.smooth_type,s.smooth_ends));
+dI_data = tseries(dateFrom:dateTo,dI_data);
 figure;
 plot(X);
 hold on

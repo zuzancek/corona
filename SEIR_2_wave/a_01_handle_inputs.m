@@ -52,9 +52,6 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 
 %% calculations
 % observed ratio
-[obs_ratio_smooth,obs_ratio,dI_inflow_pcr_adj_smooth,dI_inflow_pcr_adj,t_tests] = adjust_observed_ratio(...
-    pos_test_ratio_smooth,dI_inflow_pcr_smooth,s,t0);
-[rho_obs, rho_obs_tot,dI_inflow_test] = adjust_observed_ratio_by_test(x,s,t0,t1);
 [dI_inflow_hosp, I_hosp] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1);
 
 % asymptomatic share
