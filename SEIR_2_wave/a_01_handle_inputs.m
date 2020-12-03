@@ -55,6 +55,7 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 % observed ratio
 [obs_ratio_smooth,obs_ratio,dI_inflow_pcr_adj_smooth,dI_inflow_pcr_adj,t_tests] = adjust_observed_ratio(...
     pos_test_ratio_smooth,dI_inflow_pcr_smooth,s,t0);
+[rho_obs, rho_obs_tot] = adjust_observed_ratio_by_test(x,s,t0,t1);
 
 % asymptomatic share
 final.date = t1; final.value = 15;
@@ -176,11 +177,21 @@ grid on;
 
 figure;
 subplot(2,1,1)
-plot(resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
-plot(resize(obs_ratio_smooth,disp_from:t1),'linewidth',1);
+plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
+plot(100*resize(obs_ratio_smooth,disp_from:t1),'linewidth',1);
 title('Hypothetical observed ratio');
 legend({'PCR: raw','PCR: smooth'});
 grid on;
+ylabel('% of total cases');
+
+subplot(2,1,2)
+plot(100*(s.obs_ratio+resize(0*rho_obs_tot,disp_from:t1)),'linewidth',1); hold on;
+plot(100*resize(rho_obs_tot,disp_from:t1),'linewidth',1); hold on;
+% plot(resize(obs_ratio_smooth,disp_from:t1),'linewidth',1);
+title('Hypothetical observed ratio (adjusted by test number, PCR only)');
+legend({'steady state','data-implied'});
+grid on;
+ylabel('% of total cases');
 
 %% saving stuff
 mob_smooth = yy;
