@@ -54,7 +54,7 @@ idx = ones(N,1);
 kappa_res = get_kappa_res();
 kappa_mob = get_kappa_mob();
 
-s.self_isolation_effect = 1-0.07;
+s.self_isolation_effect = 1-0.05;
 varsigma_unobs = 1/s.self_isolation_effect*ones(T,1);
 
 varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
