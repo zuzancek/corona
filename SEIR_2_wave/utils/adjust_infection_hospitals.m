@@ -1,4 +1,4 @@
-function [X,I] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo)
+function [X,I,obs_ratio_adj] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1)
 
 alpha_hr = 7.73/100;
 T_inf = 4.3;
@@ -27,12 +27,17 @@ for t=1:T-2
     X(t) = I(t+1)-I(t)+d_I_H(t)+d_I_R(t);
 end
 
-dx = X(T-3)-X(T-4);
-X(T-2:T) = X(T-3);
-X = tseries(dateFrom+2:dateTo+2,smooth_series(X,s.smooth_width,s.smooth_type,s.smooth_ends));
-dI_data = tseries(dateFrom:dateTo,dI_data);
-figure;
-plot(X);
-hold on
-plot(dI_data);
+obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
+X(T-2:T) = X(T-3); X = [X(1);X(1);X]; % treat end-points
+X = tseries(dateFrom:dateTo+2,smooth_series(X,s.smooth_width,s.smooth_type,s.smooth_ends));
+dI_data_real = resize(X,dateFrom:dateTo);
+dI_data_reported = tseries(dateFrom:dateTo,dI_data);
+delta = dI_data_reported./dI_data_real;
+
+idx = find(dI_data_real<s.cases_min &dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
+dI_data_real(idx) = dI_data_reported(idx);
+delta = dI_data_reported./dI_data_real;
+
+obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
+
 end

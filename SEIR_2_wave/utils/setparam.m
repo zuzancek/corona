@@ -6,7 +6,8 @@ s.sim_num = 10^4;
 s.T = 100;
 s.model_seir = true;
 s.tests_min = 4700;
-s.ratio_threshold = 0.1;
+s.cases_min = 250;
+s.ratio_threshold = 0.05;
 s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
