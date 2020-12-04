@@ -55,17 +55,16 @@ Rt_smooth_series_test = tseries(t0+1:t1,Rt_test(1:nn));
 Rt_smooth_series = tseries(t0+1:t1,Rt(1:nn));
 plot(resize(Rt_smooth_series_pcr,disp_from:t1),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_test,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_real,disp_from:t1),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series,disp_from:t1),'linewidth',2);hold on;
 title('Mean Rt (smooth inputs)');
 legend({'reported data, testing is optimal, PCR only',...
     'reported data, testing is realistic, PCR only',...
-    'realistic data data, testing is optimal, PCR only',...
     'reported data, PCR+AG'});
 grid on;
 % 
-plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only)',true);
-plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG)',true);
+plot_fanchart(q_mat_test,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, realistic data/testing)',true);
+plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, as reported)',true);
+plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG as reported)',true);
 
 %% saving stuff
 x.Rt_smooth = Rt_smooth_series;

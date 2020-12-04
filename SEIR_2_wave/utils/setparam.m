@@ -11,7 +11,7 @@ s.ratio_threshold = 0.05;
 s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
-% serial interval
+% serial interval (generation period)
 s.SI.mean = 6.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0.mean = 1;             s.T_test0.std = s.SI.std;      
