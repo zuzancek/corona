@@ -29,15 +29,20 @@ end
 
 obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
 X(T-2:T) = X(T-3); X = [X(1);X(1);X]; % treat end-points
+X0 = X;
 X = tseries(dateFrom:dateTo+2,smooth_series(X,s.smooth_width,s.smooth_type,s.smooth_ends));
 dI_data_real = resize(X,dateFrom:dateTo);
 dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
 idx = find(dI_data_real<s.cases_min &dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
+X0(idx) = dI_data_reported(idx);
 dI_data_real(idx) = dI_data_reported(idx);
 delta = dI_data_reported./dI_data_real;
 
 obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
+XX = x.NewCases;
+XX(dateFrom:dateTo) = tseries(dateFrom:dateTo,X0(1:T));
+X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
 
 end
