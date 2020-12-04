@@ -1,26 +1,33 @@
-function [res_mean,res_quant] = train_SIR(time_interval,inputs,s)
+function [res_mean,res_quant] = train_SIR(time_interval,assumptions,inputs,s)
 
 %% handle inputs
 dateFrom = time_interval.dateFrom;
 dateTo = time_interval.dateTo;
 T = dateTo-dateFrom+1;
-mobility = inputs.mobility;
-restrictions = inputs.restrictions;
-q_vec = s.quant;
-obs_ratio_effect = inputs.obs_ratio_effect;
-pop_size = s.pop_size;
+% assumptions - paths
+mobility = assumptions.mobility;
+restrictions = assumptions.restrictions;
+alpha = assumptions.asymp_ratio;
+tau = assumptions.obs_ratio;
+obs_ratio_effect = assumptions.obs_ratio_effect;
+% inputs: Rt, init values
 init = inputs.init;
 Rt = inputs.Rt;
+% other parameters (stored in s)
+q_vec = s.quant;
+pop_size = s.pop_size;
 N = s.sim_num;
-% T_test0 = inputs.T_test;
-alpha = inputs.asymp_ratio;
-tau = inputs.obs_ratio;
-% lambda = s.lambda;
-s.share_reas =1;
+% alpha_hr = s.alpha_hr;
+lambda = 6.37/100; %s.lambda;
+alpha_hd = 9.71/100; %s.alpha_hd;
+self_isolation_effect = s.self_isolation_effect;
+case_isolation_effect = s.case_isolation_effect;
 
 % init values (observed)
 St = init.S(1);
 Iot = init.Io(1);
+Ht = init.Ht(1);
+Dt = init.Dt(1);
 
 % setup
 S_vec = zeros(N,T+1);       S_vec(:,1) = St;
@@ -28,36 +35,30 @@ Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = (1/tau(1)-1)*Iot;
 Io_vec = zeros(N,T+1);      Io_vec(:,1) = Iot;
 Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = alpha(1)*Iot; 
 Is_vec = zeros(N,T+1);      Is_vec(:,1) = (1-alpha(1))*Iot; 
+H_vec = zeros(N,T+1);       H_vec(:,1) = Ht(t0);
+D_vec = zeros(N,T+1);       D_vec(:,1) = Dt(t0);
+R_vec = zeros(N,T+1);
 dI_in_vec = zeros(N,T+1);     
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt(:,1);
 st = zeros(T+1,1);
-it = st; iot = st; iut = st; ist = st; iat = st;
+it = st; iot = st; iut = st; ist = st; iat = st; dt = st; rt = st; ht = st;
 
 %% initialize
 T_si_vec = get_rv(s.SI);
+T_hosp_vec = get_rv(s.T_hosp);
+T_death = s.T_death.mean;
+T_rec = s.T_rec;
 shift = min(floor(get_rv(s.SI)),ceil(2.5*s.SI.mean));
-shift_vec = [1:N]'-shift.*N;
+shift_vec = [1:N]'-shift.*N; %#ok<NBRAK>
 gamma = 1./T_si_vec;
-
-% T_pre = get_rv(s.T_pre);
-% T_test = repmat(T_test0',N,1)+repmat(T_pre,1,T);
-% T_inf_obs0 = get_rv(s.T_inf_obs0); 
-% T_inf_obs = T_inf_obs0+T_test;
-% gamma_lat = 1./T_lat;
-% gamma_unobs = 1./T_inf_unobs;
-% gamma_obs = 1./T_inf_obs;
-% gamma_obs0 = 1./T_inf_obs0;
-% gamma_test = 1./T_test;
-% gamma_hosp = 1./T_hosp;
+gamma_hosp_vec = 1./T_hosp_vec;
 
 idx = ones(N,1);
 kappa_res = get_kappa_res();
 kappa_mob = get_kappa_mob();
 
-s.self_isolation_effect = 1-0.05;
-varsigma_unobs = 1/s.self_isolation_effect*ones(T,1);
-
-varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
+varsigma_unobs = 1/self_isolation_effect*ones(T,1);
+varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/case_isolation_effect)/s.T_inf_unobs.mean;
 
 for t=1:T
     r_idx = (t+dateFrom-1).*N+shift_vec;
@@ -67,8 +68,13 @@ for t=1:T
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t);   
     Io_vec(:,t+1) = Io_vec(:,t)+s.obs_ratio.*dI_in_vec(:,t)-gamma.*Io_vec(:,t);
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
-    Ia_vec(:,t) = alpha(t).*Io_vec(:,t); Is_vec(:,t) = Io_vec(:,t)-Ia_vec(:,t);
-    idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0;
+    Ia_vec(:,t) = alpha(t).*Io_vec(:,t); 
+    Is_vec(:,t) = (1-alpha(t)).*Io_vec(:,t);
+    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)/T_rec-alpha_hd/T_death)+lambda.*gamma_hosp_vec./(1-alpha(t)).*Is_vec(:,t);
+    D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death*H_vec(:,t);
+    R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)/T_rec.*H_vec(:,t)+gamma_vec.*Ia_vec(:,t)...
+        +(gamma_vec-lambda.*gamma_hosp_vec./(1-alpha(t))).*Is_vec(:,t);
+    idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0;
 end
 
 idx = find(idx>0);
@@ -77,6 +83,9 @@ Iu_vec = Iu_vec(idx,:);
 Io_vec = Io_vec(idx,:);
 Ia_vec = Ia_vec(idx,:);
 Is_vec = Is_vec(idx,:);
+H_vec = H_vec(idx,:);
+D_vec = D_vec(idx,:);
+R_vec = R_vec(idx,:);
 I_vec = Io_vec+Iu_vec;
 
 % mean values
@@ -88,6 +97,9 @@ for t = 1:T+1
     ist(t) = mean(Is_vec(:,t));
     iot(t) = mean(Io_vec(:,t));
     iut(t) = mean(Iu_vec(:,t));
+    ht(t) = mean(H_vec(:,t));
+    dt(t) = mean(D_vec(:,t));
+    rt(t) = mean(R_vec(:,t));
 end
 res_mean.It = it;
 res_mean.Iat = iat;
@@ -95,6 +107,9 @@ res_mean.Ist = ist;
 res_mean.Iot = iot;
 res_mean.Iut = iut;
 res_mean.St = st;
+res_mean.Rt = rt;
+res_mean.Dt = dt;
+res_mean.Ht = ht;
 
 M = length(q_vec);
 res_quant.Iat = get_quant(Ia_vec(:,1:T));
@@ -103,6 +118,9 @@ res_quant.Iut = get_quant(Iu_vec(:,1:T));
 res_quant.Iot = get_quant(Io_vec(:,1:T));
 res_quant.It = get_quant(I_vec(:,1:T));
 res_quant.St = get_quant(S_vec(:,1:T));
+res_quant.Dt = get_quant(D_vec(:,1:T));
+res_quant.Ht = get_quant(H_vec(:,1:T));
+res_quant.Rt = get_quant(R_vec(:,1:T));
 
 %% helpers
 

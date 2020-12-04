@@ -16,13 +16,13 @@ s.SI.mean = 6.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test0.mean = 1;             s.T_test0.std = s.SI.std;      
 % incubation period 
-s.T_inc.mean = 5;               s.T_inc.std = s.SI.std;
+s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period
-s.T_inf.mean = 3.5;             s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 3.5;       s.T_inf_asymp.std = 0.62;
-s.T_inf_symp.mean = 3.5;        s.T_inf_symp.std = 0.62;
-s.T_inf_obs.mean = 3.5;         s.T_inf_obs.std = 0.62;
-s.T_inf_unobs.mean = 3.5;      s.T_inf_unobs.std = 0.62;
+s.T_inf.mean = 4.3;             s.T_inf.std = 0.62;
+s.T_inf_asymp.mean = 4.3;       s.T_inf_asymp.std = 0.62;
+s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
+s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
+s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -34,11 +34,20 @@ s.SI_obs.std = 0.62;
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
 % days prior to hospital admission (from onset,adjusted for test period)
-s.T_hosp.mean = 5-s.T_test0.mean;    s.T_hosp.std = 0.62;
+s.T_hosp.mean = 4;              s.T_hosp.std = 0.62;
+s.T_hosp0.mean = s.T_hosp.mean-s.T_test0.mean;    s.T_hosp0.std = 0.62;
+% time to death (from ospital admission)
+s.T_death.mean = 7;             s.T_death.std = 0.62;
+% days at hospital (in case of recovery)
+s.T_rec = 11.7;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
 % share of symptomatic patients needed to be hospitalized 
-s.lambda = 0.037; %0.0743; % <-- test here higher rate
+s.lambda = 0.0637; %0.0743; % <-- test here higher rate
+s.alpha_hr = 7.73/100; % recovery rate in hospital
+s.alpha_ih = 6.37/100*(1/s.T_hosp);
+s.alpha_ir = 1/s.T_inf.mean-s.alpha_ih;
+s.alpha_hd = 1.69/100; %1.23/100; % death rate in hospital
 s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
 % ICU rate
 s.iota = 0.1375;
@@ -76,7 +85,7 @@ s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.obs_ratio_tar = 1/5;
 s.obs_ratio = s.obs_ratio_tar;
-s.self_isolation_effect = 1-0.075;
+s.self_isolation_effect = 1-0.05;
 s.case_isolation_effect = 1/(1-1/3);
 s.threshold = 0.05;
 s.scale_fact = 4;
