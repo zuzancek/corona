@@ -34,7 +34,7 @@ s.SI_obs.std = 0.62;
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
 % days prior to hospital admission (from onset,adjusted for test period)
-s.T_hosp.mean = 4;              s.T_hosp.std = 0.62;
+s.T_hosp.mean = 4.5;              s.T_hosp.std = 0.62;
 s.T_hosp0.mean = s.T_hosp.mean-s.T_test0.mean;    s.T_hosp0.std = 0.62;
 % time to death (from ospital admission)
 s.T_death.mean = 7;             s.T_death.std = 0.62;

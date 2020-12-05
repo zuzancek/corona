@@ -51,11 +51,8 @@ death = resize(x.Deaths,h_t0:h_t1);
 death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
 %% calculations
-% observed ratio
-[dI_inflow_real, I_real, obs_ratio_real] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1,t0,t1);
-
 % asymptomatic share
-final.date = t1; final.value = 15;
+final.date = t1; final.value = 12.5;
 initial.date = t0; initial.value = 25; 
 try
     [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,13),s,initial,final);
@@ -68,6 +65,10 @@ catch err
     pr = load('raw.mat','data');
     asymp_ratio = pr.data.Asymp;
 end
+
+% observed ratio
+[dI_inflow_real, I_real, obs_ratio_real] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1,t0,t1,asymp_ratio_smooth);
+
     
 %% plotting stuff
 % clinical statistics
