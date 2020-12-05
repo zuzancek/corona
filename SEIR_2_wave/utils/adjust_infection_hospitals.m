@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1,sigma)
+function [X,I,obs_ratio_adj,sa] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
 % sigma = ratio of asymptomatical cases
 %initialization
@@ -55,5 +55,16 @@ obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,
 XX = x.NewCases;
 XX(dateFrom:dateTo) = tseries(dateFrom:dateTo,X0(1:T));
 X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+
+% [~,d] = max(resize(obs_ratio_adj,s.wave_2_from+5:dateTo));
+symp_ratio_obs = 1-sigma(s.wave_2_from);
+% [~,bp] = max((dI_data_reported(max(idx):dateTo)-dI_data_real(max(idx):dateTo)));
+sa = struct;
+sa.Xs = symp_ratio_obs.*X;
+sa.Xa = X-sa.Xs;
+sa.dIa_data_reported = dI_data_reported.*sigma(dateFrom:dateTo);
+sa.dIs_data_reported = dI_data_reported-sa.dIa_data_reported;
+sa.loss_a = sa.Xa-sa.dIa_data_reported;
+sa.loss_s = sa.Xs-sa.dIs_data_reported;
 
 end

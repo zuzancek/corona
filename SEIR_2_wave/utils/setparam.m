@@ -34,7 +34,7 @@ s.SI_obs.std = 0.62;
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
 % days prior to hospital admission (from onset,adjusted for test period)
-s.T_hosp.mean = 4.5;              s.T_hosp.std = 0.62;
+s.T_hosp.mean = 4.25;              s.T_hosp.std = 0.62;
 s.T_hosp0.mean = s.T_hosp.mean-s.T_test0.mean;    s.T_hosp0.std = 0.62;
 % time to death (from ospital admission)
 s.T_death.mean = 7;             s.T_death.std = 0.62;
@@ -43,7 +43,7 @@ s.T_rec = 11.7;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.43;
 % share of symptomatic patients needed to be hospitalized 
-s.lambda = 0.0647; %0.0743; % <-- test here higher rate
+s.lambda = 0.0637; %0.0743; % <-- test here higher rate
 s.alpha_hr = 7.73/100; % recovery rate in hospital
 s.alpha_ih = 6.37/100*(1/s.T_hosp.mean);
 s.alpha_ir = 1/s.T_inf.mean-s.alpha_ih;
