@@ -67,7 +67,7 @@ catch err
 end
 
 % observed ratio
-[dI_inflow_real, I_real, obs_ratio_real] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1,t0,t1,asymp_ratio_smooth);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1,t0,t1,asymp_ratio_smooth);
 
     
 %% plotting stuff
@@ -167,9 +167,10 @@ figure('Name','Observable ratio and lost cases');
 subplot(2,1,1)
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(resize(sa_cmp.loss_a,disp_from:t1),'linewidth',1);hold on;
 plot(resize(dI_inflow_real,disp_from:t1),'linewidth',2);hold on;
 title('New infections (PCR only)');
-legend({'reported, raw','reported, smooth', 'hypothetically observable'});
+legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable'});
 grid on;
 
 subplot(2,1,2)
