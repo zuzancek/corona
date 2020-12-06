@@ -1,6 +1,5 @@
 function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_quant,do_weight,do_dist)
 
-
 % structure of inputs:
 % I0: initial number of observed infectious
 % z: daily data of inflow of newly observed infections
@@ -14,6 +13,10 @@ sigma = inputs.asymp_ratio;
 if isempty(sigma)
     sigma = (1-s.symp_ratio_obs)+0*inputs.z;
 end
+T_hosp = inputs.T_hosp;
+if isempty(T_hosp)
+    T_hosp = s.T_hosp.mean+0*inputs.z;
+end
 z_obs = inputs.z;
 z = z_obs./obs_ratio(1:length(z_obs));
 z_unobs = z-z_obs;
@@ -23,11 +26,11 @@ N = s.sim_num;
 pop_size = s.pop_size;
 T = length(z);
 T_si_vec = get_rv(s.SI);
-alpha_hd = s.alpha_hd;
+alpha_hr = s.alpha_hr;
 lambda = s.lambda;
 T_death = s.T_death.mean;
 T_rec = s.T_rec;
-T_hosp = s.T_hosp.mean;
+% T_hosp = s.T_hosp.mean;
 alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
@@ -37,7 +40,7 @@ I_unobs_vec = zeros(N,T); I_unobs_vec(:,1) = I0-I_obs_vec(:,1);
 I_asympt_vec = zeros(N,T); I_asympt_vec(:,1) = I_obs_vec(:,1).*sigma(1);
 I_sympt_vec = zeros(N,T); I_sympt_vec(:,1) = I_obs_vec(:,1).*(1-sigma(1));
 H_vec = zeros(N,T); 
-R_vec = zeros(N,T); 
+F_vec = zeros(N,T); 
 D_vec = zeros(N,T); 
 if isfield(inputs, 'H0')
     H_vec(:,1) = H0;
@@ -47,7 +50,8 @@ if isfield(inputs,'D0')
 end
 
 Rt_vec = zeros(N,T); 
-Rt = zeros(T,1); It = Rt; St = Rt; Iobst = Rt; Iunobst = Rt;
+Rt = zeros(T,1); It = Rt; St = Rt; Iobst = Rt; Iunobst = Rt; 
+Ht = Rt; Dt = Rt; Ft = Rt; Iasympt = Rt; Isympt = Rt;
 idx = ones(N,1);
 
 % model
@@ -59,13 +63,13 @@ for t = 1:T
     S_vec(:,t+1) = S_vec(:,t)-z(t);
     I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);
     I_obs_vec(:,t+1) = I_obs_vec(:,t).*(1-1./T_si_vec)+z_obs(t);
+    I_asympt_vec(:,t) = I_asympt_vec(:,t).*(1-1./T_si_vec)+sigma(t).*z_obs(t); 
+    I_sympt_vec(:,t) = I_sympt_vec(:,t).*(1-(1-lambda)./T_si_vec+lambda./T_hosp(t))+(1-sigma(t)).*z_obs(t);
+    H_vec(:,t+1) = H_vec(:,t).*(1-alpha_hr/T_rec-(1-alpha_hr)/T_death)+lambda.*I_sympt_vec(:,t)/T_hosp(t);
+    D_vec(:,t+1) = D_vec(:,t)+(1-alpha_hr)./T_death*H_vec(:,t);
+    F_vec(:,t+1) = F_vec(:,t)+alpha_hr/T_rec.*H_vec(:,t)+(I_unobs_vec(:,t)+I_asympt_vec(:,t)...
+        +(1-lambda).*I_sympt_vec(:,t))./T_si_vec; 
     I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
-    I_asympt_vec(:,t) = sigma(t).*I_obs_vec(:,t); 
-    I_sympt_vec(:,t) = (1-sigma(t)).*I_obs_vec(:,t);
-    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)/T_rec-alpha_hd/T_death)+lambda.*I_sympt_vec(:,t)/T_hosp;
-    D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death*H_vec(:,t);
-    R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)/T_rec.*H_vec(:,t)+gamma_vec.*I_asympt_vec(:,t)...
-        +(gamma_vec-lambda./T_hosp).*I_sympt_vec(:,t);
     idx = idx & I_obs_vec(:,t+1)>=0 & I_unobs_vec(:,t+1)>=0 & H_vec(:,t+1)>=0;
 end
 idx = find(idx>0);
@@ -78,7 +82,7 @@ I_asympt_vec = I_asympt_vec(idx,:);
 I_sympt_vec = I_sympt_vec(idx,:);
 H_vec = H_vec(idx,:);
 D_vec = D_vec(idx,:);
-R_vec = R_vec(idx,:);
+F_vec = F_vec(idx,:);
 
 if do_weight
     weights = s.pweight;
@@ -101,6 +105,7 @@ for t = 1:T
     St(t) = mean(S_vec(:,t));
     Ht(t) = mean(H_vec(:,t));
     Dt(t) = mean(D_vec(:,t));
+    Ft(t) = mean(F_vec(:,t));
 end
 
 res.It = It;
@@ -111,6 +116,7 @@ res.Ist = Isympt;
 res.Ht = Ht;
 res.Dt = Dt;
 res.St = St;
+res.Ft = Ft;
 
 if do_quant
     q_vec = s.quant;
