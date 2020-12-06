@@ -28,6 +28,7 @@ inputs_fnc.I0 = I0;
 % reported data, total (AG+PCR)
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
+inputs_fnc.T_hosp = [];
 inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
 [Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false); %#ok<*ASGLU>
 nn = length(Rt);
