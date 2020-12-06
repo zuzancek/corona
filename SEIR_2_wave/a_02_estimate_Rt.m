@@ -57,10 +57,26 @@ Rt_smooth_series = tseries(t0+1:t1,Rt(1:nn));
 plot(resize(Rt_smooth_series_pcr,disp_from:t1),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_test,disp_from:t1),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series,disp_from:t1),'linewidth',2);hold on;
-title('Mean Rt (smooth inputs)');
+title('Hospitalisations (smooth inputs)');
 legend({'reported data, testing is optimal, PCR only',...
     'reported data, testing is realistic, PCR only',...
     'reported data, PCR+AG'});
+grid on;
+% 
+figure('Name','Hospitals & Deaths, means');
+subplot(2,1,1)
+plot(resize(Yt_pcr.Dt,disp_from:t1),'linewidth',2);hold on;
+plot(resize(Yt_test.Dt,disp_from:t1),'linewidth',2);hold on;
+title('Deaths (smooth inputs)');
+legend({'implied by reported data, testing is optimal, PCR only',...
+    'implied by reported data, testing is realistic, PCR only'});
+grid on;
+subplot(2,1,2)
+plot(resize(Yt_pcr.Ht,disp_from:t1),'linewidth',2);hold on;
+plot(resize(Yt_test.Ht,disp_from:t1),'linewidth',2);hold on;
+title('Hospitals (smooth inputs)');
+legend({'implied by reported data, testing is optimal, PCR only',...
+    'implied by reported data, testing is realistic, PCR only'});
 grid on;
 % 
 plot_fanchart(q_mat_test,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, realistic data/testing)',true);
