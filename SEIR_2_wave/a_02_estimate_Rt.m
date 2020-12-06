@@ -35,7 +35,7 @@ nn = length(Rt);
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = []; %double(resize(obs_ratio,t0:t1));
-inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
+inputs_fnc.asymp_ratio = [];
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
 % reported data, PCR only, realisting testing (realistic observ.ratio)
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
