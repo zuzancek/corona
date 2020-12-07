@@ -70,16 +70,16 @@ for t=1:T
     dI_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
         (varsigma.*Io_vec(:,t)+varsigma_unobs(t).*Iu_vec(:,t)).*gamma;
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t);   
-    Io_vec(:,t) = Ia_vec(:,t)+Is_vec(:,t);
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
     Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*s.obs_ratio.*dI_in_vec(:,t)-gamma.*Ia_vec(:,t); 
-    Is_vec(:,t) = Is_vec(:,t)+(1-alpha(t)).*s.obs_ratio.*dI_in_vec(:,t)...
-        -(1-lambda).*gamma.*Is_vec(:,t)-lambda.*gamma_hosp_vec.*Is_vec(:,t); 
+    Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*s.obs_ratio.*dI_in_vec(:,t)...
+        -(1-lambda).*gamma.*Is_vec(:,t)-lambda.*gamma_hosp_vec.*Is_vec(:,t);     
+    Io_vec(:,t+1) = Ia_vec(:,t+1)+Is_vec(:,t+1);
     H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)./T_rec-alpha_hd./T_death)+lambda.*gamma_hosp_vec.*Is_vec(:,t);
     D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death.*H_vec(:,t);
     R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
         +(gamma-lambda.*gamma_hosp_vec./(1-alpha(t))).*Is_vec(:,t);
-    idx = idx & Is_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0 & Ia_vec(:,t+1)>=0 ;
+    idx = idx & Is_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0 & Ia_vec(:,t+1)>=0;
 end
 
 idx = find(idx>0);
