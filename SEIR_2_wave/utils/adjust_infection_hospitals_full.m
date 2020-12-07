@@ -55,12 +55,8 @@ d_N = N(2:end)-N(1:end-1);
 d_I_N = d_N+d_N_C+d_N_R;
 I = d_I_N./alpha_in;
 d_I_R = I.*alpha_ir;
-    
-% calculation
-for t = 2:T
-    d_I_R(t) = I(t).*alpha_ir;
-    X(t-1) = I(t)-I(t-1)+d_I_N(t-1)+d_I_R(t-1);
-end
+d_I = I(2:end)+I(1:end-1);
+X = d_I+d_I_N+d_I_R;
 
 % adjust series endpoints and get ratio
 obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
