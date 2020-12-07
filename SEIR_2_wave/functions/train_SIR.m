@@ -46,8 +46,10 @@ it = st; iot = st; iut = st; ist = st; iat = st; dt = st; rt = st; ht = st;
 %% initialize
 T_si_vec = get_rv(s.SI);
 T_hosp_vec = get_rv(s.T_hosp);
-T_death = s.T_death.mean;
-T_rec = s.T_rec;
+T_death.mean = s.T_death.mean; T_death.std = 1;
+T_death = get_rv(T_death);
+T_rec.mean = s.T_rec; T_rec.std = 1;
+T_rec = get_rv(T_rec);
 shift = min(floor(get_rv(s.SI)),ceil(2.5*s.SI.mean));
 shift_vec = [1:N]'-shift.*N; %#ok<NBRAK>
 gamma = 1./T_si_vec;
@@ -70,9 +72,9 @@ for t=1:T
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
     Ia_vec(:,t) = alpha(t).*Io_vec(:,t); 
     Is_vec(:,t) = (1-alpha(t)).*Io_vec(:,t);
-    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)/T_rec-alpha_hd/T_death)+lambda.*gamma_hosp_vec./(1-alpha(t)).*Is_vec(:,t);
+    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)./T_rec-alpha_hd./T_death)+lambda.*gamma_hosp_vec./(1-alpha(t)).*Is_vec(:,t);
     D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death*H_vec(:,t);
-    R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)/T_rec.*H_vec(:,t)+gamma_vec.*Ia_vec(:,t)...
+    R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)./T_rec.*H_vec(:,t)+gamma_vec.*Ia_vec(:,t)...
         +(gamma_vec-lambda.*gamma_hosp_vec./(1-alpha(t))).*Is_vec(:,t);
     idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0;
 end

@@ -36,12 +36,12 @@ nn = length(Rt);
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = []; %double(resize(obs_ratio,t0:t1));
 inputs_fnc.asymp_ratio = [];
-[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
+[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
 % reported data, PCR only, realisting testing (realistic observ.ratio)
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
 inputs_fnc.obs_ratio = double(resize(obs_ratio_real,t0:t1));
 inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
-[Rt_test,q_mat_test,Yt_test,Rt_last_test,Rt_dist_test,Rt_rnd_test]  = model_fnc(inputs_fnc,s,true,true,false);
+[Rt_test,q_mat_test,Yt_test,Rt_last_test,Rt_dist_test,Rt_rnd_test]  = model_fnc(inputs_fnc,s,true,true,true);
 % real data, PCR only, optimal testing (it is correct!!!)
 inputs_fnc.z = double(resize(dI_inflow_real,t0:t1));
 inputs_fnc.obs_ratio = [];

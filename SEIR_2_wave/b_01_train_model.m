@@ -37,7 +37,7 @@ mobility.forecast = false;
 % restrictions = s.kappa_res_0; % delta, at;
 restrictions.forecast = false;
 % ******* Testing
-obs_ratio = double(resize(data.obs_ratio_smooth,train_from_date:train_to_date));
+obs_ratio = double(resize(data.obs_ratio,train_from_date:train_to_date));
 asymp_ratio = double(resize(data.asymp_ratio_smooth,train_from_date:train_to_date));
 T_test = 1+zeros(train_to-train_from+1,1);
 % ******* Initial values
@@ -45,18 +45,18 @@ init.S = data_Rt.Yt.St(train_from:train_to);
 init.Io = data_Rt.Yt.Iot(train_from:train_to);
 init.I = data_Rt.Yt.It(train_from:train_to);
 % ******* collect
-inputs.init = init;
-inputs.T_test = T_test;
-inputs.obs_ratio = obs_ratio;
-inputs.obs_ratio_effect = (data.s.obs_ratio./obs_ratio-1)+1;
-inputs.asymp_ratio = asymp_ratio;
-inputs.mobility = mobility;
-inputs.restrictions = restrictions;
-inputs.Rt = data_Rt.Rt_rnd;%(:,train_from-2*data.s.SI.mean:train_to-2*data.s.SI.mean);
+tinputs.init = init;
+assumptions.T_test = T_test;
+assumptions.obs_ratio = obs_ratio;
+assumptions.obs_ratio_effect = 0*(data.s.obs_ratio./obs_ratio-1)+1;
+assumptions.asymp_ratio = asymp_ratio;
+assumptions.mobility = mobility;
+assumptions.restrictions = restrictions;
+tinputs.Rt = data_Rt.Rt_rnd;%(:,train_from-2*data.s.SI.mean:train_to-2*data.s.SI.mean);
 
 %% model training
 s.quant = 0.25:0.025:0.75;
-[res_mean,res_quant] = train_SIR(time_interval,inputs,data.s);
+[res_mean,res_quant] = train_SIR(time_interval,assumptions,tinputs,data.s);
 
 %% display results
 % infectious in distributions
