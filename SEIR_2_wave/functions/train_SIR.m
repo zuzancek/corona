@@ -79,7 +79,7 @@ for t=1:T
     D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death.*H_vec(:,t);
     R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
         +(gamma-lambda.*gamma_hosp_vec./(1-alpha(t))).*Is_vec(:,t);
-    idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0;
+    idx = idx & Is_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0 & Ia_vec(:,t+1)>=0 ;
 end
 
 idx = find(idx>0);
