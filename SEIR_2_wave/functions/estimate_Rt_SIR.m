@@ -12,6 +12,9 @@ end
 sigma = inputs.asymp_ratio;
 if isempty(sigma)
     sigma = (1-s.symp_ratio_obs)+0*inputs.z;
+elseif length(sigma)<length(inputs.z)
+    nn = length(inputs.z);
+    sigma(end:end+nn-length(sigma)) = sigma(end);
 end
 T_hosp = inputs.T_hosp;
 if isempty(T_hosp)

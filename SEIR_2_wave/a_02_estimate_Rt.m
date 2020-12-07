@@ -65,15 +65,19 @@ grid on;
 % 
 figure('Name','Hospitals & Deaths, means');
 subplot(2,1,1)
-plot(resize(Yt_pcr.Dt,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Yt_test.Dt,disp_from:t1),'linewidth',2);hold on;
+Dt_pcr = tseries(t0+1:t1,Yt_pcr.Dt(1:nn));
+Dt_test = tseries(t0+1:t1,Yt_test.Dt(1:nn));
+Ht_pcr = tseries(t0+1:t1,Yt_pcr.Ht(1:nn));
+Ht_test = tseries(t0+1:t1,Yt_test.Ht(1:nn));
+plot(resize(Dt_pcr,disp_from:t1),'linewidth',2);hold on;
+plot(resize(Dt_test,disp_from:t1),'linewidth',2);hold on;
 title('Deaths (smooth inputs)');
 legend({'implied by reported data, testing is optimal, PCR only',...
     'implied by reported data, testing is realistic, PCR only'});
 grid on;
 subplot(2,1,2)
-plot(resize(Yt_pcr.Ht,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Yt_test.Ht,disp_from:t1),'linewidth',2);hold on;
+plot(resize(Ht_pcr,disp_from:t1),'linewidth',2);hold on;
+plot(resize(Ht_test,disp_from:t1),'linewidth',2);hold on;
 title('Hospitals (smooth inputs)');
 legend({'implied by reported data, testing is optimal, PCR only',...
     'implied by reported data, testing is realistic, PCR only'});
