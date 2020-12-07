@@ -41,9 +41,14 @@ obs_ratio = double(resize(data.obs_ratio,train_from_date:train_to_date));
 asymp_ratio = double(resize(data.asymp_ratio_smooth,train_from_date:train_to_date));
 T_test = 1+zeros(train_to-train_from+1,1);
 % ******* Initial values
-init.S = data_Rt.Yt.St(train_from:train_to);
-init.Io = data_Rt.Yt.Iot(train_from:train_to);
-init.I = data_Rt.Yt.It(train_from:train_to);
+init.St = data_Rt.Yt.St(train_from:train_to);
+init.Iot = data_Rt.Yt.Iot(train_from:train_to);
+init.Iut = data_Rt.Yt.Iut(train_from:train_to);
+init.It = data_Rt.Yt.It(train_from:train_to);
+init.Iat = data_Rt.Yt.Iat(train_from:train_to);
+init.Ist = data_Rt.Yt.Ist(train_from:train_to);
+init.Ht = data_Rt.Yt.Ht(train_from:train_to);
+init.Dt = data_Rt.Yt.Dt(train_from:train_to);
 % ******* collect
 tinputs.init = init;
 assumptions.T_test = T_test;

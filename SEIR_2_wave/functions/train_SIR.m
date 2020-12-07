@@ -18,14 +18,16 @@ q_vec = s.quant;
 pop_size = s.pop_size;
 N = s.sim_num;
 % alpha_hr = s.alpha_hr;
-lambda = 6.37/100; %s.lambda;
+lambda = s.lambda;
 alpha_hd = 9.71/100; %s.alpha_hd;
 self_isolation_effect = s.self_isolation_effect;
 case_isolation_effect = s.case_isolation_effect;
 
 % init values (observed)
-St = init.S(1);
-Iot = init.Io(1);
+St = init.St(1);
+Iot = init.Iot(1);
+if isfield(init,'Iat'); Iat = init.Iat(1); else; Iat = alpha(1)*Iot; end
+if isfield(init,'Ist'); Ist = init.Ist(1); else; Ist = (1-alpha(1))*Iot; end
 Ht = init.Ht(1);
 Dt = init.Dt(1);
 
@@ -33,10 +35,10 @@ Dt = init.Dt(1);
 S_vec = zeros(N,T+1);       S_vec(:,1) = St;
 Iu_vec = zeros(N,T+1);      Iu_vec(:,1) = (1/tau(1)-1)*Iot;
 Io_vec = zeros(N,T+1);      Io_vec(:,1) = Iot;
-Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = alpha(1)*Iot; 
-Is_vec = zeros(N,T+1);      Is_vec(:,1) = (1-alpha(1))*Iot; 
-H_vec = zeros(N,T+1);       H_vec(:,1) = Ht(t0);
-D_vec = zeros(N,T+1);       D_vec(:,1) = Dt(t0);
+Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = Iat; 
+Is_vec = zeros(N,T+1);      Is_vec(:,1) = Ist; 
+H_vec = zeros(N,T+1);       H_vec(:,1) = Ht;
+D_vec = zeros(N,T+1);       D_vec(:,1) = Dt;
 R_vec = zeros(N,T+1);
 dI_in_vec = zeros(N,T+1);     
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt(:,1);
@@ -73,7 +75,7 @@ for t=1:T
     Ia_vec(:,t) = alpha(t).*Io_vec(:,t); 
     Is_vec(:,t) = (1-alpha(t)).*Io_vec(:,t);
     H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)./T_rec-alpha_hd./T_death)+lambda.*gamma_hosp_vec./(1-alpha(t)).*Is_vec(:,t);
-    D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death*H_vec(:,t);
+    D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death.*H_vec(:,t);
     R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)./T_rec.*H_vec(:,t)+gamma_vec.*Ia_vec(:,t)...
         +(gamma_vec-lambda.*gamma_hosp_vec./(1-alpha(t))).*Is_vec(:,t);
     idx = idx & Io_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0;
