@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa] = adjust_infection_hospitals_full(x,~,s,dateFrom,dateTo,t0,t1,sigma)
+function [X,I,obs_ratio_adj,sa] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
 
 T = dateTo-dateFrom+1;
@@ -11,7 +11,9 @@ T_rec_icu = 12.3-T_icu;
 T_vent = 9-T_icu;
 T_rec_vent = 15.5-(T_vent+T_icu);
 T_death = 12-(T_vent+T_icu);
-alpha_in = s.lambda./T_hosp.*ones(T,1);
+alpha_in = s.lambda./T_hosp.*ones(T-1,1);
+T_inf = s.T_inf.mean;
+lambda = 6.37/100;
 alpha_ir = (1-lambda)/T_inf;
 
 % alpha_vd = 7.62/100;
@@ -25,40 +27,37 @@ alpha_ir = (1-lambda)/T_inf;
 
 % definitions
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-V = smooth_series(x.Ventilations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-C = smooth_series(x.ICU(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-H = smooth_series(x.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+V = smooth_series(h.Ventilation(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+C = smooth_series(h.ICU(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 N = H-C-V;
 
-alpha_vd = zeros(T,1); alpha_d = zeros(T,1); alpha_vr = zeros(T,1); 
-alpha_cv = zeros(T,1); alpha_v = zeros(T,1); alpha_cr = zeros(T,1);
-alpha_nc = zeros(T,1); alpha_c = zeros(T,1); alpha_nr = zeros(T,1);
-
-d_V_R = zeros(T,1); 
-d_C_V = zeros(T,1); d_C_R = zeros(T,1);
-d_N_C = zeros(T,1); d_N_R = zeros(T,1);
-d_I_N = zeros(T,1); d_I_R = zeros(T,1); I = zeros(T,1);
 X = zeros(T,1);
 
+d_V_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
+alpha_vd = d_V_D./V(1:end-1);
+alpha_d = T_death.*alpha_vd;
+alpha_vr = (1-alpha_d)./T_rec_vent;
+d_V_R = alpha_vr.*V(1:end-1);
+d_V = V(2:end)-V(1:end-1);
+d_C_V = d_V+d_V_D+d_V_R;
+alpha_cv = d_C_V./C(1:end-1);
+alpha_v = alpha_cv.*T_vent;
+alpha_cr = (1-alpha_v)./T_rec_icu;
+d_C_R = alpha_cr.*C(1:end-1);
+d_C = C(2:end)-C(1:end-1);
+d_N_C = d_C+d_C_V+d_C_R;
+alpha_nc = d_N_C./N(1:end-1);
+alpha_c = T_icu.*alpha_nc;
+alpha_nr = (1-alpha_c)./T_rec_norm;
+d_N_R = alpha_nr.*N(1:end-1);
+d_N = N(2:end)-N(1:end-1);
+d_I_N = d_N+d_N_C+d_N_R;
+I = d_I_N./alpha_in;
+d_I_R = I.*alpha_ir;
+    
 % calculation
 for t = 2:T
-    alpha_vd(t) = (D(t)-D(t-1))/V(t-1);
-    alpha_d(t) = T_death.*alpha_vd(t);
-    alpha_vr(t) = (1-alpha_d(t))./T_rec_vent;
-    d_V_R(t) = alpha_vr(t).*V(t-1);
-    d_C_V(t) = V(t)-V(t-1)+d_V_D(t)+d_V_R(t);
-    alpha_cv(t) = d_C_V(t)/C(t-1);
-    alpha_v(t) = alpha_cv(t).*T_vent;
-    alpha_cr(t) = (1-alpha_v(t))./T_rec_icu;
-    d_C_R(t) = alpha_cr(t).*C(t-1);
-    d_N_C(t) = C(t)-C(t-1)+d_C_V(t)+d_C_R(t);
-    alpha_nc(t) = d_N_C(t)./N(t-1);
-    alpha_c(t) = T_icu.*alpha_nc(t);
-    alpha_nr(t) = (1-alpha_c(t))./T_rec_norm;
-    d_N_R(t) = alpha_nr(t).*N(t-1);
-    d_I_N(t) = N(t)-N(t-1)+d_N_C(t)+d_N_R(t);
-    %
-    I(t) = d_I_N(t)/alpha_in(t); 
     d_I_R(t) = I(t).*alpha_ir;
     X(t-1) = I(t)-I(t-1)+d_I_N(t-1)+d_I_R(t-1);
 end

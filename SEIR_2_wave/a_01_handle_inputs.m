@@ -67,8 +67,7 @@ catch err
 end
 
 % observed ratio
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from-2,t1,t0,t1,asymp_ratio_smooth);
-
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals_full(x,hosp,s,disp_from-2,t1,t0,t1,asymp_ratio_smooth);
     
 %% plotting stuff
 % clinical statistics
