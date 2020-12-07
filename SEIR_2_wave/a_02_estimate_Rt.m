@@ -2,7 +2,7 @@
 initialize;
 
 %% setup
-disp_from = dd(2020,8,1);
+disp_from = dd(2020,9,1);
 indiff = true; 
 cut = 0;
 dt = 1;
