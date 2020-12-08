@@ -103,10 +103,12 @@ res_def = struct;
 res_def.x = x;
 res_def.y_pos = smooth_series([y_def_pos,y2],5,5,1);
 res_def.y_neg = smooth_series([y_def_neg,y2],5,5,1);
+res_def.d = delay;
 res_real = struct;
 res_real.x = x;
 res_real.y_pos = smooth_series([y_real_pos,y2],5,5,1);
 res_real.y_neg = smooth_series([y_real_neg,y2],5,5,1);
+res_real.d = delay_real;
 
     function [yy,aa0]=R_fun(xx0,yy0,yy1,x,k0)
         aa0 = (yy1-yy0)/(1-xx0.^k0);

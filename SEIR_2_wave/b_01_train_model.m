@@ -117,3 +117,9 @@ plot(res_quant_real.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
 grid on;
 legend({'data implied','model-implied mean','model-implied median'});
 title('Realistic testing assumption');
+
+%% save results
+means = res_mean; init = tinputs; quants = res_quant; %#ok<*NASGU>
+save('SIR.mat','means','quants','time_interval','assumptions','init');
+means = res_mean_real; init = tinputs_real;quants = res_quant_real; assumptions = assumptions_real;
+save('SIR_real.mat','means','time_interval','assumptions','init');
