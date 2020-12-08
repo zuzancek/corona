@@ -38,7 +38,7 @@ mobility.forecast = false;
 restrictions.forecast = false;
 % ******* Testing
 obs_ratio = double(resize(data.obs_ratio,train_from_date:train_to_date));
-asymp_ratio = double(resize(data.asymp_ratio_smooth,train_from_date:train_to_date));
+asymp_ratio = (1-data.s.symp_ratio_obs)+0*double(resize(data.asymp_ratio_smooth,train_from_date:train_to_date));
 T_test = 1+zeros(train_to-train_from+1,1);
 % ******* Initial values
 init.St = data_Rt.Yt.St(train_from:train_to);

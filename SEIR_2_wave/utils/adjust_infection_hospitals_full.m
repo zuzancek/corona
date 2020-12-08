@@ -4,7 +4,7 @@ function [X,I,obs_ratio_adj,sa] = adjust_infection_hospitals_full(x,h,s,dateFrom
 T = dateTo-dateFrom+1;
 
 %
-T_hosp = 4.5; %s.T_hosp.mean;
+T_hosp = 4.5;
 T_rec_norm = 6.9;
 T_icu = 8-T_hosp;
 T_rec_icu = 12.3-T_icu;

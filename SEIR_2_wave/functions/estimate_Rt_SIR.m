@@ -66,14 +66,14 @@ for t = 1:T
     S_vec(:,t+1) = S_vec(:,t)-z(t);
     I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);
     I_asympt_vec(:,t+1) = I_asympt_vec(:,t).*(1-1./T_si_vec)+sigma(t).*z_obs(t); 
-    I_sympt_vec(:,t+1) = I_sympt_vec(:,t).*(1-(1-lambda)./T_si_vec+lambda./T_hosp(t))+(1-sigma(t)).*z_obs(t);    
+    I_sympt_vec(:,t+1) = I_sympt_vec(:,t).*(1-(1-lambda)./T_si_vec-lambda./T_hosp(t))+(1-sigma(t)).*z_obs(t);    
     I_obs_vec(:,t+1) = I_asympt_vec(:,t+1)+I_sympt_vec(:,t+1);
     H_vec(:,t+1) = H_vec(:,t).*(1-eta_hr/T_rec-(1-eta_hr)/T_death)+lambda.*I_sympt_vec(:,t)/T_hosp(t);
     D_vec(:,t+1) = D_vec(:,t)+(1-eta_hr)./T_death*H_vec(:,t);
     F_vec(:,t+1) = F_vec(:,t)+eta_hr/T_rec.*H_vec(:,t)+(I_unobs_vec(:,t)+I_asympt_vec(:,t)...
         +(1-lambda).*I_sympt_vec(:,t))./T_si_vec; 
     I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
-    idx = idx & I_obs_vec(:,t+1)>=0 & I_unobs_vec(:,t+1)>=0 & H_vec(:,t+1)>=0;
+    idx = idx & I_obs_vec(:,t+1)>=0 & I_unobs_vec(:,t+1)>=0 & H_vec(:,t+1)>=0 & I_sympt_vec(:,t+1)>=0;
 end
 idx = find(idx>0);
 Rt_vec = Rt_vec(idx,:);
