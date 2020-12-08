@@ -1,5 +1,5 @@
 %% initialization
-% initialize;
+initialize;
 
 %% load data
 % inputs, ratios (asympt, obs), hospitals

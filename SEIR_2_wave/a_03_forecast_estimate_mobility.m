@@ -28,9 +28,10 @@ delay = 14;
 %% handle mobility 
 fcastPer = endFcast-startFcast+1;
 mobilityFcast = forecast_mobility(mob,fcastPer,startHist,endHist,startWave);
-% PCR data only	
+% PCR data only	- as reported
 Rt_data = tseries(data.t0+1:data.t1,data.q_mat(s.quant_idx_central,:));
 Rt_data = resize(Rt_data,data.t0+1:t1);
+% PCR data only	- as implied by hospitalizations
 Rt_data_real = tseries(data_real.t0+1:data_real.t1,data_real.q_mat(s.quant_idx_central,:));
 Rt_data_real = resize(Rt_data_real,data_real.t0+1:t1);
 Rt_series.default = Rt_data;
