@@ -18,9 +18,9 @@ q_vec = s.quant;
 pop_size = s.pop_size;
 N = s.sim_num;
 lambda = s.lambda;
-t_hosp = 59-7; % assumptions.t_hosp;
-alpha_hd = 9.71/100; %s.alpha_hd;
-self_isolation_effect = s.self_isolation_effect;
+t_hosp = assumptions.t_hosp-ceil(s.SI.mean);
+eta_hr = s.eta_hr; 
+% self_isolation_effect = s.self_isolation_effect;
 case_isolation_effect = s.case_isolation_effect;
 
 % init values (observed)
@@ -64,7 +64,7 @@ idx = ones(N,1);
 kappa_res = get_kappa_res();
 kappa_mob = get_kappa_mob();
 
-varsigma_unobs = 1/self_isolation_effect*ones(T,1);
+% varsigma_unobs = 1/self_isolation_effect*ones(T,1);
 varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/case_isolation_effect)/s.T_inf_unobs.mean;
 
 for t=1:T
@@ -78,9 +78,9 @@ for t=1:T
     Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*s.obs_ratio.*dI_in_vec(:,t)...
         -(1-lambda).*gamma.*Is_vec(:,t)-lambda.*gamma_hosp_vec(t).*Is_vec(:,t);     
     Io_vec(:,t+1) = Ia_vec(:,t+1)+Is_vec(:,t+1);
-    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)./T_rec-alpha_hd./T_death)+lambda.*gamma_hosp_vec(t).*Is_vec(:,t);
-    D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death.*H_vec(:,t);
-    R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
+    H_vec(:,t+1) = H_vec(:,t).*(1-eta_hr./T_rec-(1-eta_hr)./T_death)+lambda.*gamma_hosp_vec(t).*Is_vec(:,t);
+    D_vec(:,t+1) = D_vec(:,t)+(1-eta_hr)./T_death.*H_vec(:,t);
+    R_vec(:,t+1) = R_vec(:,t)+eta_hr./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
         +(1-lambda).*gamma.*Is_vec(:,t);
     idx = idx & Is_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0 & Ia_vec(:,t+1)>=0;
 end

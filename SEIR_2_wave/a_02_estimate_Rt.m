@@ -99,6 +99,9 @@ save(strcat('results_Rt',ext_opt{1+s.model_seir},'.mat'),'s','t0','t1','q_mat',.
 q_mat = q_mat_pcr; Rt = Rt_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
 save(strcat('results_Rt',ext_opt{1+s.model_seir},'_pcr.mat'),'s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+q_mat = q_mat_test; Rt = Rt_test; Yt = Yt_test; Rt_last = Rt_last_test; Rt_dist = Rt_dist_test; Rt_rnd = Rt_rnd_test;
+save(strcat('results_Rt',ext_opt{1+s.model_seir},'_real_pcr.mat'),'s','t0','t1','q_mat',...
+    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 
 %% optional: statistics
 % model training
