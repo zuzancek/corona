@@ -73,9 +73,9 @@ for t=1:T
     dI_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
         (varsigma.*Io_vec(:,t)+Iu_vec(:,t)).*gamma; % varsigma_unobs(t).*
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t);   
-    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
-    Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*s.obs_ratio.*dI_in_vec(:,t)-gamma.*Ia_vec(:,t); 
-    Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*s.obs_ratio.*dI_in_vec(:,t)...
+    Iu_vec(:,t+1) = Iu_vec(:,t)+(1-tau(t)).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
+    Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*tau(t).*dI_in_vec(:,t)-gamma.*Ia_vec(:,t); 
+    Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*tau(t).*dI_in_vec(:,t)...
         -(1-lambda).*gamma.*Is_vec(:,t)-lambda.*gamma_hosp_vec(t).*Is_vec(:,t);     
     Io_vec(:,t+1) = Ia_vec(:,t+1)+Is_vec(:,t+1);
     H_vec(:,t+1) = H_vec(:,t).*(1-eta_hr./T_rec-(1-eta_hr)./T_death)+lambda.*gamma_hosp_vec(t).*Is_vec(:,t);

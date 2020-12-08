@@ -43,7 +43,7 @@ restrictions.forecast = false;
 restrictions_real = restrictions;
 % ******* Testing
 obs_ratio = double(resize(data.obs_ratio,train_from_date:train_to_date));
-obs_ratio_real = double(resize(obs_ratio_real,train_from_date:train_to_date));
+obs_ratio_real = double(resize(data.obs_ratio_real,train_from_date:train_to_date));
 asymp_ratio = (1-data.s.symp_ratio_obs)+0*double(resize(data.asymp_ratio_smooth,train_from_date:train_to_date));
 asymp_ratio_real = double(resize(data.asymp_ratio_smooth,train_from_date:train_to_date));
 T_test = 1+zeros(train_to-train_from+1,1);
@@ -70,12 +70,14 @@ tinputs.Rt = data_Rt.Rt_rnd;%(:,train_from-2*data.s.SI.mean:train_to-2*data.s.SI
 tinputs_real.init = init_real;
 tinputs_real.Rt = data_Rt_real.Rt_rnd;%(:,train_from-2*data.s.SI.mean:train_to-2*data.s.SI.mean);
 assumptions.T_test = T_test;
+assumptions.t_hosp = 59;
 assumptions.obs_ratio = obs_ratio;
 assumptions.obs_ratio_effect = (data.s.obs_ratio./obs_ratio-1)+1;
 assumptions.asymp_ratio = asymp_ratio;
 assumptions.mobility = mobility;
 assumptions.restrictions = restrictions;
 assumptions_real.T_test = T_test;
+assumptions_real.t_hosp = 59;
 assumptions_real.obs_ratio = obs_ratio_real;
 assumptions_real.obs_ratio_effect = 0*(data.s.obs_ratio./obs_ratio_real-1)+1;
 assumptions_real.asymp_ratio = asymp_ratio_real;
@@ -100,11 +102,21 @@ plot_fanchart(res_quant_real.Iot,s,dt,train_from,train_to,train_from,'Observed a
 
 % Data vs model-implied infectious
 figure('Name','Data vs. model-implied observed infectious');
+subplot(2,1,1);
 plot(init.Iot,'linewidth',1);hold on;
 plot(res_mean.Iot,'linewidth',1);hold on;
 plot(res_quant.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
 grid on;
 legend({'data implied','model-implied mean','model-implied median'});
+title('Optimal testing assumption');
+
+subplot(2,1,2);
+plot(init_real.Iot,'linewidth',1);hold on;
+plot(res_mean_real.Iot,'linewidth',1);hold on;
+plot(res_quant_real.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
+grid on;
+legend({'data implied','model-implied mean','model-implied median'});
+title('Realistic testing assumption');
 
 % TODO
 % komparacie: (SIR, epi)
