@@ -31,10 +31,17 @@ mobilityFcast = forecast_mobility(mob,fcastPer,startHist,endHist,startWave);
 % PCR data only	
 Rt_data = tseries(data.t0+1:data.t1,data.q_mat(s.quant_idx_central,:));
 Rt_data = resize(Rt_data,data.t0+1:t1);
+Rt_data_real = tseries(data_real.t0+1:data_real.t1,data_real.q_mat(s.quant_idx_central,:));
+Rt_data_real = resize(Rt_data_real,data_real.t0+1:t1);
 dI_inflow = resize(inputs.dI_inflow_pcr_smooth,data.t0+1:t1-3);
+dI_inflow_real = resize(inputs.dI_inflow_real,data.t0+1:t1-3);
 It = tseries(data.t0+1:data.t1,data.Yt.Iot);
+It_real = tseries(data_real.t0+1:data_real.t1,data_real.Yt.Iot);
 dI_rel = dI_inflow./It;
-mobilityParams = estimate_mobility(mobilityFcast,Rt_data,dI_rel,startEstim,delay,startEstimFull);
+dI_rel_real = dI_inflow_real./It_real;
+Rt_series.default = Rt_data;
+Rt_series.real = Rt_data_real;
+mobilityParams = estimate_mobility(mobilityFcast,Rt_series,dI_rel,startEstim,delay,startEstimFull);
 
 %% saving results
 save('mobility_forecast.mat','mobilityFcast','startHist','fcastPer','startWave');

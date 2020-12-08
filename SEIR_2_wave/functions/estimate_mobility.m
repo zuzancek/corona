@@ -1,10 +1,15 @@
-function [res] = estimate_mobility(mob,Rt,dI,dateFrom,delay,dateFrom_fullSample)
+function [res] = estimate_mobility(mob,inputs,dI,dateFrom,delay,dateFrom_fullSample)
 
+Rt = inputs.default;
+Rt_real = inputs.real;
 r_dateFrom = dateFrom;
 r_dateTo = enddate(Rt);
 r = resize(Rt,r_dateFrom:r_dateTo);
+r_real = resize(Rt_real,r_dateFrom:r_dateTo);
 r_full = double(resize(Rt,dateFrom_fullSample:r_dateTo));
 r_data = double(r);
+r_real_full = double(resize(Rt_real,dateFrom_fullSample:r_dateTo));
+r_real_data = double(r_real);
 
 m_dateFrom = dateFrom-delay;
 m_dateTo = r_dateTo-delay;
@@ -18,15 +23,20 @@ di = di/di(r_dateFrom);
 
 [~,m_dmin] = min(m);
 [~,r_dmin] = min(r);
+[~,r_real_dmin] = min(r_real);
 [r_vmax,r_dmax] = max(r_full);
+[r_real_vmax,r_dmax] = max(r_real_full);
+[r_real_vmax,r_real_dmax] = max(r_real_full);
+fprintf('Delay in reported data: %d\n',r_dmin-m_dmin);
+fprintf('Delay in real data: %d\n',r_real_dmin-m_dmin);
 % assert(r_dmin-m_dmin==delay);
 
 figure('Name','Mobility as a predictor of Rt');
 plot(m,'linewidth',2); hold on;
 plot(r,'linewidth',2);
-plot(di,'linewidth',2);
+plot(r_real,'linewidth',2);
 grid on;
-legend({'mobility','Rt','dI_in'});
+legend({'mobility','Rt','Rt_{real}'});
 
 % curve fitting: R(m) = (1/(a_0-m^k)-a_1)*c_2
 m_idx = find(m_data<1,1); a_m = interp1([m_data(m_idx-1) m_data(m_idx)],[0 1],1);
@@ -35,10 +45,19 @@ r_idx = find(r_data<1,1);
 if isempty(r_idx)
     [~,r_idx] = min(r_data);
 end
+r_real_1 = r_real_data(m_idx-1)*a_m+(1-a_m)*r_real_data(m_idx);
+r_real_idx = find(r_real_data<1,1); 
+if isempty(r_real_idx)
+    [~,r_real_idx] = min(r_real_data);
+end
 a_r = interp1([r_data(r_idx-1) r_data(r_idx)],[0 1],1);
 m_1 = m_data(r_idx-1)*a_r+(1-a_r)*m_data(r_idx);
 m_2 = m_full(r_dmax);
 sl = (r_vmax-r_1)/(m_2-1);
+a_r_real = interp1([r_real_data(r_real_idx-1) r_real_data(r_real_idx)],[0 1],1);
+m_real_1 = m_data(r_real_idx-1)*a_r_real+(1-a_r_real)*m_data(r_real_idx);
+m_real_2 = m_full(r_real_dmax);
+sl = (r_real_vmax-r_real_1)/(m_real_2-1);
 
 figure('Name','Mobility, impact on Rt (raw data)');
 x1 = 0.65:0.01:1;
@@ -58,6 +77,7 @@ k = k_array(idx_chosen);
 y1 = modelfun2(k,x1);
 plot([x1,x2],[y1,y2],'linewidth',2,'Color','m');hold on;
 scatter(m_full,r_full,'k'); hold on;
+scatter(m_full,r_real_full,'g'); hold on;
 grid on;
 xlabel('Mobility (%)');
 ylabel('R_t');
