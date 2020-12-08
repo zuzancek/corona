@@ -117,27 +117,3 @@ plot(res_quant_real.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
 grid on;
 legend({'data implied','model-implied mean','model-implied median'});
 title('Realistic testing assumption');
-
-% TODO
-% komparacie: (SIR, epi)
-% - observed/unobserved;
-% - asymptomatical/symptomatical
-% tm0 = dd(2020,9,15);
-% tm1 = t1;
-% % tune theta
-% x = tseries(t0:t1-1,Yt.Ist./Yt.Iat);
-% as = as(2:end)/100;
-% x_tar = as./(1-as);
-% dx = 100*(x./x_tar-1);
-% figure; 
-% plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-% ylabel('%');
-% title('I_{symp}/I_{asymp} (%)');
-% % tune obs_ratio
-% x = tseries(t0:t1-1,Yt.Iot./Yt.It);
-% x_tar = s.obs_ratio_tar;
-% dx = 100*(x./x_tar-1);
-% figure; 
-% plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-% ylabel('%');
-% title('I_{obs}/I (%)');

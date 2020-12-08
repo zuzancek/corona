@@ -102,27 +102,3 @@ save(strcat('results_Rt',ext_opt{1+s.model_seir},'_pcr.mat'),'s','t0','t1','q_ma
 q_mat = q_mat_test; Rt = Rt_test; Yt = Yt_test; Rt_last = Rt_last_test; Rt_dist = Rt_dist_test; Rt_rnd = Rt_rnd_test;
 save(strcat('results_Rt',ext_opt{1+s.model_seir},'_real_pcr.mat'),'s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-
-%% optional: statistics
-% model training
-% if s.model_seir
-%     tm0 = dd(2020,9,15);
-%     tm1 = t1;
-%     % tune theta
-%     x = tseries(t0+1:t1,Yt.Iat./Yt.Iot);
-%     x = tseries(t0+1:t1,Yt.Iaint./(Yt.Iaint+Yt.Isint));
-%     x_tar = resize(asymp_ratio_smooth,t0:t1);
-%     dx = 100*(x./x_tar-1);
-%     figure; 
-%     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-%     ylabel('%');
-%     title('inflow I_{asymp}/I_{obs} (%)');
-%     % tune obs_ratio
-%     x = tseries(t0+1:t1,Yt.Ioint./(Yt.Ioint+Yt.Iuint));
-%     x_tar = resize(obs_ratio_smooth,t0:t1);
-%     dx = 100*(x./x_tar-1);
-%     figure; 
-%     plot(resize(dx,tm0:tm1),'linewidth',1); grid on;
-%     ylabel('%');
-%     title('inflow I_{obs}/I (%)');
-% end
