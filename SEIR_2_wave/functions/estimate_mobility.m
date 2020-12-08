@@ -21,11 +21,10 @@ m_data = double(m);
 di = resize(dI,r_dateFrom:r_dateTo); 
 di = di/di(r_dateFrom);
 
-[~,m_dmin] = min(m);
-[~,r_dmin] = min(r);
-[~,r_real_dmin] = min(r_real);
+[m_v_min,m_dmin] = min(m);
+[r_v_min,r_dmin] = min(r);
+[r_real_v_min,r_real_dmin] = min(r_real);
 [r_vmax,r_dmax] = max(r_full);
-[r_real_vmax,r_dmax] = max(r_real_full);
 [r_real_vmax,r_real_dmax] = max(r_real_full);
 fprintf('Delay in reported data: %d\n',r_dmin-m_dmin);
 fprintf('Delay in real data: %d\n',r_real_dmin-m_dmin);
@@ -60,7 +59,25 @@ m_real_2 = m_full(r_real_dmax);
 sl = (r_real_vmax-r_real_1)/(m_real_2-1);
 
 figure('Name','Mobility, impact on Rt (raw data)');
+pp1=scatter(m_full,r_full); hold on;
+pp2=scatter(m_full,r_real_full); hold on;
+
 x1 = 0.65:0.01:1;
+x_axis = m_v_min:0.01:1;
+k0_pos = -0.45; k0_real_pos = -0.65;
+k0_neg = 3; k0_real_neg = 6;
+[y_def_pos]=R_fun(m_v_min,r_v_min,r_1,x_axis(2:end),k0_pos);
+[y_def_neg]=R_fun_neg(m_v_min,r_v_min,r_1,x_axis(2:end),k0_neg);
+plot(x_axis(2:end),y_def_pos,'-','linewidth',2,'Color',pp1.CData);
+plot(x_axis(2:end),y_def_neg,'--','linewidth',2,'Color',pp1.CData);
+[y_real_pos]=R_fun(m_v_min,r_real_v_min,r_real_1,x_axis(2:end),k0_real_pos);
+[y_real_neg]=R_fun_neg(m_v_min,r_real_v_min,r_real_1,x_axis(2:end),k0_real_neg);
+plot(x_axis(2:end),y_real_pos,'-','linewidth',2,'Color',pp2.CData);
+plot(x_axis(2:end),y_real_neg,'--','linewidth',2,'Color',pp2.CData);
+grid on;
+legend([pp1,pp2],{'reported','real'});
+
+
 x2 = 1:0.01:1.45;
 y2 = r_1+sl.*(x2-x2(1));
 
@@ -128,4 +145,21 @@ res.f.y_grid = z;
         yy = r_1*(a+1).*(1-a./(a+exp((x.^3-1).*k)));
     end
 
+%     function [yy,aa0]=R_fun0(xx0,yy0,yy1,x,k0)
+%         aa0 = fzero(@inner_fnc,0.5);
+%         function [d]=inner_fnc(aa)
+%             d=aa./(aa-1).*yy0/yy1-(1./(aa-xx0.^k0)-1);
+%         end
+%         yy = yy1*(aa0-1)./aa0.*(1./(aa0-x.^k0)-1);
+%     end
+    function [yy,aa0]=R_fun(xx0,yy0,yy1,x,k0)
+        aa0 = (yy1-yy0)/(1-xx0.^k0);
+        bb0 = yy1-aa0;
+        yy = aa0.*x.^k0+bb0;
+    end
+    function [yy,aa0]=R_fun_neg(xx0,yy0,yy1,x,k0)
+        aa0 = (yy1-yy0)/(1-exp((xx0-1)*k0));
+        bb0 = yy1-aa0;
+        yy = aa0.*exp(k0*(x-1))+bb0;
+    end
 end
