@@ -1,5 +1,7 @@
 function [res_def,res_real] = estimate_mobility(mob,inputs,dateFrom,delay,dateFrom_fullSample)
 
+delay = 15;
+delay_real = 10;
 Rt = inputs.default;
 Rt_real = inputs.real;
 r_dateFrom = dateFrom;
@@ -18,12 +20,20 @@ m = resize(mob.orig/100,m_dateFrom:m_dateTo);
 m_full = double(resize(mob.orig/100,dateFrom_fullSample-delay:m_dateTo));
 m_data = double(m);
 
+m_real_dateFrom = dateFrom-delay_real;
+m_real_dateTo = r_dateTo-delay_real;
+m_real = resize(mob.orig/100,m_real_dateFrom:m_real_dateTo);
+% m_raw = double(resize(mob.raw/100,m_dateFrom:m_dateTo));
+m_real_full = double(resize(mob.orig/100,dateFrom_fullSample-delay_real:m_real_dateTo));
+m_real_data = double(m_real);
+
 [m_v_min,m_dmin] = min(m);
 [r_v_min,r_dmin] = min(r);
+[m_real_v_min,m_real_dmin] = min(m_real);
 [r_real_v_min,r_real_dmin] = min(r_real);
 [r_real_vmax,r_real_dmax] = max(r_real_full);
 fprintf('Delay in reported data: %d\n',r_dmin-m_dmin);
-fprintf('Delay in real data: %d\n',r_real_dmin-m_dmin);
+fprintf('Delay in real data: %d\n',r_real_dmin-m_real_dmin);
 % assert(r_dmin-m_dmin==delay);
 
 figure('Name','Mobility as a predictor of Rt');

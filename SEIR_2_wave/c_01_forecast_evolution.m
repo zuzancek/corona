@@ -16,6 +16,14 @@ me = load('mobility_estimation.mat','mobilityParams','mobilityParams_real','star
 %% handle inputs
 % ****************** Dates
 % ****************** Mobility
+% medium scenario assumed
+mobility.forecast = true;
+mobility.values = mf.mobilityFcast.medium(startFcast:end)/100;
+mobility.scale = mf.mobilityFcast.medium(startFcast);
+mobility.x_grid = me.mobilityParams.x;
+mobility.y_grid = me.mobilityParams.y_pos;
+
+
 s = data.s; % s = setparam
 startFcast = data.t1+1;
 endHist = startFcast-1;
