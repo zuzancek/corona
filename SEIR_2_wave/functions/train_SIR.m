@@ -18,6 +18,7 @@ q_vec = s.quant;
 pop_size = s.pop_size;
 N = s.sim_num;
 lambda = s.lambda;
+t_hosp = 59-7; % assumptions.t_hosp;
 alpha_hd = 9.71/100; %s.alpha_hd;
 self_isolation_effect = s.self_isolation_effect;
 case_isolation_effect = s.case_isolation_effect;
@@ -46,7 +47,10 @@ it = st; iot = st; iut = st; ist = st; iat = st; dt = st; rt = st; ht = st;
 
 %% initialize
 T_si_vec = get_rv(s.SI);
-T_hosp_vec = get_rv(s.T_hosp);
+T_hosp_vec = s.T_hosp.mean+zeros(T,1); 
+T_hosp_vec(t_hosp:end) = smooth_series(linspace(T_hosp_vec(t_hosp),T_hosp_vec(t_hosp)+1,T-t_hosp+1),7,3,1);
+dh = T_hosp_vec./T_hosp_vec(1);
+% T_hosp_vec = get_rv(s.T_hosp);
 T_death.mean = s.T_death.mean; T_death.std = 1;
 T_death = get_rv(T_death);
 T_rec.mean = s.T_rec; T_rec.std = 1;
@@ -65,16 +69,16 @@ varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/case_isolatio
 
 for t=1:T
     r_idx = (t+dateFrom-1).*N+shift_vec;
-    R_eff(:,t) = Rt(r_idx).*kappa_mob(t).*kappa_res(t).*obs_ratio_effect(t);
+    R_eff(:,t) = Rt(r_idx).*kappa_mob(t).*kappa_res(t).*obs_ratio_effect(t).*dh(t);
     dI_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
         (varsigma.*Io_vec(:,t)+Iu_vec(:,t)).*gamma; % varsigma_unobs(t).*
     S_vec(:,t+1) = S_vec(:,t)-dI_in_vec(:,t);   
     Iu_vec(:,t+1) = Iu_vec(:,t)+(1-s.obs_ratio).*dI_in_vec(:,t)-gamma.*Iu_vec(:,t);
     Ia_vec(:,t+1) = Ia_vec(:,t)+alpha(t).*s.obs_ratio.*dI_in_vec(:,t)-gamma.*Ia_vec(:,t); 
     Is_vec(:,t+1) = Is_vec(:,t)+(1-alpha(t)).*s.obs_ratio.*dI_in_vec(:,t)...
-        -(1-lambda).*gamma.*Is_vec(:,t)-lambda.*gamma_hosp_vec.*Is_vec(:,t);     
+        -(1-lambda).*gamma.*Is_vec(:,t)-lambda.*gamma_hosp_vec(t).*Is_vec(:,t);     
     Io_vec(:,t+1) = Ia_vec(:,t+1)+Is_vec(:,t+1);
-    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)./T_rec-alpha_hd./T_death)+lambda.*gamma_hosp_vec.*Is_vec(:,t);
+    H_vec(:,t+1) = H_vec(:,t).*(1-(1-alpha_hd)./T_rec-alpha_hd./T_death)+lambda.*gamma_hosp_vec(t).*Is_vec(:,t);
     D_vec(:,t+1) = D_vec(:,t)+alpha_hd./T_death.*H_vec(:,t);
     R_vec(:,t+1) = R_vec(:,t)+(1-alpha_hd)./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
         +(1-lambda).*gamma.*Is_vec(:,t);

@@ -3,7 +3,7 @@ function [] = plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,fname,maketit,vararg
 f = figure('Name',fname);
 fanChart(1:size(q_mat,2), q_mat', q_mat(s.quant_idx_central,:), s.quant,...
     'alpha', .75, 'colormap', {'shadesOfColor',s.color_graph});
-if isempty(varargin)
+if isempty(varargin) || varargin{1}<=0
     lab_idx = 1;
 else
     lab_idx = varargin{1};

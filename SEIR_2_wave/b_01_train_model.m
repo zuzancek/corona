@@ -66,9 +66,9 @@ s.quant = 0.25:0.025:0.75;
 %% display results
 % infectious in distributions
 ydata.data = init.It; ydata.col = 'r'; ydata.leg = 'Data-implied';
-plot_fanchart(res_quant.It,s,dt,train_from,train_to,train_from,'Total active infections (SIR, PCR only)',true,8,ydata);
+plot_fanchart(res_quant.It,s,dt,train_from,train_to,train_from,'Total active infections (SIR, PCR only)',true,1,ydata);
 ydata.data = init.Iot; ydata.col = 'r'; ydata.leg = 'Data-implied';
-plot_fanchart(res_quant.Iot,s,dt,train_from,train_to,train_from,'Observed active infections (SIR, PCR only)',true,8,ydata);
+plot_fanchart(res_quant.Iot,s,dt,train_from,train_to,train_from,'Observed active infections (SIR, PCR only)',true,1,ydata);
 
 % Data vs model-implied infectious
 figure('Name','Data vs. model-implied observed infectious');
