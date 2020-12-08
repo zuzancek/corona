@@ -36,9 +36,9 @@ Rt_data_real = tseries(data_real.t0+1:data_real.t1,data_real.q_mat(s.quant_idx_c
 Rt_data_real = resize(Rt_data_real,data_real.t0+1:t1);
 Rt_series.default = Rt_data;
 Rt_series.real = Rt_data_real;
-mobilityParams = estimate_mobility(mobilityFcast,Rt_series,startEstim,delay,startEstimFull);
+[mobilityParams,mobilityParams_real] = estimate_mobility(mobilityFcast,Rt_series,startEstim,delay,startEstimFull);
 
 %% saving results
 save('mobility_forecast.mat','mobilityFcast','startHist','fcastPer','startWave');
-save('mobility_estimation.mat','mobilityParams','startEstim','delay','startEstimFull');
+save('mobility_estimation.mat','mobilityParams','mobilityParams_real','startEstim','delay','startEstimFull');
 

@@ -8,11 +8,14 @@ startWave = dd(2020,09,01); % start of the second wave
 %% loading stuff
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
-data = load('results_Rt.mat','q_mat','Rt','Yt','s','Rt_last','t0','t1');
+data = load('results_Rt_SIR_pcr.mat','s','t0','t1','q_mat','Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+data_real = load('results_Rt_SIR_real_pcr.mat','s','t0','t1','q_mat','Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 mf = load('mobility_forecast.mat','mobilityFcast','startHist','fcastPer','startWave');
-me = load('mobility_estimation.mat','mobilityParams','startEstim','delay','startEstimFull');
+me = load('mobility_estimation.mat','mobilityParams','mobilityParams_real','startEstim','delay','startEstimFull');
 
 %% handle inputs
+% ****************** Dates
+% ****************** Mobility
 s = data.s; % s = setparam
 startFcast = data.t1+1;
 endHist = startFcast-1;
