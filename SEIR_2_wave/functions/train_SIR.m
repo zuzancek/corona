@@ -171,6 +171,7 @@ res_quant.Rt = get_quant(R_vec(:,1:T));
 
     function [m] = get_kappa_mob()
         if mobility.forecast
+            idx_neg = find(diff(mobility.values)<0)+1;
             m0 = interp1(mobility.x_grid,mobility.y_grid,mobility.values);
             ms = interp1(mobility.x_grid,mobility.y_grid,mobility.scale);
             m = m0/ms;

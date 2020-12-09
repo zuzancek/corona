@@ -29,7 +29,7 @@ perFcast = endFcast-startFcast+1;
 % medium scenario assumed
 mobility.forecast = true;
 mobility.delay = me.mobilityParams.d;
-mobility.values = mf.mobilityFcast.medium(startFcast-mobility.delay:end-mobility.delay)/100;
+mobility.values = mf.mobilityFcast.medium(startFcast-mobility.delay-1:end-mobility.delay)/100;
 mobility.scale = mf.mobilityFcast.medium(startFcast-mobility.delay)/100;
 mobility.x_grid = me.mobilityParams.x;
 mobility.y_grid_pos = me.mobilityParams.y_pos;
