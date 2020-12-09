@@ -54,6 +54,8 @@ figure('Name','Mobility, impact on Rt');
 pp1=scatter(m_full,r_full); hold on;
 pp2=scatter(m_full,r_real_full); hold on;
 x0_axis = m_v_min:0.01:1.01;
+idx_x0 = find(x0_axis>1,1);
+x0_axis = x0_axis(1:idx_x0-1);
 nn = length(x0_axis);
 k0_pos = -0.45; k0_real_pos = -0.65;
 k0_neg = 3; k0_real_neg = 6;
