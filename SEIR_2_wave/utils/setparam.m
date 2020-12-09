@@ -114,6 +114,7 @@ s.min_pts = 100;
 s.max_pts = 200;
 s.min_dif = 1;
 s.max_dif = 4;
+s.shift_max = 2*s.SI.mean;
 
 end
 

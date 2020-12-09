@@ -30,7 +30,6 @@ perFcast = endFcast-startFcast+1;
 mobility.forecast = true;
 mobility.delay = me.mobilityParams.d;
 mobility.values = mf.mobilityFcast.medium(startFcast-mobility.delay-1:end-mobility.delay)/100;
-mobility.scale = mf.mobilityFcast.medium(startFcast-mobility.delay)/100;
 mobility.x_grid = me.mobilityParams.x;
 mobility.y_grid_pos = me.mobilityParams.y_pos;
 mobility.y_grid_neg = me.mobilityParams.y_neg;
@@ -50,15 +49,15 @@ init.Dt = data_Rt.Yt.Dt(end);
 %% forecast with SIRh
 % put inputs together
 inputs.init = init;
-inputs.Rt = data_Rt.Rt_rnd;
+inputs.Rt = extend_Rt(data_Rt.Rt_rnd,perFcast);
 assumptions.T_test = T_test;
 assumptions.obs_ratio = obs_ratio;
 assumptions.asymp_ratio = asymp_ratio;
 assumptions.mobility = mobility;
 assumptions.restrictions = restrictions;
 assumptions_real.T_test = T_test;
-time_interval.dateFrom = startFcast;
-time_interval.dateTo = endFcast;
+time_interval.dateFrom = startFcast-data.t0;
+time_interval.dateTo = endFcast-data.t0;
 
 % run forecast
 s.quant = 0.25:0.025:0.75;

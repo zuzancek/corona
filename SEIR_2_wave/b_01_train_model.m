@@ -119,7 +119,7 @@ plot(res_mean_real.Iot,'linewidth',1);hold on;
 plot(res_quant_real.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
 grid on;
 legend({'data implied','model-implied mean','model-implied median'});
-title('Observed Active Infections (Realistic testing assumption)');
+title('Observed Active Infections (realistic testing assumption)');
 
 %% save results
 means = res_mean; init = tinputs; quants = res_quant; %#ok<*NASGU>

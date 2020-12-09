@@ -68,7 +68,7 @@ T_death.mean = s.T_death.mean; T_death.std = 1;
 T_death = get_rv(T_death);
 T_rec.mean = s.T_rec; T_rec.std = 1;
 T_rec = get_rv(T_rec);
-shift = min(floor(get_rv(s.SI)),ceil(2*s.SI.mean));
+shift = min(floor(get_rv(s.SI)),s.shift_max);
 shift_vec = [1:N]'-shift.*N; %#ok<NBRAK>
 gamma = 1./T_si_vec;
 gamma_hosp_vec = 1./T_hosp_vec;
@@ -171,10 +171,14 @@ res_quant.Rt = get_quant(R_vec(:,1:T));
 
     function [m] = get_kappa_mob()
         if mobility.forecast
-            idx_neg = find(diff(mobility.values)<0)+1;
-            m0 = interp1(mobility.x_grid,mobility.y_grid,mobility.values);
-            ms = interp1(mobility.x_grid,mobility.y_grid,mobility.scale);
-            m = m0/ms;
+            idx_neg = (diff(mobility.values)<0); 
+            idx_neg = [idx_neg(1);idx_neg(1:end-1)];
+            mvals = mobility.values(2:end);
+            m0_neg = interp1(mobility.x_grid,mobility.y_grid_neg,mvals);
+            m0_pos = interp1(mobility.x_grid,mobility.y_grid_pos,mvals);
+            m0 = idx_neg.*m0_neg+not(idx_neg).*m0_pos;
+            m0_smooth = smooth_series(m0,5,5,1);
+            m = m0_smooth/m0_smooth(1);
         else
             m = ones(T,1);
         end
