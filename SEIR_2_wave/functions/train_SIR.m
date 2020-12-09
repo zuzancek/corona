@@ -48,11 +48,11 @@ Ia_vec = zeros(N,T+1);      Ia_vec(:,1) = Iat;
 Is_vec = zeros(N,T+1);      Is_vec(:,1) = Ist; 
 H_vec = zeros(N,T+1);       H_vec(:,1) = Ht;
 D_vec = zeros(N,T+1);       D_vec(:,1) = Dt;
-R_vec = zeros(N,T+1);
+F_vec = zeros(N,T+1);
 dI_in_vec = zeros(N,T+1);     
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt(:,1);
 st = zeros(T+1,1);
-it = st; iot = st; iut = st; ist = st; iat = st; dt = st; rt = st; ht = st;
+it = st; iot = st; iut = st; ist = st; iat = st; dt = st; ft = st; ht = st; re = st;
 
 %% initialize
 T_si_vec = get_rv(s.SI);
@@ -81,7 +81,7 @@ kappa_mob = get_kappa_mob();
 varsigma = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/case_isolation_effect)/s.T_inf_unobs.mean;
 
 for t=1:T
-    r_idx = (t+dateFrom-1).*N+shift_vec;
+    r_idx = (t+dateFrom-2).*N+shift_vec;
     R_eff(:,t) = Rt(r_idx).*kappa_mob(t).*kappa_res(t).*obs_ratio_effect(t).*dh(t);
     dI_in_vec(:,t) = R_eff(:,t).*S_vec(:,t)/pop_size.*...
         (varsigma.*Io_vec(:,t)+Iu_vec(:,t)).*gamma; % varsigma_unobs(t).*
@@ -93,7 +93,7 @@ for t=1:T
     Io_vec(:,t+1) = Ia_vec(:,t+1)+Is_vec(:,t+1);
     H_vec(:,t+1) = H_vec(:,t).*(1-eta_hr./T_rec-(1-eta_hr)./T_death)+lambda.*gamma_hosp_vec(t).*Is_vec(:,t);
     D_vec(:,t+1) = D_vec(:,t)+(1-eta_hr)./T_death.*H_vec(:,t);
-    R_vec(:,t+1) = R_vec(:,t)+eta_hr./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
+    F_vec(:,t+1) = F_vec(:,t)+eta_hr./T_rec.*H_vec(:,t)+gamma.*Ia_vec(:,t)...
         +(1-lambda).*gamma.*Is_vec(:,t);
     idx = idx & Is_vec(:,t+1)>=0 & Iu_vec(:,t+1)>=0 & H_vec(:,t+1)>=0 & Ia_vec(:,t+1)>=0;
 end
@@ -106,13 +106,15 @@ Ia_vec = Ia_vec(idx,:);
 Is_vec = Is_vec(idx,:);
 H_vec = H_vec(idx,:);
 D_vec = D_vec(idx,:);
-R_vec = R_vec(idx,:);
+R_eff = R_eff(idx,:);
+F_vec = F_vec(idx,:);
 I_vec = Io_vec+Iu_vec;
 
 % mean values
 res_mean = struct;
 for t = 1:T+1
     it(t) = mean(I_vec(:,t));
+    re(t) = mean(R_eff(:,t));
     st(t) = mean(S_vec(:,t));
     iat(t) = mean(Ia_vec(:,t));
     ist(t) = mean(Is_vec(:,t));
@@ -120,15 +122,16 @@ for t = 1:T+1
     iut(t) = mean(Iu_vec(:,t));
     ht(t) = mean(H_vec(:,t));
     dt(t) = mean(D_vec(:,t));
-    rt(t) = mean(R_vec(:,t));
+    ft(t) = mean(F_vec(:,t));
 end
 res_mean.It = it;
+res_mean.Refft = re;
 res_mean.Iat = iat;
 res_mean.Ist = ist;
 res_mean.Iot = iot;
 res_mean.Iut = iut;
 res_mean.St = st;
-res_mean.Rt = rt;
+res_mean.Ft = ft;
 res_mean.Dt = dt;
 res_mean.Ht = ht;
 
@@ -137,11 +140,12 @@ res_quant.Iat = get_quant(Ia_vec(:,1:T));
 res_quant.Ist = get_quant(Is_vec(:,1:T));
 res_quant.Iut = get_quant(Iu_vec(:,1:T));
 res_quant.Iot = get_quant(Io_vec(:,1:T));
+res_quant.Refft = get_quant(R_eff(:,1:T));
 res_quant.It = get_quant(I_vec(:,1:T));
 res_quant.St = get_quant(S_vec(:,1:T));
 res_quant.Dt = get_quant(D_vec(:,1:T));
 res_quant.Ht = get_quant(H_vec(:,1:T));
-res_quant.Rt = get_quant(R_vec(:,1:T));
+res_quant.Ft = get_quant(F_vec(:,1:T));
 
 %% helpers
 
