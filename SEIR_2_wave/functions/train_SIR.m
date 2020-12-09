@@ -9,7 +9,11 @@ mobility = assumptions.mobility;
 restrictions = assumptions.restrictions;
 alpha = assumptions.asymp_ratio;
 tau = assumptions.obs_ratio;
-obs_ratio_effect = assumptions.obs_ratio_effect;
+if isfield(assumptions,'obs_ratio_effect')
+    obs_ratio_effect = assumptions.obs_ratio_effect;
+else
+    obs_ratio_effect = ones(T,1);
+end
 % inputs: Rt, init values
 init = inputs.init;
 Rt = inputs.Rt;
@@ -30,7 +34,7 @@ case_isolation_effect = s.case_isolation_effect;
 
 % init values (observed)
 Iot = init.Iot(1);
-if isfield(init,'St'); St = init.St(1); else; St = s.pop_size-I0/tau(1); end
+if isfield(init,'St'); St = init.St(1); else; St = s.pop_size-Iot/tau(1); end
 if isfield(init,'Iat'); Iat = init.Iat(1); else; Iat = alpha(1)*Iot; end
 if isfield(init,'Ist'); Ist = init.Ist(1); else; Ist = (1-alpha(1))*Iot; end
 Ht = init.Ht(1);
