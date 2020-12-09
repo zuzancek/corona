@@ -51,7 +51,7 @@ D_vec = zeros(N,T+1);       D_vec(:,1) = Dt;
 F_vec = zeros(N,T+1);
 dI_in_vec = zeros(N,T+1);     
 R_eff = zeros(N,T+1);       R_eff(:,1) = Rt(:,1);
-st = zeros(T+1,1);
+st = zeros(T,1);
 it = st; iot = st; iut = st; ist = st; iat = st; dt = st; ft = st; ht = st; re = st;
 
 %% initialize
@@ -112,7 +112,7 @@ I_vec = Io_vec+Iu_vec;
 
 % mean values
 res_mean = struct;
-for t = 1:T+1
+for t = 1:T
     it(t) = mean(I_vec(:,t));
     re(t) = mean(R_eff(:,t));
     st(t) = mean(S_vec(:,t));
@@ -175,14 +175,17 @@ res_quant.Ft = get_quant(F_vec(:,1:T));
 
     function [m] = get_kappa_mob()
         if mobility.forecast
-            idx_neg = (diff(mobility.values)<0); 
-            idx_neg = [idx_neg(1);idx_neg(1:end-1)];
-            mvals = mobility.values(2:end);
-            m0_neg = interp1(mobility.x_grid,mobility.y_grid_neg,mvals);
-            m0_pos = interp1(mobility.x_grid,mobility.y_grid_pos,mvals);
-            m0 = idx_neg.*m0_neg+not(idx_neg).*m0_pos;
-            m0_smooth = smooth_series(m0,5,5,1);
-            m = m0_smooth/m0_smooth(1);
+            y = .5*(mobility.y_grid_neg+mobility.y_grid_pos);
+            m0 = interp1(mobility.x_grid,y,mobility.values(2:end));
+            m = m0/m0(1);
+%             idx_neg = (diff(mobility.values)<0); 
+%             idx_neg = [idx_neg(1);idx_neg(1:end-1)];
+%             mvals = mobility.values(2:end);
+%             m0_neg = interp1(mobility.x_grid,mobility.y_grid_neg,mvals);
+%             m0_pos = interp1(mobility.x_grid,mobility.y_grid_pos,mvals);
+%             m0 = idx_neg.*m0_neg+not(idx_neg).*m0_pos;
+%             m0_smooth = smooth_series(m0,5,5,1);
+%             m = m0_smooth/m0_smooth(1);
         else
             m = ones(T,1);
         end

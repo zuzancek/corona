@@ -73,23 +73,23 @@ end
 % clinical statistics
 figure('Name','Clinical statistics');
 subplot(2,2,1)
-plot(hospit,'linewidth',1);hold on;
-plot(hospit_smooth,'linewidth',2);
+plot(resize(hospit,disp_from:t1),'linewidth',1);hold on;
+plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('Total hospitalizations');
 subplot(2,2,2)
-plot(icu,'linewidth',1);hold on;
-plot(icu_smooth,'linewidth',2);
+plot(resize(icu,disp_from:t1),'linewidth',1);hold on;
+plot(resize(icu_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('ICU beds');
 subplot(2,2,3)
-plot(vent,'linewidth',1);hold on;
-plot(vent_smooth,'linewidth',2);
+plot(resize(vent,disp_from:t1),'linewidth',1);hold on;
+plot(resize(vent_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('Ventilations');
 subplot(2,2,4)
-plot(death,'linewidth',1);hold on;
-plot(death_smooth,'linewidth',2);
+plot(resize(death,disp_from:t1),'linewidth',1);hold on;
+plot(resize(death_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('Deaths');
 
