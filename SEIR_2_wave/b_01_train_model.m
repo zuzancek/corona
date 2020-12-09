@@ -24,6 +24,9 @@ train_from = train_from_date-data_Rt.t0+1;
 train_to = train_to_date-data_Rt.t0+1;
 time_interval.dateFrom = train_from;
 time_interval.dateTo = train_to;
+dt = 1;
+
+s = data.s;
 
 %% handle inputs
 % ******* Mobility
@@ -108,7 +111,7 @@ plot(res_mean.Iot,'linewidth',1);hold on;
 plot(res_quant.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
 grid on;
 legend({'data implied','model-implied mean','model-implied median'});
-title('Optimal testing assumption');
+title('Observed Active Infections (Optimal testing assumption)');
 
 subplot(2,1,2);
 plot(init_real.Iot,'linewidth',1);hold on;
@@ -116,7 +119,7 @@ plot(res_mean_real.Iot,'linewidth',1);hold on;
 plot(res_quant_real.Iot(ceil(length(s.quant)/2),:),'linewidth',1);hold on;
 grid on;
 legend({'data implied','model-implied mean','model-implied median'});
-title('Realistic testing assumption');
+title('Observed Active Infections (Realistic testing assumption)');
 
 %% save results
 means = res_mean; init = tinputs; quants = res_quant; %#ok<*NASGU>
