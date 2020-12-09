@@ -18,14 +18,19 @@ q_vec = s.quant;
 pop_size = s.pop_size;
 N = s.sim_num;
 lambda = s.lambda;
-t_hosp = assumptions.t_hosp-ceil(s.SI.mean);
+if isfield(assumptions,'t_hosp')
+    t_hosp = assumptions.t_hosp-ceil(s.SI.mean);
+    adjust_t_hosp = true;
+else
+    adjust_t_hosp = false;
+end
 eta_hr = s.eta_hr; 
 % self_isolation_effect = s.self_isolation_effect;
 case_isolation_effect = s.case_isolation_effect;
 
 % init values (observed)
-St = init.St(1);
 Iot = init.Iot(1);
+if isfield(init,'St'); St = init.St(1); else; St = s.pop_size-I0/tau(1); end
 if isfield(init,'Iat'); Iat = init.Iat(1); else; Iat = alpha(1)*Iot; end
 if isfield(init,'Ist'); Ist = init.Ist(1); else; Ist = (1-alpha(1))*Iot; end
 Ht = init.Ht(1);
@@ -48,8 +53,12 @@ it = st; iot = st; iut = st; ist = st; iat = st; dt = st; rt = st; ht = st;
 %% initialize
 T_si_vec = get_rv(s.SI);
 T_hosp_vec = s.T_hosp.mean+zeros(T,1); 
-T_hosp_vec(t_hosp:end) = smooth_series(linspace(T_hosp_vec(t_hosp),T_hosp_vec(t_hosp)+1,T-t_hosp+1),7,3,1);
-dh = T_hosp_vec./T_hosp_vec(1);
+if adjust_t_hosp
+    T_hosp_vec(t_hosp:end) = smooth_series(linspace(T_hosp_vec(t_hosp),T_hosp_vec(t_hosp)+1,T-t_hosp+1),7,3,1);
+    dh = T_hosp_vec./T_hosp_vec(1);
+else
+    dh = 1+0*T_hosp_vec;
+end
 % T_hosp_vec = get_rv(s.T_hosp);
 T_death.mean = s.T_death.mean; T_death.std = 1;
 T_death = get_rv(T_death);
