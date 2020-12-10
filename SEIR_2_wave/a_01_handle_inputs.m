@@ -56,10 +56,12 @@ discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.s
 
 %% calculations
 % asymptomatic share
-final.date = t1; final.value = 10;
+final.date = t1; final.value = 13.5;
 initial.date = t0; initial.value = 25; 
+breakpoint.date = dd(2020,10,30);breakpoint.value = 33.5;
 try
-    [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),s,initial,final,dd(2020,11,25));
+    [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
+        s,initial,final,breakpoint,dd(2020,11,30));
 catch err
     pr = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_real','dI_inflow_smooth','dI_inflow_real_smooth',...
         'pos_test_ratio_smooth','obs_ratio','asymp_ratio_smooth',...
@@ -71,7 +73,7 @@ catch err
 end
 
 % observed ratio
-% [dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
     
 %% plotting stuff
 % clinical statistics

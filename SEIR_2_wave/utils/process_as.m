@@ -1,4 +1,4 @@
-function [z,z_smooth] = process_as(filename,dateFrom,dateTo,s,initial,final,dateBreak)
+function [z,z_smooth] = process_as(filename,dateFrom,dateTo,s,initial,final,break1,dateBreak2)
 
 tbl = readtable(filename);
 x = tbl.x;
@@ -12,7 +12,8 @@ try
     zz = tseries(initial.date:final.date,NaN); 
     zz(dateFrom:dateTo) = z;
     zz(initial.date) = initial.value;
-    zz(dateBreak:final.date) = final.value;
+    zz(break1.date) = break1.value;
+    zz(dateBreak2:final.date) = final.value;
     zz = interp(zz);
     z = zz;
     z_smooth = smooth_series(z,s.smooth_width,s.smooth_type,s.smooth_ends);
