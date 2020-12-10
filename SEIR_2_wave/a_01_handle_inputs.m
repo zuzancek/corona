@@ -1,4 +1,4 @@
-initialize;
+% initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -58,7 +58,7 @@ discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.s
 % asymptomatic share
 final.date = t1; final.value = 13.5;
 initial.date = t0; initial.value = 25; 
-breakpoint.date = dd(2020,10,30);breakpoint.value = 33.5;
+breakpoint.date = dd(2020,10,30);breakpoint.value = 26.5;
 try
     [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
         s,initial,final,breakpoint,dd(2020,11,30));
