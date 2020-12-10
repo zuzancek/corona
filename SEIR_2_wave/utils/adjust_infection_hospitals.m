@@ -1,12 +1,9 @@
 function [Xs,Is,obs_ratio_adj,sa] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
-% sigma = ratio of asymptomatical cases
-%initialization
-% alpha_hr = s.alpha_hr;              % 7.73/100;
-T_inf = 6.5; % s.T_inf.mean;               % 4.3;
-T_symp = 5.5; %  symptoms onset
-T_hosp0 = 0+T_symp; % s.T_hosp.mean;            % 4;
-T_hosp1 = 1+T_symp; % s.T_hosp.mean;            % 4;
+T_inf = s.SI.mean;              
+T_symp = s.T_hosp.mean; 
+T_hosp0 = 1+T_symp; 
+T_hosp1 = 2+T_symp; 
 T = dateTo-dateFrom+1;
 sigma = sigma(dateFrom:dateTo);
 
