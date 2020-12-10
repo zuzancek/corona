@@ -6,7 +6,7 @@ function [Xs,Is,obs_ratio_adj,sa] = adjust_infection_hospitals(x,h,s,dateFrom,da
 T_inf = 6.5; % s.T_inf.mean;               % 4.3;
 T_symp = 5; %  symptoms onset
 T_hosp0 = T_symp; % s.T_hosp.mean;            % 4;
-T_hosp1 = 1+T_symp; % s.T_hosp.mean;            % 4;
+T_hosp1 = 2+T_symp; % s.T_hosp.mean;            % 4;
 T = dateTo-dateFrom+1;
 sigma = sigma(dateFrom:dateTo);
 
@@ -21,9 +21,9 @@ alpha_hr = (1-omega_hosp)./T_rec_hosp;
 % T_hosp = T_hosp0+zeros(T,1);
 % T_hosp(end) = T_hosp1; T_hosp(ceil(T/2)+1:end) = linspace(T_hosp0,T_hosp1,floor(T/2));
 T_hosp = T_hosp0+zeros(T,1);
-T_hosp(end) = T_hosp1; T_hosp(52:end) = linspace(T_hosp0,T_hosp1,T-52+1);
+T_hosp(end) = T_hosp1; T_hosp(45:end) = linspace(T_hosp0,T_hosp1,T-45+1);
 T_hosp = smooth_series(T_hosp,s.smooth_width,s.smooth_type,s.smooth_ends);
-lambda = 0.0910;%s.lambda;                  % 6.37/100
+lambda = 0.0925;%s.lambda;                  % 6.37/100
 alpha_ih = lambda./T_hosp;
 alpha_ir = (1-lambda)/T_inf;
 
