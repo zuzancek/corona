@@ -69,7 +69,6 @@ dI_data_real = resize(X,dateFrom:dateTo);
 dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
-figure;plot(dI_data_reported);hold on;plot(X);
 idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
 X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
@@ -79,8 +78,6 @@ obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,
 XX = x.NewCases;
 XX(dateFrom:dateTo) = X;
 X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
-
-plot(X);
 sa = struct;
 sa.Xs = (1-sigma(s.wave_2_from)).*X;
 sa.Xa = X-sa.Xs;
