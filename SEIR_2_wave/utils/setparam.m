@@ -41,7 +41,7 @@ s.T_death.mean = 7;             s.T_death.std = 0.62;
 % days at hospital (in case of recovery)
 s.T_rec = 11.7;
 % share of symptomatic patients in observed cases
-s.symp_ratio_obs = 0.43;
+s.symp_ratio_obs = 0.55;
 % share of symptomatic patients needed to be hospitalized 
 s.lambda = 0.0637; %0.0743; % <-- test here higher rate
 s.alpha_hr = 7.73/100; % recovery rate in hospital
