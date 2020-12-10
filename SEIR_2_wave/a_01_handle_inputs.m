@@ -52,10 +52,10 @@ death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_en
 
 %% calculations
 % asymptomatic share
-final.date = t1; final.value = 15;
+final.date = t1; final.value = 10;
 initial.date = t0; initial.value = 25; 
 try
-    [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),s,initial,final,dd(2020,11,05));
+    [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),s,initial,final,dd(2020,11,25));
 catch err
     pr = load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_real','dI_inflow_smooth','dI_inflow_real_smooth',...
         'pos_test_ratio_smooth','obs_ratio','asymp_ratio_smooth',...
