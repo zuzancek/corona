@@ -71,11 +71,11 @@ catch err
 end
 
 % observed ratio
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
+% [dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
     
 %% plotting stuff
 % clinical statistics
-figure('Name','Clinical statistics');
+figure('Name','Clinical statistics I.');
 subplot(2,2,1)
 plot(resize(hospit,disp_from:t1),'linewidth',1);hold on;
 plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);
@@ -96,6 +96,31 @@ plot(resize(death,disp_from:t1),'linewidth',1);hold on;
 plot(resize(death_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('Deaths');
+figure('Name','Clinical statistics II.');
+subplot(2,2,1)
+plot(resize(admiss,disp_from:t1),'linewidth',1);hold on;
+plot(resize(admiss_smooth,disp_from:t1),'linewidth',2);
+grid on;
+title('Hospital Admissions');
+subplot(2,2,2)
+plot(resize(discharge,disp_from:t1),'linewidth',1);hold on;
+plot(resize(discharge_smooth,disp_from:t1),'linewidth',2);
+grid on;
+title('Discharges from Hospitals');
+subplot(2,2,3)
+plot(100*resize(icu_smooth./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(100*resize(vent_smooth./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(100*resize((hospit_smooth-vent_smooth-icu_smooth)./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
+grid on;
+legend({'ICU','Ventilations','Normal'});
+title('Shares of patients');
+subplot(2,2,4)
+d_death = diff(death); d_death_smooth = diff(death_smooth);
+d_death(startdate(d_death)-1) = 0; d_death_smooth(startdate(d_death_smooth)-1) = 0;
+plot(resize(d_death/hospit,disp_from:t1),'linewidth',1);hold on;
+plot(resize(d_death_smooth./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
+grid on;
+title('Death rate');
 
 % mobility
 threshold = 100;
@@ -194,7 +219,7 @@ pos_test_ratio_smooth = resize(pos_test_ratio_smooth,startdate(dI_inflow_pcr_smo
 save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_real','dI_inflow_smooth',...
     'pos_test_ratio_smooth','obs_ratio','obs_ratio_real','asymp_ratio_smooth',...
     'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-    'death_smooth','h_t0','h_t1');
+    'death_smooth','admiss_smooth','discharge_smooth','h_t0','h_t1');
 data.NewCases_PCR = x.NewCases;
 data.TotalActiveCases_real_PCR = I_real;
 data.NewCases_real_PCR = dI_inflow_real;
@@ -207,4 +232,6 @@ data.Deaths = x.Deaths;
 data.ICU = icu;
 data.Vent = vent;
 data.Hosp = hospit;
+data.Admission = admiss;
+data.Discharge = discharge;
 save('raw.mat','data');
