@@ -1,4 +1,4 @@
-% initialize;
+initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -56,9 +56,9 @@ discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.s
 
 %% calculations
 % asymptomatic share
-final.date = t1; final.value = 13.5;
+final.date = t1; final.value = 20;%13.5;
 initial.date = t0; initial.value = 25; 
-breakpoint.date = dd(2020,10,30);breakpoint.value = 26.5;
+breakpoint.date = dd(2020,10,30);breakpoint.value = 20;%26.5;
 try
     [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
         s,initial,final,breakpoint,dd(2020,11,30));
@@ -73,11 +73,12 @@ catch err
 end
 
 % observed ratio
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
+t_hosp_data.init = 1; t_hosp_data.final = 2; t_hosp_data.bp = dd(2020,10,15);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,t_hosp_data);
     
 %% plotting stuff
 % clinical statistics
-figure('Name','Clinical statistics I.');
+figure('Name','Clinical statistics');
 subplot(2,2,1)
 plot(resize(hospit,disp_from:t1),'linewidth',1);hold on;
 plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);
@@ -98,31 +99,6 @@ plot(resize(death,disp_from:t1),'linewidth',1);hold on;
 plot(resize(death_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('Deaths');
-figure('Name','Clinical statistics II.');
-subplot(2,2,1)
-plot(resize(admiss,disp_from:t1),'linewidth',1);hold on;
-plot(resize(admiss_smooth,disp_from:t1),'linewidth',2);
-grid on;
-title('Hospital Admissions');
-subplot(2,2,2)
-plot(resize(discharge,disp_from:t1),'linewidth',1);hold on;
-plot(resize(discharge_smooth,disp_from:t1),'linewidth',2);
-grid on;
-title('Discharges from Hospitals');
-subplot(2,2,3)
-plot(100*resize(icu_smooth./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
-plot(100*resize(vent_smooth./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
-plot(100*resize((hospit_smooth-vent_smooth-icu_smooth)./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
-grid on;
-legend({'ICU','Ventilations','Normal'});
-title('Shares of patients');
-subplot(2,2,4)
-d_death = diff(death); d_death_smooth = diff(death_smooth);
-d_death(startdate(d_death)-1) = 0; d_death_smooth(startdate(d_death_smooth)-1) = 0;
-plot(resize(d_death/hospit,disp_from:t1),'linewidth',1);hold on;
-plot(resize(d_death_smooth./hospit_smooth,disp_from:t1),'linewidth',2);hold on;
-grid on;
-title('Death rate');
 
 % mobility
 threshold = 100;
