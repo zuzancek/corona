@@ -1,30 +1,34 @@
 function [X,I,obs_ratio_adj,sa] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
-
 T = dateTo-dateFrom+1;
+T_hosp_data.init = 0; T_hosp_data.final = 0.5; T_hosp_data.bp = dd(2020,10,15);
 
 %
-T_hosp = 4.5;
+T_symp = s.T_hosp.mean; 
+T_hosp0 = T_hosp_data.init+T_symp; 
+T_hosp1 = T_hosp_data.final+T_symp; 
+T_hosp = T_hosp0+zeros(T-1,1);
+bp = T_hosp_data.bp-dateFrom;
+T_hosp(end) = T_hosp1; T_hosp(bp:end) = linspace(T_hosp0,T_hosp1,T-bp);
+T_hosp = smooth_series(T_hosp,s.smooth_width,s.smooth_type,s.smooth_ends);
+
 T_rec_norm = 6.9;
 T_icu = 8-T_hosp;
 T_rec_icu = 12.3-T_icu;
 T_vent = 5-T_icu;
 T_rec_vent = 14.5-(T_vent+T_icu);
 T_death = 12-(T_vent+T_icu);
-alpha_in = s.lambda./T_hosp.*ones(T-1,1);
-T_inf = s.SI.mean;
+s.lambda = 6.78/100;
 lambda = s.lambda; % 6.37/100;
+alpha_in = lambda./T_hosp.*ones(T-1,1);
+T_inf = s.SI.mean;
 alpha_ir = (1-lambda)/T_inf;
 
 % alpha_vd = 7.62/100;
 % alpha_cv = 9.86/100;
 % alpha_nc = 7.61/100;
 
-dI_data =smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-% % 
-% % T_hosp = T_hosp0+zeros(T,1);
-% % T_hosp(end) = T_hosp1; T_hosp(ceil(T/2)+1:end) = linspace(T_hosp0,T_hosp1,floor(T/2));
-% % lambda = s.lambda;                  % 6.37/100
+dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 
 % definitions
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
@@ -59,32 +63,39 @@ X = d_I+d_I_N(1:end-1)+d_I_R(1:end-1);
 
 % adjust series endpoints and get ratio
 obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
-dt = 2;
-X = [dI_data(1:dt);X];
-X(T-dt:T) = X(T-3);
-X0 = X; 
+X = adjust_tail(X,3);
 X = tseries(dateFrom:dateTo,smooth_series(X,s.smooth_width,s.smooth_type,s.smooth_ends));
 dI_data_real = resize(X,dateFrom:dateTo);
 dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
+figure;plot(dI_data_reported);hold on;plot(X);
 idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
-X0(idx-dateFrom+1) = dI_data_reported(idx); X0(1:min(idx)-dateFrom+1) = dI_data_reported(dateFrom:min(idx));
+X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 delta = dI_data_reported./dI_data_real;
 
 obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
 XX = x.NewCases;
-XX(dateFrom:dateTo) = tseries(dateFrom:dateTo,X0(1:T));
+XX(dateFrom:dateTo) = X;
 X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
 
-symp_ratio_obs = 1-sigma(s.wave_2_from);
+plot(X);
 sa = struct;
-sa.Xs = symp_ratio_obs.*X;
+sa.Xs = (1-sigma(s.wave_2_from)).*X;
 sa.Xa = X-sa.Xs;
 sa.dIa_data_reported = dI_data_reported.*sigma(dateFrom:dateTo);
 sa.dIs_data_reported = dI_data_reported-sa.dIa_data_reported;
 sa.loss_a = sa.Xa-sa.dIa_data_reported;
 sa.loss_s = sa.Xs-sa.dIs_data_reported;
+
+    function [x] = adjust_tail(x,k)
+        dx = x(T-k)-x(T-k-1);
+        x(T-k+1) = x(T-k)+2/3*dx;
+        x(T-k+2) = x(T-k+1)+1/3*dx;
+        for j=3:k
+            x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
+        end        
+    end
 
 end

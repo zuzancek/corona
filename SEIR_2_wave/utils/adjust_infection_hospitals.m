@@ -1,4 +1,6 @@
-function [X,Is,obs_ratio_adj,sa] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1,sigma,T_hosp_data)
+function [X,Is,obs_ratio_adj,sa] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1,sigma)
+
+T_hosp_data.init = 1; T_hosp_data.final = 2; T_hosp_data.bp = dd(2020,10,15);
 
 T_inf = s.SI.mean;              
 T_symp = s.T_hosp.mean; 
