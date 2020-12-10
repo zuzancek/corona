@@ -49,6 +49,10 @@ vent = hosp.Ventilation;
 vent_smooth = smooth_series(vent,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 death = resize(x.Deaths,h_t0:h_t1);
 death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+admiss = hosp.Admission;
+admiss_smooth = smooth_series(admiss,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+discharge = hosp.Discharge;
+discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
 %% calculations
 % asymptomatic share
