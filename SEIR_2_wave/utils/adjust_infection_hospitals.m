@@ -21,7 +21,7 @@ end
 T_hosp = T_hosp0+zeros(T,1);
 T_hosp(end) = T_hosp1; T_hosp(51:end) = linspace(T_hosp0,T_hosp1,T-51+1);
 T_hosp = smooth_series(T_hosp,s.smooth_width,s.smooth_type,s.smooth_ends);
-lambda = 0.0917;%s.lambda;                  
+lambda = s.lambda;                  
 alpha_ih = lambda./T_hosp;
 alpha_ir = (1-lambda)/T_inf;
 
@@ -68,18 +68,14 @@ dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
 obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
-XX = x.NewCases;
-XX(dateFrom:dateTo) = tseries(dateFrom:dateTo,X0(1:T));
-Xs = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+dI_data_s = dI_data_reported.*(1-sigma);
+dI_data_a = dI_data_reported-dI_data_s;
 
-% [~,d] = max(resize(obs_ratio_adj,s.wave_2_from+5:dateTo));
-symp_ratio_obs = 1-sigma(s.wave_2_from);
-% [~,bp] = max((dI_data_reported(max(idx):dateTo)-dI_data_real(max(idx):dateTo)));
 sa = struct;
-sa.Xs = symp_ratio_obs.*Xs;
-sa.Xa = Xs-sa.Xs;
-sa.dIa_data_reported = dI_data_reported.*sigma(dateFrom:dateTo);
-sa.dIs_data_reported = dI_data_reported-sa.dIa_data_reported;
+sa.Xs = Xs;
+sa.Xa = X-Xs;
+sa.dIa_data_reported = dI_data_a;
+sa.dIs_data_reported = dI_data_s;
 sa.loss_a = sa.Xa-sa.dIa_data_reported;
 sa.loss_s = sa.Xs-sa.dIs_data_reported;
 

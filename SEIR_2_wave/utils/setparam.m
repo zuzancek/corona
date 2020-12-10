@@ -43,7 +43,7 @@ s.T_rec = 11.7;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.55;
 % share of symptomatic patients needed to be hospitalized 
-s.lambda = 0.0637; %0.0743; % <-- test here higher rate
+s.lambda = 0.0917; %0.0637; 
 s.alpha_hr = 7.73/100; % recovery rate in hospital
 s.eta_hr = s.alpha_hr.*s.T_rec;
 s.alpha_ih = 6.37/100*(1/s.T_hosp.mean);
