@@ -1,7 +1,7 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
 T = dateTo-dateFrom+1;
-T_hosp_data.init = 0; T_hosp_data.final = 0; T_hosp_data.bp = dd(2020,10,15);
+T_hosp_data.init = 0; T_hosp_data.final = 0.5; T_hosp_data.bp = dd(2020,10,15);
 
 %
 T_symp = s.T_hosp.mean; 
