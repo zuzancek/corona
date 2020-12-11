@@ -73,8 +73,14 @@ catch err
 end
 
 % observed ratio
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
-    
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
+
+% alternative numbers for hospitals
+init.D = death_smooth(disp_from);   init.V = vent_smooth(disp_from);
+init.C = icu_smooth(disp_from);     init.H = hospit_smooth(disp_from);
+init.I = x.ActiveCases(disp_from);
+[out] = adjust_hospitals_infection_full(x,par,s,init,disp_from,t1);
+
 %% plotting stuff
 % clinical statistics
 figure('Name','Clinical statistics');

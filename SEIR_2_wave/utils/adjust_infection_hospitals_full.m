@@ -28,7 +28,7 @@ alpha_ir = (1-lambda)/T_inf;
 % alpha_cv = 9.86/100;
 % alpha_nc = 7.61/100;
 
-% X = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 
 % definitions
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);

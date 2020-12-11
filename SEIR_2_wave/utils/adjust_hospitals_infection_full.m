@@ -1,7 +1,8 @@
 function [out] = adjust_hospitals_infection_full(x,p,s,init,dateFrom,dateTo)
 
 T = dateTo-dateFrom+1;
-I0 = init.I;    C0 = init.C;    V0 = init.V;   N0 = init.H-V0-C0;
+I0 = init.I;    C0 = init.C;    V0 = init.V;   
+N0 = init.H-V0-C0; D0 = init.D;
 
 T_hosp = p.T_hosp;
 T_rec_norm = p.T_rec_norm;      % 6.9;
@@ -18,11 +19,11 @@ alpha_v = p.alpha_v;    alpha_cv = alpha_v./T_vent;     alpha_cr = (1-alpha_v)./
 alpha_c = p.alpha_c;    alpha_nc = alpha_c./T_icu;      alpha_nr = (1-alpha_c)./T_rec_norm;
 lambda = p.lambda;      alpha_in = lambda./T_hosp;      alpha_ir = (1-lambda)./T_inf;
 X = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-I = zeros(T+1,1); I(1) = I0; d_I_R = zeros(T,1); d_I_N = zeros(T,1);
-N = zeros(T+1,1); N(1) = N0; d_N_R = zeros(T,1); d_N_C = zeros(T,1);
-C = zeros(T+1,1); C(1) = C0; d_C_R = zeros(T,1); d_C_V = zeros(T,1);
-V = zeros(T+1,1); C(1) = C0; d_V_R = zeros(T,1); d_V_D = zeros(T,1);
-D = zeros(T+1,1); 
+I = zeros(T,1); I(1) = I0; d_I_R = zeros(T-1,1); d_I_N = zeros(T,1);
+N = zeros(T,1); N(1) = N0; d_N_R = zeros(T-1,1); d_N_C = zeros(T,1);
+C = zeros(T,1); C(1) = C0; d_C_R = zeros(T-1,1); d_C_V = zeros(T,1);
+V = zeros(T,1); C(1) = C0; d_V_R = zeros(T-1,1); d_V_D = zeros(T,1);
+D = zeros(T,1); D(1) = D0;
 
 % calculation
 for t=1:T
