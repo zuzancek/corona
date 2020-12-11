@@ -194,6 +194,28 @@ legend({'stationary (optimistic)','real (implied by hospitalizations)'});
 grid on;
 ylabel('% of total cases');
 
+figure('Name','Situation in Hospitals: Comparison')
+subplot(2,2,1)
+plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
+plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
+legend({'observed','implied by reported daily new cases'});
+grid on;
+title('Hospitalisations (total)');
+subplot(2,2,2)
+plot(resize(icu_smooth,disp_from:t1),'linewidth',1);hold on;
+plot(resize(out.C,disp_from:t1),'linewidth',1);hold on;
+grid on;
+title('ICU');
+subplot(2,2,3)
+plot(resize(vent_smooth,disp_from:t1),'linewidth',1);hold on;
+plot(resize(out.V,disp_from:t1),'linewidth',1);hold on;
+grid on;
+title('Ventilations');
+subplot(2,2,4)
+plot(resize(death_smooth,disp_from:t1),'linewidth',1);hold on;
+plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
+grid on;
+title('Deaths');
 
 %% saving stuff
 mob_smooth = yy;

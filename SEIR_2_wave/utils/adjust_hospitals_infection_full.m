@@ -14,10 +14,10 @@ T_death = p.T_death;            % 12-(T_vent+T_icu);
 T_inf = s.SI.mean;
 
 % definitions
-alpha_d = p.alpha_d;    alpha_vd = alpha_d./T_death;    alpha_vr = (1-alpha_d)./T_rec_vent;
-alpha_v = p.alpha_v;    alpha_cv = alpha_v./T_vent;     alpha_cr = (1-alpha_v)./T_rec_icu;
-alpha_c = p.alpha_c;    alpha_nc = alpha_c./T_icu;      alpha_nr = (1-alpha_c)./T_rec_norm;
-lambda = p.lambda;      alpha_in = lambda./T_hosp;      alpha_ir = (1-lambda)./T_inf;
+alpha_d = mean(p.alpha_d)*ones(T-1,1);    alpha_vd = alpha_d./T_death;    alpha_vr = (1-alpha_d)./T_rec_vent;
+alpha_v = mean(p.alpha_v)*ones(T-1,1);    alpha_cv = alpha_v./T_vent;     alpha_cr = (1-alpha_v)./T_rec_icu;
+alpha_c = mean(p.alpha_c)*ones(T-1,1);    alpha_nc = alpha_c./T_icu;      alpha_nr = (1-alpha_c)./T_rec_norm;
+lambda = p.lambda;      alpha_in = lambda./T_hosp;      alpha_ir = (1-lambda)./T_inf.*ones(T-1,1);
 X = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 I = zeros(T,1); I(1) = I0; d_I_R = zeros(T-1,1); d_I_N = zeros(T,1);
 N = zeros(T,1); N(1) = N0; d_N_R = zeros(T-1,1); d_N_C = zeros(T,1);
@@ -26,7 +26,7 @@ V = zeros(T,1); C(1) = C0; d_V_R = zeros(T-1,1); d_V_D = zeros(T,1);
 D = zeros(T,1); D(1) = D0;
 
 % calculation
-for t=1:T
+for t=1:T-1
     d_I_R(t) = alpha_ir(t).*I(t); d_I_N(t) = alpha_in(t).*I(t);
     I(t+1) = I(t)+X(t)-d_I_R(t)-d_I_N(t);
     d_N_R(t) = alpha_nr(t).*N(t); d_N_C(t) = alpha_nc(t).*N(t);
@@ -39,11 +39,12 @@ for t=1:T
 end
 
 out = struct;
-out.X = X;
-out.I = I;
-out.N = N;
-out.C = C;
-out.V = V;
-out.D = D;
+out.X = tseries(dateFrom:dateTo,X);
+out.I = tseries(dateFrom:dateTo,I);
+out.N = tseries(dateFrom:dateTo,N);
+out.C = tseries(dateFrom:dateTo,C);
+out.V = tseries(dateFrom:dateTo,V);
+out.D = tseries(dateFrom:dateTo,D);
+out.H = tseries(dateFrom:dateTo,N+C+V);
 
 end
