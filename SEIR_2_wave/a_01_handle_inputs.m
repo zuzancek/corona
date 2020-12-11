@@ -81,6 +81,14 @@ init.C = icu_smooth(disp_from);     init.H = hospit_smooth(disp_from);
 init.I = x.ActiveCases(disp_from);
 [out] = adjust_hospitals_infection_full(x,par,s,init,disp_from,t1);
 
+% testing quality
+tests_cum = cumsum(tests);
+cases_cum = cumsum(x.NewCases);
+d_tests_cum = smooth_series(pct(tests_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
+d_cases_cum = smooth_series(pct(cases_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
+quality = (1+d_tests_cum/100)./(1+d_cases_cum/100);
+quality = quality./quality(s.wave_2_from)-1;
+
 %% plotting stuff
 % clinical statistics
 figure('Name','Clinical statistics');
@@ -174,8 +182,7 @@ title('Tests (reported)');
 legend({'PCR: raw','PCR: smooth'});
 grid on;
 
-figure('Name','Observable ratio and lost cases');
-subplot(2,1,1)
+figure('Name','New cases (reported vs.true)');
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(resize(sa_cmp.loss_a,disp_from:t1),'linewidth',1);hold on;
@@ -184,8 +191,9 @@ plot(resize(sa_cmp.loss_s,disp_from:t1),'linewidth',1);hold on;
 title('New infections (PCR only)');
 legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable','"lost" symptomatical new cases'});
 grid on;
-
-subplot(2,1,2)
+% 
+figure('Name','Observable ratio and test quality')
+subplot(2,1,1)
 obs_ratio = 0*obs_ratio_real+s.obs_ratio;
 plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
 plot(100*resize(obs_ratio_real,disp_from:t1),'linewidth',1);
@@ -193,7 +201,16 @@ title('Observable ratio');
 legend({'stationary (optimistic)','real (implied by hospitalizations)'});
 grid on;
 ylabel('% of total cases');
+subplot(2,1,2)
+obs_ratio = 0*obs_ratio_real+s.obs_ratio;
+plot(100*resize(quality,disp_from:t1),'linewidth',1); hold on;
+plot(100*resize(1+0*quality,disp_from:t1),'linewidth',1,'linestyle','--','Color','k'); hold on;
+title('Testing quality');
+legend('%\Delta tests/% Delta cases, total');
+grid on;
+ylabel('%');
 
+%
 figure('Name','Situation in Hospitals: Comparison')
 subplot(2,2,1)
 plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
