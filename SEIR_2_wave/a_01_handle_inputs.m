@@ -58,7 +58,7 @@ discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.s
 % asymptomatic share
 final.date = t1; final.value = 13.5;
 initial.date = t0; initial.value = 25; 
-breakpoint.date = dd(2020,10,30);breakpoint.value = 26.5;
+breakpoint.date = dd(2020,10,30);breakpoint.value = 29.5;
 try
     [asymp_ratio,asymp_ratio_smooth] = process_as('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
         s,initial,final,breakpoint,dd(2020,11,30));
@@ -174,8 +174,9 @@ plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(resize(sa_cmp.loss_a,disp_from:t1),'linewidth',1);hold on;
 plot(resize(dI_inflow_real,disp_from:t1),'linewidth',2);hold on;
+plot(resize(sa_cmp.loss_s,disp_from:t1),'linewidth',1);hold on;
 title('New infections (PCR only)');
-legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable'});
+legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable','"lost" symptomatical new cases'});
 grid on;
 
 subplot(2,1,2)

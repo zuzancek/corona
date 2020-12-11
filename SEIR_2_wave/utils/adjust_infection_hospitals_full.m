@@ -1,7 +1,7 @@
-function [X,I,obs_ratio_adj,sa] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma)
+function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
 T = dateTo-dateFrom+1;
-T_hosp_data.init = 0; T_hosp_data.final = 0.5; T_hosp_data.bp = dd(2020,10,15);
+T_hosp_data.init = 0; T_hosp_data.final = 0; T_hosp_data.bp = dd(2020,10,15);
 
 %
 T_symp = s.T_hosp.mean; 
@@ -18,7 +18,7 @@ T_rec_icu = 12.3-T_icu;
 T_vent = 5-T_icu;
 T_rec_vent = 14.5-(T_vent+T_icu);
 T_death = 12-(T_vent+T_icu);
-s.lambda = 6.78/100;
+s.lambda = 6.37/100;
 lambda = s.lambda; % 6.37/100;
 alpha_in = lambda./T_hosp.*ones(T-1,1);
 T_inf = s.SI.mean;
@@ -28,7 +28,7 @@ alpha_ir = (1-lambda)/T_inf;
 % alpha_cv = 9.86/100;
 % alpha_nc = 7.61/100;
 
-dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% X = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 
 % definitions
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
@@ -78,13 +78,23 @@ obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,
 XX = x.NewCases;
 XX(dateFrom:dateTo) = X;
 X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+
 sa = struct;
-sa.Xs = (1-sigma(s.wave_2_from)).*X;
+sa.Xs = (1-sigma(dateFrom)).*X;%
 sa.Xa = X-sa.Xs;
 sa.dIa_data_reported = dI_data_reported.*sigma(dateFrom:dateTo);
 sa.dIs_data_reported = dI_data_reported-sa.dIa_data_reported;
 sa.loss_a = sa.Xa-sa.dIa_data_reported;
-sa.loss_s = sa.Xs-sa.dIs_data_reported;
+sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) = 0; %#ok<FNDSB>
+
+% store params & tseries
+p.T_hosp = T_hosp;
+p.T_rec_norm = T_rec_norm;
+p.T_icu = T_icu; p.T_rec_icu = T_rec_icu;
+p.T_vent = T_vent; p.T_rec_vent = T_rec_vent;
+p.T_death = T_death; 
+p.alpha_d = alpha_d; p.alpha_v = alpha_v; p.alpha_c = alpha_c;
+p.lambda = lambda;
 
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);
