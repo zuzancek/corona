@@ -1,4 +1,4 @@
-initialize;
+% initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -88,6 +88,8 @@ d_tests_cum = smooth_series(pct(tests_cum),s.smooth_width,s.smooth_type,s.smooth
 d_cases_cum = smooth_series(pct(cases_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
 quality = (1+d_tests_cum/100)./(1+d_cases_cum/100);
 quality = quality./quality(s.wave_2_from)-1;
+d_tests_cum = 100*((d_tests_cum./100+1)/(1+d_tests_cum(s.wave_2_from)/100)-1);
+d_cases_cum = 100*((d_cases_cum./100+1)/(1+d_cases_cum(s.wave_2_from)/100)-1);
 
 %% plotting stuff
 % clinical statistics
@@ -203,10 +205,10 @@ grid on;
 ylabel('% of total cases');
 subplot(2,1,2)
 obs_ratio = 0*obs_ratio_real+s.obs_ratio;
-plot(100*resize(quality,disp_from:t1),'linewidth',1); hold on;
-plot(100*resize(1+0*quality,disp_from:t1),'linewidth',1,'linestyle','--','Color','k'); hold on;
+plot(resize(d_tests_cum,disp_from:t1),'linewidth',1); hold on;
+plot(resize(d_cases_cum,disp_from:t1),'linewidth',1); hold on;
 title('Testing quality');
-legend('%\Delta tests/% Delta cases, total');
+legend({'%\Delta tests','%\Delta cases'});
 grid on;
 ylabel('%');
 

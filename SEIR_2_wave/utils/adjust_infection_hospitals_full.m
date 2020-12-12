@@ -1,7 +1,7 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma)
 
 T = dateTo-dateFrom+1;
-T_hosp_data.init = 0; T_hosp_data.final = 0.5; T_hosp_data.bp = dd(2020,10,15);
+T_hosp_data.init = 0; T_hosp_data.final = 0.5; T_hosp_data.bp = dd(2020,11,01);
 
 %
 T_symp = s.T_hosp.mean; 
@@ -12,24 +12,28 @@ bp = T_hosp_data.bp-dateFrom;
 T_hosp(end) = T_hosp1; T_hosp(bp:end) = linspace(T_hosp0,T_hosp1,T-bp);
 T_hosp = smooth_series(T_hosp,s.smooth_width,s.smooth_type,s.smooth_ends);
 
-T_rec_norm = 6.9;
+T_rec_norm = 6.9+1;
 T_icu = 8-T_hosp;
 T_rec_icu = 12.3-T_icu;
 T_vent = 5-T_icu;
 T_rec_vent = 14.5-(T_vent+T_icu);
 T_death = 12-(T_vent+T_icu);
-s.lambda = 6.37/100;
+s.lambda = 6.52/100;
 lambda = s.lambda; % 6.37/100;
 alpha_in = lambda./T_hosp.*ones(T-1,1);
 T_inf = s.SI.mean;
 alpha_ir = (1-lambda)/T_inf;
+alpha_xn = 5.72/100;
+% omega_vent = 26.21/100;         
+% omega_icu = 4.92/100;        
+% omega_norm = 2.71/100;   
 
-% alpha_vd = 7.62/100;
-% alpha_cv = 9.86/100;
-% alpha_nc = 7.61/100;
+% I(t+1) = I(t)+X(t)-IN(t)-IR(t)
+% N(t+1) = N(t)+IN(t)-NC(t)-NR(t)
+% ..
 
 dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-
+I=0;
 % definitions
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 V = smooth_series(h.Ventilation(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
@@ -56,10 +60,12 @@ alpha_nr = (1-alpha_c)./T_rec_norm;
 d_N_R = alpha_nr.*N(1:end-1);
 d_N = N(2:end)-N(1:end-1);
 d_I_N = d_N+d_N_C+d_N_R;
-I = d_I_N./alpha_in;
-d_I_R = I.*alpha_ir;
-d_I = I(2:end)-I(1:end-1);
-X = d_I+d_I_N(1:end-1)+d_I_R(1:end-1);
+X = d_I_N./alpha_xn;
+
+% I = d_I_N./alpha_in;
+% d_I_R = I.*alpha_ir;
+% d_I = I(2:end)-I(1:end-1);
+% X = d_I+d_I_N(1:end-1)+d_I_R(1:end-1);
 
 % adjust series endpoints and get ratio
 obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
@@ -69,6 +75,7 @@ dI_data_real = resize(X,dateFrom:dateTo);
 dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
+plot(X);hold on;% plot(dI_data_reported)
 idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
 X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
@@ -103,6 +110,14 @@ p.lambda = lambda;
         for j=3:k
             x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
         end        
+    end
+
+    function [x] = get_rv(y)
+        shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
+        L = length(shape0);
+        shape0_vec = repmat(shape0,N,1);
+        scale0_vec = scale0*ones(N,L);
+        x = gamrnd(shape0_vec,scale0_vec);
     end
 
 end
