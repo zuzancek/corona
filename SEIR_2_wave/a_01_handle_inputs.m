@@ -72,6 +72,10 @@ catch err
     asymp_ratio = pr.data.Asymp;
 end
 
+% old-age share
+old_init = 0.1; old_final = 0.15;
+[z,z_smooth,z_ext_smooth] = process_old('data/old_share.xlsx',dd(2020,09,03),t1,dd(2020,3,13),t1,s,old_init,old_final);
+
 % observed ratio
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
 
