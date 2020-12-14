@@ -73,11 +73,11 @@ catch err
 end
 
 % old-age share
-old_init = 0.1; old_final = 0.15;
+old_init = 10; old_final = 15;
 [z,z_smooth,z_ext_smooth] = process_old('data/old_share.xlsx',dd(2020,09,03),t1,dd(2020,3,13),t1,s,old_init,old_final);
 
 % observed ratio
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth);
 
 % alternative numbers for hospitals
 init.D = death_smooth(disp_from);   init.V = vent_smooth(disp_from);
