@@ -84,7 +84,7 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
-s.old_share = 0.09;
+s.old_share = 0.0878;
 s.obs_ratio_tar = 1/5;
 s.obs_ratio = s.obs_ratio_tar;
 s.self_isolation_effect = 1-0.05;
