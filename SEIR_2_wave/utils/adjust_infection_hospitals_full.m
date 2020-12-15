@@ -14,7 +14,7 @@ T_rec_y = 4.56;                 T_rec_o = 5.65;
 omega_y = 5.15/100;             omega_o = 37.16;
 theta = rho/(1-rho)*lambda_o/lambda_y; theta = theta/(1+theta);
 beta_d_y = omega_y/T_death_y;   beta_d_o = omega_o/T_death_o;       beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
-beta_r_y = (1-omega_y)/T_rec_y; beta_r_o = (1-omega_o)/T_rec_o;     beta_r = theta*beta_r_o+(1-theta)*beta_r_y;
+% beta_r_y = (1-omega_y)/T_rec_y; beta_r_o = (1-omega_o)/T_rec_o;     beta_r = theta*beta_r_o+(1-theta)*beta_r_y;
 
 
 % ******* Equations
@@ -26,7 +26,6 @@ beta_r_y = (1-omega_y)/T_rec_y; beta_r_o = (1-omega_o)/T_rec_o;     beta_r = the
 
 % initialization
 dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-I=0;
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 
@@ -37,8 +36,8 @@ beta_r_t = theta*(1-omega_y*k_d_t)/T_rec_y+(1-theta)*(1-omega_o*k_d_t)/T_rec_o;
 % H_R = beta_r_t.*H(1:end-1);
 I_H = H(2:end)-H(1:end-1).*(1-beta_d_t-beta_r_t);
 I = I_H./alpha_h;
-I_R = alpha_r.*I;
-
+% I_R = alpha_r.*I;
+X = I(2:end)-I(1:end-1).*(1-alpha_r-alpha_h);
 
 % alpha_o = omega_o./T_death_o;   alpha_y = omega_y./T_death_y;
 % delta_o = lambda_o./T_hosp_o;   delta_y = lambda_y./T_hosp_y;
@@ -77,26 +76,26 @@ I_R = alpha_r.*I;
 % H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 % N = H-C-V;
 
-H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
-alpha_vd = H_D./V(1:end-1);
-alpha_d = T_death.*alpha_vd;
-alpha_vr = (1-alpha_d)./T_rec_vent;
-d_V_R = alpha_vr.*V(1:end-1);
-d_V = V(2:end)-V(1:end-1);
-d_C_V = d_V+H_D+d_V_R;
-alpha_cv = d_C_V./C(1:end-1);
-alpha_v = alpha_cv.*T_vent;
-alpha_cr = (1-alpha_v)./T_rec_icu;
-d_C_R = alpha_cr.*C(1:end-1);
-d_C = C(2:end)-C(1:end-1);
-d_N_C = d_C+d_C_V+d_C_R;
-alpha_nc = d_N_C./N(1:end-1);
-alpha_c = T_icu.*alpha_nc;
-alpha_nr = (1-alpha_c)./T_rec_norm;
-d_N_R = alpha_nr.*N(1:end-1);
-d_N = N(2:end)-N(1:end-1);
-d_I_N = d_N+d_N_C+d_N_R;
-X = d_I_N./alpha_xn;
+% H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
+% alpha_vd = H_D./V(1:end-1);
+% alpha_d = T_death.*alpha_vd;
+% alpha_vr = (1-alpha_d)./T_rec_vent;
+% d_V_R = alpha_vr.*V(1:end-1);
+% d_V = V(2:end)-V(1:end-1);
+% d_C_V = d_V+H_D+d_V_R;
+% alpha_cv = d_C_V./C(1:end-1);
+% alpha_v = alpha_cv.*T_vent;
+% alpha_cr = (1-alpha_v)./T_rec_icu;
+% d_C_R = alpha_cr.*C(1:end-1);
+% d_C = C(2:end)-C(1:end-1);
+% d_N_C = d_C+d_C_V+d_C_R;
+% alpha_nc = d_N_C./N(1:end-1);
+% alpha_c = T_icu.*alpha_nc;
+% alpha_nr = (1-alpha_c)./T_rec_norm;
+% d_N_R = alpha_nr.*N(1:end-1);
+% d_N = N(2:end)-N(1:end-1);
+% d_I_N = d_N+d_N_C+d_N_R;
+% X = d_I_N./alpha_xn;
 
 % I = d_I_N./alpha_in;
 % d_I_R = I.*alpha_ir;
