@@ -2,17 +2,43 @@ function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFr
 
 T = dateTo-dateFrom+1;
 
-T_inf = s.T_SI.mean;    T_test = 2+s.T_pre.mean;
-T_hosp_y_0 = 3.24;      T_hosp_o_0 = 7.02;       
-T_rec_y = 4.56;         T_rec_o = 5.65;
-T_death_y = 3.41;       T_death_o = 4.59;
-lambda_y = 2.32/100;    lambda_y = 31.86/100;
-omega_y = 5.15/100;     omega_o = 37.16;
+rho = s.old_share;
 
-% dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-% I=0;
-% D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-% H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+T_inf = s.T_SI.mean;            T_test = 1+s.T_pre.mean;
+T_hosp_y = 3.24+T_test;         T_hosp_o = 7.02+T_test;
+lambda_y = 2.32/100;            lambda_o = 31.86/100;
+alpha_h_y = lambda_y/T_hosp_y;  alpha_h_o = lambda_o/T_hosp_o;      alpha_h = rho*alpha_h_o+(1-rho)*alpha_h_y;
+alpha_r_y = (1-lambda_y)/T_inf; alpha_r_o = (1-lambda_o)/T_inf;     alpha_r = rho*alpha_r_o+(1-rho)*alpha_r_y;
+T_death_y = 3.41;               T_death_o = 4.59;
+T_rec_y = 4.56;                 T_rec_o = 5.65;
+omega_y = 5.15/100;             omega_o = 37.16;
+theta = rho/(1-rho)*lambda_o/lambda_y; theta = theta/(1+theta);
+beta_d_y = omega_y/T_death_y;   beta_d_o = omega_o/T_death_o;       beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
+beta_r_y = (1-omega_y)/T_rec_y; beta_r_o = (1-omega_o)/T_rec_o;     beta_r = theta*beta_r_o+(1-theta)*beta_r_y;
+
+
+% ******* Equations
+% I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
+%       I_H(t) = alpha_h*I(t);   I_R(t) = alpha_r*I(t);
+% H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
+%       H_D(t) = beta_h*H(t);    H_R(t) = beta_r*H(t);
+% D(t+1) = D(t)+H_D(t);
+
+% initialization
+dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+I=0;
+D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+
+% calculation
+H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
+beta_d_t = H_D./H(1:end-1); k_d_t = beta_d_t./beta_d;
+beta_r_t = theta*(1-omega_y*k_d_t)/T_rec_y+(1-theta)*(1-omega_o*k_d_t)/T_rec_o;
+% H_R = beta_r_t.*H(1:end-1);
+I_H = H(2:end)-H(1:end-1).*(1-beta_d_t-beta_r_t);
+I = I_H./alpha_h;
+I_R = alpha_r.*I;
+
 
 % alpha_o = omega_o./T_death_o;   alpha_y = omega_y./T_death_y;
 % delta_o = lambda_o./T_hosp_o;   delta_y = lambda_y./T_hosp_y;
@@ -40,24 +66,24 @@ omega_y = 5.15/100;     omega_o = 37.16;
 % X_o = d_I_o+I_R_o(1:end-1)+I_H_o(1:end-1);
 % X = X_y+X_o;
 
-alpha_xn_y = 2.32/100; alpha_xn_o = 31.86/100;
-alpha_xn = alpha_xn_o.*omega(dateFrom:dateTo)+alpha_xn_y.*(1-omega(dateFrom:dateTo));
-alpha_xn = alpha_xn(1:end-1);
+% alpha_xn_y = 2.32/100; alpha_xn_o = 31.86/100;
+% alpha_xn = alpha_xn_o.*omega(dateFrom:dateTo)+alpha_xn_y.*(1-omega(dateFrom:dateTo));
+% alpha_xn = alpha_xn(1:end-1);
+% 
+% % definitions
+% D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% V = smooth_series(h.Ventilation(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% C = smooth_series(h.ICU(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% N = H-C-V;
 
-% definitions
-D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-V = smooth_series(h.Ventilation(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-C = smooth_series(h.ICU(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-N = H-C-V;
-
-d_H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
-alpha_vd = d_H_D./V(1:end-1);
+H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
+alpha_vd = H_D./V(1:end-1);
 alpha_d = T_death.*alpha_vd;
 alpha_vr = (1-alpha_d)./T_rec_vent;
 d_V_R = alpha_vr.*V(1:end-1);
 d_V = V(2:end)-V(1:end-1);
-d_C_V = d_V+d_H_D+d_V_R;
+d_C_V = d_V+H_D+d_V_R;
 alpha_cv = d_C_V./C(1:end-1);
 alpha_v = alpha_cv.*T_vent;
 alpha_cr = (1-alpha_v)./T_rec_icu;
