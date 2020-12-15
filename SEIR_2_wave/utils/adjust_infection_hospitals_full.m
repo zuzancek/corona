@@ -22,8 +22,6 @@ omega_y = 5.15/100;                 omega_o = 37.16;
 theta = rho/(1-rho)*lambda_o/lambda_y; 
 theta = theta/(1+theta);
 beta_d_y = omega_y/T_death_y;       beta_d_o = omega_o/T_death_o;        beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
-% beta_r_y = (1-omega_y)/T_rec_y; beta_r_o = (1-omega_o)/T_rec_o;     beta_r = theta*beta_r_o+(1-theta)*beta_r_y;
-
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
