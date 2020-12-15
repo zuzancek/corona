@@ -4,19 +4,24 @@ T = dateTo-dateFrom+1;
 
 rho = s.old_share;
 
-T_delay_0 = delay.v0;           T_delay_1 = delay.v1;               T_delay_at = delay.at;
-T_delay = zeros(T,1)+T_delay_0; T_delay(T_delay_at-dateFrom:end) = T_delay_1;
+% delay in testing (gradual)
+T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
+T_delay_at = delay.at;
+T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = smooth_series(T_delay,s.smooth_width,s.smooth_type,s.smooth_ends);
-T_inf = s.SI.mean;              T_test = (2+1+s.T_pre.mean)+T_delay;
-T_hosp_y = 7.02+T_test+1;       T_hosp_o = 3.24+T_test+1;         
-lambda_y = 2.32/100;            lambda_o = 28.86/100;
-alpha_h_y = lambda_y./T_hosp_y; alpha_h_o = lambda_o./T_hosp_o;      alpha_h = rho*alpha_h_y+(1-rho)*alpha_h_o;
-alpha_r_y = (1-lambda_y)/T_inf; alpha_r_o = (1-lambda_o)/T_inf;     alpha_r = rho*alpha_r_o+(1-rho)*alpha_r_y;
-T_death_y = 3.41;               T_death_o = 4.59;
-T_rec_y = 4.56;                 T_rec_o = 5.65;
-omega_y = 5.15/100;             omega_o = 37.16;
-theta = rho/(1-rho)*lambda_o/lambda_y; theta = theta/(1+theta);
-beta_d_y = omega_y/T_death_y;   beta_d_o = omega_o/T_death_o;       beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
+
+T_inf = s.SI.mean;                  T_test = (2+1+s.T_pre.mean)+T_delay;
+T_inf_y = T_inf-0.5;                T_inf_o = T_inf+1;
+T_hosp_y = 7.02+T_test+1;           T_hosp_o = 3.24+T_test+1;         
+lambda_y = 2.32/100;                lambda_o = 28.86/100;
+alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;      alpha_h = rho*alpha_h_y+(1-rho)*alpha_h_o;
+alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      alpha_r = rho*alpha_r_o+(1-rho)*alpha_r_y;
+T_death_y = 3.41;                   T_death_o = 4.59;
+T_rec_y = 4.56;                     T_rec_o = 5.65;
+omega_y = 5.15/100;                 omega_o = 37.16;
+theta = rho/(1-rho)*lambda_o/lambda_y; 
+theta = theta/(1+theta);
+beta_d_y = omega_y/T_death_y;       beta_d_o = omega_o/T_death_o;        beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
 % beta_r_y = (1-omega_y)/T_rec_y; beta_r_o = (1-omega_o)/T_rec_o;     beta_r = theta*beta_r_o+(1-theta)*beta_r_y;
 
 
@@ -41,10 +46,6 @@ I_H = H(2:end)-H(1:end-1).*(1-beta_d_t-beta_r_t);
 I = I_H./alpha_h(1:T-1);
 % I_R = alpha_r.*I;
 X = I(2:end)-I(1:end-1).*(1-alpha_r-alpha_h(1:T-2));
-
-% alpha_o = omega_o./T_death_o;   alpha_y = omega_y./T_death_y;
-% delta_o = lambda_o./T_hosp_o;   delta_y = lambda_y./T_hosp_y;
-% gamma_o = (1-lambda_o)./T_rec_o;   gamma_y = (1-lambda_y)./T_rec_y;
 
 % % calculation
 % d_H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
