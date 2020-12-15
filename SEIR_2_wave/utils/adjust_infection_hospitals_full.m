@@ -14,20 +14,24 @@ T_inf = s.SI.mean;                  T_test = (2+1+s.T_pre.mean)+T_delay;
 T_inf_y = T_inf-0.5;                T_inf_o = T_inf+1;
 T_hosp_y = 7.02+T_test+1;           T_hosp_o = 3.24+T_test+1;         
 lambda_y = 2.32/100;                lambda_o = 28.86/100;
-alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;      alpha_h = rho*alpha_h_y+(1-rho)*alpha_h_o;
+alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;        alpha_h = rho*alpha_h_y+(1-rho)*alpha_h_o;
 alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      alpha_r = rho*alpha_r_o+(1-rho)*alpha_r_y;
 T_death_y = 3.41;                   T_death_o = 4.59;
 T_rec_y = 4.56;                     T_rec_o = 5.65;
 omega_y = 5.15/100;                 omega_o = 37.16;
 theta = rho/(1-rho)*lambda_o/lambda_y; 
 theta = theta/(1+theta);
-beta_d_y = omega_y/T_death_y;       beta_d_o = omega_o/T_death_o;        beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
+beta_d_y = omega_y/T_death_y;       beta_d_o = omega_o/T_death_o;          beta_d = theta*beta_d_o+(1-theta)*beta_d_y;
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
-%       I_H(t) = alpha_h*I(t);   I_R(t) = alpha_r*I(t);
-% H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
-%       H_D(t) = beta_h*H(t);    H_R(t) = beta_r*H(t);
+%       I_H(t) = alpha*I(t);   I_R(t) = zeta_i*I(t);
+% N(t+1) = N(t)+I_N(t)-N_C(t)-N_R(t);
+%       N_C(t) = beta*N(t);    N_R(t) = zeta_n*N(t);
+% C(t+1) = C(t)+N_C(t)-C_V(t)-C_R(t);
+%       C_V(t) = gamma*C(t);    C_R(t) = zeta_c*C(t);
+% V(t+1) = V(t)+C_V(t)-V_D(t)-V_R(t);
+%       V_D(t) = delta*V(t);    C_R(t) = zeta_v*V(t);
 % D(t+1) = D(t)+H_D(t);
 
 % initialization
@@ -132,13 +136,36 @@ sa.loss_a = sa.Xa-sa.dIa_data_reported;
 sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) = 0; %#ok<FNDSB>
 
 % store params & tseries
-p.T_hosp = T_hosp;
-p.T_rec_norm = T_rec_norm;
-p.T_icu = T_icu; p.T_rec_icu = T_rec_icu;
-p.T_vent = T_vent; p.T_rec_vent = T_rec_vent;
-p.T_death = T_death; 
-p.alpha_d = alpha_d; p.alpha_v = alpha_v; p.alpha_c = alpha_c;
-p.lambda = lambda;
+p.T_delay = T_delay;
+p.T_inf_y = T_inf_y;
+p.T_inf_o = T_inf_o;
+p.T_hosp_y = T_hosp_y;
+p.T_hosp_o = T_hosp_o;
+p.T_death_y = T_death_y; 
+p.T_death_o = T_death_o; 
+p.T_rec_y = T_rec_y; 
+p.T_rec_o = T_rec_o;
+p.alpha_h_y = alpha_h_y;
+p.alpha_h_o = alpha_h_o;
+p.alpha_r_y = alpha_r_y;
+p.alpha_r_o = alpha_r_o;
+p.lambda_y = lambda_y;
+p.lambda_o = lambda_o;
+p.beta_d_t = beta_d_t;
+p.beta_r_t = beta_r_t;
+p.k_d_t = k_d_t;
+p.rho = rho;
+p.theta = theta;
+p.beta_d = beta_d;
+p.beta_d_o = beta_d_o;
+p.beta_d_y = beta_d_y;
+p.omega_y = omega_y;
+p.omega_o = omega_o;
+% p.T_icu = T_icu; p.T_rec_icu = T_rec_icu;
+% p.T_vent = T_vent; p.T_rec_vent = T_rec_vent;
+% p.T_death = T_death; 
+% p.alpha_d = alpha_d; p.alpha_v = alpha_v; p.alpha_c = alpha_c;
+% p.lambda = lambda;
 
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);
@@ -149,12 +176,12 @@ p.lambda = lambda;
         end        
     end
 
-    function [x] = get_rv(y)
-        shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
-        L = length(shape0);
-        shape0_vec = repmat(shape0,N,1);
-        scale0_vec = scale0*ones(N,L);
-        x = gamrnd(shape0_vec,scale0_vec);
-    end
+%     function [x] = get_rv(y)
+%         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
+%         L = length(shape0);
+%         shape0_vec = repmat(shape0,N,1);
+%         scale0_vec = scale0*ones(N,L);
+%         x = gamrnd(shape0_vec,scale0_vec);
+%     end
 
 end
