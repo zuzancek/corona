@@ -82,7 +82,7 @@ cfr_init = 10; cfr_final = 22;
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,10,15);
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext_smooth,delay);
 
 
 % alternative numbers for hospitals
@@ -163,14 +163,21 @@ title('Mobility, smooth data');
 legend(fn);
 
 % epidemiology
-figure('Name','New cases & asymptomatic share');
-subplot(2,1,1);
+figure('Name','New cases, PCR, AG')
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1);hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(resize(dI_inflow,disp_from:t1),'linewidth',1);hold on;
 plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 title('New infections (reported only)');
 legend({'PCR only: raw','PCR only: smooth','PCR+AG: raw','PCR+AG: smooth'});
+grid on;
+
+figure('Name','CFR & asymptomatic share')
+subplot(2,1,2);
+plot(resize(100*cfr,disp_from:t1),'linewidth',1);hold on;
+plot(resize(100*cfr_ext_smooth,disp_from:t1),'linewidth',2);hold on;
+title('Case fatality rate (reported,  %, hospitals only)');
+legend({'raw','smooth'});
 grid on;
 
 subplot(2,1,2);
@@ -180,7 +187,7 @@ title('Share of asymptomatic new cases (reported,  %, PCR only)');
 legend({'raw','smooth'});
 grid on;
 
-figure;
+figure('Name','Tests & PTR');
 subplot(2,1,1)
 plot(resize(pos_test_ratio,disp_from:t1),'linewidth',1); hold on;
 plot(resize(pos_test_ratio_smooth,disp_from:t1),'linewidth',2);
