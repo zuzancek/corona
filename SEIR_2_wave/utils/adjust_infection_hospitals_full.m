@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma,omega,delay)
+function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay) %#ok<INUSL>
 
 T = dateTo-dateFrom+1;
 

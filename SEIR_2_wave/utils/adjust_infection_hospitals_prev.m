@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,s,dateFrom,dateTo,t0,t1,sigma,omega,CFR,delay)
+function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_prev(x,h,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
 
@@ -34,12 +34,13 @@ beta_d_y = omega_y/T_death_y;       beta_d_o = omega_o/T_death_o;          beta_
 dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-R_H = D.*(1./CFR-1)-H;
 
 % calculation
 H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
-H_R = smooth_series(R_H(2:end)-R_H(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
-I_H = H(2:end)-H(1:end-1)+H_D+H_R;
+beta_d_t = H_D./H(1:end-1); k_d_t = beta_d_t./beta_d;
+beta_r_t = theta*(1-omega_y*k_d_t)/T_rec_y+(1-theta)*(1-omega_o*k_d_t)/T_rec_o;
+% H_R = beta_r_t.*H(1:end-1);
+I_H = H(2:end)-H(1:end-1).*(1-beta_d_t-beta_r_t);
 I = I_H./alpha_h(1:T-1);
 % I_R = alpha_r.*I;
 X = I(2:end)-I(1:end-1).*(1-alpha_r-alpha_h(1:T-2));
