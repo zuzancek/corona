@@ -1,4 +1,4 @@
-function [z,z_smooth,z_ext_smooth] = process_xls(filename,dateFrom,dateTo,extendFrom,extendTo,s,initial,final)
+function [z,z_smooth,z_ext,z_ext_smooth] = process_xls(filename,dateFrom,dateTo,extendFrom,extendTo,s,initial,final)
 
 tbl = readtable(filename);
 x = tbl.x;
@@ -14,6 +14,7 @@ z_ext_smooth = smooth_series(z_ext,s.smooth_width,s.smooth_type,s.smooth_ends);
 z_smooth = smooth_series(z,s.smooth_width,s.smooth_type,s.smooth_ends);
 
 z = z/100;
+z_ext = z_ext/100;
 z_smooth = z_smooth/100;
 z_ext_smooth = z_ext_smooth/100;
 

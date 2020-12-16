@@ -2,6 +2,7 @@ function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,s,dateFrom,da
 
 T = dateTo-dateFrom+1;
 
+cfr = CFR(dateFrom:dateTo);
 rho = s.old_share;
 
 % delay in testing (gradual)
@@ -10,10 +11,10 @@ T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = smooth_series(T_delay,s.smooth_width,s.smooth_type,s.smooth_ends);
 
-T_inf = s.T_inf.mean;               T_test = (1+s.T_pre.mean)+T_delay;
-T_inf_y = T_inf;                    T_inf_o = T_inf+1;
+T_inf = s.T_inf.mean;               T_test = (3+s.T_pre.mean)+T_delay;
+T_inf_y = T_inf;                    T_inf_o = T_inf;
 T_hosp_y = 7.02+T_test;             T_hosp_o = 3.24+T_test;         
-lambda_y = 2.32/100;                lambda_o = 28.86/100;
+lambda_y = 2.32/100;                lambda_o = 31.86/100;
 alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;        alpha_h = rho*alpha_h_y+(1-rho)*alpha_h_o;
 alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      alpha_r = rho*alpha_r_o+(1-rho)*alpha_r_y;
 T_death_y = 3.41;                   T_death_o = 4.59;
@@ -34,7 +35,7 @@ beta_d_y = omega_y/T_death_y;       beta_d_o = omega_o/T_death_o;          beta_
 dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
-R_H = D.*(1./CFR-1)-H;
+R_H = smooth_series(x.Deaths(dateFrom:dateTo).*(1./cfr-1),s.smooth_width,s.smooth_type,s.smooth_ends);
 
 % calculation
 H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
