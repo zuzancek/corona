@@ -18,11 +18,11 @@ s.T_test0.mean = 1;             s.T_test0.std = s.SI.std;
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period
-s.T_inf.mean = 4.3;             s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 4.3;       s.T_inf_asymp.std = 0.62;
-s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
-s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
-s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
+s.T_inf.mean = 3.3;             s.T_inf.std = 0.62;
+s.T_inf_asymp.mean = 3.3;       s.T_inf_asymp.std = 0.62;
+s.T_inf_symp.mean = 3.3;        s.T_inf_symp.std = 0.62;
+s.T_inf_obs.mean = 3.3;         s.T_inf_obs.std = 0.62;
+s.T_inf_unobs.mean = 3.3;       s.T_inf_unobs.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
