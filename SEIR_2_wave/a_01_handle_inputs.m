@@ -82,7 +82,7 @@ cfr_init = 13; cfr_final = 22;
     dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,10,15);
+delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,10,15);
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
 
 
