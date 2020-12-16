@@ -10,9 +10,9 @@ T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = smooth_series(T_delay,s.smooth_width,s.smooth_type,s.smooth_ends);
 
-T_inf = s.T_inf.mean;               T_test = (1+s.T_pre.mean)+T_delay;
-T_inf_y = T_inf;                    T_inf_o = T_inf+1;
-T_hosp_y = 7.02+T_test;             T_hosp_o = 3.24+T_test;         
+T_inf = s.SI.mean;               T_test = (2+s.T_pre.mean)+T_delay;
+T_inf_y = T_inf-0.5;                T_inf_o = T_inf+1;
+T_hosp_y = 7.02+T_test+1;           T_hosp_o = 3.24+T_test+1;         
 lambda_y = 2.32/100;                lambda_o = 28.86/100;
 alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;        alpha_h = rho*alpha_h_y+(1-rho)*alpha_h_o;
 alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      alpha_r = rho*alpha_r_o+(1-rho)*alpha_r_y;
