@@ -38,15 +38,15 @@ alpha_r_y = (1-lambda_n_y)/T_inf_y;     alpha_r_o = (1-lambda_n_o)/T_inf_o;     
 % normal hospital N
 theta_n = rho/(1-rho)*lambda_n_o/lambda_n_y;    theta_n = theta_n/(1+theta_n);
 beta_y = lambda_c_y/T_icu_y;            beta_o = lambda_c_o/T_icu_o;             beta = theta_n*beta_o+(1-theta_n)*beta_y;
-beta_r_y = (1-lambda_c_y)/T_rec_norm_y; beta_r_o = lambda_c_o/T_rec_norm_o;      zeta_n = theta_n*beta_r_o+(1-theta_n)*beta_r_y;
+beta_r_y = (1-lambda_c_y)/T_rec_norm_y; beta_r_o = lambda_c_o/T_rec_norm_o;      
 % intensive care C
 theta_c = theta_n*lambda_c_o/lambda_c_y;
 gamma_y = lambda_v_y/T_vent_y;          gamma_o = lambda_v_o/T_vent_o;           gamma = theta_c*gamma_o+(1-theta_c)*gamma_y;
-gamma_r_y = (1-lambda_v_y)/T_rec_icu_y; gamma_r_o = lambda_v_o/T_rec_icu_o;      zeta_c = theta_c*gamma_r_o+(1-theta_c)*gamma_r_y;
+gamma_r_y = (1-lambda_v_y)/T_rec_icu_y; gamma_r_o = lambda_v_o/T_rec_icu_o;      
 % ventilation V
 theta_v = theta_c*lambda_v_o/lambda_v_y;
 delta_y = lambda_d_y/T_death_y;         delta_o = lambda_d_o/T_death_o;          delta = theta_v*delta_o+(1-theta_v)*delta_y;
-delta_r_y = (1-lambda_d_y)/T_rec_vent_y;delta_r_o = lambda_d_o/T_rec_vent_o;     zeta_v = theta_v*delta_r_o+(1-theta_v)*delta_r_y;
+delta_r_y = (1-lambda_d_y)/T_rec_vent_y;delta_r_o = lambda_d_o/T_rec_vent_o;     
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_N(t)-I_R(t);     
@@ -114,35 +114,30 @@ sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) 
 
 % store params & tseries
 p.T_delay = T_delay;
-p.T_inf_y = T_inf_y;
-p.T_inf_o = T_inf_o;
-p.T_hosp_y = T_hosp_y;
-p.T_hosp_o = T_hosp_o;
-p.T_death_y = T_death_y; 
-p.T_death_o = T_death_o; 
-p.T_rec_y = T_rec_y; 
-p.T_rec_o = T_rec_o;
-p.alpha_h_y = alpha_y;
-p.alpha_h_o = alpha_o;
-p.alpha_r_y = alpha_r_y;
-p.alpha_r_o = alpha_r_o;
-p.lambda_n_y = lambda_n_y;
-p.lambda_n_o = lambda_n_o;
-p.beta_d_t = beta_d_t;
-p.beta_r_t = beta_r_t;
-p.k_d_t = k_v_t;
-p.rho = rho;
-p.theta = theta;
-p.beta_d = beta_d;
-p.beta_d_o = beta_d_o;
-p.beta_d_y = beta_d_y;
-p.omega_y = omega_y;
-p.omega_o = omega_o;
-% p.T_icu = T_icu; p.T_rec_icu = T_rec_icu;
-% p.T_vent = T_vent; p.T_rec_vent = T_rec_vent;
-% p.T_death = T_death; 
-% p.alpha_d = alpha_d; p.alpha_v = alpha_v; p.alpha_c = alpha_c;
-% p.lambda = lambda;
+p.T_test = T_test;
+p.T_inf_y = T_inf_y; p.T_inf_o = T_inf_o;
+p.T_hosp_y = T_hosp_y; p.T_hosp_o = T_hosp_o;
+p.T_rec_norm_y = T_rec_norm_y; p.T_rec_norm_o = T_rec_norm_o;
+p.T_icu_y = T_icu_y; p.T_icu_o = T_icu_o;   
+p.T_rec_icu_y = T_rec_icu_y; p.T_rec_icu_o = T_rec_icu_o;
+p.T_vent_y = T_vent_y; p.T_vent_o = T_vent_o;
+p.T_rec_vent_y = T_rec_vent_y; p.T_rec_vent_o = T_rec_vent_o;
+p.T_death_y = T_death_y; p.T_death_o = T_death_o;
+p.lambda_n_y = lambda_n_y; p.lambda_n_o = lambda_n_o;
+p.lambda_c_y = lambda_c_y; p.lambda_c_o = lambda_c_o;
+p.lambda_v_y = lambda_v_y; p.lambda_v_o = lambda_v_o;
+p.lambda_d_y = lambda_d_y; p.lambda_d_o = lambda_d_o;
+p.alpha_y = alpha_y; p.alpha_o = alpha_o;
+p.alpha_r_y = alpha_r_y;p.alpha_r_o = alpha_r_o;
+p.theta_n = theta_n;
+p.beta_y = beta_y; p.beta_o = beta_o;
+p.beta_r_y = beta_r_y; p.beta_r_o = beta_r_o;
+p.theta_c = theta_c;
+p.gamma_y = gamma_y; p.gamma_o = gamma_o;
+p.gamma_r_y = gamma_r_y; p.gamma_r_o = gamma_r_o;
+p.theta_v = theta_v;
+p.delta_y = delta_y; p.delta_o = delta_o; 
+p.delta_r_y = delta_r_y; p.delta_r_o = delta_r_o;
 
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);
