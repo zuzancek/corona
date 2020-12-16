@@ -1,4 +1,4 @@
-function [z,z_smooth,z_ext_smooth] = process_old(filename,dateFrom,dateTo,extendFrom,extendTo,s,initial,final)
+function [z,z_smooth,z_ext_smooth] = process_xls(filename,dateFrom,dateTo,extendFrom,extendTo,s,initial,final)
 
 tbl = readtable(filename);
 x = tbl.x;
