@@ -74,7 +74,7 @@ end
 
 % old-age share
 old_init = 10; old_final = 15;
-[z,z_smooth,~,z_ext_smooth] = process_xls('data/old_share.xlsx',dd(2020,09,03),t1,dd(2020,3,13),t1,s,old_init,old_final);
+[z,z_smooth,z_ext,z_ext_smooth] = process_xls('data/old_share.xlsx',dd(2020,09,03),t1,dd(2020,3,13),t1,s,old_init,old_final);
 
 % case fatality rate at hospitals
 cfr_init = 13; cfr_final = 22;
@@ -83,7 +83,7 @@ cfr_init = 13; cfr_final = 22;
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,10,15);
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par,cf] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
 
 
 % alternative numbers for hospitals
@@ -212,7 +212,7 @@ title('New infections (PCR only)');
 legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable','"lost" symptomatical new cases'});
 grid on;
 % 
-figure('Name','Observable ratio and test quality')
+figure('Name','Observable ratio and CFR')
 subplot(2,1,1)
 obs_ratio = 0*obs_ratio_real+s.obs_ratio;
 plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
@@ -222,11 +222,10 @@ legend({'stationary (optimistic)','real (implied by hospitalizations)'});
 grid on;
 ylabel('% of total cases');
 subplot(2,1,2)
-obs_ratio = 0*obs_ratio_real+s.obs_ratio;
-plot(resize(d_tests_cum,disp_from:t1),'linewidth',1); hold on;
-plot(resize(d_cases_cum,disp_from:t1),'linewidth',1); hold on;
-title('Testing quality');
-legend({'%\Delta tests','%\Delta cases'});
+plot(resize(z_ext,disp_from:t1),'linewidth',1); hold on;
+plot(resize(z_ext_smooth,disp_from:t1),'linewidth',1); hold on;
+title('Old-age persons (65+, % of confirmend cases)');
+legend({'raw','smooth'});
 grid on;
 ylabel('%');
 
