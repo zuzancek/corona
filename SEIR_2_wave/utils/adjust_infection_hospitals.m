@@ -5,20 +5,27 @@ T = dateTo-dateFrom+1;
 rho = omega(dateFrom:dateTo); %s.old_share;
 
 % delay in testing (gradual)
-T_delay_0 = delay.v0;               T_delay_1 = 0*delay.v1;               
+T_delay_0 = delay.v0;               T_delay_1 = 2*delay.v1;               
 T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = smooth_series(T_delay,s.smooth_width,s.smooth_type,s.smooth_ends);
 
-T_test_at = 3;
+T_test_at = 2;
 T_inf = s.SI.mean;                  T_test = (T_test_at+s.T_inc.mean)+T_delay;
-T_inf_y = T_inf;                    T_inf_o = T_inf;
-T_hosp_y = 7.02+T_test;             T_hosp_o = 3.24+T_test;         
-lambda_y = 2.32/100;                lambda_o = 31.86/100;
-alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;        alpha_h = rho.*alpha_h_y+(1-rho).*alpha_h_o;
+T_inf_y = T_inf;                    T_inf_o = T_inf+1.5;
+T_hosp_y = 7.02+T_test;             T_hosp_o = 3.24+T_test;   
+hospit_rate = 7.08/100;
+rho_avg = 8.78/100;
+lambda_y = 2.32/100;                lambda_o = (33.86/100);
+kappa = lambda_o/lambda_y;
+hospit_rate_y = hospit_rate/(1+kappa*rho_avg);  lambda_y = hospit_rate_y/(1-rho_avg);
+hospit_rate_o = hospit_rate-hospit_rate_y;      lambda_o = hospit_rate_o/rho_avg;
+alpha_h_y = lambda_y./T_hosp_y;     alpha_h_o = lambda_o./T_hosp_o;        alpha_h = rho.*alpha_h_o+(1-rho).*alpha_h_y;
 alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      alpha_r = rho.*alpha_r_o+(1-rho).*alpha_r_y;
-T_death_y = 3.41;                   T_death_o = 4.59;
-T_rec_y = 4.56;                     T_rec_o = 5.65;
+T_death_y = 3.41+T_hosp_y;                   
+T_death_o = 4.59+T_hosp_o;
+T_rec_y = 4.56+T_hosp_y;                     
+T_rec_o = 5.65+T_hosp_o;
 omega_y = 5.15*1.1/100;             omega_o = (37.16/100)/1.1;
 theta = rho./(1-rho).*lambda_o./lambda_y; 
 theta = theta./(1+theta);
@@ -32,15 +39,22 @@ beta_d_y = omega_y./T_death_y;       beta_d_o = omega_o./T_death_o;          bet
 % D(t+1) = D(t)+H_D(t);
 
 % initialization
+s.smooth_width = 7;
 dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% CFR = smooth_series(cfr(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+% 
+% % calculation
+% R_H = (1./CFR-1).*D;
+% H_D = D(2:end)-D(1:end-1);
+% H_R = max(0,R_H(2:end)-R_H(1:end-1));
+% I_H = H(2:end)-H(1:end-1)+H_R+H_D;
 
-% calculation
 H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
 beta_d_t = H_D./H(1:end-1); 
 k_d_t = beta_d_t./beta_d(1:end-1);
-beta_r_t = theta(1:end-1).*(1-omega_y.*k_d_t)./T_rec_y+(1-theta(1:end-1)).*(1-omega_o.*k_d_t)./T_rec_o;
+beta_r_t = theta(1:end-1).*(1-omega_y.*k_d_t)./T_rec_y(1:end-1)+(1-theta(1:end-1)).*(1-omega_o.*k_d_t)./T_rec_o(1:end-1);
 H_R = beta_r_t.*H(1:end-1);
 I_H = H(2:end)-H(1:end-1).*(1-beta_d_t-beta_r_t);
 I = I_H./alpha_h(1:T-1);
@@ -62,6 +76,7 @@ dI_data_real = resize(X,dateFrom:dateTo);
 dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
+plot(X);hold on;
 idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
 X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
