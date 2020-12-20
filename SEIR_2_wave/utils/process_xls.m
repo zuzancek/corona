@@ -4,7 +4,10 @@ tbl = readtable(filename);
 x = tbl.x;
 y = tbl.y;
 xx = 1:dateTo-dateFrom+1;
-yy = interp1(x,y,xx,'pchip');
+x1 = ceil(max(x));
+x_new = [x;[x1:xx(end)]'];
+y_new = [y;[y(end)+zeros(length(xx)-x1+1,1)]];
+yy = interp1(x_new,y_new,xx,'pchip');
 z = tseries(dateFrom:dateTo,yy);
 z_ext = tseries(extendFrom:extendTo,NaN);
 z_ext(dateFrom:dateTo) = z;
@@ -12,8 +15,9 @@ if isempty(initial)
     initial = z(dateFrom);
 end
 if isempty(final)
-    final = z(dateTo);
+    final = z(dateTo);    
 end
+
 z_ext(extendFrom) = initial; z_ext(extendTo) = final;
 z_ext = interp(z_ext,extendFrom:extendTo);
 z_ext_smooth = smooth_series(z_ext,s.smooth_width,s.smooth_type,s.smooth_ends);
