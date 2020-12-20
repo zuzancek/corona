@@ -8,6 +8,12 @@ yy = interp1(x,y,xx,'pchip');
 z = tseries(dateFrom:dateTo,yy);
 z_ext = tseries(extendFrom:extendTo,NaN);
 z_ext(dateFrom:dateTo) = z;
+if isempty(initial)
+    initial = z(dateFrom);
+end
+if isempty(final)
+    final = z(dateTo);
+end
 z_ext(extendFrom) = initial; z_ext(extendTo) = final;
 z_ext = interp(z_ext,extendFrom:extendTo);
 z_ext_smooth = smooth_series(z_ext,s.smooth_width,s.smooth_type,s.smooth_ends);
