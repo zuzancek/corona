@@ -5,8 +5,13 @@ x = tbl.x;
 y = tbl.y;
 xx = 1:dateTo-dateFrom+1;
 x1 = ceil(max(x));
+d = 1;
+if x1==x(end)
+    x(end) = [];
+    d = 0;
+end
 x_new = [x;[x1:xx(end)]'];
-y_new = [y;[y(end)+zeros(length(xx)-x1+1,1)]];
+y_new = [y;[y(end)+zeros(length(xx)-x1+d,1)]];
 yy = interp1(x_new,y_new,xx,'pchip');
 z = tseries(dateFrom:dateTo,yy);
 z_ext = tseries(extendFrom:extendTo,NaN);
