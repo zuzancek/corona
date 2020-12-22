@@ -3,6 +3,7 @@ function [z,z_smooth,z_ext,z_ext_smooth] = process_xls(filename,dateFrom,dateTo,
 tbl = readtable(filename);
 x = tbl.x;
 y = tbl.y;
+
 xx = 1:dateTo-dateFrom+1;
 x1 = ceil(max(x));
 d = 1;
