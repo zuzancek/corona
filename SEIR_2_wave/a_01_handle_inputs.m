@@ -4,6 +4,7 @@ x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
+db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
 disp_from = dd(2020,9,1);
@@ -75,16 +76,15 @@ end
 
 % old-age share
 z = db_age.Old./db_age.Total;
-[z,z_smooth] = extend_series(z,t0,t1);
+[z,z_smooth] = extend_series(z,t0,t1,[],[]);
 
 % case fatality rate at hospitals
 cfr_init = []; cfr_final = [];
-[cfr,cfr_smooth,cfr_ext,cfr_ext_smooth] = process_xls('data/cfr_hosp.xlsx',...
+[cfr,cfr_smooth,cfr_ext,cfr_ext_smooth] = process_xls('data/cfr_hospitals.xlsx',...
     dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,10,29);
-db_age = dbload('data/new_cases_age.csv');
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
 
 
