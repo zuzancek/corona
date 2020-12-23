@@ -57,9 +57,9 @@ discharge = hosp.Discharge;
 discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 deaths_total = db_deaths.Total;
 deaths_total_smooth = smooth_series(deaths_total,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
-deaths_onCovid = db_death.DeathCovid;
+deaths_onCovid = db_deaths.DeathCovid;
 deaths_onCovid_smooth = smooth_series(deaths_onCovid,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
-deaths_withCovid = db_death.DeathWithCovid;
+deaths_withCovid = db_deaths.DeathWithCovid;
 deaths_withCovid_smooth = smooth_series(deaths_withCovid,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
 %% calculations
@@ -90,8 +90,8 @@ cfr_init = []; cfr_final = [];
     dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,10,29);
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total_smooth,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
+delay.v0 = 0; delay.v1 = 2; delay.at = dd(2020,11,06);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_onCovid_smooth,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
 
 
 % alternative numbers for hospitals

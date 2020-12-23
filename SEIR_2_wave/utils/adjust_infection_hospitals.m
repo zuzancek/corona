@@ -3,7 +3,7 @@ function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,
 T = dateTo-dateFrom+1;
 
 rho = omega(dateFrom:dateTo); %s.old_share;
-cfr = smooth_series(cfr(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+varsigma = smooth_series((1./cfr(dateFrom:dateTo-1)-1),s.smooth_width,s.smooth_type,s.smooth_ends);
 
 % delay in testing (gradual)
 T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
@@ -54,8 +54,8 @@ H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_ty
 % I_H = H(2:end)-H(1:end-1)+H_R+H_D;
 
 H_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
-H_R = (1./cfr(1:end-1)-1).*H_D;
-I_H = H(2:end)-H(1:end-1)+H_D+H_R;
+H_R = smooth_series(varsigma.*H_D,s.smooth_width,s.smooth_type,s.smooth_ends);
+I_H = smooth_series(H(2:end)-H(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends)+H_D+H_R;
 I = I_H./alpha_h(2:end);
 X = I(2:end)-I(1:end-1).*(1-alpha_r(3:end)-alpha_h(3:end));
 

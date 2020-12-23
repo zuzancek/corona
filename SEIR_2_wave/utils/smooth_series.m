@@ -1,4 +1,4 @@
-function res = smooth_series(Y,w,type,ends,varargin)
+function res = smooth_series(Y,varargin)
 
 if isa(Y,'tseries')
     convert = true;
@@ -7,10 +7,25 @@ if isa(Y,'tseries')
 else
     convert = false;
 end
-try
-    indiff = (varargin{1} == false);
-catch err %#ok<NASGU>
+if isempty(varargin)
+    w = 7;
+else
+    w = varargin{1};
+end
+if length(varargin)<=1
+    type = 5;
+else
+    type = varargin{2};
+end
+if length(varargin)<=2
+    ends = 1;
+else
+    ends = varargin{3};
+end
+if length(varargin)<=3
     indiff = true;
+else
+    indiff = varargin{4};
 end
 
 if ~indiff
