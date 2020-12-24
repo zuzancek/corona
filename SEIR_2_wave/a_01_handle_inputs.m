@@ -91,7 +91,7 @@ cfr_init = []; cfr_final = [];
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 2; delay.at = dd(2020,11,06);
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_onCovid_smooth,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_ext_smooth,cfr_ext,delay);
 
 
 % alternative numbers for hospitals
