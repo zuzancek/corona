@@ -1,7 +1,7 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
-method = s.smoothing_method;
+method = @smooth_series; %s.smoothing_method;
 
 rho = omega(dateFrom:dateTo); %s.old_share;
 varsigma = method(1./cfr(dateFrom:dateTo-1)-1);

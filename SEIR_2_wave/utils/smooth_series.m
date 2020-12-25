@@ -8,12 +8,12 @@ else
     convert = false;
 end
 if isempty(varargin)
-    w = 7;
+    w = 5;
 else
     w = varargin{1};
 end
 if length(varargin)<=1
-    type = 5;
+    type = 3;
 else
     type = varargin{2};
 end
