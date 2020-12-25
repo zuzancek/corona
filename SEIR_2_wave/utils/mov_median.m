@@ -33,7 +33,7 @@ catch err0
     end
 end
 
-y = movmedian(x(dateFrom:dateTo),d);
+y = movmedian(x(dateFrom:dateTo),d,'omitnan');
 
 if isa(x,'tseries')
     y = y+0*x;
