@@ -1,8 +1,8 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
-% method = @smooth_series; %s.smoothing_method;
-method = s.smoothing_method;
+method = @smooth_series; %s.smoothing_method;
+% method = s.smoothing_method;
 
 rho = method(omega(dateFrom:dateTo)); %s.old_share;
 varsigma = method(1./cfr(dateFrom:dateTo-1)-1);
@@ -85,7 +85,6 @@ dI_data_real = resize(X,dateFrom:dateTo);
 dI_data_reported = tseries(dateFrom:dateTo,dI_data);
 delta = dI_data_reported./dI_data_real;
 
-plot(X);hold on;
 idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
 X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
