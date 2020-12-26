@@ -1,9 +1,10 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
-method = @smooth_series; %s.smoothing_method;
+% method = @smooth_series; %s.smoothing_method;
+method = s.smoothing_method;
 
-rho = omega(dateFrom:dateTo); %s.old_share;
+rho = method(omega(dateFrom:dateTo)); %s.old_share;
 varsigma = method(1./cfr(dateFrom:dateTo-1)-1);
 
 % delay in testing (gradual)
@@ -58,7 +59,7 @@ H_D = method(D(2:end)-D(1:end-1));
 H_R = method(varsigma.*H_D);
 I_H = method(H(2:end)-H(1:end-1))+H_D+H_R;
 I = I_H./alpha_h(2:end);
-X = I(2:end)-I(1:end-1).*(1-alpha_r(3:end)-alpha_h(3:end));
+X = method(I(2:end)-I(1:end-1).*(1-alpha_r(3:end)-alpha_h(3:end)));
 
 % beta_d_t = H_D./H(1:end-1); 
 % k_d_t = beta_d_t./beta_d(2:end);

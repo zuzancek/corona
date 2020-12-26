@@ -85,13 +85,13 @@ z = db_age.Old./db_age.Total;
 [z,z_smooth] = extend_series(z,t0,t1,[],[]);
 
 % case fatality rate at hospitals
-cfr_init = []; cfr_final = [];
+cfr_init = []; cfr_final = 17.5;
 [cfr,cfr_smooth,cfr_ext,cfr_ext_smooth] = process_xls('data/cfr_hospitals.xlsx',...
     dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 2; delay.at = dd(2020,11,06);
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z_smooth,cfr_ext,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z,cfr_ext,delay);
 
 
 % alternative numbers for hospitals
