@@ -2,7 +2,7 @@ function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,
 
 T = dateTo-dateFrom+1;
 method = @smooth_series; %s.smoothing_method;
-method = s.smoothing_method;
+% method = s.smoothing_method;
 
 rho = method(omega(dateFrom:dateTo)); %s.old_share;
 varsigma = method(1./cfr(dateFrom:dateTo-1)-1);
@@ -24,20 +24,22 @@ lambda_y = 2.32/100;                lambda_o = (31.86/100);
 kappa = lambda_o/lambda_y;
 hospit_rate_y = hospit_rate/(1+kappa*rho_avg);  lambda_y = hospit_rate_y/(1-rho_avg);
 hospit_rate_o = hospit_rate-hospit_rate_y;      lambda_o = hospit_rate_o/rho_avg;
-alpha_h_y = lambda_y./(T_hosp_y);     alpha_h_o = lambda_o./T_hosp_o;        alpha_h = rho.*alpha_h_o+(1-rho).*alpha_h_y;
-alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      alpha_r = rho.*alpha_r_o+(1-rho).*alpha_r_y;
+alpha_h_y = lambda_y./(T_hosp_y);     alpha_h_o = lambda_o./T_hosp_o;        
+alpha_r_y = (1-lambda_y)/T_inf_y;   alpha_r_o = (1-lambda_o)/T_inf_o;      
 % T_death_y = 3.41+2;%+T_hosp_y_0;                   
 % T_death_o = 4.59+2;%+T_hosp_o_0;
 % T_rec_y = 11.25+zeros(T,1);% 4.56+T_hosp_y_0;                     
 % T_rec_o = 11.25+zeros(T,1);% 5.65+T_hosp_o_0;
-omega_y = 5.15/100;         T_death_y = 5;      alpha_hdy = omega_y/T_death_y;
-omega_o = (37.16/100);      T_death_o = 5;      alpha_hdo = omega_o/T_death_o;
+omega_y = 5.15/100;         T_death_y = 5;      alpha_hdy = omega_y/(1+0*T_death_y);
+omega_o = (37.16/100);      T_death_o = 5;      alpha_hdo = omega_o/(1+0*T_death_o);
 T_rec_y = 6; alpha_hry = (1-omega_y)./T_rec_y;
 T_rec_o = 6; alpha_hro = (1-omega_o)./T_rec_o;
 kappa = 1;
-eta_y = 2.32/100;           T_hosp_y = 6.5;     alpha_ihy = kappa*eta_y/T_hosp_y;
-eta_o = 31.86/100;          T_hosp_o = 3.9;     alpha_iho = kappa*eta_o/T_hosp_o;
-T_inf_y = s.T_inf.mean-T_test_at;               alpha_iry = (1-kappa*eta_y)./T_inf_y;
+eta_y = 2.32/100;           T_hosp_y = 6.5;     alpha_ihy = kappa*eta_y/(1+0*T_hosp_y);
+eta_o = 31.86/100;          T_hosp_o = 3.9;     alpha_iho = kappa*eta_o/(1+0*T_hosp_o);
+T_inf_y = s.SI.mean;
+% s.T_inf.mean-T_test_at;               
+alpha_iry = (1-kappa*eta_y)./T_inf_y;
 T_inf_o = T_inf_y+1;                            alpha_iro = (1-kappa*eta_o)./T_inf_o;
 
 
@@ -67,18 +69,18 @@ H_D = method(D(2:end)-D(1:end-1));
 alpha_hd = H_D./H(1:end-1);
 theta = (alpha_hd-alpha_hdy)./(alpha_hdo-alpha_hdy);
 H_D_o = theta.*H_D;
-H_o = H_D_o./alpha_hdo; H_o(end+1) = theta(end).*H;
+H_o = H_D_o./alpha_hdo; H_o(end+1) = theta(end).*H(end);
 H_R_o = alpha_hro.*H_o(1:end-1);
 I_H_o = method(H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o;
 I_o = I_H_o./alpha_iho;
-I_R_o = alpha_iro.*I_o;
+I_R_o = alpha_iro.*I_o; I_o = [I_o(1);I_o];
 X_o = method(I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
-H_D_y = H_D-HD_o;
+H_D_y = H_D-H_D_o;
 H_y = H-H_o;
 H_R_y = alpha_hry.*H_y(1:end-1);
 I_H_y = method(H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y;
 I_y = I_H_y./alpha_ihy;
-I_R_y = alpha_iry.*I_y;
+I_R_y = alpha_iry.*I_y; I_y = [I_y(1);I_y];
 X_y = method(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 X = X_o+X_y;
 
