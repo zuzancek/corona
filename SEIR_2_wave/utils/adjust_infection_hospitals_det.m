@@ -2,8 +2,8 @@ function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_det(x,h,d,s,dateF
 % (x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
-% method = @smooth_series; 
-method = s.smoothing_method;
+method = @smooth_series; 
+% method = s.smoothing_method;
 
 rho = method(omega(dateFrom:dateTo)); %s.old_share;
 rho_ext = method(omega); %s.old_share;
@@ -15,10 +15,10 @@ T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method(T_delay);
 
-omega_y = 5.15/100;         alpha_hdy = omega_y;
-omega_o = (37.16/100);      alpha_hdo = omega_o;
-T_rec_y = 5; alpha_hry = (1-omega_y)./T_rec_y;
-T_rec_o = 7; alpha_hro = (1-omega_o)./T_rec_o;
+omega_y = 5.15/100;         T_death_y = 3.41;      alpha_hdy = omega_y/(T_death_y);
+omega_o = (37.16/100);      T_death_o = 4.59;      alpha_hdo = omega_o/(T_death_o);
+                            T_rec_y = 5;           alpha_hry = (1-omega_y)./T_rec_y;
+                            T_rec_o = 7;           alpha_hro = (1-omega_o)./T_rec_o;
 kappa = 1;
 eta_y = 2.32/100;           alpha_ihy = kappa*eta_y;
 eta_o = 31.86/100;          alpha_iho = kappa*eta_o;
@@ -39,8 +39,8 @@ D = method(d(dateFrom:dateTo));%smooth_series(x.Deaths(dateFrom:dateTo),s.smooth
 H = method(h.Hospitalizations(dateFrom:dateTo));
 
 H_D = method(D(2:end)-D(1:end-1));
-alpha_hd = H_D./H(1:end-1);
-theta = (alpha_hd*5-alpha_hdy)./(alpha_hdo-alpha_hdy);
+alpha_hd = method(H_D./H(1:end-1));
+theta = (alpha_hd-alpha_hdy)./(alpha_hdo-alpha_hdy);
 H_D_o = theta.*H_D;
 H_o = H_D_o./alpha_hdo; H_o(end+1) = H_o(end);
 H_R_o = alpha_hro.*H_o(1:end-1);
