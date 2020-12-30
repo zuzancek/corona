@@ -1,8 +1,10 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_det(x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,~,delay)
+function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_det(x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,mort,delay)
 % (x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
 method = @smooth_series; 
+d_share_old = mort.share_old;
+cfr = mort.cfr_hosp;
 % method = s.smoothing_method;
 
 rho = method(omega(dateFrom:dateTo)); %s.old_share;

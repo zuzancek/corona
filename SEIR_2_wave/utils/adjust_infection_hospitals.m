@@ -6,6 +6,8 @@ method = @smooth_series; %s.smoothing_method;
 
 rho = method(omega(dateFrom:dateTo)); %s.old_share;
 varsigma = method(1./cfr(dateFrom:dateTo-1)-1);
+delta = cfr(dateFrom:dateTo);
+
 
 % delay in testing (gradual)
 T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
@@ -65,7 +67,16 @@ H = method(h.Hospitalizations(dateFrom:dateTo));
 % H_R = max(0,R_H(2:end)-R_H(1:end-1));
 % I_H = H(2:end)-H(1:end-1)+H_R+H_D;
 
+% D'=D+H_D
 H_D = method(D(2:end)-D(1:end-1));
+% H'=H+I_H-H_D-H_R
+I_H = H_D./delta(1:end-1);
+H_R = H(1:end-1)-H(2:end-1)+I_H-H_D;
+% I'=I+X-I_H-I_R
+I = I_H./alpha_h
+% 1. najprv vyskusat s homogennou populaciou
+
+
 alpha_hd = H_D./H(1:end-1);
 theta = (alpha_hd-alpha_hdy)./(alpha_hdo-alpha_hdy);
 H_D_o = theta.*H_D;
