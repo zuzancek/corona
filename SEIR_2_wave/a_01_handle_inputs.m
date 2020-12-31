@@ -5,6 +5,7 @@ mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
+db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
 disp_from = dd(2020,9,1);
@@ -83,6 +84,8 @@ end
 % old-age share
 z = db_age.Old./db_age.Total;
 [z,z_smooth] = extend_series(z,t0,t1,[],[]);
+death_ratio = smooth_series(db_deaths_age.TotalDeathRatioOld);
+
 
 % case fatality rate at hospitals
 cfr_init = []; cfr_final = 17.5;
