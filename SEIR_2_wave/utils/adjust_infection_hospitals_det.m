@@ -3,8 +3,10 @@ function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_det(x,h,d,s,dateF
 
 T = dateTo-dateFrom+1;
 method = @smooth_series; 
-d_share_old = mort.share_old;
+d_share_old = mort.old_share;
+varsigma = d_share_old(dateFrom:dateTo);
 cfr = mort.cfr_hosp;
+delta = cfr(dateFrom:dateTo);
 % method = s.smoothing_method;
 
 rho = method(omega(dateFrom:dateTo)); %s.old_share;
@@ -27,6 +29,8 @@ eta_o = 31.86/100;          alpha_iho = kappa*eta_o;
 T_inf_y = s.SI.mean;        alpha_iry = (1-kappa*eta_y)./T_inf_y;
 T_inf_o = T_inf_y+1;        alpha_iro = (1-kappa*eta_o)./T_inf_o;
 
+kappa_d = 8;
+
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
 %       I_H(t) = alpha_h*I(t);   I_R(t) = alpha_r*I(t);
@@ -41,6 +45,26 @@ D = method(d(dateFrom:dateTo));%smooth_series(x.Deaths(dateFrom:dateTo),s.smooth
 H = method(h.Hospitalizations(dateFrom:dateTo));
 
 H_D = method(D(2:end)-D(1:end-1));
+H_D_o = varsigma(1:end-1).*H_D;
+H_D_y = H_D-H_D_o;
+alpha_dy = (H_D_o+kappa_d.*H_D_y)./(kappa_d.*H(1:end-1));
+alpha_do = kappa_d.*alpha_dy;
+H_o = H_D_o./alpha_do;
+H_y = H(1:end-1)-H_o;
+I_H = H_D./delta(1:end-1);
+kappa_r = I_H-(H(2:end)-H(1:end-1))-H_D./(H(1:end-1).*((1-omega_o)./T_rec_o+(1-omega_y)./T_rec_y));
+T_rec_o = T_rec_o./kappa_r; H_R_o = (1-omega_o)./T_rec_o.*H_o;
+T_rec_y = T_rec_y./kappa_r; H_R_y = (1-omega_y)./T_rec_y.*H_y;
+I_H_o = H_o(2:end)-H_o(1:end-1)+H_D_o(1:end-1)+H_R_o(1:end-1);
+I_H_y = H_y(2:end)-H_y(1:end-1)+H_D_y(1:end-1)+H_R_y(1:end-1);
+I_o = I_H_o./alpha_iho;
+I_y = I_H_y./alpha_ihy;
+I_R_o = alpha_iro.*I_o;
+I_R_y = alpha_iry.*I_y;
+X_o = I_o(2:end)-I_o(1:end-1)+I_H_o(1:end-1)+I_R_o(1:end-1);
+X_y = I_y(2:end)-I_y(1:end-1)+I_H_y(1:end-1)+I_R_y(1:end-1);
+X = X_o+X_y;
+
 alpha_hd = method(H_D./H(1:end-1));
 theta = (alpha_hd-alpha_hdy)./(alpha_hdo-alpha_hdy);
 H_D_o = theta.*H_D;
