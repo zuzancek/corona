@@ -6,6 +6,7 @@ hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','freq','daily');
+db_asympt = dbload('data/asymptomatical_cases_share.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
 disp_from = dd(2020,9,1);
@@ -65,12 +66,14 @@ deaths_withCovid_smooth = smooth_series(deaths_withCovid,s.smooth_width_hosp,s.s
 
 %% calculations
 % asymptomatic share
-[asymp_ratio,asymp_ratio_smooth] = process_xls('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
-    dd(2020,3,13),t1,s,[],[]);
+% [asymp_ratio,asymp_ratio_smooth] = process_xls('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
+%     dd(2020,3,13),t1,s,[],[]);
+asymp_ratio = db_asympt.Net;
+[asymp_ratio,asymp_ratio_smooth] = extend_series(asymp_ratio,t0,t1,[],[]);
 
 % old-age share
-z = db_age.Old./db_age.Total;
-[z,z_smooth] = extend_series(z,t0,t1,[],[]);
+old_ratio = db_age.Old./db_age.Total;
+[old_ratio,old_ratio_smooth] = extend_series(old_ratio,t0,t1,[],[]);
 death_ratio = smooth_series(db_deaths_age.TotalDeathRatioOld);
 
 
@@ -83,7 +86,7 @@ cfr_init = []; cfr_final = 17.5;
 delay.v0 = 0; delay.v1 = 2; delay.at = dd(2020,11,06);
 mort.old_share = death_ratio;
 mort.cfr_hosp = cfr_ext_smooth;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_det(x,hosp,deaths_total,s,disp_from,t1,t0,t1,asymp_ratio_smooth,z,mort,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_det(x,hosp,deaths_total,s,disp_from,t1,t0,t1,asymp_ratio_smooth,old_ratio,mort,delay);
 
 
 % alternative numbers for hospitals
