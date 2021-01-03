@@ -74,7 +74,6 @@ asymp_ratio = db_asympt.Net;
 % old-age share (in cases, dead)
 old_ratio = db_age.Old./db_age.Total;
 [old_ratio,old_ratio_smooth] = extend_series(old_ratio,t0,t1,[],[]);
-% death_ratio = smooth_series(db_deaths_age.TotalDeathRatioOld);
 
 % case fatality rate at hospitals
 cfr_init = []; cfr_final = 17.5;
@@ -83,14 +82,12 @@ cfr_init = []; cfr_final = 17.5;
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 2; delay.at = dd(2020,11,06);
-% mort.old_share = death_ratio;
-% mort.cfr_hosp = cfr_ext_smooth;
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 params.cfr_hospitals = cfr_ext;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_det(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay);
 
 
 % alternative numbers for hospitals
