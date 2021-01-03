@@ -120,7 +120,8 @@ s.min_dif = 1;
 s.max_dif = 4;
 s.shift_max = 2*s.SI.mean;
 
-s.smoothing_method = @mov_median;
+s.smoothing_method_data = @mov_median;
+s.smoothing_method_params = @smooth_series;
 
 end
 

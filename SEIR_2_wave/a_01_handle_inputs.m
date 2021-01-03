@@ -81,7 +81,7 @@ cfr_init = []; cfr_final = 17.5;
     dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 2; delay.at = dd(2020,11,06);
+delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,11,01);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 params.cfr_hospitals = cfr_ext;
