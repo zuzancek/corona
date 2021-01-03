@@ -1,13 +1,12 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_det(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
-% (x,h,d,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay)
 
 T = dateTo-dateFrom+1;
 method = @smooth_series; 
 
 death_old_ratio = method(params.death_old_ratio);
 varsigma = death_old_ratio(dateFrom:dateTo);
-cfr_hospitals = method(params.cfr_hospitals);
-delta = cfr_hospitals(dateFrom:dateTo);
+% cfr_hospitals = method(params.cfr_hospitals);
+% delta = cfr_hospitals(dateFrom:dateTo);
 cases_old_ratio = method(params.cases_old_ratio);
 rho = cases_old_ratio(dateFrom:dateTo);
 rho_ext = cases_old_ratio;
@@ -22,8 +21,8 @@ T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method(T_delay);
 
-omega_y = 5.15/100;         T_death_y = 3.41;      alpha_hdy = omega_y/(T_death_y);
-omega_o = (37.16/100);      T_death_o = 4.59;      alpha_hdo = omega_o/(T_death_o);
+omega_y = 5.15/100;         T_death_y = 3.41;      alpha_hdy = omega_y/T_death_y;
+omega_o = (37.16/100);      T_death_o = 4.59;      alpha_hdo = omega_o/T_death_o;
                             T_rec_y = 5;           alpha_hry = (1-omega_y)./T_rec_y;
                             T_rec_o = 7;           alpha_hro = (1-omega_o)./T_rec_o;
 kappa = 1;
@@ -35,15 +34,12 @@ T_inf_o = T_inf_y+1.5;          alpha_iro = (1-kappa*eta_o*T_hosp_o)./T_inf_o;
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
-%       I_H(t) = alpha_h*I(t);   I_R(t) = alpha_r*I(t);
 % H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
-%       H_D(t) = beta_d*H(t);    H_R(t) = beta_r*N(t);
 % D(t+1) = D(t)+H_D(t);
 
 % initialization
-% s.smooth_width = 7;
 dI_data = method(x.NewCases(dateFrom:dateTo));
-D = method(d(dateFrom:dateTo));%smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+D = method(d(dateFrom:dateTo));
 H = method(h.Hospitalizations(dateFrom:dateTo));
 
 H_D = method(D(2:end)-D(1:end-1));
