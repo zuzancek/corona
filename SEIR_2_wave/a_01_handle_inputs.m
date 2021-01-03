@@ -89,7 +89,6 @@ params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay);
 
-
 % alternative numbers for hospitals
 init.D = death_smooth(disp_from);   init.V = vent_smooth(disp_from);
 init.C = icu_smooth(disp_from);     init.H = hospit_smooth(disp_from);

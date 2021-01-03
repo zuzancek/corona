@@ -13,7 +13,7 @@ rho_ext = cases_old_ratio;
 asymp_ratio = method(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
 
-% method = s.smoothing_method;
+method = s.smoothing_method;
 
 % delay in testing (gradual)
 T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
@@ -21,15 +21,15 @@ T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method(T_delay);
 
-omega_y = 5.15/100;         T_death_y = 3.41;      alpha_hdy = omega_y/T_death_y;
-omega_o = (37.16/100);      T_death_o = 4.59;      alpha_hdo = omega_o/T_death_o;
+omega_y = 5.15/100;         T_death_y = 3.41+1;      alpha_hdy = omega_y/T_death_y;
+omega_o = (37.16/100);      T_death_o = 4.59+1;      alpha_hdo = omega_o/T_death_o;
                             T_rec_y = 5;           alpha_hry = (1-omega_y)./T_rec_y;
                             T_rec_o = 7;           alpha_hro = (1-omega_o)./T_rec_o;
 kappa = 1;
-eta_y = 2.32/100;           alpha_ihy = kappa*eta_y;    T_hosp_y = 6.5;
-eta_o = 31.86/100;          alpha_iho = kappa*eta_o;    T_hosp_o = 3.8;
-T_inf_y = s.T_inf.mean+0.5;     alpha_iry = (1-kappa*eta_y*T_hosp_y)./T_inf_y;
-T_inf_o = T_inf_y+1.5;          alpha_iro = (1-kappa*eta_o*T_hosp_o)./T_inf_o;
+eta_y = 2.32/100;                   alpha_ihy = kappa*eta_y;            T_hosp_y = 6.5;
+eta_o = 31.86/100;                  alpha_iho = kappa*eta_o;            T_hosp_o = 3.8;
+T_sick_y = s.T_sick_y.mean-s.T_test.mean;         alpha_iry = (1-kappa*eta_y*T_hosp_y)./T_sick_y;
+T_sick_o = s.T_sick_o.mean-s.T_test.mean;         alpha_iro = (1-kappa*eta_o*T_hosp_o)./T_sick_o;
 
 
 % ******* Equations

@@ -14,7 +14,7 @@ s.wave_2_from = dd(2020,9,1);
 % serial interval (generation period)
 s.SI.mean = 6.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test0.mean = 1;             s.T_test0.std = s.SI.std;      
+s.T_test.mean = 3;             s.T_test.std = s.SI.std;      
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period
@@ -23,19 +23,22 @@ s.T_inf_asymp.mean = 3.3;       s.T_inf_asymp.std = 0.62;
 s.T_inf_symp.mean = 3.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 3.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 3.3;       s.T_inf_unobs.std = 0.62;
+% sickness/symptoms period
+s.T_sick_y.mean = 7;            s.T_sick_y.std = 0.62;
+s.T_sick_o.mean = 8;            s.T_sick_o.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
-s.T_inf_obs0.mean = s.T_inf_obs.mean-s.T_pre.mean-s.T_test0.mean;
-s.T_inf_obs0.std = s.T_inf_obs.std;
-s.SI_obs.mean = s.SI.mean-s.T_inf_obs0.mean;
+s.T_inf_obs.mean = s.T_inf_obs.mean-s.T_pre.mean-s.T_test.mean;
+s.T_inf_obs.std = s.T_inf_obs.std;
+s.SI_obs.mean = s.SI.mean-s.T_inf_obs.mean;
 s.SI_obs.std = 0.62;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
 % days prior to hospital admission (from onset,adjusted for test period)
 s.T_hosp.mean = 4.5;              s.T_hosp.std = 0.62;
-s.T_hosp0.mean = s.T_hosp.mean-s.T_test0.mean;    s.T_hosp0.std = 0.62;
+s.T_hosp0.mean = s.T_hosp.mean-s.T_test.mean;    s.T_hosp0.std = 0.62;
 % time to death (from ospital admission)
 s.T_death.mean = 7;             s.T_death.std = 0.62;
 % days at hospital (in case of recovery)
