@@ -27,6 +27,7 @@ T_short = method_params(T_short);
 
 omega_y = s.omega_y;
 omega_o = s.omega_o;
+T_death_y = s.T_death_y;        alpha_hdy = omega_y/T_death_y;
 T_death_o = s.T_death_o;        alpha_hdo = omega_o/T_death_o;
 T_rec_y = s.T_rec_y-T_short;    alpha_hry = (1-omega_y)./T_rec_y;
 T_rec_o = s.T_rec_o-T_short;    alpha_hro = (1-omega_o)./T_rec_o;
@@ -98,7 +99,7 @@ XX(dateFrom:dateTo) = X_y;
 X_y = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
 
 sa = struct;
-sa.Xs = (1-sigma(1)).*X;%
+sa.Xs = (1-sigma(1)).*X;
 sa.Xo = X_o;
 sa.Xy = X_y;
 sa.Xa = X-sa.Xs;
@@ -109,6 +110,22 @@ sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) 
 sa.loss_o = sa.Xo-dI_data_reported_old;
 sa.loss_y = sa.Xy-dI_data_reported_young;
 
+% store params
+p.alpha_hdy = alpha_hdy;
+p.alpha_hdo = alpha_hdo;
+p.alpha_hry = alpha_hry;
+p.alpha_hro = alpha_hro;
+p.alpha_ihy = alpha_ihy;
+p.alpha_iho = alpha_iho;
+p.alpha_iry = alpha_iry;
+p.alpha_iro = alpha_iro;
+p.T_rec_y = T_rec_y;
+p.T_rec_o = T_rec_o;
+p.T_sick_y = T_sick_y;
+p.T_sick_o = T_sick_o;
+p.rho = rho;
+p.rho_ext = rho_ext;
+p.varsigma = varsigma;
 
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);

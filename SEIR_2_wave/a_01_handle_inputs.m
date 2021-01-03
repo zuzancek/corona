@@ -82,15 +82,16 @@ cfr_init = []; cfr_final = 17.5;
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,11,01);
-srec.v0 = 0; srec.v1 = 2; srec.at = dd(2020,10,15);
+srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 params.cfr_hospitals = cfr_ext;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
-
 % alternative numbers for hospitals
+[out] = adjust_hospitals_infection(x,par,s,init,disp_from,t1);
+
 init.D = death_smooth(disp_from);   init.V = vent_smooth(disp_from);
 init.C = icu_smooth(disp_from);     init.H = hospit_smooth(disp_from);
 init.I = x.ActiveCases(disp_from);

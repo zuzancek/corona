@@ -70,10 +70,10 @@ s.omega_vent = 0.33;
 s.omega_y = 5.15/100;       s.omega_o = (37.16/100); 
 s.T_death_y = 3.41;         s.T_death_o = 4.59;  
 % recovery at hospital
-s.T_rec_y = 9.2;            s.T_rec_o = 13.3;
+s.T_rec_y = 6.2;            s.T_rec_o = 13.3;
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.T_hosp_y = 7;           s.T_hosp_o = 5;
+s.T_hosp_y = 7;             s.T_hosp_o = 5;
 
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
