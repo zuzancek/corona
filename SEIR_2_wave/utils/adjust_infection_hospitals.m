@@ -15,12 +15,12 @@ asymp_ratio = method_params(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
 
 % delay in testing (gradual)
-T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
+T_delay_0 = delay.v0;               T_delay_1 = 0*delay.v1;               
 T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method_params(T_delay);
 % shortening recovery peiod
-T_short_0 = srec.v0;                T_short_1 = srec.v1;           
+T_short_0 = srec.v0;                T_short_1 = 0*srec.v1;           
 T_short_at = srec.at;
 T_short = zeros(T,1)+T_short_0;     T_short(T_short_at-dateFrom:end) = T_short_1;
 T_short = method_params(T_short);
@@ -31,12 +31,10 @@ T_death_y = s.T_death_y;        alpha_hdy = omega_y/T_death_y;
 T_death_o = s.T_death_o;        alpha_hdo = omega_o/T_death_o;
 T_rec_y = s.T_rec_y-T_short;    alpha_hry = (1-omega_y)./T_rec_y;
 T_rec_o = s.T_rec_o-T_short;    alpha_hro = (1-omega_o)./T_rec_o;
-eta_y = s.eta_y;                alpha_ihy = eta_y;            
-T_hosp_y = s.T_hosp_y;
-eta_o = s.eta_o;                alpha_iho = eta_o;            
-T_hosp_o = s.T_hosp_o;
-T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;         alpha_iry = (1-eta_y*T_hosp_y)./T_sick_y;
-T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;         alpha_iro = (1-eta_o*T_hosp_o)./T_sick_o;
+eta_y = s.eta_y;                T_hosp_y = s.T_hosp_y;  alpha_ihy = eta_y./T_hosp_y;   
+eta_o = s.eta_o;                T_hosp_o = s.T_hosp_o;  alpha_iho = eta_o./T_hosp_o;  
+T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;         alpha_iry = (1-eta_y)./T_sick_y;
+T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;         alpha_iro = (1-eta_o)./T_sick_o;
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
@@ -51,8 +49,9 @@ H = method_data(h.Hospitalizations(dateFrom:dateTo));
 H_D = method_data(D(2:end)-D(1:end-1));
 H_D_o = varsigma(1:end-1).*H_D;
 H_D_y = H_D-H_D_o;
-H_o = H_D_o./alpha_hdo; H_o(end+1) = H_o(end);
-H_y = H-H_o;
+H_y_H_o = alpha_hdo./alpha_hdy.*H_D_y./H_D_o; H_y_H_o(end+1) = H_y_H_o(end);
+H_y = H_y_H_o./(H_y_H_o+1).*H;
+H_o = H-H_y;
 H_R_o = alpha_hro(1:end-1).*H_o(1:end-1);
 I_H_o = method_data(H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o;
 I_o = I_H_o./alpha_iho;

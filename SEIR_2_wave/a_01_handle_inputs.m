@@ -92,7 +92,7 @@ params.asymp_ratio = asymp_ratio;
 
 % alternative numbers for hospitals
 init.D = death; init.H = hospit; init.I = x.ActiveCases; 
-init.rho = old_ratio; init.varsigma = death_old_ratio;
+init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = adjust_hospitals_infection(x,par,s,init,disp_from,t1);
 
 % testing quality

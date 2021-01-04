@@ -4,17 +4,19 @@ T = dateTo-dateFrom+1;
 I0 = init.I;     
 H0 = init.H; 
 D0 = init.D;
-rho = init.rho;
-varsigma = init.varsigma;
 
-alpha_hdy = p.alpha_hdy;
-alpha_hdo = p.alpha_hdo;
-alpha_hry = p.alpha_hry;
-alpha_hro = p.alpha_hro;      
-alpha_ihy = p.alpha_ihy;        
-alpha_iho = p.alpha_iho;  
-alpha_iry = p.alpha_iry;
-alpha_iro = p.alpha_iro;
+method_params = s.smoothing_method_params;
+rho = method_params(init.rho); rho = rho(dateFrom:dateTo);
+varsigma = method_params(init.varsigma); varsigma = varsigma(dateFrom:dateTo);
+     
+alpha_ihy = s.eta_y/s.T_hosp_y;        
+alpha_iho = s.eta_o/s.T_hosp_o;  
+alpha_iry = (1-s.eta_y)./p.T_sick_y; 
+alpha_iro = (1-s.eta_o)./p.T_sick_o;
+alpha_hdy = s.omega_y/s.T_death_y;
+alpha_hdo = s.omega_o/s.T_death_o;
+alpha_hry = (1-s.omega_y)./p.T_rec_y; 
+alpha_hro = (1-s.omega_o)./p.T_rec_o; 
 eta_y = s.eta_y;                   
 eta_o = s.eta_o;           
 
@@ -34,8 +36,9 @@ D_y = zeros(T,1); D_y(1) = D0(1)-D_o(1);
 H0 = method_data(H0(dateFrom:dateTo));
 H_o = zeros(T,1); H_o(1) = H0(1)*eta_o*rho(1)/(eta_o*s.old_share+eta_y*(1-s.old_share));
 H_y = zeros(T,1); H_y(1) = H0(1);
-I_o = zeros(T,1); I_o(1) = I0*s.old_share;
-I_y = zeros(T,1); I_y(1) = I0-I_o(1);
+I0 = method_data(I0(dateFrom:dateTo));
+I_o = zeros(T,1); I_o(1) = I0(1)*s.old_share;
+I_y = zeros(T,1); I_y(1) = I0(1)-I_o(1);
 d_I_H_o = zeros(T,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I_H_o;
 d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 
