@@ -49,16 +49,16 @@ H = method_data(h.Hospitalizations(dateFrom:dateTo));
 H_D = method_data(D(2:end)-D(1:end-1));
 H_D_o = varsigma(1:end-1).*H_D;
 H_D_y = H_D-H_D_o;
-H_y_H_o = alpha_hdo./alpha_hdy.*H_D_y./H_D_o; H_y_H_o(end+1) = H_y_H_o(end);
+H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
 H_y = H_y_H_o./(H_y_H_o+1).*H;
 H_o = H-H_y;
-H_R_o = alpha_hro(1:end-1).*H_o(1:end-1);
-I_H_o = method_data(H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o;
+H_R_o = alpha_hro.*H_o;
+I_H_o = method_data(H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o(1:end-1);
+H_R_y = alpha_hry.*H_y;
+I_H_y = method_data(H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y(1:end-1);
 I_o = I_H_o./alpha_iho;
 I_R_o = alpha_iro(1:end-1).*I_o; I_o = [I_o(1);I_o];
 X_o = method_data(I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
-H_R_y = alpha_hry(1:end-1).*H_y(1:end-1);
-I_H_y = method_data(H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y;
 I_y = I_H_y./alpha_ihy;
 I_R_y = alpha_iry(1:end-1).*I_y; I_y = [I_y(1);I_y];
 X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
@@ -125,6 +125,24 @@ p.T_sick_o = T_sick_o;
 p.rho = rho;
 p.rho_ext = rho_ext;
 p.varsigma = varsigma;
+
+    function [y,ys] = adjust_series(x)
+        y = NaN+zeros(T,1);
+        y(1:length(x)) = x;
+        if isnan(y(1))
+            y(1) = mean(x,'omitnan');
+        end
+        if isnan(y(end))
+            if isnan(x(end))
+                y(end) = mean(x,'omitnan');
+            else
+                y(end) = x(end);
+            end
+        end
+        idx_y = ~isnan(y);
+        y = interp1(find(idx_y),y(idx_y),1:T,'spline')';
+        ys = smooth_series(y);
+    end
 
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);

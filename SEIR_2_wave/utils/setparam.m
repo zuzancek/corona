@@ -24,8 +24,8 @@ s.T_inf_symp.mean = 3.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 3.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 3.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y.mean = 7;            s.T_sick_y.std = 0.62;
-s.T_sick_o.mean = 8;            s.T_sick_o.std = 0.62;
+s.T_sick_y.mean = 6.5;            s.T_sick_y.std = 0.62;
+s.T_sick_o.mean = 9.5;            s.T_sick_o.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -67,14 +67,14 @@ s.xi = s.iota*0.5;
 s.psi_vent = 1/4;
 s.omega_vent = 0.33;
 % death probability/time
-s.omega_y = 5.15/100;       s.omega_o = (31.16/100); 
+s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  %31
 s.T_death_y = 3.41+4;       s.T_death_o = 4.59+8;  
 % recovery at hospital
-s.T_rec_y = 9.2;            s.T_rec_o = 13.5;
+s.T_rec_y = 9.2;            s.T_rec_o = 14.5;
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.T_hosp_y = 7;             s.T_hosp_o = 5;
-
+s.T_hosp_y = 5;             s.T_hosp_o = 4;
+s.eta_y = 5.1/100;          s.eta_o = 15.6/100;
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
 s.kappa_res_delta_0 = -0.5;
