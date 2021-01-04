@@ -27,14 +27,14 @@ T_short = method_params(T_short);
 
 omega_y = s.omega_y;
 omega_o = s.omega_o;
-T_death_y = s.T_death_y;        alpha_hdy = omega_y/T_death_y;
-T_death_o = s.T_death_o;        alpha_hdo = omega_o/T_death_o;
-T_rec_y = s.T_rec_y-T_short;    alpha_hry = (1-omega_y)./T_rec_y;
-T_rec_o = s.T_rec_o-T_short;    alpha_hro = (1-omega_o)./T_rec_o;
-eta_y = s.eta_y;                T_hosp_y = s.T_hosp_y;  alpha_ihy = eta_y./T_hosp_y;   
-eta_o = s.eta_o;                T_hosp_o = s.T_hosp_o;  alpha_iho = eta_o./T_hosp_o;  
-T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;         alpha_iry = (1-eta_y)./T_sick_y;
-T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;         alpha_iro = (1-eta_o)./T_sick_o;
+T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y;
+T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o;
+T_rec_y = s.T_rec_y-T_short;                         alpha_hry = (1-omega_y)./T_rec_y;
+T_rec_o = s.T_rec_o-T_short;                         alpha_hro = (1-omega_o)./T_rec_o;
+eta_y = s.eta_y;                                     T_hosp_y = s.T_hosp_y;  alpha_ihy = eta_y./T_hosp_y;   
+eta_o = s.eta_o;                                     T_hosp_o = s.T_hosp_o;  alpha_iho = eta_o./T_hosp_o;  
+T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
+T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
