@@ -88,7 +88,7 @@ params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 params.cfr_hospitals = cfr_ext;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
 
 % alternative numbers for hospitals
 init.D = death; init.H = hospit; init.I = x.ActiveCases; 
