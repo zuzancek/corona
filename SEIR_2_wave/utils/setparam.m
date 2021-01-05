@@ -67,8 +67,8 @@ s.xi = s.iota*0.5;
 s.psi_vent = 1/4;
 s.omega_vent = 0.33;
 % death probability/time
-s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  %31
-s.T_death_y = 3.41+4;       s.T_death_o = 4.59+8;  
+s.omega_y = 3.15/100;       s.omega_o = (37.16/100);  %31
+s.T_death_y = 3.41+5;       s.T_death_o = 4.59+8;  
 % recovery at hospital
 s.T_rec_y = 9.2;            s.T_rec_o = 14.5;
 % hospitalization probability/time to

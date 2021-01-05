@@ -95,15 +95,15 @@ init.D = death; init.H = hospit; init.I = x.ActiveCases;
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = adjust_hospitals_infection(x,par,s,init,disp_from,t1);
 
-% testing quality
-tests_cum = cumsum(tests);
-cases_cum = cumsum(x.NewCases);
-d_tests_cum = smooth_series(pct(tests_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
-d_cases_cum = smooth_series(pct(cases_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
-quality = (1+d_tests_cum/100)./(1+d_cases_cum/100);
-quality = quality./quality(s.wave_2_from)-1;
-d_tests_cum = 100*((d_tests_cum./100+1)/(1+d_tests_cum(s.wave_2_from)/100)-1);
-d_cases_cum = 100*((d_cases_cum./100+1)/(1+d_cases_cum(s.wave_2_from)/100)-1);
+% % testing quality
+% tests_cum = cumsum(tests);
+% cases_cum = cumsum(x.NewCases);
+% d_tests_cum = smooth_series(pct(tests_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
+% d_cases_cum = smooth_series(pct(cases_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
+% quality = (1+d_tests_cum/100)./(1+d_cases_cum/100);
+% quality = quality./quality(s.wave_2_from)-1;
+% d_tests_cum = 100*((d_tests_cum./100+1)/(1+d_tests_cum(s.wave_2_from)/100)-1);
+% d_cases_cum = 100*((d_cases_cum./100+1)/(1+d_cases_cum(s.wave_2_from)/100)-1);
 
 %% plotting stuff
 % clinical statistics
@@ -124,8 +124,10 @@ plot(resize(vent_smooth,disp_from:t1),'linewidth',2);
 grid on;
 title('Ventilations');
 subplot(2,2,4)
-plot(resize(death,disp_from:t1),'linewidth',1);hold on;
-plot(resize(death_smooth,disp_from:t1),'linewidth',2);
+pp1=plot(resize(death,disp_from:t1),'linewidth',1,'linestyle','--');hold on;
+pp2=plot(resize(deaths_total,disp_from:t1),'linewidth',1,'linestyle','--');hold on;
+plot(resize(death_smooth,disp_from:t1),'linewidth',2,'Color',pp1.Color);
+plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2,'Color',pp2.Color);
 grid on;
 title('Deaths');
 
@@ -251,7 +253,7 @@ plot(resize(out.V,disp_from:t1),'linewidth',1);hold on;
 grid on;
 title('Ventilations');
 subplot(2,2,4)
-plot(resize(death_smooth,disp_from:t1),'linewidth',1);hold on;
+plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
 plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
 grid on;
 title('Deaths');
