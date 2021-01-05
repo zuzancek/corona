@@ -15,7 +15,7 @@ asymp_ratio = method_params(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
 
 % delay in testing (gradual)
-T_delay_0 = delay.v0;               T_delay_1 = 0*delay.v1;               
+T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
 T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method_params(T_delay);
@@ -27,13 +27,13 @@ T_short = method_params(T_short);
 
 % parameters
 % I->H/N
-lambda_iny = s.lambda_iny;    T_hosp_y = s.T_hosp_y;   T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    
-lambda_ino = s.lambda_ino;    T_hosp_o = s.T_hosp_o;   T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    
+lambda_iny = s.eta_y+0.04;    T_hosp_y = s.T_hosp_y;   T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    
+lambda_ino = s.eta_o+0.04;    T_hosp_o = s.T_hosp_o;   T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    
 alpha_iry = (1-lambda_iny)./T_sick_y; alpha_iny = lambda_iny./T_hosp_y; 
 alpha_iro = (1-lambda_ino)./T_sick_o; alpha_ino = lambda_ino./T_hosp_o; 
 % N->C
-lambda_ncy = (7.61-3)*3/100;    T_icu_y = 3;      T_rec_ny = 6.9-2;
-lambda_nco = (7.61+3)*3/100;    T_icu_o = 3;      T_rec_no = 6.9+2;
+lambda_ncy = (7.61-3)*3/100;    T_icu_y = 3;      T_rec_ny = 6.9-2-T_short;
+lambda_nco = (7.61+3)*3/100;    T_icu_o = 3;      T_rec_no = 6.9+2-T_short;
 alpha_ncy = lambda_ncy./T_icu_y; alpha_nry = (1-lambda_ncy)./T_rec_ny; 
 alpha_nco = lambda_nco./T_icu_o; alpha_nro = (1-lambda_nco)./T_rec_no; 
 % C->V
@@ -78,24 +78,24 @@ V_y = V_y_V_o./(V_y_V_o+1).*V;
 V_o = V-V_y;
 V_R_o = alpha_vro.*V_o;
 V_R_y = alpha_vry.*V_y;
-C_V_o = method_data(V_o(2:end)-V_o(1:end-1))+V_D_o+V_R_o;
-C_V_y = method_data(V_y(2:end)-V_y(1:end-1))+V_D_y+V_R_y;
+C_V_o = method_data(V_o(2:end)-V_o(1:end-1))+V_D_o+V_R_o(1:end-1);
+C_V_y = method_data(V_y(2:end)-V_y(1:end-1))+V_D_y+V_R_y(1:end-1);
 %
 C_y_C_o = adjust_series(alpha_cvo./alpha_cvy.*C_V_y./C_V_o);
 C_y = C_y_C_o./(C_y_C_o+1).*C;
 C_o = C-C_y;
 C_R_o = alpha_cro.*C_o;
 C_R_y = alpha_cry.*C_y;
-N_C_o = method_data(C_o(2:end)-C_o(1:end-1))+C_V_o+C_R_o;
-N_C_y = method_data(C_y(2:end)-C_y(1:end-1))+C_V_y+C_R_y;
+N_C_o = method_data(C_o(2:end)-C_o(1:end-1))+C_V_o+C_R_o(1:end-1);
+N_C_y = method_data(C_y(2:end)-C_y(1:end-1))+C_V_y+C_R_y(1:end-1);
 %
 N_y_N_o = adjust_series(alpha_nco./alpha_ncy.*N_C_y./N_C_o);
 N_y = N_y_N_o./(N_y_N_o+1).*N;
 N_o = N-N_y;
 N_R_o = alpha_nro.*N_o;
 N_R_y = alpha_nry.*N_y;
-I_N_o = method_data(N_o(2:end)-N_o(1:end-1))+N_C_o+N_R_o;
-I_N_y = method_data(N_y(2:end)-N_y(1:end-1))+N_C_y+N_R_y;
+I_N_o = method_data(N_o(2:end)-N_o(1:end-1))+N_C_o+N_R_o(1:end-1);
+I_N_y = method_data(N_y(2:end)-N_y(1:end-1))+N_C_y+N_R_y(1:end-1);
 %
 I_o = I_N_o./alpha_ino;
 I_y = I_N_y./alpha_iny;

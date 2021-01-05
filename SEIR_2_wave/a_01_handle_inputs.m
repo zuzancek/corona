@@ -48,6 +48,9 @@ I0 = x.TotalCases(tt0-1)/s.obs_ratio;
 hospit = hosp.Hospitalizations;
 hospit_smooth = smooth_series(hospit,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 icu = hosp.ICU;
+icu(startdate(hospit_smooth)+40:startdate(hospit_smooth)+60) = NaN;
+icu = interp(icu,startdate(hospit_smooth):enddate(hospit_smooth));
+hosp.ICU = icu;
 icu_smooth = smooth_series(resize(icu,h_t0:h_t1),s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 vent = hosp.Ventilation;
 vent_smooth = smooth_series(vent,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
@@ -81,7 +84,7 @@ cfr_init = []; cfr_final = 17.5;
     dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,11,01);
+delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,11,01);
 srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
