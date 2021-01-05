@@ -1,8 +1,6 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay) %#ok<INUSL>
+function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full_prev(x,h,s,dateFrom,dateTo,t0,t1,sigma,omega,cfr,delay) %#ok<INUSL>
 
 T = dateTo-dateFrom+1;
-method_data = s.smoothing_method_data; 
-method_params = s.smoothing_method_params; 
 
 rho = s.old_share;
 
@@ -62,15 +60,15 @@ delta_r_y = (1-lambda_d_y)/T_rec_vent_y;delta_r_o = lambda_d_o/T_rec_vent_o;
 % D(t+1) = D(t)+V_D(t);
 
 % initialization
-dI_data = method_data(x.NewCases(dateFrom:dateTo));
-D = method_data(d(dateFrom:dateTo));
-H = method_data(h.Hospitalizations(dateFrom:dateTo));
-V = method_data(h.Ventilation(dateFrom:dateTo));
-C = method_data(h.ICU(dateFrom:dateTo));
+dI_data = smooth_series(x.NewCases(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+D = smooth_series(x.Deaths(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+V = smooth_series(h.Ventilation(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+C = smooth_series(h.ICU(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
+H = smooth_series(h.Hospitalizations(dateFrom:dateTo),s.smooth_width,s.smooth_type,s.smooth_ends);
 N = H-C-V;
 
 % calculation
-V_D = method_data(D(2:end)-D(1:end-1));
+V_D = smooth_series(D(2:end)-D(1:end-1),s.smooth_width,s.smooth_type,s.smooth_ends);
 delta_t = V_D./V(1:end-1); k_v_t = delta_t./delta;
 zeta_v_t = theta_v*(1-delta_y*k_v_t)/T_rec_vent_y+(1-theta_v)*(1-delta_o*k_v_t)/T_rec_vent_o;
 V_R = zeta_v_t.*V(1:end-1);
