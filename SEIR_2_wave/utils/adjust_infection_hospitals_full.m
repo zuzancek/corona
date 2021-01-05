@@ -151,6 +151,15 @@ sa.loss_o = sa.Xo-dI_data_reported_old;
 sa.loss_y = sa.Xy-dI_data_reported_young;
 
 p = struct();
+p.alpha_iry = alpha_iry; p.alpha_iny = alpha_iny; 
+p.alpha_iro = alpha_iro; p.alpha_ino = alpha_ino; 
+p.alpha_ncy = alpha_ncy; p.alpha_nry = alpha_nry; 
+p.alpha_nco = alpha_nco; p.alpha_nro = alpha_nro; 
+p.alpha_cvy = alpha_cvy; p.alpha_cry = alpha_cry; 
+p.alpha_cvo = alpha_cvo; p.alpha_cro = alpha_cro; 
+p.alpha_vdy = alpha_vdy; p.alpha_vry = alpha_vry; 
+p.alpha_vdo = alpha_vdo; p.alpha_vro = alpha_vro; 
+
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);
         x(T-k+1) = x(T-k)+2/3*dx;
