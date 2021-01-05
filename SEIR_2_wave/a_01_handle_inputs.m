@@ -179,7 +179,7 @@ legend({'PCR only: raw','PCR only: smooth','PCR+AG: raw','PCR+AG: smooth'});
 grid on;
 
 figure('Name','CFR & asymptomatic share')
-subplot(2,1,2);
+subplot(2,1,1);
 plot(resize(100*cfr,disp_from:t1),'linewidth',1);hold on;
 plot(resize(100*cfr_ext_smooth,disp_from:t1),'linewidth',2);hold on;
 title('Case fatality rate (reported,  %, hospitals only)');
@@ -227,8 +227,8 @@ legend({'stationary (optimistic)','real (implied by hospitalizations)'});
 grid on;
 ylabel('% of total cases');
 subplot(2,1,2)
-plot(resize(z_ext,disp_from:t1),'linewidth',1); hold on;
-plot(resize(z_ext_smooth,disp_from:t1),'linewidth',1); hold on;
+plot(resize(old_ratio,disp_from:t1),'linewidth',1); hold on;
+plot(resize(old_ratio_smooth,disp_from:t1),'linewidth',1); hold on;
 title('Old-age persons (65+, % of confirmend cases)');
 legend({'raw','smooth'});
 grid on;
