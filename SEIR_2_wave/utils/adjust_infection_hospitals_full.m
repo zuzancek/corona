@@ -150,6 +150,7 @@ sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) 
 sa.loss_o = sa.Xo-dI_data_reported_old;
 sa.loss_y = sa.Xy-dI_data_reported_young;
 
+% store params
 p = struct();
 p.alpha_iry = alpha_iry; p.alpha_iny = alpha_iny; 
 p.alpha_iro = alpha_iro; p.alpha_ino = alpha_ino; 
@@ -159,6 +160,9 @@ p.alpha_cvy = alpha_cvy; p.alpha_cry = alpha_cry;
 p.alpha_cvo = alpha_cvo; p.alpha_cro = alpha_cro; 
 p.alpha_vdy = alpha_vdy; p.alpha_vry = alpha_vry; 
 p.alpha_vdo = alpha_vdo; p.alpha_vro = alpha_vro; 
+p.lambda_iny = lambda_iny; p.lambda_ino = lambda_ino;
+p.lambda_ncy = lambda_ncy; p.lambda_nco = lambda_nco;
+p.lambda_cvy = lambda_cvy; p.lambda_cvo = lambda_cvo;
 
     function [x] = adjust_tail(x,k)
         dx = x(T-k)-x(T-k-1);

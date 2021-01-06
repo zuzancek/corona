@@ -28,8 +28,7 @@ eta_o = s.eta_o;
 % initialization
 method_data = s.smoothing_method_data;
 X = method_data(x.NewCases(dateFrom:dateTo));
-X_o = X.*rho;
-X_y = X-X_o;
+X_o = X.*rho;   X_y = X-X_o;
 D0 = method_data(D0(dateFrom:dateTo));
 D_o = zeros(T,1); D_o(1) = D0(1)*varsigma(1); 
 D_y = zeros(T,1); D_y(1) = D0(1)-D_o(1); 
@@ -56,6 +55,7 @@ for t=1:T-1
     D_y(t+1) = D_y(t)+d_H_D_y(t);
 end
 
+% store results
 out = struct;
 out.X_o = tseries(dateFrom:dateTo,X_o);
 out.X_y = tseries(dateFrom:dateTo,X_y);
