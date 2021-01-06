@@ -1,4 +1,4 @@
-%initialize;
+initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -32,17 +32,21 @@ dI_inflow_pcr = resize(x.NewCases,tt0:t1);
 dI_inflow_pcr_smooth = smooth_series(dI_inflow_pcr,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 dI_inflow = dI_inflow_pcr+dI_inflow_ag;
-dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,...
-    s.smooth_type,s.smooth_ends);
+dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,s.smooth_type,s.smooth_ends);
 
 pos_test_ratio = x.NewCases./x.Tests;
 pos_test_ratio_ag = y.AgPosit./y.AgTests;
-pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,...
-    s.smooth_type,s.smooth_ends);
+pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
 tests = x.Tests;
-tests_smooth = smooth_series(tests,s.smooth_width,...
-    s.smooth_type,s.smooth_ends);
+tests_smooth = smooth_series(tests,s.smooth_width,s.smooth_type,s.smooth_ends);
 I0 = x.TotalCases(tt0-1)/s.obs_ratio;
+
+cases_data = struct;
+cases_data.cases_ag = dI_inflow_ag;   cases_data.cases_ag_mm = mov_median(dI_inflow_ag);   cases_data.cases_ag_smooth = smooth_series(dI_inflow_ag);
+cases_data.cases_pcr = dI_inflow_pcr; cases_data.cases_pcr_mm = mov_median(dI_inflow_pcr); cases_data.cases_pcr_smooth = dI_inflow_pcr_smooth;
+cases_data.cases_total = dI_inflow;   cases_data.cases_total_mm = mov_median(dI_inflow);   cases_data.cases_total_smooth = dI_inflow_smooth;
+cases_data.ptr_pcr = pos_test_ratio;  cases_data.ptr_mm = mov_median(pos_test_ratio);      cases_data.ptr_smooth = pos_test_ratio_smooth;
+cases_data.ptr_ag = pos_test_ratio_ag;cases_data.ptr_ag_mm = mov_median(pos_test_ratio_ag);cases_data.ptr_ag_smooth = tests_smooth;
 
 % clinical
 hospit = hosp.Hospitalizations;
@@ -67,31 +71,46 @@ deaths_onCovid_smooth = smooth_series(deaths_onCovid,s.smooth_width_hosp,s.smoot
 deaths_withCovid = db_deaths.DeathWithCovid;
 deaths_withCovid_smooth = smooth_series(deaths_withCovid,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
 
+hosp_data = struct;
+hosp_data.H_raw = hospit;           hosp_data.H_smooth = hospit_smooth;
+hosp_data.C_raw = icu;              hosp_data.C_smooth = icu_smooth;
+hosp_data.V_raw = vent;             hosp_data.V_smooth = vent_smooth;
+hosp_data.D_raw = deaths_total;     hosp_data.D_smooth = deaths_total_smooth;
+
+deaths_data = struct;
+deaths_data.total = deaths_total; deaths_data.total_smooth = deaths_total_smooth;
+deaths_data.on = deaths_onCovid; deaths_data.on_smooth = deaths_onCovid_smooth;
+deaths_data.with = deaths_withCovid; deaths_data.with_smooth = deaths_withCovid_smooth;
+
 %% calculations
 % asymptomatic share
-% [asymp_ratio,asymp_ratio_smooth] = process_xls('data/asympt_share.xlsx',dd(2020,3,13),dd(2020,10,30),...
-%     dd(2020,3,13),t1,s,[],[]);
 asymp_ratio = db_asympt.Net;
 [asymp_ratio,asymp_ratio_smooth] = extend_series(asymp_ratio,t0,t1,[],[]);
+cases_data.asymp_ratio = asymp_ratio;      cases_data.asymp_ratio_smooth = asymp_ratio_smooth;
 
 % old-age share (in cases, dead)
 old_ratio = db_age.Old./db_age.Total;
 [old_ratio,old_ratio_smooth] = extend_series(old_ratio,t0,t1,[],[]);
+cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;
 
 % case fatality rate at hospitals
 cfr_init = []; cfr_final = 17.5;
-[cfr,cfr_smooth,cfr_ext,cfr_ext_smooth] = process_xls('data/cfr_hospitals.xlsx',...
-    dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
+[cfr,cfr_smooth,cfr_ext,cfr_ext_smooth] = process_xls('data/cfr_hospitals.xlsx', dd(2020,10,15),dd(2020,12,08),dd(2020,3,13),t1,s,cfr_init,cfr_final);
+deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
 delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,11,01);
 srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
+deaths_data.old_ratio = params.death_old_ratio; deaths_data.old_ratio_smooth = smooth_series(deaths_data.old_ratio);
 params.cfr_hospitals = cfr_ext;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
+cases_data.cases_pcr_implied = dI_inflow_real;
+cases_data.obs_ratio = obs_ratio_real;
+cases_data.loss = sa_cmp;
 
 % alternative numbers for hospitals
 init.D = death; init.H = hospit; 
@@ -99,16 +118,7 @@ init.C = icu;   init.V = vent;
 init.I = x.ActiveCases; 
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = adjust_hospitals_infection_full(x,par,s,init,disp_from,t1);
-
-% % testing quality
-% tests_cum = cumsum(tests);
-% cases_cum = cumsum(x.NewCases);
-% d_tests_cum = smooth_series(pct(tests_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
-% d_cases_cum = smooth_series(pct(cases_cum),s.smooth_width,s.smooth_type,s.smooth_ends);
-% quality = (1+d_tests_cum/100)./(1+d_cases_cum/100);
-% quality = quality./quality(s.wave_2_from)-1;
-% d_tests_cum = 100*((d_tests_cum./100+1)/(1+d_tests_cum(s.wave_2_from)/100)-1);
-% d_cases_cum = 100*((d_cases_cum./100+1)/(1+d_cases_cum(s.wave_2_from)/100)-1);
+hosp_data.alt = out;
 
 %% plotting stuff
 % clinical statistics
@@ -159,12 +169,11 @@ legend(fn);
 figure;
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
-    zz = smooth_series(double(yy),s.smooth_width,s.smooth_type,s.smooth_ends);
-    yy = 0*yy+zz;
+    zz = smooth_series(yy,s.smooth_width,s.smooth_type,s.smooth_ends);
     if i==length(fn)
-        plot(yy,'linewidth',2,'Color','k');hold on;
+        plot(zz,'linewidth',2,'Color','k');hold on;
     else
-        plot(yy,'linewidth',1);hold on;
+        plot(zz,'linewidth',1);hold on;
     end
 end
 plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
@@ -264,26 +273,6 @@ grid on;
 title('Deaths');
 
 %% saving stuff
-mob_smooth = yy;
-% obs_ratio_smooth = resize(obs_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
-asymp_ratio_smooth = resize(asymp_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
-pos_test_ratio_smooth = resize(pos_test_ratio_smooth,startdate(dI_inflow_pcr_smooth):enddate(dI_inflow_pcr_smooth));
-save('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_real','dI_inflow_smooth',...
-    'pos_test_ratio_smooth','obs_ratio','obs_ratio_real','asymp_ratio_smooth',...
-    'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-    'death_smooth','admiss_smooth','discharge_smooth','h_t0','h_t1');
-data.NewCases_PCR = x.NewCases;
-data.TotalActiveCases_real_PCR = I_real;
-data.NewCases_real_PCR = dI_inflow_real;
-data.Tests_PCR = x.Tests;
-data.Asymp = asymp_ratio;
-data.ObsRatio_real = obs_ratio_real;
-data.TestRatio_PCR = pos_test_ratio;
-data.Mobility = mob.SK;
-data.Deaths = x.Deaths;
-data.ICU = icu;
-data.Vent = vent;
-data.Hosp = hospit;
-data.Admission = admiss;
-data.Discharge = discharge;
-save('raw.mat','data');
+dates.t0 = t0;      dates.t1 = t1;
+mob_data.raw = yy;  mob_data.smooth = zz;
+save('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data');
