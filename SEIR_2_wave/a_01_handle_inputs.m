@@ -94,7 +94,9 @@ params.asymp_ratio = asymp_ratio;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
 
 % alternative numbers for hospitals
-init.D = death; init.H = hospit; init.I = x.ActiveCases; 
+init.D = death; init.H = hospit; 
+init.C = icu;   init.V = vent;
+init.I = x.ActiveCases; 
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = adjust_hospitals_infection_full(x,par,s,init,disp_from,t1);
 

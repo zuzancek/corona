@@ -64,21 +64,21 @@ d_V_R_y = d_I_R_y;    d_V_D_y = d_I_R_y;    d_V_R_o = d_I_R_y;      d_V_D_o = d_
 
 % calculation
 for t=1:T-1
-    d_I_R_y(t) = alpha_iry(t).*I_y(t); d_I_N_y(t) = alpha_iny(t).*I_y(t);
+    d_I_R_y(t) = alpha_iry(t).*I_y(t); d_I_N_y(t) = alpha_iny.*I_y(t);
     I_y(t+1) = I_y(t)+X_y(t)-d_I_R_y(t)-d_I_N_y(t);
-    d_I_R_o(t) = alpha_iro(t).*I_o(t); d_I_N_o(t) = alpha_ino(t).*I_o(t);
+    d_I_R_o(t) = alpha_iro(t).*I_o(t); d_I_N_o(t) = alpha_ino.*I_o(t);
     I_o(t+1) = I_o(t)+X_o(t)-d_I_R_o(t)-d_I_N_o(t);
-    d_N_R_y(t) = alpha_nry(t).*N_y(t); d_N_C_y(t) = alpha_ncy(t).*N_y(t);
+    d_N_R_y(t) = alpha_nry(t).*N_y(t); d_N_C_y(t) = alpha_ncy.*N_y(t);
     N_y(t+1) = N_y(t)+d_I_N_y(t)-d_N_R_y(t)-d_N_C_y(t);
-    d_N_R_o(t) = alpha_nro(t).*N_o(t); d_N_C_o(t) = alpha_nco(t).*N_o(t);
+    d_N_R_o(t) = alpha_nro(t).*N_o(t); d_N_C_o(t) = alpha_nco.*N_o(t);
     N_o(t+1) = N_o(t)+d_I_N_o(t)-d_N_R_o(t)-d_N_C_o(t);
-    d_C_R_y(t) = alpha_cry(t).*C_y(t); d_C_V_y(t) = alpha_cvy(t).*C_y(t);
+    d_C_R_y(t) = alpha_cry.*C_y(t); d_C_V_y(t) = alpha_cvy.*C_y(t);
     C_y(t+1) = C_y(t)+d_N_C_y(t)-d_C_R_y(t)-d_C_V_y(t);
-    d_C_R_o(t) = alpha_cro(t).*C_o(t); d_C_V_o(t) = alpha_cvo(t).*C_o(t);
+    d_C_R_o(t) = alpha_cro.*C_o(t); d_C_V_o(t) = alpha_cvo.*C_o(t);
     C_o(t+1) = C_o(t)+d_N_C_o(t)-d_C_R_o(t)-d_C_V_o(t);
-    d_V_R_y(t) = alpha_vry(t).*V_y(t); d_V_D_y(t) = alpha_vdy(t).*V_y(t);
+    d_V_R_y(t) = alpha_vry.*V_y(t); d_V_D_y(t) = alpha_vdy.*V_y(t);
     V_y(t+1) = V_o(t)+d_C_V_y(t)-d_V_R_y(t)-d_V_D_y(t);
-    d_V_R_o(t) = alpha_vro(t).*V_o(t); d_V_D_o(t) = alpha_vdo(t).*V_o(t);
+    d_V_R_o(t) = alpha_vro.*V_o(t); d_V_D_o(t) = alpha_vdo.*V_o(t);
     V_o(t+1) = V_o(t)+d_C_V_o(t)-d_V_R_o(t)-d_V_D_o(t);
     D_y(t+1) = D_y(t)+d_V_D_y(t);
     D_o(t+1) = D_o(t)+d_V_D_o(t);
