@@ -1,63 +1,107 @@
 function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR(inputs,s,do_quant,do_weight,do_dist)
 
+%% Model
+% S(t+1) = S(t)-Z(t)
+% E(t+1) = E(t)+Z(t)-E(t)/T_lat
+% Iu(t+1) = Iu(t)+E(t)/T_lat-rho(t)*Iu(t)/T_test-(1-rho(t))*Iu(t)/T_inf
+% Io(t+1) = Io(t)+rho(t)*Iu(t)/T_test-lambda(t)*Io(t)/T_hosp-(1-lambda(t))*Io(t)/T_sick
+% H(t+1) = H(t)+lambda(t)*Io(t)/T_hosp-omega(t)*H(t)/T_death-(1-omega(t))*H(t)/T_rec
+% D(t+1) = D(t)+omega(t)*H(t)/T_death
+%
+% Z(t) = Rt(t)/T_inf*S(t)/N*(Iu(t)+alpha_o*Io(t)+alpha_h*H(t))
+% X(t) = rho(t)*Iu(t)/T_test
 
-% structure of inputs:
-% I0: initial number of observed infectious
-% z: daily data of inflow of newly observed infections
-
-% initialization
-obs_ratio = inputs.obs_ratio;
-if isempty(obs_ratio)
-    obs_ratio = s.obs_ratio+0*inputs.z;
-end
-z_obs = inputs.z;
-z = z_obs./obs_ratio;
-z_unobs = z-z_obs;
-
-I0 = inputs.I0/obs_ratio(1);
+%% initialization
 N = s.sim_num;
 pop_size = s.pop_size;
-T = length(z);
-T_lat_vec = get_rv(s.T_lat);
-T_inf_vec = get_rv(s.T_inf);
-gamma_inf_unobs = 1./T_inf_vec;
-s.T_inf_obs.mean = s.T_inf_obs.mean-s.T_inf_obs0.mean;
-T_inf_obs_vec = get_rv(s.T_inf_obs);
-gamma_inf_obs = 1./T_inf_obs_vec;
-alpha = (s.T_inf_obs.mean+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
-% set initial values
-S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
-E_vec = zeros(N,T); E_vec(:,1) = z(1).*T_lat_vec;
-I_vec = zeros(N,T); I_vec(:,1) = I0;
-I_obs_vec = zeros(N,T); I_obs_vec(:,1) = I0*obs_ratio(1);
-I_unobs_vec = zeros(N,T); I_unobs_vec(:,1) = I0-I_obs_vec(:,1);
-Rt_vec = zeros(N,T); 
-Rt = zeros(T,1); It = Rt; St = Rt; Et = Rt; Iobst = Rt; Iunobst = Rt;
+Z = inputs.Z;
+T = length(Z);
+init = inputs.init;
+I0 = init.I;
+H0 = init.H;
+D0 = init.H;
+
+try    
+    rho = inputs.obs_ratio;
+    assert(length(rho)>=T);
+catch err %#ok<NASGU>
+    rho = s.obs_ratio+0*Z;
+end
+try 
+    sigma = inputs.asymp_ratio;
+    assert(length(sigma)>=T);
+catch err %#ok<NASGU>
+    sigma = 1-s.symp_ratio_obs+0*Z;
+end
+
+T_test = s.T_test; % zmenit na T_pre (rv) + 1-2 dni postupne
+T_inf = s.T_inf; T_inf_vec = get_rv(T_inf);
+T_lat = s.T_lat; T_lat_vec = get_rv(T_lat);
+T_sick_y.mean = s.T_sick_y.mean-T_test.mean; T_sick_y_vec = get_rv(T_sick_y);
+T_sick_o.mean = s.T_sick_o.mean-T_test.mean; T_sick_o_vec = get_rv(T_sick_o);
+alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
+alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
+theta_ih = rho.*alpha_iho+(1-rho).*alpha_ihy;
+theta_ir = rho.*alpha_iro+(1-rho).*alpha_iry;
+varrho = rho.*alpha_iho./theta_ih;
+alpha_hdy = s.omega_y/s.T_death_y;    alpha_hdo = s.omega_o/s.T_death_o;
+alpha_hry = (1-s.omega_y)./p.T_rec_y; alpha_hro = (1-s.omega_o)./p.T_rec_o; 
+theta_hd = varrho.*alpha_hdo+(1-varrho).*alpha_hdy;
+theta_hr = varrho.*alpha_hro+(1-varrho).*alpha_hry;
+theta_ui = rho./T_test.mean;
+theta_ur = (1-rho)./T_inf_vec;
+
+xx = 0:0.001:10;
+yy = cdf('Gamma',xx,T_inf.mean*(T_inf.std^2),1/(T_inf.std^2));
+zeta_o = yy(idx_cdf(find(xx>=T_test.mean,1)));                  alpha_o = 0.5*zeta_o;
+zeta_h = yy(idx_cdf(find(xx>=T_test.mean+T_hosp.mean,1)));      alpha_h = 0.25*zeta_h;
+
+% define arrays
+S = zeros(N,T); E = S; Io = S; Iu = S; Rt = S; H = S; D = S;
+S(:,1) = pop_size-I0; Io(:,1) = I0.*rho(1); Iu(:,1) = I0.*(1-rho(1));
+H(:,1) = H0; D(:,1) = D0;
+
+%%
 idx = ones(N,1);
 
-% model
-% S(t+1) = S(t)-R(t)*gamma_inf*S(t)*I(t)/pop_size;
-% E(t+1) = E(t)+R(t)*gamma_inf*S(t)*I(t)/pop_size-E(t)*gamma_lat;
-% I(t+1) = I(t)+E(t)*gamma_lat-gamma_inf*I(t);
-% z(t) = E(t)*gamma_lat;
-for t = 1:T-1
-    E_vec(:,t+1) = z(t+1).*T_lat_vec;
-    x = E_vec(:,t+1)-E_vec(:,t)+z(t);
-    S_vec(:,t+1) = S_vec(:,t)-x; 
-    Rt_vec(:,t) = pop_size.*x./S_vec(:,t).*T_inf_vec./(I_unobs_vec(:,t)+alpha*I_obs_vec(:,t));
-    I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-gamma_inf_unobs)+z_unobs(t);
-    I_obs_vec(:,t+1) = I_obs_vec(:,t).*(1-gamma_inf_obs)+z_obs(t);
-    I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
-    idx = idx & I_unobs_vec(:,t+1)>0 & I_obs_vec(:,t+1)>0 & x>0;
+for t=1:T
+    Io(:,t+1) = Io(:,t).*(1-theta_ih(t)-theta_ir(:,t))+X(t);
+    H(:,t+1) = H(:,t).*(1-theta_hd(t)-theta_hr(t))+theta_ih(t).*Io(:,t);
+    D(:,t+1) = D(:,t)+theta_hd(t).*H(:,t);
+    Iu(:,t) = X(t)./theta_ui(t);
+    Iu(:,t+1) = X(t+1)./theta_ui(t+1);
+    Iu(:,t+2) = X(t+2)./theta_ui(t+2);
+    E(:,t) = (Iu(:,t+1)-Iu(:,t).*(1-theta_ui(t)-theta_ur(t))).*T_lat_vec;
+    E(:,t+1) = (Iu(:,t+2)-Iu(:,t+1).*(1-theta_ui(t+1)-theta_ur(t+1))).*T_lat_vec;
+    Z = E(:,t+1)-E(:,t).*(1-1./T_lat_vec);
+    Rt(:,t) = pop_size.*Z./S(:,t).*T_inf_vec./(Iu(:,t)+alpha_o.*Io(:,t)+alpha_h.*H(:,t));
+    S(:,t+1) = S(:,t)-Z;        
+    idx = idx & Io(:,t+1)>=0 & Iu(:,t+1)>=0 & H(:,t+1)>=0 & E(:,t+1)>=0;
 end
 idx = find(idx>0);
-Rt_vec = Rt_vec(idx,:);
-Rt_vec(:,T) = Rt_vec(:,T-1);
-S_vec = S_vec(idx,:);
-E_vec = E_vec(idx,:);
-I_vec = I_vec(idx,:);
-I_unobs_vec = I_unobs_vec(idx,:);
-I_obs_vec = I_obs_vec(idx,:);
+S = S(idx,:); E = E(idx,:); Iu = Iu(idx,:); Io = Io(idx,:); H = H(idx,:); D = D(idx,:); Rt = Rt(idx,:);
+I = Iu+Io;
+Ia = Io.*sigma; Is = Io-Ia;
+
+%% store results
+% means
+for t = 1:T
+    res.mean.Rt_mean(t) = mean(Rt(:,t));
+    res.mean.I_mean(t) = mean(I(:,t));
+    res.mean.Iu_mean(t) = mean(Iu(:,t));
+    res.mean.Io_mean(t) = mean(Io(:,t));
+    res.mean.Ia_mean(t) = mean(Ia(:,t));
+    res.mean.Is_mean(t) = mean(Is(:,t));
+    res.mean.S_mena(t) = mean(S(:,t));
+    res.mean.H_mean(t) = mean(H(:,t));
+    res.mean.D_mean(t) = mean(D(:,t));
+    res.mean.E_mean(t) = mean(E(:,t));
+end
+
+%%
+
+
+alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 
 if do_weight
     weights = s.pweight;
@@ -69,21 +113,6 @@ if do_weight
 else
     Rt_last = Rt_vec(:,T);
 end
-
-for t = 1:T
-    Rt(t) = mean(Rt_vec(:,t));
-    It(t) = mean(I_vec(:,t));
-    Et(t) = mean(E_vec(:,t));
-    Iobst(t) = mean(I_obs_vec(:,t));
-    Iunobst(t) = mean(I_unobs_vec(:,t));
-    St(t) = mean(S_vec(:,t));
-end
-
-res.It = It;
-res.Et = Et;
-res.Iot = Iobst;
-res.Iut = Iunobst;
-res.St = St;
 
 if do_quant
     q_vec = s.quant;

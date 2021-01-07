@@ -19,7 +19,7 @@ T_delay_0 = delay.v0;               T_delay_1 = 0*delay.v1;
 T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method_params(T_delay);
-% shortening recovery peiod
+% shortening recovery period
 T_short_0 = srec.v0;                T_short_1 = 0*srec.v1;           
 T_short_at = srec.at;
 T_short = zeros(T,1)+T_short_0;     T_short(T_short_at-dateFrom:end) = T_short_1;
