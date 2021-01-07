@@ -13,7 +13,7 @@ load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s')
 t0 = dates.t0;
 t1 = dates.t1;
 tt0 = t0+dt;
-s.model_seir = false;
+% s.model_seir = false;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
 else
