@@ -1,5 +1,14 @@
 function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_quant,do_weight,do_dist)
 
+%% Model
+% S(t+1) = S(t)-Z(t)
+% E(t+1) = E(t)+Z(t)-E(t)/T_lat
+% Iu(t+1) = Iu(t)+E(t)/T_lat-rho(t)*Iu(t)/T_test-(1-rho(t))*Iu(t)/T_inf
+% Io(t+1) = Io(t)+rho(t)*Iu(t)/T_test-lambda(t)*Io(t)/T_hosp-(1-lambda(t))*Io(t)/T_sick
+% H(t+1) = H(t)+lambda(t)*Io(t)/T_hosp-omega(t)*H(t)/T_death-(1-omega(t))*H(t)/T_rec
+% D(t+1) = D(t)+omega(t)*H(t)/T_death
+%%
+
 % structure of inputs:
 % I0: initial number of observed infectious
 % z: daily data of inflow of newly observed infections
