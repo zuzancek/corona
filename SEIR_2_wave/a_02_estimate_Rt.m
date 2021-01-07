@@ -8,10 +8,10 @@ cut = 0;
 dt = 1;
 
 %% load data
-load('inputs.mat','dI_inflow_pcr','dI_inflow_pcr_smooth','dI_inflow_real','dI_inflow_smooth',...
-    'pos_test_ratio_smooth','obs_ratio','obs_ratio_real','asymp_ratio_smooth',...
-    'I0','mob','s','t0','t1','hospit_smooth','vent_smooth','icu_smooth',...
-    'death_smooth','h_t0','h_t1');
+load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s');
+
+t0 = dates.t0;
+t1 = dates.t1;
 tt0 = t0+dt;
 s.model_seir = false;
 if s.model_seir
