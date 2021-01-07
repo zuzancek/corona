@@ -39,7 +39,7 @@ pos_test_ratio_ag = y.AgPosit./y.AgTests;
 pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
 tests = x.Tests;
 tests_smooth = smooth_series(tests,s.smooth_width,s.smooth_type,s.smooth_ends);
-I0 = x.TotalCases(tt0-1)/s.obs_ratio;
+I0 = x.ActiveCases(disp_from-1)/s.obs_ratio;
 
 cases_data = struct;
 cases_data.cases_ag = dI_inflow_ag;   cases_data.cases_ag_mm = mov_median(dI_inflow_ag);   cases_data.cases_ag_smooth = smooth_series(dI_inflow_ag);
@@ -47,6 +47,7 @@ cases_data.cases_pcr = dI_inflow_pcr; cases_data.cases_pcr_mm = mov_median(dI_in
 cases_data.cases_total = dI_inflow;   cases_data.cases_total_mm = mov_median(dI_inflow);   cases_data.cases_total_smooth = dI_inflow_smooth;
 cases_data.ptr_pcr = pos_test_ratio;  cases_data.ptr_mm = mov_median(pos_test_ratio);      cases_data.ptr_smooth = pos_test_ratio_smooth;
 cases_data.ptr_ag = pos_test_ratio_ag;cases_data.ptr_ag_mm = mov_median(pos_test_ratio_ag);cases_data.ptr_ag_smooth = tests_smooth;
+cases_data.I0 = I0;
 
 % clinical
 hospit = hosp.Hospitalizations;

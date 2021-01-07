@@ -13,7 +13,7 @@ load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s')
 t0 = dates.t0;
 t1 = dates.t1;
 tt0 = t0+dt;
-% s.model_seir = false;
+s.model_seir = true;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
 else
@@ -21,16 +21,26 @@ else
 end
 disp_to = t1-1;
 
+%% inputs definition
+inputs_fnc = struct();
+init = struct();
+init.I0 = cases_data.I0;
+init.H0 = hosp_data.H_smooth(t0-1);
+init.D0 = hosp_data.D_smooth(t0-1);
+params = struct();
+params.obs_ratio = cases_data.obs_ratio;
+params.old_ratio = cases_data.old_ratio_smooth;
+params.asymp_ratio = cases_data.asymp_ratio_smooth;
+inputs_fnc.init = init;
+inputs_fnc.params = params;
+
 %% calculations
 % s = setparam();
-inputs_fnc = struct();
-inputs_fnc.I0 = I0;
-% reported data, total (AG+PCR)
-inputs_fnc.obs_ratio = [];
-inputs_fnc.asymp_ratio = [];
-inputs_fnc.T_hosp = [];
-inputs_fnc.z = double(resize(dI_inflow_smooth,t0:t1));
+% _mm = moving median; _smooth = quasi-gaussian smoother
+% 1.) reported data, PCR tests only
+inputs_fnc.z = double(resize(cases_data.cases_pcr_mm,t0:t1)); % moving median
 [Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false); %#ok<*ASGLU>
+
 nn = length(Rt);
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
 inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));

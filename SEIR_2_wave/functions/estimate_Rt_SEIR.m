@@ -17,18 +17,25 @@ pop_size = s.pop_size;
 Z = inputs.Z;
 T = length(Z);
 init = inputs.init;
+params = inputs.params;
 I0 = init.I;
 H0 = init.H;
 D0 = init.H;
 
 try    
-    rho = inputs.obs_ratio;
+    rho = params.obs_ratio;
     assert(length(rho)>=T);
 catch err %#ok<NASGU>
     rho = s.obs_ratio+0*Z;
 end
+try    
+    omega = params.old_ratio;
+    assert(length(omega)>=T);
+catch err %#ok<NASGU>
+    omega = s.old_share+0*Z;
+end
 try 
-    sigma = inputs.asymp_ratio;
+    sigma = params.asymp_ratio;
     assert(length(sigma)>=T);
 catch err %#ok<NASGU>
     sigma = 1-s.symp_ratio_obs+0*Z;
@@ -41,9 +48,9 @@ T_sick_y.mean = s.T_sick_y.mean-T_test.mean; T_sick_y_vec = get_rv(T_sick_y);
 T_sick_o.mean = s.T_sick_o.mean-T_test.mean; T_sick_o_vec = get_rv(T_sick_o);
 alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
 alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
-theta_ih = rho.*alpha_iho+(1-rho).*alpha_ihy;
-theta_ir = rho.*alpha_iro+(1-rho).*alpha_iry;
-varrho = rho.*alpha_iho./theta_ih;
+theta_ih = omega.*alpha_iho+(1-omega).*alpha_ihy;
+theta_ir = omega.*alpha_iro+(1-omega).*alpha_iry;
+varrho = omega.*alpha_iho./theta_ih;
 alpha_hdy = s.omega_y/s.T_death_y;    alpha_hdo = s.omega_o/s.T_death_o;
 alpha_hry = (1-s.omega_y)./p.T_rec_y; alpha_hro = (1-s.omega_o)./p.T_rec_o; 
 theta_hd = varrho.*alpha_hdo+(1-varrho).*alpha_hdy;
@@ -99,9 +106,6 @@ for t = 1:T
 end
 
 %%
-
-
-alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 
 if do_weight
     weights = s.pweight;
