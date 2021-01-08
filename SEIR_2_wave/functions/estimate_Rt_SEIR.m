@@ -14,8 +14,8 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR(inputs,s,do_qu
 %% initialization
 N = s.sim_num;
 pop_size = s.pop_size;
-Z = inputs.Z;
-T = length(Z);
+X = inputs.X;
+T = length(X);
 init = inputs.init;
 params = inputs.params;
 I0 = init.I;
@@ -26,17 +26,17 @@ try
     rho = params.obs_ratio;
     assert(length(rho)>=T);
 catch err %#ok<NASGU>
-    rho = s.obs_ratio+0*Z;
+    rho = s.obs_ratio+0*X;
 end
 try    
     omega = params.old_ratio;
     assert(length(omega)>=T);
 catch err %#ok<NASGU>
-    omega = s.old_share+0*Z;
+    omega = s.old_share+0*X;
 end
 try 
     sigma = params.asymp_ratio;
-    assert(length(sigma)>=T);
+    assert(length(sigma)>=X);
 catch err %#ok<NASGU>
     sigma = 1-s.symp_ratio_obs+0*Z;
 end
@@ -49,19 +49,19 @@ T_sick_o.mean = s.T_sick_o.mean-T_test.mean; T_sick_o_vec = get_rv(T_sick_o);
 alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
 alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
 theta_ih = omega.*alpha_iho+(1-omega).*alpha_ihy;
-theta_ir = omega.*alpha_iro+(1-omega).*alpha_iry;
+theta_ir = omega'.*alpha_iro+(1-omega').*alpha_iry;
 varrho = omega.*alpha_iho./theta_ih;
 alpha_hdy = s.omega_y/s.T_death_y;    alpha_hdo = s.omega_o/s.T_death_o;
 alpha_hry = (1-s.omega_y)./p.T_rec_y; alpha_hro = (1-s.omega_o)./p.T_rec_o; 
 theta_hd = varrho.*alpha_hdo+(1-varrho).*alpha_hdy;
 theta_hr = varrho.*alpha_hro+(1-varrho).*alpha_hry;
 theta_ui = rho./T_test.mean;
-theta_ur = (1-rho)./T_inf_vec;
+theta_ur = (1-rho')./T_inf_vec;
 
 xx = 0:0.001:10;
 yy = cdf('Gamma',xx,T_inf.mean*(T_inf.std^2),1/(T_inf.std^2));
-zeta_o = yy(idx_cdf(find(xx>=T_test.mean,1)));                  alpha_o = 0.5*zeta_o;
-zeta_h = yy(idx_cdf(find(xx>=T_test.mean+T_hosp.mean,1)));      alpha_h = 0.25*zeta_h;
+zeta_o = yy((find(xx>=T_test.mean,1)));                  alpha_o = 0.5*zeta_o;
+zeta_h = yy((find(xx>=T_test.mean+T_hosp.mean,1)));      alpha_h = 0.25*zeta_h;
 
 % define arrays
 S = zeros(N,T); E = S; Io = S; Iu = S; Rt = S; H = S; D = S;
@@ -71,7 +71,7 @@ H(:,1) = H0; D(:,1) = D0;
 %%
 idx = ones(N,1);
 
-for t=1:T
+for t=1:T-2
     Io(:,t+1) = Io(:,t).*(1-theta_ih(t)-theta_ir(:,t))+X(t);
     H(:,t+1) = H(:,t).*(1-theta_hd(t)-theta_hr(t))+theta_ih(t).*Io(:,t);
     D(:,t+1) = D(:,t)+theta_hd(t).*H(:,t);

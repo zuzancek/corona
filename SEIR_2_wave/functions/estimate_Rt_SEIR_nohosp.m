@@ -12,8 +12,8 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR_nohosp(inputs,
 %% initialization
 N = s.sim_num;
 pop_size = s.pop_size;
-Z = inputs.Z;
-T = length(Z);
+X = inputs.Z;
+T = length(X);
 init = inputs.init;
 params = inputs.params;
 I0 = init.I0;
@@ -22,19 +22,19 @@ try
     rho = double(params.obs_ratio);
     assert(length(rho)>=T);
 catch err %#ok<NASGU>
-    rho = s.obs_ratio+0*Z;
+    rho = s.obs_ratio+0*X;
 end
 try    
     omega = double(params.old_ratio);
     assert(length(omega)>=T);
 catch err %#ok<NASGU>
-    omega = s.old_share+0*Z;
+    omega = s.old_share+0*X;
 end
 try 
     sigma = double(params.asymp_ratio);
     assert(length(sigma)>=T);
 catch err %#ok<NASGU>
-    sigma = 1-s.symp_ratio_obs+0*Z;
+    sigma = 1-s.symp_ratio_obs+0*X;
 end
 
 T_test = s.T_test;
@@ -45,13 +45,13 @@ T_sick_o.mean = s.T_sick_o.mean-T_test.mean; T_sick_o.std = s.T_sick_o.std; T_si
 alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
 alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
 theta_ih = omega.*alpha_iho+(1-omega).*alpha_ihy;
-theta_ir = omega.*alpha_iro+(1-omega).*alpha_iry;
+theta_ir = omega'.*alpha_iro+(1-omega').*alpha_iry;
 theta_ui = rho./T_test.mean;
-theta_ur = (1-rho)./T_inf_vec;
+theta_ur = (1-rho')./T_inf_vec;
 
 xx = 0:0.001:10;
 yy = cdf('Gamma',xx,T_inf.mean*(T_inf.std^2),1/(T_inf.std^2));
-zeta_o = yy(idx_cdf(find(xx>=T_test.mean,1)));                  alpha_o = 0.5*zeta_o;
+zeta_o = yy(find(xx>=T_test.mean,1));                  alpha_o = 0.5*zeta_o;
 
 % define arrays
 S = zeros(N,T); E = S; Io = S; Iu = S; Rt = S; 
@@ -60,7 +60,7 @@ S(:,1) = pop_size-I0; Io(:,1) = I0.*rho(1); Iu(:,1) = I0.*(1-rho(1));
 %%
 idx = ones(N,1);
 
-for t=1:T
+for t=1:T-2
     Io(:,t+1) = Io(:,t).*(1-theta_ih(t)-theta_ir(:,t))+X(t);
     Iu(:,t) = X(t)./theta_ui(t);
     Iu(:,t+1) = X(t+1)./theta_ui(t+1);
