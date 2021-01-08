@@ -12,6 +12,7 @@ load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s')
 
 t0 = dates.t0;
 t1 = dates.t1;
+t2 = dates.t2;
 tt0 = t0+dt;
 s.model_seir = true;
 if s.model_seir
@@ -19,27 +20,34 @@ if s.model_seir
 else
     model_fnc = @estimate_Rt_SIR;
 end
-disp_to = t1-1;
+disp_to = t2-1;
 
 %% inputs definition
 inputs_fnc = struct();
 init = struct();
 init.I0 = cases_data.I0;
-init.H0 = hosp_data.H_smooth(t0-1);
-init.D0 = hosp_data.D_smooth(t0-1);
+init.H0 = hosp_data.H_smooth(t1-1);
+init.D0 = hosp_data.D_smooth(t1);
+params0 = struct();
+params0.obs_ratio = cases_data.obs_ratio;           
+params0.old_ratio = cases_data.old_ratio_smooth;
+params0.asymp_ratio = cases_data.asymp_ratio_smooth;
 params = struct();
-params.obs_ratio = cases_data.obs_ratio;
-params.old_ratio = cases_data.old_ratio_smooth;
-params.asymp_ratio = cases_data.asymp_ratio_smooth;
+params.obs_ratio = resize(cases_data.obs_ratio,t1-1:t2);           
+params.old_ratio = resize(cases_data.old_ratio_smooth,t1-1:t2);
+params.asymp_ratio = resize(cases_data.asymp_ratio_smooth,t1-1:t2);
+inputs_fnc0.init = init;
 inputs_fnc.init = init;
+inputs_fnc0.params = params0;
 inputs_fnc.params = params;
 
 %% calculations
 % s = setparam();
 % _mm = moving median; _smooth = quasi-gaussian smoother
-% 1.) reported data, PCR tests only
-inputs_fnc.z = double(resize(cases_data.cases_pcr_mm,t0:t1)); % moving median
-[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = model_fnc(inputs_fnc,s,true,true,false); %#ok<*ASGLU>
+% 0.) reported data, PCR tests only, no hospitals
+% needed to get a good enough guess of I0
+inputs_fnc0.Z = double(resize(cases_data.cases_pcr_mm,t0:t2)); % moving median
+[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR_nohosp(inputs_fnc0,s,true,true,false); %#ok<*ASGLU>
 
 nn = length(Rt);
 % reported data, PCR only, testing is optimal (sstate observ.ratio)

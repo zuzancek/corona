@@ -275,6 +275,6 @@ grid on;
 title('Deaths');
 
 %% saving stuff
-dates.t0 = t0;      dates.t1 = t1;
+dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
 mob_data.raw = yy;  mob_data.smooth = zz;
 save('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s');
