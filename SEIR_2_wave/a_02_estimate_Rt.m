@@ -1,5 +1,6 @@
 %% initialization
 initialize;
+rng(1000);
 
 %% setup
 disp_from = dd(2020,9,1);

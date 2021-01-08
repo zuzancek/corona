@@ -40,7 +40,7 @@ end
 T_test = s.T_test;
 T_inf = s.T_inf; T_inf_vec = get_rv(T_inf);
 T_lat = s.T_lat; T_lat_vec = get_rv(T_lat);
-T_sick_y.mean = s.T_sick_y.mean-0*T_test.mean; T_sick_y.std = s.T_sick_y.std; T_sick_y_vec = get_rv(T_sick_y);
+T_sick_y.mean = s.T_sick_y.mean+1-0*T_test.mean; T_sick_y.std = s.T_sick_y.std; T_sick_y_vec = get_rv(T_sick_y);
 T_sick_o.mean = s.T_sick_o.mean-0*T_test.mean; T_sick_o.std = s.T_sick_o.std; T_sick_o_vec = get_rv(T_sick_o);
 alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
 alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
@@ -70,7 +70,8 @@ for t=1:T-2
     Z = E(:,t+1)-E(:,t).*(1-1./T_lat_vec);
     Rt(:,t) = pop_size.*Z./S(:,t).*T_inf_vec./(Iu(:,t)+alpha_o.*Io(:,t));
     S(:,t+1) = S(:,t)-Z;        
-    idx = idx & Io(:,t+1)>=0 & Iu(:,t+1)>=0 & E(:,t+1)>=0;
+    idx = idx & Io(:,t+1)>=0 & Iu(:,t+1)>=0 & E(:,t+1)>=0 & Z>=0;
+    fprintf('%d\n',length(find(idx<1)));
 end
 idx = find(idx);
 S = S(idx,:); E = E(idx,:); Iu = Iu(idx,:); Io = Io(idx,:); Rt = Rt(idx,:);
