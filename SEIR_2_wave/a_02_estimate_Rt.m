@@ -66,6 +66,7 @@ inputs_fnc.asymp_ratio = [];
 [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real]  = model_fnc(inputs_fnc,s,true,true,false);
 
 %% plotting stuff
+% 1./ reproduction number
 figure('Name','Effective reproduction number, means');
 nn = length(Rt_pcr);
 Rt_smooth_series_pcr = tseries(t0+1:t2,Rt_pcr);
@@ -74,12 +75,16 @@ Rt_smooth_series_test = tseries(t0+1:t2,Rt_test);
 plot(resize(Rt_smooth_series_pcr,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_test,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_real,disp_from:t2),'linewidth',2);hold on;
-title('Hospitalisations (smooth inputs)');
-legend({'reported data, testing is optimal, PCR only',...
-    'reported data, testing is realistic, PCR only',...
-    'implied data, PCR only'});
+title('Effective reproduction number (PCR tests only, smooth inputs)');
+legend({'reported data, testing is optimal',...
+    'reported data, testing is realistic',...
+    'implied data'});
 grid on;
 % 
+plot_fanchart(q_mat_real,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, implied data)',true);
+plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
+
+% 2./ situation in hospitals
 figure('Name','Hospitals & Deaths, means');
 subplot(2,1,1)
 Dt_pcr = tseries(t0+1:t1,Yt_pcr.Dt(1:nn));
@@ -99,10 +104,6 @@ title('Hospitals (smooth inputs)');
 legend({'implied by reported data, testing is optimal, PCR only',...
     'implied by reported data, testing is realistic, PCR only'});
 grid on;
-% 
-plot_fanchart(q_mat_test,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, realistic data/testing)',true);
-plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, as reported)',true);
-plot_fanchart(q_mat,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG as reported)',true);
 
 %% saving stuff
 x.Rt_smooth = Rt_smooth_series;
