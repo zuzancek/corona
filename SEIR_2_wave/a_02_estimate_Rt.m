@@ -86,12 +86,12 @@ plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number
 % 2./ situation in hospitals
 figure('Name','Hospitals & Deaths, means');
 subplot(2,1,1)
-Dt_pcr = tseries(t0+1:t1,Yt_pcr.Dt(1:nn));
-Dt_test = tseries(t0+1:t1,Yt_test.Dt(1:nn));
-Ht_pcr = tseries(t0+1:t1,Yt_pcr.Ht(1:nn));
-Ht_test = tseries(t0+1:t1,Yt_test.Ht(1:nn));
-plot(resize(Dt_pcr,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Dt_test,disp_from:t1),'linewidth',2);hold on;
+Dt_pcr = tseries(t0+1:t2,Yt_pcr.Dt(1:nn));
+Dt_test = tseries(t0+1:t2,Yt_test.Dt(1:nn));
+Ht_pcr = tseries(t0+1:t2,Yt_pcr.Ht(1:nn));
+Ht_test = tseries(t0+1:t2,Yt_test.Ht(1:nn));
+plot(resize(Dt_pcr,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Dt_test,disp_from:t2),'linewidth',2);hold on;
 title('Deaths (smooth inputs)');
 legend({'implied by reported data, testing is optimal, PCR only',...
     'implied by reported data, testing is realistic, PCR only'});
