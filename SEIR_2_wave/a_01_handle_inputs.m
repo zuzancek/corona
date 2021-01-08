@@ -39,7 +39,7 @@ pos_test_ratio_ag = y.AgPosit./y.AgTests;
 pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
 tests = x.Tests;
 tests_smooth = smooth_series(tests,s.smooth_width,s.smooth_type,s.smooth_ends);
-I0 = x.ActiveCases(disp_from-1)/s.obs_ratio;
+I0 = x.TotalCases(t0)/s.obs_ratio;
 
 cases_data = struct;
 cases_data.cases_ag = dI_inflow_ag;   cases_data.cases_ag_mm = mov_median(dI_inflow_ag);   cases_data.cases_ag_smooth = smooth_series(dI_inflow_ag);

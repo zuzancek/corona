@@ -14,6 +14,7 @@ t0 = dates.t0;
 t1 = dates.t1;
 t2 = dates.t2;
 tt0 = t0+dt;
+s = setparam();
 s.model_seir = true;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;

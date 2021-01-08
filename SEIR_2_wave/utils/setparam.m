@@ -12,17 +12,17 @@ s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 
 % serial interval (generation period)
-s.SI.mean = 6.5;                s.SI.std = 0.62;
+s.SI.mean = 7.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test.mean = 3;             s.T_test.std = s.SI.std;      
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period
-s.T_inf.mean = 3.3;             s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 3.3;       s.T_inf_asymp.std = 0.62;
-s.T_inf_symp.mean = 3.3;        s.T_inf_symp.std = 0.62;
-s.T_inf_obs.mean = 3.3;         s.T_inf_obs.std = 0.62;
-s.T_inf_unobs.mean = 3.3;       s.T_inf_unobs.std = 0.62;
+s.T_inf.mean = 4.3;             s.T_inf.std = 0.62;
+s.T_inf_asymp.mean = 4.3;       s.T_inf_asymp.std = 0.62;
+s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
+s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
+s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
 s.T_sick_y.mean = 6.5;            s.T_sick_y.std = 0.62;
 s.T_sick_o.mean = 9.5;            s.T_sick_o.std = 0.62;

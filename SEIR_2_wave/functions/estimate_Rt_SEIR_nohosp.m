@@ -40,8 +40,8 @@ end
 T_test = s.T_test;
 T_inf = s.T_inf; T_inf_vec = get_rv(T_inf);
 T_lat = s.T_lat; T_lat_vec = get_rv(T_lat);
-T_sick_y.mean = s.T_sick_y.mean-T_test.mean; T_sick_y.std = s.T_sick_y.std; T_sick_y_vec = get_rv(T_sick_y);
-T_sick_o.mean = s.T_sick_o.mean-T_test.mean; T_sick_o.std = s.T_sick_o.std; T_sick_o_vec = get_rv(T_sick_o);
+T_sick_y.mean = s.T_sick_y.mean-0*T_test.mean; T_sick_y.std = s.T_sick_y.std; T_sick_y_vec = get_rv(T_sick_y);
+T_sick_o.mean = s.T_sick_o.mean-0*T_test.mean; T_sick_o.std = s.T_sick_o.std; T_sick_o_vec = get_rv(T_sick_o);
 alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
 alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
 theta_ih = omega.*alpha_iho+(1-omega).*alpha_ihy;
@@ -51,7 +51,7 @@ theta_ur = (1-rho')./T_inf_vec;
 
 xx = 0:0.001:10;
 yy = cdf('Gamma',xx,T_inf.mean*(T_inf.std^2),1/(T_inf.std^2));
-zeta_o = yy(find(xx>=T_test.mean,1));                  alpha_o = 0.5*zeta_o;
+zeta_o = 1-yy(find(xx>=T_test.mean,1));                  alpha_o = 0.5*zeta_o;
 
 % define arrays
 S = zeros(N,T); E = S; Io = S; Iu = S; Rt = S; 
@@ -72,7 +72,7 @@ for t=1:T-2
     S(:,t+1) = S(:,t)-Z;        
     idx = idx & Io(:,t+1)>=0 & Iu(:,t+1)>=0 & E(:,t+1)>=0;
 end
-idx = find(idx>0);
+idx = find(idx);
 S = S(idx,:); E = E(idx,:); Iu = Iu(idx,:); Io = Io(idx,:); Rt = Rt(idx,:);
 I = Iu+Io;
 Ia = Io.*sigma; Is = Io-Ia;

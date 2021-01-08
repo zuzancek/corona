@@ -14,7 +14,7 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR(inputs,s,do_qu
 %% initialization
 N = s.sim_num;
 pop_size = s.pop_size;
-X = inputs.X;
+X = inputs.Z;
 T = length(X);
 init = inputs.init;
 params = inputs.params;
@@ -60,8 +60,8 @@ theta_ur = (1-rho')./T_inf_vec;
 
 xx = 0:0.001:10;
 yy = cdf('Gamma',xx,T_inf.mean*(T_inf.std^2),1/(T_inf.std^2));
-zeta_o = yy((find(xx>=T_test.mean,1)));                  alpha_o = 0.5*zeta_o;
-zeta_h = yy((find(xx>=T_test.mean+T_hosp.mean,1)));      alpha_h = 0.25*zeta_h;
+zeta_o = 1-yy((find(xx>=T_test.mean,1)));                  alpha_o = 0.5*zeta_o;
+zeta_h = 1-yy((find(xx>=T_test.mean+T_hosp.mean,1)));      alpha_h = 0.25*zeta_h;
 
 % define arrays
 S = zeros(N,T); E = S; Io = S; Iu = S; Rt = S; H = S; D = S;
