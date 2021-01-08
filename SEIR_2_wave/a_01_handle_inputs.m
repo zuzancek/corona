@@ -91,7 +91,7 @@ cases_data.asymp_ratio = asymp_ratio;      cases_data.asymp_ratio_smooth = asymp
 
 % old-age share (in cases, dead)
 old_ratio = db_age.Old./db_age.Total;
-[old_ratio,old_ratio_smooth] = extend_series(old_ratio,t0,t1,[],[]);
+[old_ratio,old_ratio_smooth] = extend_series(old_ratio,t0,t1,s.old_share,[]);
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;
 
 % case fatality rate at hospitals

@@ -2,8 +2,7 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR_nohosp(inputs,
 
 %% Model
 % S(t+1) = S(t)-Z(t)
-% E(t+1) = E(t)+Z(t)-E(t)/T_lat
-% Iu(t+1) = Iu(t)+E(t)/T_lat-rho(t)*Iu(t)/T_test-(1-rho(t))*Iu(t)/T_inf
+% Iu(t+1) = Iu(t)+Z(t)-rho(t)*Iu(t)/T_test-(1-rho(t))*Iu(t)/T_inf
 % Io(t+1) = Io(t)+rho(t)*Iu(t)/T_test-lambda(t)*Io(t)/T_hosp-(1-lambda(t))*Io(t)/T_sick
 %
 % Z(t) = Rt(t)/T_inf*S(t)/N*(Iu(t)+alpha_o*Io(t))
@@ -38,23 +37,24 @@ catch err %#ok<NASGU>
 end
 
 T_test = s.T_test;
-T_inf = s.T_inf; T_inf_vec = get_rv(T_inf);
-T_lat = s.T_lat; T_lat_vec = get_rv(T_lat);
-T_sick_y.mean = s.T_sick_y.mean+1-0*T_test.mean; T_sick_y.std = s.T_sick_y.std; T_sick_y_vec = get_rv(T_sick_y);
-T_sick_o.mean = s.T_sick_o.mean-0*T_test.mean; T_sick_o.std = s.T_sick_o.std; T_sick_o_vec = get_rv(T_sick_o);
+T_SI = s.SI;                T_si_vec = get_rv(T_SI);
+T_inc = s.T_inc;            T_inc_vec = get_rv(T_inc);
+T_sick_y.mean = s.T_sick_y.mean; T_sick_y.std = s.T_sick_y.std; T_sick_y_vec = get_rv(T_sick_y);
+T_sick_o.mean = s.T_sick_o.mean; T_sick_o.std = s.T_sick_o.std; T_sick_o_vec = get_rv(T_sick_o);
 alpha_ihy = s.eta_y/s.T_hosp_y;         alpha_iho = s.eta_o/s.T_hosp_o; 
 alpha_iry = (1-s.eta_y)./T_sick_y_vec;  alpha_iro = (1-s.eta_o)./T_sick_o_vec;
 theta_ih = omega.*alpha_iho+(1-omega).*alpha_ihy;
 theta_ir = omega'.*alpha_iro+(1-omega').*alpha_iry;
-theta_ui = rho./T_test.mean;
-theta_ur = (1-rho')./T_inf_vec;
+theta_ui = rho'./(T_inc_vec+T_test.mean);
+theta_ur = (1-rho')./T_si_vec;
 
 xx = 0:0.001:10;
-yy = cdf('Gamma',xx,T_inf.mean*(T_inf.std^2),1/(T_inf.std^2));
-zeta_o = 1-yy(find(xx>=T_test.mean,1));                  alpha_o = 0.5*zeta_o;
+yy = cdf('Gamma',xx,T_SI.mean*(T_SI.std^2),1/(T_SI.std^2));
+zeta_o = 1-yy(find(xx>=T_test.mean+s.T_inc.mean,1));      alpha_o = 0.5*zeta_o;
+zeta_u = 1-yy(find(xx>=s.T_lat.mean,1));                  alpha_u = zeta_u;
 
 % define arrays
-S = zeros(N,T); E = S; Io = S; Iu = S; Rt = S; 
+S = zeros(N,T); Io = S; Iu = S; Rt = S; 
 S(:,1) = pop_size-I0; Io(:,1) = I0.*rho(1); Iu(:,1) = I0.*(1-rho(1));
 
 %%
@@ -62,19 +62,16 @@ idx = ones(N,1);
 
 for t=1:T-2
     Io(:,t+1) = Io(:,t).*(1-theta_ih(t)-theta_ir(:,t))+X(t);
-    Iu(:,t) = X(t)./theta_ui(t);
-    Iu(:,t+1) = X(t+1)./theta_ui(t+1);
-    Iu(:,t+2) = X(t+2)./theta_ui(t+2);
-    E(:,t) = (Iu(:,t+1)-Iu(:,t).*(1-theta_ui(t)-theta_ur(t))).*T_lat_vec;
-    E(:,t+1) = (Iu(:,t+2)-Iu(:,t+1).*(1-theta_ui(t+1)-theta_ur(t+1))).*T_lat_vec;
-    Z = E(:,t+1)-E(:,t).*(1-1./T_lat_vec);
-    Rt(:,t) = pop_size.*Z./S(:,t).*T_inf_vec./(Iu(:,t)+alpha_o.*Io(:,t));
+    Iu(:,t) = X(t)./theta_ui(:,t);
+    Iu(:,t+1) = X(t+1)./theta_ui(:,t+1);
+    Z = Iu(:,t+1)-Iu(:,t).*(1-theta_ui(:,t)-theta_ur(t));
+    Rt(:,t) = pop_size.*Z./S(:,t).*T_si_vec./(alpha_u.*Iu(:,t)+alpha_o.*Io(:,t));
     S(:,t+1) = S(:,t)-Z;        
-    idx = idx & Io(:,t+1)>=0 & Iu(:,t+1)>=0 & E(:,t+1)>=0 & Z>=0;
+    idx = idx & Io(:,t+1)>=0 & Iu(:,t+1)>=0 & Z>=0;
     fprintf('%d\n',length(find(idx<1)));
 end
 idx = find(idx);
-S = S(idx,:); E = E(idx,:); Iu = Iu(idx,:); Io = Io(idx,:); Rt = Rt(idx,:);
+S = S(idx,:); Iu = Iu(idx,:); Io = Io(idx,:); Rt = Rt(idx,:);
 I = Iu+Io;
 Ia = Io.*sigma; Is = Io-Ia;
 
@@ -87,8 +84,7 @@ for t = 1:T
     res.mean.Io_mean(t) = mean(Io(:,t));
     res.mean.Ia_mean(t) = mean(Ia(:,t));
     res.mean.Is_mean(t) = mean(Is(:,t));
-    res.mean.S_mena(t) = mean(S(:,t));
-    res.mean.E_mean(t) = mean(E(:,t));
+    res.mean.S_mean(t) = mean(S(:,t));
 end
 
 %%

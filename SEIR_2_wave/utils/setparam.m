@@ -29,8 +29,8 @@ s.T_sick_o.mean = 9.5;            s.T_sick_o.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
-s.T_inf_obs.mean = s.T_inf_obs.mean-s.T_pre.mean-s.T_test.mean;
-s.T_inf_obs.std = s.T_inf_obs.std;
+s.T_inf_obs0.mean = s.T_inf_obs.mean-s.T_pre.mean-s.T_test.mean;
+s.T_inf_obs0.std = s.T_inf_obs.std;
 s.SI_obs.mean = s.SI.mean-s.T_inf_obs.mean;
 s.SI_obs.std = 0.62;
 % latent period

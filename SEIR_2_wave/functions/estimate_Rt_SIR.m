@@ -14,19 +14,27 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_qua
 % z: daily data of inflow of newly observed infections
 
 % initialization
-obs_ratio = inputs.obs_ratio;
-if isempty(obs_ratio)
+try
+    obs_ratio = inputs.obs_ratio;
+    assert(length(obs_ratio)==length(inputs.z));
+catch err
     obs_ratio = s.obs_ratio+0*inputs.z;
 end
-sigma = inputs.asymp_ratio;
-if isempty(sigma)
-    sigma = (1-s.symp_ratio_obs)+0*inputs.z;
-elseif length(sigma)<length(inputs.z)
-    nn = length(inputs.z);
-    sigma(end:end+nn-length(sigma)) = sigma(end);
+try
+    sigma = inputs.asymp_ratio;
+    assert(length(sigma)==length(inputs.z));
+catch err
+    if isempty(inputs.asymp_ratio)
+        sigma = (1-s.symp_ratio_obs)+0*inputs.z;
+    elseif length(inputs.asymp_ratio)<length(inputs.z)
+        nn = length(inputs.z);
+        sigma(end:end+nn-length(sigma)) = sigma(end);
+    end
 end
-T_hosp = inputs.T_hosp;
-if isempty(T_hosp)
+try
+    T_hosp = inputs.T_hosp;
+    assert(length(T_hosp)==length(inputs.z));
+catch err %#ok<NASGU>
     T_hosp = s.T_hosp.mean+0*inputs.z;
 end
 z_obs = inputs.z;

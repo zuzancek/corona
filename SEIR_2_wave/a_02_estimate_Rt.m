@@ -16,7 +16,7 @@ t1 = dates.t1;
 t2 = dates.t2;
 tt0 = t0+dt;
 s = setparam();
-s.model_seir = true;
+s.model_seir = false;
 if s.model_seir
     model_fnc = @estimate_Rt_SEIR;
 else
@@ -46,41 +46,34 @@ inputs_fnc.params = params;
 %% calculations
 % s = setparam();
 % _mm = moving median; _smooth = quasi-gaussian smoother
-% 0.) reported data, PCR tests only, no hospitals
 % needed to get a good enough guess of I0
-inputs_fnc0.Z = double(resize(cases_data.cases_pcr_mm,t0:t2)); % moving median
-[Rt,q_mat,Yt,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SEIR_nohosp(inputs_fnc0,s,true,true,false); %#ok<*ASGLU>
-
-nn = length(Rt);
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
-inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
-inputs_fnc.obs_ratio = []; %double(resize(obs_ratio,t0:t1));
+inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
+inputs_fnc.I0 = cases_data.I0;
+inputs_fnc.obs_ratio = []; 
 inputs_fnc.asymp_ratio = [];
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
 % reported data, PCR only, realisting testing (realistic observ.ratio)
-inputs_fnc.z = double(resize(dI_inflow_pcr_smooth,t0:t1));
-inputs_fnc.obs_ratio = double(resize(obs_ratio_real,t0:t1));
-inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
+inputs_fnc.obs_ratio = double(resize(cases_data.obs_ratio,t0:t2));
+inputs_fnc.asymp_ratio = double(resize(cases_data.asymp_ratio,t0:t2));
 [Rt_test,q_mat_test,Yt_test,Rt_last_test,Rt_dist_test,Rt_rnd_test]  = model_fnc(inputs_fnc,s,true,true,true);
 % real data, PCR only, optimal testing (it is correct!!!)
-inputs_fnc.z = double(resize(dI_inflow_real,t0:t1));
-inputs_fnc.obs_ratio = [];
-inputs_fnc.asymp_ratio = double(resize(asymp_ratio_smooth,t0:t1));
+inputs_fnc.z = double(resize(cases_data.cases_pcr_implied,t0:t2));
 [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real]  = model_fnc(inputs_fnc,s,true,true,false);
 
 %% plotting stuff
 figure('Name','Effective reproduction number, means');
-Rt_smooth_series_pcr = tseries(t0+1:t1,Rt_pcr(1:nn));
-Rt_smooth_series_real = tseries(t0+1:t1,Rt_real(1:nn));
-Rt_smooth_series_test = tseries(t0+1:t1,Rt_test(1:nn));
-Rt_smooth_series = tseries(t0+1:t1,Rt(1:nn));
-plot(resize(Rt_smooth_series_pcr,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_test,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series,disp_from:t1),'linewidth',2);hold on;
+nn = length(Rt_pcr);
+Rt_smooth_series_pcr = tseries(t0+1:t2,Rt_pcr(1:nn));
+Rt_smooth_series_real = tseries(t0+1:t2,Rt_real(1:nn));
+Rt_smooth_series_test = tseries(t0+1:t2,Rt_test(1:nn));
+plot(resize(Rt_smooth_series_pcr,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Rt_smooth_series_test,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Rt_smooth_series_real,disp_from:t2),'linewidth',2);hold on;
 title('Hospitalisations (smooth inputs)');
 legend({'reported data, testing is optimal, PCR only',...
     'reported data, testing is realistic, PCR only',...
-    'reported data, PCR+AG'});
+    'implied data, PCR only'});
 grid on;
 % 
 figure('Name','Hospitals & Deaths, means');
