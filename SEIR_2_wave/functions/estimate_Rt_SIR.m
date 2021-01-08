@@ -16,13 +16,13 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_qua
 % initialization
 try
     obs_ratio = inputs.obs_ratio;
-    assert(length(obs_ratio)==length(inputs.z));
+    assert(length(obs_ratio)>=length(inputs.z));
 catch err
     obs_ratio = s.obs_ratio+0*inputs.z;
 end
 try
     sigma = inputs.asymp_ratio;
-    assert(length(sigma)==length(inputs.z));
+    assert(length(sigma)>=length(inputs.z));
 catch err
     if isempty(inputs.asymp_ratio)
         sigma = (1-s.symp_ratio_obs)+0*inputs.z;
