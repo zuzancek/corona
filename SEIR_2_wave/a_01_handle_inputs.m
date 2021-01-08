@@ -100,7 +100,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 1.5; delay.at = dd(2020,11,01);
+delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,11,01);
 srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -111,6 +111,7 @@ params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
 cases_data.cases_pcr_implied = dI_inflow_real;
+cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = obs_ratio_real;
 cases_data.loss = sa_cmp;
 

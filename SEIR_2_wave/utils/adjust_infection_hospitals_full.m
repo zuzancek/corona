@@ -127,16 +127,16 @@ X_y(idx) = dI_data_reported_old(idx); X_y(dateFrom:min(idx)) = dI_data_reported_
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 delta = dI_data_reported./dI_data_real;
 
-obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
+obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio);
 XX = x.NewCases;
 XX(dateFrom:dateTo) = X;
-X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+X = method_data(XX);
 XX = x.NewCases.*rho_ext;
 XX(dateFrom:dateTo) = X_o;
-X_o = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+X_o = method_data(XX);
 XX = x.NewCases.*(1-rho_ext);
 XX(dateFrom:dateTo) = X_y;
-X_y = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+X_y = method_data(XX);
 
 sa = struct;
 sa.Xs = (1-sigma(1)).*X;

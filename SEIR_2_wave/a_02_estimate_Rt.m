@@ -59,14 +59,18 @@ inputs_fnc.asymp_ratio = double(resize(cases_data.asymp_ratio,t0:t2));
 [Rt_test,q_mat_test,Yt_test,Rt_last_test,Rt_dist_test,Rt_rnd_test]  = model_fnc(inputs_fnc,s,true,true,true);
 % real data, PCR only, optimal testing (it is correct!!!)
 inputs_fnc.z = double(resize(cases_data.cases_pcr_implied,t0:t2));
+inputs_fnc.obs_ratio = [];
+inputs_fnc.asymp_ratio = [];
+% I0 = Yt_pcr.Iot(t1-t0+1);
+% inputs_fnc.I0 = I0;
 [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real]  = model_fnc(inputs_fnc,s,true,true,false);
 
 %% plotting stuff
 figure('Name','Effective reproduction number, means');
 nn = length(Rt_pcr);
-Rt_smooth_series_pcr = tseries(t0+1:t2,Rt_pcr(1:nn));
-Rt_smooth_series_real = tseries(t0+1:t2,Rt_real(1:nn));
-Rt_smooth_series_test = tseries(t0+1:t2,Rt_test(1:nn));
+Rt_smooth_series_pcr = tseries(t0+1:t2,Rt_pcr);
+Rt_smooth_series_real = tseries(t0:t2,Rt_real);
+Rt_smooth_series_test = tseries(t0+1:t2,Rt_test);
 plot(resize(Rt_smooth_series_pcr,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_test,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_real,disp_from:t2),'linewidth',2);hold on;
