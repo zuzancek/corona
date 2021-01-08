@@ -2,8 +2,7 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_qua
 
 %% Model
 % S(t+1) = S(t)-Z(t)
-% E(t+1) = E(t)+Z(t)-E(t)/T_lat
-% Iu(t+1) = Iu(t)+E(t)/T_lat-rho(t)*Iu(t)/T_test-(1-rho(t))*Iu(t)/T_inf
+% Iu(t+1) = Iu(t)+Z(t)-rho(t)*Iu(t)/T_test-(1-rho(t))*Iu(t)/T_inf
 % Io(t+1) = Io(t)+rho(t)*Iu(t)/T_test-lambda(t)*Io(t)/T_hosp-(1-lambda(t))*Io(t)/T_sick
 % H(t+1) = H(t)+lambda(t)*Io(t)/T_hosp-omega(t)*H(t)/T_death-(1-omega(t))*H(t)/T_rec
 % D(t+1) = D(t)+omega(t)*H(t)/T_death
@@ -17,13 +16,13 @@ function [Rt,q_mat,res,Rt_last,Rt_dist,Rt_rnd] = estimate_Rt_SIR(inputs,s,do_qua
 try
     obs_ratio = inputs.obs_ratio;
     assert(length(obs_ratio)>=length(inputs.z));
-catch err
+catch err %#ok<NASGU>
     obs_ratio = s.obs_ratio+0*inputs.z;
 end
 try
     sigma = inputs.asymp_ratio;
     assert(length(sigma)>=length(inputs.z));
-catch err
+catch err %#ok<NASGU>
     if isempty(inputs.asymp_ratio)
         sigma = (1-s.symp_ratio_obs)+0*inputs.z;
     elseif length(inputs.asymp_ratio)<length(inputs.z)

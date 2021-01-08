@@ -46,7 +46,6 @@ inputs_fnc.params = params;
 %% calculations
 % s = setparam();
 % _mm = moving median; _smooth = quasi-gaussian smoother
-% needed to get a good enough guess of I0
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
