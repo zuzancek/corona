@@ -56,32 +56,51 @@ inputs_fnc.asymp_ratio = [];
 inputs_fnc.obs_ratio = double(resize(cases_data.obs_ratio,t0:t2));
 inputs_fnc.asymp_ratio = double(resize(cases_data.asymp_ratio,t0:t2));
 [Rt_test,q_mat_test,Yt_test,Rt_last_test,Rt_dist_test,Rt_rnd_test]  = model_fnc(inputs_fnc,s,true,true,true);
-% real data, PCR only, optimal testing (it is correct!!!)
+% real data, PCR only, optimal testing
 inputs_fnc.z = double(resize(cases_data.cases_pcr_implied,t0:t2));
 inputs_fnc.obs_ratio = [];
 inputs_fnc.asymp_ratio = [];
 % I0 = Yt_pcr.Iot(t1-t0+1);
 % inputs_fnc.I0 = I0;
 [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real]  = model_fnc(inputs_fnc,s,true,true,false);
+% reported data, PCR+AG
+inputs_fnc.z = double(resize(cases_data.cases_total_smooth,t0:t2));
+inputs_fnc.obs_ratio = [];
+inputs_fnc.asymp_ratio = [];
+% I0 = Yt_pcr.Iot(t1-t0+1);
+% inputs_fnc.I0 = I0;
+[Rt_total,q_mat_total,Yt_total,Rt_last_total,Rt_dist_total,Rt_rnd_total]  = model_fnc(inputs_fnc,s,true,true,false);
+
 
 %% plotting stuff
+% 0./ cases
+figure('Name','New cases (smooth data, means)')
+plot(cases_data.cases_pcr_implied,'linewidth',1); hold on;
+plot(cases_data.cases_pcr_smooth,'k--', 'linewidth',1);
+plot(cases_data.cases_total_smooth,'Color',[0.5 0 0.5],'linewidth',1);
+grid on;
+legend({'Implied by hospitals','PCR reported','AG+PCR reported'});
+
 % 1./ reproduction number
 figure('Name','Effective reproduction number, means');
 nn = length(Rt_pcr);
 Rt_smooth_series_pcr = tseries(t0+1:t2,Rt_pcr);
 Rt_smooth_series_real = tseries(t0:t2,Rt_real);
 Rt_smooth_series_test = tseries(t0+1:t2,Rt_test);
+Rt_smooth_series_total = tseries(t0+1:t2,Rt_total);
 plot(resize(Rt_smooth_series_pcr,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_test,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Rt_smooth_series_real,disp_from:t2),'linewidth',2);hold on;
-title('Effective reproduction number (PCR tests only, smooth inputs)');
-legend({'reported data, testing is optimal',...
-    'reported data, testing is realistic',...
-    'implied data'});
+plot(resize(Rt_smooth_series_total,disp_from:t2),'linewidth',2);hold on;
+title('Effective reproduction number (smooth inputs)');
+legend({'reported data, PCR only, testing is optimal',...
+    'reported data, PCR only, testing is realistic',...
+    'implied data', 'reported data, AG+PCR'});
 grid on;
 % 
-plot_fanchart(q_mat_real,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, implied data)',true);
+plot_fanchart(q_mat_real,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
 plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
+plot_fanchart(q_mat_total,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG, reported data)',true);
 
 % 2./ situation in hospitals
 figure('Name','Hospitals & Deaths, means');
@@ -105,8 +124,9 @@ legend({'implied by reported data, testing is optimal, PCR only',...
 grid on;
 
 %% saving stuff
-x.Rt_smooth = Rt_smooth_series;
-x.Rt_smooth_pcr = Rt_smooth_series_pcr;
+x.Rt = Rt_smooth_series_pcr;
+x.Rt_real = Rt_smooth_series_real;
+x.Rt_test = Rt_smooth_series_test;
 dbsave(x,'results.csv');
 
 Rt = tseries(t0+1:t1,Rt); %#ok<*NASGU>
