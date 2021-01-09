@@ -79,6 +79,7 @@ plot(cases_data.cases_pcr_implied,'linewidth',1); hold on;
 plot(cases_data.cases_pcr_smooth,'k--', 'linewidth',1);
 plot(cases_data.cases_total_smooth,'Color',[0.5 0 0.5],'linewidth',1);
 grid on;
+title('New cases');
 legend({'Implied by hospitals','PCR reported','AG+PCR reported'});
 
 % 1./ reproduction number
