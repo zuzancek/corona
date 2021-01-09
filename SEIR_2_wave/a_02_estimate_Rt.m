@@ -108,20 +108,30 @@ figure('Name','Hospitals & Deaths, means');
 subplot(2,1,1)
 Dt_pcr = tseries(t0+1:t2,Yt_pcr.Dt(1:nn));
 Dt_test = tseries(t0+1:t2,Yt_test.Dt(1:nn));
-Ht_pcr = tseries(t0+1:t2,Yt_pcr.Ht(1:nn));
-Ht_test = tseries(t0+1:t2,Yt_test.Ht(1:nn));
+Dt_real = tseries(t0+1:t2,Yt_real.Dt(1:nn));
+Dt_total = tseries(t0+1:t2,Yt_total.Dt(1:nn));
 plot(resize(Dt_pcr,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Dt_test,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Dt_real,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Dt_total,disp_from:t2),'linewidth',2);hold on;
+plot(resize(hosp_data.D_smooth,disp_from:t2),'k--','linewidth',1);hold on;
 title('Deaths (smooth inputs)');
-legend({'implied by reported data, testing is optimal, PCR only',...
-    'implied by reported data, testing is realistic, PCR only'});
+legend({'reported data, optimal testing, PCR only',...
+    'reported data, realistic testing, PCR only', 'implied data', 'reported data, PCR+AG'});
 grid on;
 subplot(2,1,2)
-plot(resize(Ht_pcr,disp_from:t1),'linewidth',2);hold on;
-plot(resize(Ht_test,disp_from:t1),'linewidth',2);hold on;
+Ht_pcr = tseries(t0+1:t2,Yt_pcr.Ht(1:nn));
+Ht_test = tseries(t0+1:t2,Yt_test.Ht(1:nn));
+Ht_real = tseries(t0+1:t2,Yt_real.Ht(1:nn));
+Ht_total = tseries(t0+1:t2,Yt_total.Ht(1:nn));
+plot(resize(Ht_pcr,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Ht_test,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Ht_real,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Ht_total,disp_from:t2),'linewidth',2);hold on;
+plot(resize(hosp_data.H_smooth,disp_from:t2),'k--','linewidth',1);hold on;
 title('Hospitals (smooth inputs)');
-legend({'implied by reported data, testing is optimal, PCR only',...
-    'implied by reported data, testing is realistic, PCR only'});
+legend({'reported data, optimal testing, PCR only',...
+    'reported data, realistic testing, PCR only', 'implied data', 'reported data, PCR+AG'});
 grid on;
 
 %% saving stuff
