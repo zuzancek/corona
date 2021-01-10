@@ -9,7 +9,7 @@ db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','fr
 db_asympt = dbload('data/asymptomatical_cases_share.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
-idx_fun = 1;
+idx_fun = 2;
 out_filename_opt = {'inputs_full.mat','inputs.mat'}; out_filename = out_filename_opt{idx_fun};
 fun_opt_0 = {'adjust_infection_hospitals_full','adjust_infection_hospitals'}; fun_0 = str2func(fun_opt_0{idx_fun});
 fun_opt_1 = {'adjust_hospitals_infection_full','adjust_hospitals_infection'}; fun_1 = str2func(fun_opt_1{idx_fun});
@@ -257,27 +257,41 @@ ylabel('%');
 
 %
 figure('Name','Situation in Hospitals: Comparison')
-subplot(2,2,1)
-plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
-plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
-legend({'observed','implied by reported daily new cases'});
-grid on;
-title('Hospitalisations (total)');
-subplot(2,2,2)
-plot(resize(icu_smooth,disp_from:t1),'linewidth',1);hold on;
-plot(resize(out.C,disp_from:t1),'linewidth',1);hold on;
-grid on;
-title('ICU');
-subplot(2,2,3)
-plot(resize(vent_smooth,disp_from:t1),'linewidth',1);hold on;
-plot(resize(out.V,disp_from:t1),'linewidth',1);hold on;
-grid on;
-title('Ventilations');
-subplot(2,2,4)
-plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
-plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
-grid on;
-title('Deaths');
+if idx_fun==1
+    subplot(2,2,1)
+    plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
+    legend({'observed','implied by reported daily new cases'});
+    grid on;
+    title('Hospitalisations (total)');
+    subplot(2,2,2)
+    plot(resize(icu_smooth,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out.C,disp_from:t1),'linewidth',1);hold on;
+    grid on;
+    title('ICU');
+    subplot(2,2,3)
+    plot(resize(vent_smooth,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out.V,disp_from:t1),'linewidth',1);hold on;
+    grid on;
+    title('Ventilations');
+    subplot(2,2,4)
+    plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
+    grid on;
+    title('Deaths');
+else
+    subplot(2,1,1)
+    plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
+    legend({'observed','implied by reported daily new cases'});
+    grid on;
+    title('Hospitalisations (total)');
+    subplot(2,1,2)
+    plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
+    grid on;
+    title('Deaths');
+end    
 
 %% saving stuff
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
