@@ -63,7 +63,7 @@ inputs_fnc.obs_ratio = [];
 inputs_fnc.old_ratio = params.old_ratio;
 inputs_fnc.death_ratio = params.death_ratio;
 inputs_fnc.asymp_ratio = [];
-[Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real]  = model_fnc(inputs_fnc,s,true,true,false);
+[Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real] = model_fnc(inputs_fnc,s,true,true,false);
 % reported data, PCR+AG
 inputs_fnc.z = double(resize(cases_data.cases_total_smooth,t0:t2));
 inputs_fnc.obs_ratio = [];
@@ -138,13 +138,13 @@ x.Rt_real = Rt_smooth_series_real;
 x.Rt_test = Rt_smooth_series_test;
 dbsave(x,'results.csv');
 
-Rt = tseries(t0+1:t1,Rt); %#ok<*NASGU>
-ext_opt = {'_SIR','_SEIR'};
-save(strcat('results_Rt',ext_opt{1+s.model_seir},'.mat'),'s','t0','t1','q_mat',...
-    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+Rt_pcr = tseries(t0:t2,Rt_pcr); %#ok<*NASGU>
 q_mat = q_mat_pcr; Rt = Rt_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
-save(strcat('results_Rt',ext_opt{1+s.model_seir},'_pcr.mat'),'s','t0','t1','q_mat',...
+save(strcat('results_Rt.mat'),'s','t0','t1','t2','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-q_mat = q_mat_test; Rt = Rt_test; Yt = Yt_test; Rt_last = Rt_last_test; Rt_dist = Rt_dist_test; Rt_rnd = Rt_rnd_test;
-save(strcat('results_Rt',ext_opt{1+s.model_seir},'_real_pcr.mat'),'s','t0','t1','q_mat',...
+q_mat = q_mat_real; Rt = Rt_real; Yt = Yt_real; Rt_last = Rt_last_real; Rt_dist = Rt_dist_real; Rt_rnd = Rt_rnd_real;
+save(strcat('results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
+    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+q_mat = q_mat_total; Rt = Rt_total; Yt = Yt_total; Rt_last = Rt_last_total; Rt_dist = Rt_dist_total; Rt_rnd = Rt_rnd_total;
+save(strcat('results_Rt_total.mat'),'s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
