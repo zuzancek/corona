@@ -286,7 +286,7 @@ else
     plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
     plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
     plot(resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
-    legend({'observed','implied by reported daily new cases'});
+    legend({'observed','implied by reported daily new cases','reconstructed from implied cases'});
     grid on;
     title('Hospitalisations (total)');
     subplot(2,1,2)
@@ -295,6 +295,7 @@ else
     plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
     grid on;
     title('Deaths');
+    legend({'observed','implied by reported daily new cases','reconstructed from implied cases'});    
 end    
 
 %% saving stuff

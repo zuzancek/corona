@@ -138,13 +138,15 @@ x.Rt_real = Rt_smooth_series_real;
 x.Rt_test = Rt_smooth_series_test;
 dbsave(x,'results.csv');
 
-Rt_pcr = tseries(t0:t2,Rt_pcr); %#ok<*NASGU>
-q_mat = q_mat_pcr; Rt = Rt_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
+Rt = tseries(t0:t2-1,Rt_pcr); %#ok<*NASGU>
+q_mat = q_mat_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
 save(strcat('results_Rt.mat'),'s','t0','t1','t2','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+Rt = tseries(t0:t2,Rt_real);
 q_mat = q_mat_real; Rt = Rt_real; Yt = Yt_real; Rt_last = Rt_last_real; Rt_dist = Rt_dist_real; Rt_rnd = Rt_rnd_real;
 save(strcat('results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-q_mat = q_mat_total; Rt = Rt_total; Yt = Yt_total; Rt_last = Rt_last_total; Rt_dist = Rt_dist_total; Rt_rnd = Rt_rnd_total;
+Rt = tseries(t0:t2-1,Rt_total);
+q_mat = q_mat_total; Yt = Yt_total; Rt_last = Rt_last_total; Rt_dist = Rt_dist_total; Rt_rnd = Rt_rnd_total;
 save(strcat('results_Rt_total.mat'),'s','t0','t1','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
