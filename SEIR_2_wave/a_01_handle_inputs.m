@@ -104,7 +104,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 0; delay.at = dd(2020,11,01);
+delay.v = [2 0];  delay.at = [dd(2020,10,01),dd(2020,11,15)];
 srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -175,7 +175,7 @@ ylabel('%');
 title('Mobility, raw data');
 legend(fn);
 
-figure;
+figure('Name','Mobility, smooth data');
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
     zz = smooth_series(yy,s.smooth_width,s.smooth_type,s.smooth_ends);

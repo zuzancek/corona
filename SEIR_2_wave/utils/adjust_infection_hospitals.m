@@ -15,10 +15,15 @@ asymp_ratio = method_params(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
 
 % delay in testing (gradual)
-T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
-T_delay_at = delay.at;
-T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
-T_delay = method_params(T_delay);
+T_delay = NaN+zeros(T,1); T_delay(1) = 0;
+dlen = length(delay.v);
+for i=1:dlen
+    T_delay(delay.at(i)-dateFrom) = delay.v(i);
+end
+if dlen
+    T_delay(T) = delay.v(end);
+end
+T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 % shortening recovery period
 T_short_0 = srec.v0;                T_short_1 = 0*srec.v1;           
 T_short_at = srec.at;
@@ -80,7 +85,9 @@ dI_data_reported_young = dI_data_reported-dI_data_reported_old;
 delta = dI_data_reported./dI_data_real;
 
 idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
-X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
+idx = dateFrom:max(idx);
+X(idx) = dI_data_reported(idx);
+% X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 X_o(idx) = dI_data_reported_old(idx); X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
 X_y(idx) = dI_data_reported_old(idx); X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));

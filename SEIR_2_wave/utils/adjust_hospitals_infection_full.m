@@ -5,7 +5,8 @@ I0 = init.I;    C0 = init.C;    V0 = init.V;
 N0 = init.H-V0-C0; D0 = init.D;
 
 method_params = s.smoothing_method_params;
-rho = method_params(init.rho); rho = rho(dateFrom:dateTo);
+% rho = method_params(init.rho); 
+rho = init.rho(dateFrom:dateTo);
 varsigma = method_params(init.varsigma); varsigma = varsigma(dateFrom:dateTo);
 
 % parameters
