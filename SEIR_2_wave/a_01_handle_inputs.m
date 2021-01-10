@@ -104,7 +104,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,11,01);
+delay.v0 = 0; delay.v1 = 0; delay.at = dd(2020,11,01);
 srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -125,6 +125,8 @@ init.C = icu;   init.V = vent;
 init.I = x.ActiveCases; 
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = fun_1(x,par,s,init,disp_from,t1);
+y = x; y.NewCases = dI_inflow_real;
+[out_check] = fun_1(y,par,s,init,disp_from,t1);
 hosp_data.alt = out;
 
 %% plotting stuff
@@ -151,7 +153,7 @@ pp2=plot(resize(deaths_total,disp_from:t1),'linewidth',1,'linestyle','--');hold 
 plot(resize(death_smooth,disp_from:t1),'linewidth',2,'Color',pp1.Color);
 plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2,'Color',pp2.Color);
 grid on;
-title('Deaths');
+title('Total Deaths (with+on covid)');
 
 % mobility
 threshold = 100;
@@ -283,12 +285,14 @@ else
     subplot(2,1,1)
     plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
     plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
     legend({'observed','implied by reported daily new cases'});
     grid on;
     title('Hospitalisations (total)');
     subplot(2,1,2)
     plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
     plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
+    plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
     grid on;
     title('Deaths');
 end    

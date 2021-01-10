@@ -1,7 +1,7 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay,srec)
 
 T = dateTo-dateFrom+1;
-method_data = s.smoothing_method_params; 
+method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params; 
 
 death_old_ratio = method_params(params.death_old_ratio);
@@ -15,7 +15,7 @@ asymp_ratio = method_params(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
 
 % delay in testing (gradual)
-T_delay_0 = delay.v0;               T_delay_1 = 0*delay.v1;               
+T_delay_0 = delay.v0;               T_delay_1 = delay.v1;               
 T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method_params(T_delay);
@@ -46,22 +46,22 @@ dI_data = method_data(x.NewCases(dateFrom:dateTo));
 D = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(dateFrom:dateTo));
 
-H_D = method_data(D(2:end)-D(1:end-1));
+H_D = (D(2:end)-D(1:end-1));
 H_D_o = varsigma(1:end-1).*H_D;
 H_D_y = H_D-H_D_o;
 H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
 H_y = H_y_H_o./(H_y_H_o+1).*H;
 H_o = H-H_y;
 H_R_o = alpha_hro.*H_o;
-I_H_o = method_data(H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o(1:end-1);
+I_H_o = (H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o(1:end-1);
 H_R_y = alpha_hry.*H_y;
-I_H_y = method_data(H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y(1:end-1);
+I_H_y = (H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y(1:end-1);
 I_o = I_H_o./alpha_iho;
 I_R_o = alpha_iro(1:end-1).*I_o; I_o = [I_o(1);I_o];
-X_o = method_data(I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
+X_o = (I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
 I_y = I_H_y./alpha_ihy;
 I_R_y = alpha_iry(1:end-1).*I_y; I_y = [I_y(1);I_y];
-X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
+X_y = (I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 X = X_o+X_y;
 I = I_o+I_y;
 
@@ -141,7 +141,7 @@ p.varsigma = varsigma;
         end
         idx_y = ~isnan(y);
         y = interp1(find(idx_y),y(idx_y),1:T,'spline')';
-        ys = smooth_series(y);
+        ys = method_data(y);
     end
 
     function [x] = adjust_tail(x,k)

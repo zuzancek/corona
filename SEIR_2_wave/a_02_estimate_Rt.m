@@ -1,5 +1,5 @@
 %% initialization
-initialize;
+% initialize;
 rng(1000);
 
 %% setup
@@ -33,8 +33,6 @@ init.D0 = hosp_data.D_smooth(t1);
 params = struct();
 params.obs_ratio = cases_data.obs_ratio;           
 params.old_ratio = cases_data.old_ratio_smooth;
-params.old_ratio(dd(2020,9,1):dd(2020,10,15)) = 1.15*params.old_ratio(dd(2020,9,1):dd(2020,10,15));
-params.old_ratio(dd(2020,12,1):dd(2020,12,31)) = 1.15*params.old_ratio(dd(2020,12,1):dd(2020,12,31));
 params.old_ratio = smooth_series(params.old_ratio);
 params.death_ratio = deaths_data.old_ratio_smooth;
 params.asymp_ratio = cases_data.asymp_ratio_smooth;
