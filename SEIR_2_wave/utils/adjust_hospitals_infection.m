@@ -34,7 +34,7 @@ D_o = zeros(T,1); D_o(1) = D0(1)*varsigma(1);
 D_y = zeros(T,1); D_y(1) = D0(1)-D_o(1); 
 H0 = method_data(H0(dateFrom:dateTo));
 H_o = zeros(T,1); H_o(1) = H0(1)*eta_o*rho(1)/(eta_o*s.old_share+eta_y*(1-s.old_share));
-H_y = zeros(T,1); H_y(1) = H0(1);
+H_y = zeros(T,1); H_y(1) = H0(1)-H_o(1);
 I0 = method_data(I0(dateFrom:dateTo));
 I_o = zeros(T,1); I_o(1) = I0(1)*s.old_share;
 I_y = zeros(T,1); I_y(1) = I0(1)-I_o(1);

@@ -30,47 +30,51 @@ init = struct();
 init.I0 = cases_data.I0;
 init.H0 = hosp_data.H_smooth(t1-1);
 init.D0 = hosp_data.D_smooth(t1);
-params0 = struct();
-params0.obs_ratio = cases_data.obs_ratio;           
-params0.old_ratio = cases_data.old_ratio_smooth;
-params0.asymp_ratio = cases_data.asymp_ratio_smooth;
 params = struct();
-params.obs_ratio = resize(cases_data.obs_ratio,t1-1:t2);           
-params.old_ratio = resize(cases_data.old_ratio_smooth,t1-1:t2);
-params.asymp_ratio = resize(cases_data.asymp_ratio_smooth,t1-1:t2);
-inputs_fnc0.init = init;
-inputs_fnc.init = init;
-inputs_fnc0.params = params0;
-inputs_fnc.params = params;
+params.obs_ratio = cases_data.obs_ratio;           
+params.old_ratio = cases_data.old_ratio_smooth;
+params.old_ratio(dd(2020,9,1):dd(2020,10,15)) = 1.15*params.old_ratio(dd(2020,9,1):dd(2020,10,15));
+params.old_ratio(dd(2020,12,1):dd(2020,12,31)) = 1.15*params.old_ratio(dd(2020,12,1):dd(2020,12,31));
+params.old_ratio = smooth_series(params.old_ratio);
+params.death_ratio = deaths_data.old_ratio_smooth;
+params.asymp_ratio = cases_data.asymp_ratio_smooth;
 
 %% calculations
-% s = setparam();
+s = setparam();
 % _mm = moving median; _smooth = quasi-gaussian smoother
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
-inputs_fnc.obs_ratio = []; 
+inputs_fnc.H0 = 0;
+inputs_fnc.D0 = 0;
+%
+inputs_fnc.obs_ratio = [];
+inputs_fnc.old_ratio = [];
+inputs_fnc.death_ratio = []; 
 inputs_fnc.asymp_ratio = [];
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
 % reported data, PCR only, realisting testing (realistic observ.ratio)
 inputs_fnc.obs_ratio = double(resize(cases_data.obs_ratio,t0:t2));
+inputs_fnc.old_ratio = params.old_ratio;
+inputs_fnc.death_ratio = params.death_ratio;
 inputs_fnc.asymp_ratio = double(resize(cases_data.asymp_ratio,t0:t2));
 [Rt_test,q_mat_test,Yt_test,Rt_last_test,Rt_dist_test,Rt_rnd_test]  = model_fnc(inputs_fnc,s,true,true,true);
 % real data, PCR only, optimal testing
 inputs_fnc.z = double(resize(cases_data.cases_pcr_implied,t0:t2));
 inputs_fnc.obs_ratio = [];
+inputs_fnc.old_ratio = params.old_ratio;
+inputs_fnc.death_ratio = params.death_ratio;
 inputs_fnc.asymp_ratio = [];
-% I0 = Yt_pcr.Iot(t1-t0+1);
-% inputs_fnc.I0 = I0;
 [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real]  = model_fnc(inputs_fnc,s,true,true,false);
 % reported data, PCR+AG
 inputs_fnc.z = double(resize(cases_data.cases_total_smooth,t0:t2));
 inputs_fnc.obs_ratio = [];
+inputs_fnc.old_ratio = [];
 inputs_fnc.asymp_ratio = [];
+inputs_fnc.death_ratio = [];
 % I0 = Yt_pcr.Iot(t1-t0+1);
 % inputs_fnc.I0 = I0;
 [Rt_total,q_mat_total,Yt_total,Rt_last_total,Rt_dist_total,Rt_rnd_total]  = model_fnc(inputs_fnc,s,true,true,false);
-
 
 %% plotting stuff
 % 0./ cases
@@ -107,31 +111,27 @@ plot_fanchart(q_mat_total,s,dt,disp_from,disp_to,t0,'Effective reproduction numb
 figure('Name','Hospitals & Deaths, means');
 subplot(2,1,1)
 Dt_pcr = tseries(t0+1:t2,Yt_pcr.Dt(1:nn));
-Dt_test = tseries(t0+1:t2,Yt_test.Dt(1:nn));
 Dt_real = tseries(t0+1:t2,Yt_real.Dt(1:nn));
 Dt_total = tseries(t0+1:t2,Yt_total.Dt(1:nn));
 plot(resize(Dt_pcr,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Dt_test,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Dt_real,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Dt_total,disp_from:t2),'linewidth',2);hold on;
 plot(resize(hosp_data.D_smooth,disp_from:t2),'k--','linewidth',1);hold on;
 title('Deaths (smooth inputs)');
-legend({'reported data, optimal testing, PCR only',...
-    'reported data, realistic testing, PCR only', 'implied data', 'reported data, PCR+AG'});
+legend({'reported data, PCR only',...
+    'implied data', 'reported data, PCR+AG'});
 grid on;
 subplot(2,1,2)
 Ht_pcr = tseries(t0+1:t2,Yt_pcr.Ht(1:nn));
-Ht_test = tseries(t0+1:t2,Yt_test.Ht(1:nn));
 Ht_real = tseries(t0+1:t2,Yt_real.Ht(1:nn));
 Ht_total = tseries(t0+1:t2,Yt_total.Ht(1:nn));
 plot(resize(Ht_pcr,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Ht_test,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Ht_real,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Ht_total,disp_from:t2),'linewidth',2);hold on;
 plot(resize(hosp_data.H_smooth,disp_from:t2),'k--','linewidth',1);hold on;
 title('Hospitals (smooth inputs)');
-legend({'reported data, optimal testing, PCR only',...
-    'reported data, realistic testing, PCR only', 'implied data', 'reported data, PCR+AG'});
+legend({'reported data, PCR only',...
+    'implied data', 'reported data, PCR+AG'});
 grid on;
 
 %% saving stuff

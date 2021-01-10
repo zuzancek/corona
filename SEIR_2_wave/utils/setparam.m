@@ -68,7 +68,7 @@ s.psi_vent = 1/4;
 s.omega_vent = 0.33;
 % death probability/time
 s.omega_y = 3.15/100;       s.omega_o = (37.16/100);  %31
-s.T_death_y = 3.41+5;       s.T_death_o = 4.59+8;  
+s.T_death_y = 3.41+5;       s.T_death_o = 4.59+7;  
 % recovery at hospital
 s.T_rec_y = 9.2;            s.T_rec_o = 14.5;
 % hospitalization probability/time to
@@ -96,6 +96,7 @@ s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
 s.old_share = 0.1385;
+s.old_death_ratio = 0.8407;
 s.obs_ratio_tar = 1/5;
 s.obs_ratio = s.obs_ratio_tar;
 s.self_isolation_effect = 1-0.05;
