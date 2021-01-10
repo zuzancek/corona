@@ -9,6 +9,9 @@ db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','fr
 db_asympt = dbload('data/asymptomatical_cases_share.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 s = setparam();
+idx_fun = 1;
+fun_opt_0 = {'adjust_infection_hospitals_full','adjust_infection_hospitals'}; fun_0 = str2func(fun_opt_0{idx_fun});
+fun_opt_1 = {'adjust_hospitals_infection_full','adjust_hospitals_infection'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
 
@@ -51,7 +54,7 @@ cases_data.I0 = I0;
 
 % clinical
 hospit = hosp.Hospitalizations;
-hospit_smooth = smooth_series(hospit,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+hospit_smooth = smooth_series(hospit);
 icu = hosp.ICU;
 icu(startdate(hospit_smooth)+40:startdate(hospit_smooth)+60) = NaN;
 icu = interp(icu,startdate(hospit_smooth):enddate(hospit_smooth));
@@ -100,7 +103,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v0 = 0; delay.v1 = 0.5; delay.at = dd(2020,11,01);
+delay.v0 = 0; delay.v1 = 1; delay.at = dd(2020,11,01);
 srec.v0 = 0; srec.v1 = 1; srec.at = dd(2020,10,15);
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -109,7 +112,7 @@ deaths_data.old_ratio_smooth = smooth_series(deaths_data.old_ratio);
 params.cfr_hospitals = cfr_ext;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = adjust_infection_hospitals_full(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,srec);
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = obs_ratio_real;
@@ -120,7 +123,7 @@ init.D = death; init.H = hospit;
 init.C = icu;   init.V = vent;
 init.I = x.ActiveCases; 
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
-[out] = adjust_hospitals_infection_full(x,par,s,init,disp_from,t1);
+[out] = fun_1(x,par,s,init,disp_from,t1);
 hosp_data.alt = out;
 
 %% plotting stuff

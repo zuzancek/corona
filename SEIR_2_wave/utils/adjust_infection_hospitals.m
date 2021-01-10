@@ -1,7 +1,7 @@
 function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay,srec)
 
 T = dateTo-dateFrom+1;
-method_data = s.smoothing_method_data; 
+method_data = s.smoothing_method_params; 
 method_params = s.smoothing_method_params; 
 
 death_old_ratio = method_params(params.death_old_ratio);
