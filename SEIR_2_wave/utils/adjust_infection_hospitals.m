@@ -41,6 +41,11 @@ eta_o = s.eta_o;                                     T_hosp_o = s.T_hosp_o;  alp
 T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
 T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
 
+d_std = 0.62; d_mean = 6.5;
+d_shape = d_mean*d_std^2; d_scale = 1/d_std^2;
+xx = 0:15;
+y = pdf('Gamma',xx,d_shape,d_scale);
+
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
 % H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
@@ -52,6 +57,10 @@ D = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(dateFrom:dateTo));
 
 H_D = (D(2:end)-D(1:end-1));
+
+d = (D(2:end)-D(1:end-1));
+xxx=get_wa(y(2:end),H,30);
+
 H_D_o = varsigma(1:end-1).*H_D;
 H_D_y = H_D-H_D_o;
 H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
@@ -158,6 +167,17 @@ p.varsigma = varsigma;
         for j=3:k
             x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
         end        
+    end
+
+    function [x] = get_wa(w,z,id)
+        k = length(w);
+        t = length(z)-id+1;
+        V = repmat(w,t,1);
+        J = repmat([1:k],t,1)+repmat([0:t-1]',1,k);
+        L = 0*(k-1)+repmat([1:t]',1,k);
+        A = sparse(L,J,V);
+        A = A./sum(A,2);
+        x = A*z(end-t+1:end);
     end
 
 %     function [x] = get_rv(y)
