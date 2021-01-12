@@ -73,9 +73,11 @@ s.T_death_y = 6.05;         s.T_death_o = 4.42;
 s.T_rec_y = 9.2;            s.T_rec_o = 14.5;
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
+s.eta_y = 2.94/100;         s.eta_o = 26.31/100;
 s.T_hosp_y = 5;             s.T_hosp_o = 5;
-s.eta_y = 4.8/100;          s.eta_o = 15.6/100;
-s.eta_y = 5.42/100;         s.eta_o = 16.79/100;
+s.T_hosp_y = 7;             s.T_hosp_o = 4;
+% s.eta_y = 4.8/100;          s.eta_o = 15.6/100;
+% s.eta_y = 5.42/100;         s.eta_o = 16.79/100;
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
 s.kappa_res_delta_0 = -0.5;
