@@ -169,15 +169,30 @@ p.varsigma = varsigma;
         end        
     end
 
-    function [x] = get_wa(w,z,id)
-        k = length(w);
-        t = length(z)-id+1;
-        V = repmat(w,t,1);
+    function [x] = get_wa(weight,Z,alpha,idxFrom)
+        k = length(weight);
+        t = length(Z)-idxFrom+1;
+        W = repmat(weight,t,1);
+        A = repmat(alpha./[1:k],t,1);
         J = repmat([1:k],t,1)+repmat([0:t-1]',1,k);
         L = 0*(k-1)+repmat([1:t]',1,k);
-        A = sparse(L,J,V);
-        A = A./sum(A,2);
-        x = A*z(end-t+1:end);
+        Weight_mat = sparse(L,J,W);
+        Alpha_mat = sparse(L,J,A);
+        Weight_mat = Weight_mat./sum(Weight_mat,2);
+        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
+    end
+
+    function [x] = get_wa_inv(weight,Z,alpha,idxFrom)
+        k = length(weight);
+        t = length(Z)-idxFrom+1;
+        W = repmat(weight,t,1);
+        A = repmat(alpha./[1:k],t,1);
+        J = repmat([1:k],t,1)+repmat([0:t-1]',1,k);
+        L = 0*(k-1)+repmat([1:t]',1,k);
+        Weight_mat = sparse(L,J,W);
+        Alpha_mat = sparse(L,J,A);
+        Weight_mat = Weight_mat./sum(Weight_mat,2);
+        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
     end
 
 %     function [x] = get_rv(y)
