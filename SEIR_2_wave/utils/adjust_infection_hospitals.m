@@ -41,10 +41,10 @@ eta_o = s.eta_o;                                     T_hosp_o = s.T_hosp_o;  alp
 T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
 T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
 
-d_std = 0.62; d_mean = 6.5;
-d_shape = d_mean*d_std^2; d_scale = 1/d_std^2;
-xx = 0:15;
-y = pdf('Gamma',xx,d_shape,d_scale);
+% d_std = 0.62; d_mean = 6.5;
+% d_shape = d_mean*d_std^2; d_scale = 1/d_std^2;
+% xx = 0:15;
+% y = pdf('Gamma',xx,d_shape,d_scale);
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
@@ -57,10 +57,8 @@ D = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(dateFrom:dateTo));
 
 H_D = (D(2:end)-D(1:end-1));
-
-d = (D(2:end)-D(1:end-1));
-xxx=get_wa(y(2:end),H,30);
-
+% d = (D(2:end)-D(1:end-1));
+% xxx=get_wa(y(2:end),H,30);
 H_D_o = varsigma(1:end-1).*H_D;
 H_D_y = H_D-H_D_o;
 H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
@@ -173,9 +171,9 @@ p.varsigma = varsigma;
         k = length(weight);
         t = length(Z)-idxFrom+1;
         W = repmat(weight,t,1);
-        A = repmat(alpha./[1:k],t,1);
-        J = repmat([1:k],t,1)+repmat([0:t-1]',1,k);
-        L = 0*(k-1)+repmat([1:t]',1,k);
+        A = repmat(alpha./(1:k),t,1);
+        J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
+        L = 0*(k-1)+repmat((1:t)',1,k);
         Weight_mat = sparse(L,J,W);
         Alpha_mat = sparse(L,J,A);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
@@ -186,35 +184,20 @@ p.varsigma = varsigma;
         k = length(weight);
         t = length(Z)-idxFrom+1;
         W = repmat(weight,t,1);
-        a = phi./[1:k];
+        a = phi./(1:k);
         A = repmat(a,t,1);
-        J = repmat([1:k],t,1)+repmat([0:t-1]',1,k);
-        L = (k-1)+repmat([1:t]',1,k);
-        U0 = tril(repmat([1:k-1],k-1,1)); 
+        J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
+        L = (k-1)+repmat((1:t)',1,k);
+        U0 = tril(repmat(1:k-1,k-1,1)); 
         U0(U0==0) = k+1; w(end+1) = 0;
         J0 = repmat(1:k-1,k-1,1);
-        L0 = repmat([1:k-1]',1,k-1);
+        L0 = repmat((1:k-1)',1,k-1);
         W0 = w(U0(U0~=0));
         A0 = a(U0(U0~=0));
         Weight_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[W(:),W0(:)]);
         Alpha_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[A(:),A0(:)]);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
-        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
-        
-        
-        V = repmat(w,T,1);
-J = repmat([1:k],T,1)+repmat([0:T-1]',1,k);
-I = k-1+repmat([1:T]',1,k);
-A0 = tril(repmat([1:k-1],k-1,1)); 
-A0(A0==0) = k+1;
-w(end+1) = 0;
-cw = cumsum(w);
-J0 = repmat(1:k-1,k-1,1);
-I0 = repmat([1:k-1]',1,k-1);
-V0 = w(A0(A0~=0));
-A = sparse([I0(:);I(:)],[J0(:);J(:)],[V0(:);V(:)]);
-A = A./sum(A,2);
-
+        x = (Weight_mat.*Alpha_mat)\Z(end-t-k+1:end-1); 
     end
 
 %     function [x] = get_rv(y)
