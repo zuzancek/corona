@@ -25,7 +25,7 @@ s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
 s.T_sick_y.mean = 6.5;            s.T_sick_y.std = 0.62;
-s.T_sick_o.mean = 9.5;            s.T_sick_o.std = 0.62;
+s.T_sick_o.mean = 8.5;            s.T_sick_o.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -45,39 +45,15 @@ s.T_death.mean = 7;             s.T_death.std = 0.62;
 s.T_rec = 11.7;
 % share of symptomatic patients in observed cases
 s.symp_ratio_obs = 0.55;
-% share of symptomatic patients needed to be hospitalized 
-s.lambda = 0.0917; %0.0637; 
-s.alpha_hr = 7.73/100; % recovery rate in hospital
-s.eta_hr = s.alpha_hr.*s.T_rec;
-s.alpha_ih = 6.37/100*(1/s.T_hosp.mean);
-s.alpha_ir = 1/s.T_inf.mean-s.alpha_ih;
-s.alpha_hd = 1.69/100; %1.23/100; % death rate in hospital
-s.p_a_s = s.symp_ratio_obs*s.T_inf_asymp.mean/(s.T_inf_symp.mean);
-% ICU rate
-s.iota = 0.1375;
-% discharge rate (non-ventilation case)
-s.gamma_novent = 1/10; 
-% case fatality rate (non-ventilation)
-s.omega_novent = 0.1102; % 1-0.8125
-% time from hospital (non-vent) admission to death
-s.psi_novent = 1/6; 
-% patients with ventilation needed (inflow)
-s.xi = s.iota*0.5;
-% time from vent-admission to death
-s.psi_vent = 1/4;
-s.omega_vent = 0.33;
 % death probability/time
-s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  %alpha_hdy/alpha_hdo = 9.93 pct
-s.T_death_y = 6.05;         s.T_death_o = 4.42;  
+s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  %31
+s.T_death_y = 3.41+6;       s.T_death_o = 4.59+7;  
 % recovery at hospital
-s.T_rec_y = 9.2;            s.T_rec_o = 14.5;
+s.T_rec_y = 10.2;            s.T_rec_o = 12.5;
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.eta_y = 2.94/100;         s.eta_o = 26.31/100;
-s.T_hosp_y = 5;             s.T_hosp_o = 5;
-s.T_hosp_y = 7;             s.T_hosp_o = 4;
-% s.eta_y = 4.8/100;          s.eta_o = 15.6/100;
-% s.eta_y = 5.42/100;         s.eta_o = 16.79/100;
+s.eta_y = 4.95/100;         s.eta_o = 30.86/100;
+s.T_hosp_y = 6;             s.T_hosp_o = 3;
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
 s.kappa_res_delta_0 = -0.5;

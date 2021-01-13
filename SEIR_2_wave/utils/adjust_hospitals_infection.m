@@ -13,10 +13,10 @@ alpha_ihy = s.eta_y/s.T_hosp_y;
 alpha_iho = s.eta_o/s.T_hosp_o;  
 alpha_iry = (1-s.eta_y)./p.T_sick_y; 
 alpha_iro = (1-s.eta_o)./p.T_sick_o;
-alpha_hdy = s.omega_y/s.T_death_y;
-alpha_hdo = s.omega_o/s.T_death_o;
-alpha_hry = (1-s.omega_y)./p.T_rec_y; 
-alpha_hro = (1-s.omega_o)./p.T_rec_o; 
+alpha_hdy = p.alpha_hdy; %s.omega_y/s.T_death_y;
+alpha_hdo = p.alpha_hdo; % s.omega_o/s.T_death_o;
+alpha_hry = p.alpha_hry; % (1-s.omega_y)./p.T_rec_y; 
+alpha_hro = p.alpha_hro; %(1-s.omega_o)./p.T_rec_o; 
 eta_y = s.eta_y;                   
 eta_o = s.eta_o;           
 
@@ -43,13 +43,13 @@ d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 
 % calculation
 for t=1:T-1
-    d_I_H_o(t) = alpha_iho.*I_o(t);  d_I_R_o(t) = alpha_iro(t).*I_o(t);
+    d_I_H_o(t) = alpha_iho.*I_o(t);     d_I_R_o(t) = alpha_iro(t).*I_o(t);
     I_o(t+1) = I_o(t)+X_o(t)-d_I_H_o(t)-d_I_R_o(t);
     d_I_H_y(t) = alpha_ihy.*I_y(t);  d_I_R_y(t) = alpha_iry(t).*I_y(t);
     I_y(t+1) = I_y(t)+X_y(t)-d_I_H_y(t)-d_I_R_y(t);
-    d_H_D_o(t) = alpha_hdo.*H_o(t);  d_H_R_o(t) = alpha_hro(t).*H_o(t);
+    d_H_D_o(t) = alpha_hdo(t).*H_o(t);  d_H_R_o(t) = alpha_hro(t).*H_o(t);
     H_o(t+1) = H_o(t)+d_I_H_o(t)-d_H_D_o(t)-d_H_R_o(t);
-    d_H_D_y(t) = alpha_hdy.*H_y(t);  d_H_R_y(t) = alpha_hry(t).*H_y(t);
+    d_H_D_y(t) = alpha_hdy(t).*H_y(t);  d_H_R_y(t) = alpha_hry(t).*H_y(t);
     H_y(t+1) = H_y(t)+d_I_H_y(t)-d_H_D_y(t)-d_H_R_y(t);
     D_o(t+1) = D_o(t)+d_H_D_o(t);
     D_y(t+1) = D_y(t)+d_H_D_y(t);

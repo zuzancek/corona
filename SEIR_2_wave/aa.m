@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
+function [X,I,obs_ratio_adj,sa,p] = aa(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
@@ -24,17 +24,27 @@ if dlen
     T_delay(T) = delay.v(end);
 end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
+% shortening recovery period
+% T_short_0 = srec.v0;                T_short_1 = 0*srec.v1;           
+% T_short_at = srec.at;
+% T_short = zeros(T,1)+T_short_0;     T_short(T_short_at-dateFrom:end) = T_short_1;
+% T_short = method_params(T_short);
 
 omega_y = s.omega_y;
 omega_o = s.omega_o;
-T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
-T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
-T_rec_y = s.T_rec_y;                         alpha_hry = (1-omega_y)./T_rec_y;
-T_rec_o = s.T_rec_o;                         alpha_hro = (1-omega_o)./T_rec_o;
+T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y;
+T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o;
+T_rec_y = s.T_rec_y;                                 alpha_hry = (1-omega_y)./T_rec_y;
+T_rec_o = s.T_rec_o;                                 alpha_hro = (1-omega_o)./T_rec_o;
 eta_y = s.eta_y;                                     T_hosp_y = s.T_hosp_y;  alpha_ihy = eta_y./T_hosp_y;   
 eta_o = s.eta_o;                                     T_hosp_o = s.T_hosp_o;  alpha_iho = eta_o./T_hosp_o;  
 T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
 T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
+
+% d_std = 0.62; d_mean = 6.5;
+% d_shape = d_mean*d_std^2; d_scale = 1/d_std^2;
+% xx = 0:15;
+% y = pdf('Gamma',xx,d_shape,d_scale);
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
@@ -42,6 +52,10 @@ T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_si
 % D(t+1) = D(t)+H_D(t);
 
 % initialization
+% dI_data = method_data(x.NewCases(dateFrom:dateTo));
+% D = method_data(d(dateFrom-1:dateTo));
+% H = method_data(h.Hospitalizations(dateFrom-1:dateTo));
+
 dI_data = method_data(x.NewCases(dateFrom:dateTo));
 D = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(dateFrom:dateTo));
@@ -50,26 +64,70 @@ H_D = (D(2:end)-D(1:end-1));
 H_D_o = varsigma(1:end-1).*H_D;
 H_D_y = H_D-H_D_o;
 H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
-H_y = method_params(H_y_H_o./(H_y_H_o+1)).*H;
+H_y = H_y_H_o./(H_y_H_o+1).*H;
 H_o = H-H_y;
-alpha_hdy = method_params(H_D_y./H_y(1:end-1)); alpha_hry = method_params((1-alpha_hdy.*T_death_y)./T_rec_y);alpha_hry = [alpha_hry(1);alpha_hry];
-alpha_hdo = method_params(H_D_o./H_y(1:end-1)); alpha_hro = method_params((1-alpha_hdo.*T_death_o)./T_rec_o);alpha_hro = [alpha_hro(1);alpha_hro];
-H_R_o = method_data(alpha_hro.*H_o);
-I_H_o = method_data(H_o(2:end)-H_o(1:end-1)+H_D_o+H_R_o(1:end-1));
-H_R_y = method_data(alpha_hry.*H_y);
-I_H_y = method_data(H_y(2:end)-H_y(1:end-1)+H_D_y+H_R_y(1:end-1));
-I_o = method_data(I_H_o./alpha_iho);
-I_R_o = method_data(alpha_iro(1:end-1).*I_o); I_o = [I_o(1);I_o];
-X_o = method_data(I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
-I_y = method_data(I_H_y./alpha_ihy);
-I_R_y = method_data(alpha_iry(1:end-1).*I_y); I_y = [I_y(1);I_y];
-X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
+H_R_o = alpha_hro.*H_o;
+I_H_o = (H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o(1:end-1);
+H_R_y = alpha_hry.*H_y;
+I_H_y = (H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y(1:end-1);
+I_o = I_H_o./alpha_iho;
+I_R_o = alpha_iro(1:end-1).*I_o; I_o = [I_o(1);I_o];
+X_o = (I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
+I_y = I_H_y./alpha_ihy;
+I_R_y = alpha_iry(1:end-1).*I_y; I_y = [I_y(1);I_y];
+X_y = (I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 X = X_o+X_y;
 I = I_o+I_y;
-rho_real = X_o./X;
-plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
-figure;plot(rho);hold on;plot(rho_real);
+% 
+% 
+% 
+% 
+% H_D = (D(2:end)-D(1:end-1));
+% % d = (D(2:end)-D(1:end-1));
+% % xxx=get_wa(y(2:end),H,30);
+% H_D_o = varsigma.*H_D;
+% H_D_y = H_D-H_D_o;
+% %
+% figure;plot(H_D_o,'linewidth',1);hold on;plot(H_D_y,'linewidth',1);plot(H_D,'k','linewidth',1);title('HD');legend({'HDo','HDy','HD'});grid on;
+% %
+% H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o); H_y_H_o = [H_y_H_o(1);H_y_H_o(:)];
+% H_y = H_y_H_o./(H_y_H_o+1).*H;
+% H_o = H-H_y;
+% alpha_hdy0 = (H_D_y./H_y(1:end-1));
+% alpha_hdo0 = (H_D_o./H_o(1:end-1));
+% alpha_hry = (1-omega_y)./T_rec_y;
+% figure;plot(H_o,'linewidth',1);hold on;plot(H_y,'linewidth',1);plot(H,'k','linewidth',1);title('H');legend({'Ho','Hy','H'});grid on;
+% %
+% figure;
+% subplot(2,1,1);plot(alpha_hdy0,'linewidth',1);hold on;plot(alpha_hdy0*0+alpha_hdy,'linewidth',1);plot(alpha_hdy0*0+mean(alpha_hdy0),'k','linewidth',1);title('alpha_hdy');legend({'alpha_hdy(t)','alpha_hdy','mean(alpha_hdy(t))'});grid on;
+% subplot(2,1,2);plot(alpha_hdo0,'linewidth',1);hold on;plot(alpha_hdo0*0+alpha_hdo,'linewidth',1);plot(alpha_hdo0*0+mean(alpha_hdo0),'k','linewidth',1);title('alpha_hdo');legend({'alpha_hdy(t)','alpha_hdy','mean(alpha_hdy(t))'});grid on;
+% 
+% % omega_y = T_death_y.*alpha_hdy;                                  
+% % omega_o = T_death_o.*alpha_hdo;
+% alpha_hro = (1-omega_o)./T_rec_o;
+% H_R_o = alpha_hro.*H_o(1:end-1);
+% I_H_o = (H_o(2:end)-H_o(1:end-1))+H_D_o+H_R_o;
+% H_R_y = alpha_hry.*H_y(1:end-1);
+% I_H_y = (H_y(2:end)-H_y(1:end-1))+H_D_y+H_R_y;
+% %
+% figure;
+% subplot(2,1,1);plot(H_R_o,'linewidth',1);hold on;plot(H_R_y,'linewidth',1);plot(H_R_o+H_R_y,'k','linewidth',1);title('HR');legend({'HRo','HRy','HR'});grid on;
+% subplot(2,1,2);plot(I_H_o,'linewidth',1);hold on;plot(I_H_y,'linewidth',1);plot(I_H_o+I_H_y,'k','linewidth',1);title('IH');legend({'IHo','IHy','IH'});grid on;
+% 
+% I_o = I_H_o./alpha_iho;
+% I_R_o = alpha_iro.*I_o; 
+% X_o = (I_o(2:end)-I_o(1:end-1))+I_H_o(1:end-1)+I_R_o(1:end-1);
+% I_y = I_H_y./alpha_ihy;
+% I_R_y = alpha_iry.*I_y; 
+% X_y = (I_y(2:end)-I_y(1:end-1))+I_H_y(1:end-1)+I_R_y(1:end-1);
+% figure;
+% subplot(2,1,1);plot(I_R_o,'linewidth',1);hold on;plot(I_R_y,'linewidth',1);plot(I_R_o+I_R_y,'k','linewidth',1);title('IR');legend({'IRo','IRy','IR'});grid on;
+% subplot(2,1,2);plot(I_o,'linewidth',1);hold on;plot(I_y,'linewidth',1);plot(I_o+I_y,'k','linewidth',1);title('I');legend({'Io','Iy','I'});grid on;
+% %
+% X = X_o+X_y;
+% I = I_o+I_y;
 
+figure;plot(X,'linewidth',1');hold on;plot(dI_data,'k','linewidth',1);grid on; title('X');legend({'implied','reported'});
 % adjust series endpoints and get ratio
 obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
 X = adjust_tail(X,2);
@@ -118,7 +176,11 @@ sa.loss_y = sa.Xy-dI_data_reported_young;
 
 % store params
 p.alpha_hdy = alpha_hdy;
+p.omega_y = omega_y;
+p.alpha_hdy_t = H_D_y./H_y(1:end-1);
 p.alpha_hdo = alpha_hdo;
+p.omega_o = omega_o;
+p.alpha_hdo_t = H_D_o./H_o(1:end-1);
 p.alpha_hry = alpha_hry;
 p.alpha_hro = alpha_hro;
 p.alpha_ihy = alpha_ihy;
@@ -160,15 +222,7 @@ p.varsigma = varsigma;
         end        
     end
 
-%     function [x] = get_rv(y)
-%         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
-%         L = length(shape0);
-%         shape0_vec = repmat(shape0,N,1);
-%         scale0_vec = scale0*ones(N,L);
-%         x = gamrnd(shape0_vec,scale0_vec);
-%     end
-
-function [x] = get_wa(weight,Z,alpha,idxFrom)
+    function [x] = get_wa(weight,Z,alpha,idxFrom)
         k = length(weight);
         t = length(Z)-idxFrom+1;
         W = repmat(weight,t,1);
@@ -200,5 +254,13 @@ function [x] = get_wa(weight,Z,alpha,idxFrom)
         Weight_mat = Weight_mat./sum(Weight_mat,2);
         x = (Weight_mat.*Alpha_mat)\Z(end-t-k+1:end-1); 
     end
+
+%     function [x] = get_rv(y)
+%         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
+%         L = length(shape0);
+%         shape0_vec = repmat(shape0,N,1);
+%         scale0_vec = scale0*ones(N,L);
+%         x = gamrnd(shape0_vec,scale0_vec);
+%     end
 
 end

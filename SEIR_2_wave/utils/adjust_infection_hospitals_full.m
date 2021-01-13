@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay,srec)
+function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
@@ -19,11 +19,6 @@ T_delay_0 = delay.v0;               T_delay_1 = delay.v1;
 T_delay_at = delay.at;
 T_delay = zeros(T,1)+T_delay_0;     T_delay(T_delay_at-dateFrom:end) = T_delay_1;
 T_delay = method_params(T_delay);
-% shortening recovery peiod
-T_short_0 = srec.v0;                T_short_1 = 0*srec.v1;           
-T_short_at = srec.at;
-T_short = zeros(T,1)+T_short_0;     T_short(T_short_at-dateFrom:end) = T_short_1;
-T_short = method_params(T_short);
 
 % parameters
 % I->H/N
@@ -32,8 +27,8 @@ lambda_ino = s.eta_o+0.04;    T_hosp_o = s.T_hosp_o;   T_sick_o = s.T_sick_o.mea
 alpha_iry = (1-lambda_iny)./T_sick_y; alpha_iny = lambda_iny./T_hosp_y; 
 alpha_iro = (1-lambda_ino)./T_sick_o; alpha_ino = lambda_ino./T_hosp_o; 
 % N->C
-lambda_ncy = (7.61-3)*3/100;    T_icu_y = 3;      T_rec_ny = 6.9-2-T_short;
-lambda_nco = (7.61+3)*3/100;    T_icu_o = 3;      T_rec_no = 6.9+2-T_short;
+lambda_ncy = (7.61-3)*3/100;    T_icu_y = 3;      T_rec_ny = 6.9-2;
+lambda_nco = (7.61+3)*3/100;    T_icu_o = 3;      T_rec_no = 6.9+2;
 alpha_ncy = lambda_ncy./T_icu_y; alpha_nry = (1-lambda_ncy)./T_rec_ny; 
 alpha_nco = lambda_nco./T_icu_o; alpha_nro = (1-lambda_nco)./T_rec_no; 
 % C->V
