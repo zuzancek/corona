@@ -1,4 +1,4 @@
-function [out] = adjust_hospitals_infection(x,p,s,init,dateFrom,dateTo)
+function [out] = XIHD(x,p,s,init,dateFrom,dateTo)
 
 T = dateTo-dateFrom+1;
 I0 = init.I;     

@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = adjust_infection_hospitals_full(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
+function [X,I,obs_ratio_adj,sa,p] = DHIXe(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 

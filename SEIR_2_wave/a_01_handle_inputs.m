@@ -11,8 +11,8 @@ db_asympt = dbload('data/asymptomatical_cases_share.csv','dateFormat','yyyy-mm-d
 s = setparam();
 idx_fun = 2;
 out_filename_opt = {'inputs_full.mat','inputs.mat'}; out_filename = out_filename_opt{idx_fun};
-fun_opt_0 = {'adjust_infection_hospitals_full','adjust_infection_hospitals'}; fun_0 = str2func(fun_opt_0{idx_fun});
-fun_opt_1 = {'adjust_hospitals_infection_full','adjust_hospitals_infection'}; fun_1 = str2func(fun_opt_1{idx_fun});
+fun_opt_0 = {'DHIXe','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
+fun_opt_1 = {'XIHDe','XIHD'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
 
