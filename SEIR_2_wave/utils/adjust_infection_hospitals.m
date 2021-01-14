@@ -52,8 +52,8 @@ H_D_y = H_D-H_D_o;
 H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
 H_y = method_params(H_y_H_o./(H_y_H_o+1)).*H;
 H_o = H-H_y;
-alpha_hdy = method_params(H_D_y./H_y(1:end-1)); alpha_hry = method_params((1-alpha_hdy.*T_death_y)./T_rec_y);alpha_hry = [alpha_hry(1);alpha_hry];
-alpha_hdo = method_params(H_D_o./H_y(1:end-1)); alpha_hro = method_params((1-alpha_hdo.*T_death_o)./T_rec_o);alpha_hro = [alpha_hro(1);alpha_hro];
+% alpha_hdy = method_params(H_D_y./H_y(1:end-1)); alpha_hry = method_params((1-alpha_hdy.*T_death_y)./T_rec_y);alpha_hry = [alpha_hry(1);alpha_hry];
+% alpha_hdo = method_params(H_D_o./H_y(1:end-1)); alpha_hro = method_params((1-alpha_hdo.*T_death_o)./T_rec_o);alpha_hro = [alpha_hro(1);alpha_hro];
 H_R_o = method_data(alpha_hro.*H_o);
 I_H_o = method_data(H_o(2:end)-H_o(1:end-1)+H_D_o+H_R_o(1:end-1));
 H_R_y = method_data(alpha_hry.*H_y);
@@ -66,7 +66,7 @@ I_R_y = method_data(alpha_iry(1:end-1).*I_y); I_y = [I_y(1);I_y];
 X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 X = X_o+X_y;
 I = I_o+I_y;
-rho_real = X_o./X;
+rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
 plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
 figure;plot(rho);hold on;plot(rho_real);
 
@@ -129,7 +129,7 @@ p.T_rec_y = T_rec_y;
 p.T_rec_o = T_rec_o;
 p.T_sick_y = T_sick_y;
 p.T_sick_o = T_sick_o;
-p.rho = rho;
+p.rho = rho_real;
 p.rho_ext = rho_ext;
 p.varsigma = varsigma;
 

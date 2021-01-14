@@ -6,7 +6,11 @@ H0 = init.H;
 D0 = init.D;
 
 method_params = s.smoothing_method_params;
-rho = method_params(init.rho); rho = rho(dateFrom:dateTo);
+try
+    rho = p.rho;
+catch err
+    rho = method_params(init.rho); rho = rho(dateFrom:dateTo);
+end
 varsigma = method_params(init.varsigma); varsigma = varsigma(dateFrom:dateTo);
      
 alpha_ihy = s.eta_y/s.T_hosp_y;        
@@ -47,9 +51,9 @@ for t=1:T-1
     I_o(t+1) = I_o(t)+X_o(t)-d_I_H_o(t)-d_I_R_o(t);
     d_I_H_y(t) = alpha_ihy.*I_y(t);  d_I_R_y(t) = alpha_iry(t).*I_y(t);
     I_y(t+1) = I_y(t)+X_y(t)-d_I_H_y(t)-d_I_R_y(t);
-    d_H_D_o(t) = alpha_hdo(t).*H_o(t);  d_H_R_o(t) = alpha_hro(t).*H_o(t);
+    d_H_D_o(t) = alpha_hdo.*H_o(t);  d_H_R_o(t) = alpha_hro.*H_o(t);
     H_o(t+1) = H_o(t)+d_I_H_o(t)-d_H_D_o(t)-d_H_R_o(t);
-    d_H_D_y(t) = alpha_hdy(t).*H_y(t);  d_H_R_y(t) = alpha_hry(t).*H_y(t);
+    d_H_D_y(t) = alpha_hdy.*H_y(t);  d_H_R_y(t) = alpha_hry.*H_y(t);
     H_y(t+1) = H_y(t)+d_I_H_y(t)-d_H_D_y(t)-d_H_R_y(t);
     D_o(t+1) = D_o(t)+d_H_D_o(t);
     D_y(t+1) = D_y(t)+d_H_D_y(t);

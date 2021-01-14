@@ -14,7 +14,7 @@ s.wave_2_from = dd(2020,9,1);
 % serial interval (generation period)
 s.SI.mean = 7.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test.mean = 3;             s.T_test.std = s.SI.std;      
+s.T_test.mean = 2;             s.T_test.std = s.SI.std;      
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period
@@ -47,13 +47,13 @@ s.T_rec = 11.7;
 s.symp_ratio_obs = 0.55;
 % death probability/time
 s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  %31
-s.T_death_y = 3.41+6;       s.T_death_o = 4.59+7;  
+s.T_death_y = 3.41+4;       s.T_death_o = 4.59+5;  
 % recovery at hospital
-s.T_rec_y = 10.2;            s.T_rec_o = 12.5;
+s.T_rec_y = 10.1;            s.T_rec_o = 12.5;
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.eta_y = 4.95/100;         s.eta_o = 30.86/100;
-s.T_hosp_y = 6;             s.T_hosp_o = 3;
+s.eta_y = 3.32/100;         s.eta_o = 31.86/100;
+s.T_hosp_y = 4;             s.T_hosp_o = 4;
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
 s.kappa_res_delta_0 = -0.5;
