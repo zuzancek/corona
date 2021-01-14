@@ -27,10 +27,9 @@ T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_dela
 
 % death: najpr time-inconsistent, potom konzistentne
 omega_y = s.omega_y;       omega_o = s.omega_o;         omega = (omega_o.*varsigma+omega_y)./(1+varsigma);
-T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death.mean = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
-T_death.std = s.T_death.std;
-k_death = 10; x_death = 1:k_death; T_death_shape = T_death.mean*T_death_std^2; T_death_scale = 1/T_death_std^2;
-p_T_death = pdf('Gamma',x_death,T_death_shape,T_death_scale);
+T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
+k_death = 10; x_death = 1:k_death; T_death_shape = T_death*s.T_death.std^2; T_death_scale = 1/s.T_death.std^2;
+p_T_death = pdf('Gamma',repmat(x_death,length(varsigma),1)',T_death_shape,T_death_scale+0.*T_death_shape);
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
 % T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
