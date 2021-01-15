@@ -2,17 +2,22 @@ function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,t1,params,d
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
-method_params = s.smoothing_method_params; 
+method_params = s.smoothing_method_params;
+firstData = dateFrom-31;% params.dataFrom;
+tshift = dateFrom-firstData;
+idxstr.D.validFrom = 1;
+idxstr.D.dispFrom = tshift+1;
+idxstr.H.validFrom = 1;
+idxstr.H.dispFrom = tshift+1;
+idxstr.HD.validFrom = 1;
+idxstr.HD.dispFrom = tshift+1;
 
-death_old_ratio = method_params(params.death_old_ratio);
-varsigma = death_old_ratio(dateFrom:dateTo);
+varsigma = extend(double(params.death_old_ratio),tshift);
 % cfr_hospitals = method(params.cfr_hospitals);
 % delta = cfr_hospitals(dateFrom:dateTo);
-cases_old_ratio = method_params(params.cases_old_ratio);
-rho = cases_old_ratio(dateFrom:dateTo);
-rho_ext = cases_old_ratio;
-asymp_ratio = method_params(params.asymp_ratio);
-sigma = asymp_ratio(dateFrom:dateTo);
+rho = method_params(params.cases_old_ratio(firstData:dateTo));
+asymp_ratio = method_params(params.asymp_ratio(firstData:dateTo));
+sigma = method_params(params.asymp_ratio(firstData:dateTo));
 
 % delay in testing (gradual)
 T_delay = NaN+zeros(T,1); T_delay(1) = 0;
@@ -33,9 +38,9 @@ p_T_death = pdf('Gamma',repmat(x_death,length(varsigma),1),repmat(T_death_shape,
 % hospitalizations
 % old-young share in hospitals
 zeta0 = (1-varsigma)./varsigma.*omega_y./omega_o; zeta = zeta0./(1+zeta0);
-% recovery
+% recovery     
 T_rec_y = s.T_rec_y;    T_rec_o = s.T_rec_o;            T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
-k_rec = 20; x_rec = 1:k_rec;      T_rec_shape = T_rec*s.SI.std^2; T_rec_scale = 1/s.SI.std^2;  
+k_rec = 20; x_rec = 1:k_rec;   T_rec_shape = T_rec*s.SI.std^2; T_rec_scale = 1/s.SI.std^2;
 p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),repmat(T_rec_scale,length(zeta),k_rec));
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
@@ -54,16 +59,20 @@ p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),r
 
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo));
-D = method_data(d(dateFrom:dateTo));
-H = method_data(h.Hospitalizations(dateFrom:dateTo));
-H0 = method_data(h.Hospitalizations(dateFrom-k_death:dateTo));
+D = x.Deaths(firstData:dateTo)*d(dateFrom)/x.Deaths(dateFrom); 
+D(tshift+1:end) = method_data(d(dateFrom:dateTo));
+H = method_data(h.Hospitalizations(firstData:dateTo));
 
-HD = method_data(D(2:end)-D(1:end-1)); HD = [HD(1);HD(:)];
-HD_0 = get_wa(p_T_death,H0,omega,k_death);
-gamma_hd = HD./HD_0;
+H0 = method_data(h.Hospitalizations(dateFrom-k_death:dateTo));
+H01 = method_data(h.Hospitalizations(dateFrom-k_rec:dateTo));
+
+HD = method_data(D(2:end)-D(1:end-1));  HD = [HD(1);HD(:)];
+hd = get_wa(p_T_death(k_death+1:end,:),H,omega(k_death+1:end),k_death);
+gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
 gamma_hd = method_params(gamma_hd);
-alpha_rec = 1-omega.*gamma_hd;
-HR = get_wa_inv(p_T_rec,H0,alpha_rec,k_rec);
+alpha_rec = 1-omega.*gamma_hd; 
+HR = alpha_rec./T_rec.*H;
+% HR = get_wa_inv(p_T_rec,H01,alpha_rec,k_rec);
 
 
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
@@ -229,6 +238,13 @@ p.varsigma = varsigma;
         Alpha_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[A(:),A0(:)]);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
         x = (Weight_mat.*Alpha_mat)\Z(end-t-k+1:end-1); 
+    end
+
+    function [y] = extend(x,t0)
+        xlen = length(x);
+        z = x(1)+zeros(xlen+t0,1);
+        z(t0+1:end) = x;
+        y = method_params(z);
     end
 
 end
