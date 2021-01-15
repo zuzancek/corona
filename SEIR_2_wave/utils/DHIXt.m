@@ -29,7 +29,14 @@ T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_dela
 omega_y = s.omega_y;       omega_o = s.omega_o;         omega = (omega_o.*varsigma+omega_y)./(1+varsigma);
 T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
 k_death = 10; x_death = 1:k_death; T_death_shape = T_death*s.T_death.std^2; T_death_scale = 1/s.T_death.std^2;
-p_T_death = pdf('Gamma',repmat(x_death,length(varsigma),1)',T_death_shape,T_death_scale+0.*T_death_shape);
+p_T_death = pdf('Gamma',repmat(x_death,length(varsigma),1),repmat(T_death_shape,1,k_death),repmat(T_death_scale,length(varsigma),k_death));
+% hospitalizations
+% old-young share in hospitals
+zeta0 = (1-varsigma)./varsigma.*omega_y./omega_o; zeta = zeta0./(1+zeta0);
+% recovery
+T_rec_y = s.T_rec_y;    T_rec_o = s.T_rec_o;            T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
+k_rec = 20; x_rec = 1:k_rec;      T_rec_shape = T_rec*s.SI.std^2; T_rec_scale = 1/s.SI.std^2;  
+p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),repmat(T_rec_scale,length(zeta),k_rec));
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
 % T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
@@ -51,9 +58,13 @@ D = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(dateFrom:dateTo));
 H0 = method_data(h.Hospitalizations(dateFrom-k_death:dateTo));
 
-HD = (D(2:end)-D(1:end-1));
-HD_0 = get_wa(p_T_death,H,omega,k_death);
+HD = method_data(D(2:end)-D(1:end-1)); HD = [HD(1);HD(:)];
+HD_0 = get_wa(p_T_death,H0,omega,k_death);
 gamma_hd = HD./HD_0;
+gamma_hd = method_params(gamma_hd);
+alpha_rec = 1-omega.*gamma_hd;
+HR = get_wa_inv(p_T_rec,H0,alpha_rec,k_rec);
+
 
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
 % H_y = method_params(H_y_H_o./(H_y_H_o+1)).*H;
@@ -175,10 +186,17 @@ p.varsigma = varsigma;
 %     end
 
     function [x] = get_wa(weight,Z,alpha,idxFrom)
-        k = length(weight);
-        t = length(Z)-idxFrom+1;
-        W = repmat(weight,t,1);
-        A = repmat(alpha./(1:k),t,1);
+        sz = size(weight);
+        k = sz(2);k0 = sz(1);
+        %k = length(weight);
+        t = length(Z)-idxFrom;
+        if k0==1
+            W = repmat(weight,t,1);
+            A = repmat(alpha./(1:k),t,1);
+        else
+            W = weight;
+            A = alpha./(1:k);
+        end
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
         L = 0*(k-1)+repmat((1:t)',1,k);
         Weight_mat = sparse(L,J,W);
@@ -188,11 +206,17 @@ p.varsigma = varsigma;
     end
 
     function [x] = get_wa_inv(weight,Z,phi,idxFrom)
-        k = length(weight);
-        t = length(Z)-idxFrom+1;
-        W = repmat(weight,t,1);
+        sz = size(weight);
+        k = sz(2);k0 = sz(1);
+        t = length(Z)-idxFrom;
         a = phi./(1:k);
-        A = repmat(a,t,1);
+        if k0==1
+            W = repmat(weight,t,1);
+            A = repmat(a,t,1);
+        else
+            W = weight;
+            A = a;
+        end        
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
         L = (k-1)+repmat((1:t)',1,k);
         U0 = tril(repmat(1:k-1,k-1,1)); 
