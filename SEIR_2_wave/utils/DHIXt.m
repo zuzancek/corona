@@ -72,7 +72,7 @@ gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
 gamma_hd = method_params(gamma_hd);
 alpha_rec = 1-omega.*gamma_hd; 
 HR = alpha_rec./T_rec.*H;
-% HR = get_wa_inv(p_T_rec,H01,alpha_rec,k_rec);
+% HR = get_wa_inv(p_T_rec(k_rec+1:end,:),H,alpha_rec(k_rec+1:end),k_rec);
 
 
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
@@ -218,24 +218,25 @@ p.varsigma = varsigma;
         sz = size(weight);
         k = sz(2);k0 = sz(1);
         t = length(Z)-idxFrom;
-        a = phi./(1:k);
+        aalpha = phi./(1:k);
         if k0==1
             W = repmat(weight,t,1);
-            A = repmat(a,t,1);
+            A = repmat(aalpha,t,1);
         else
             W = weight;
-            A = a;
+            A = aalpha;
         end        
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
         L = (k-1)+repmat((1:t)',1,k);
         U0 = tril(repmat(1:k-1,k-1,1)); 
-        U0(U0==0) = k+1; w(end+1) = 0;
-        J0 = repmat(1:k-1,k-1,1);
-        L0 = repmat((1:k-1)',1,k-1);
-        W0 = w(U0(U0~=0));
-        A0 = a(U0(U0~=0));
-        Weight_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[W(:),W0(:)]);
-        Alpha_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[A(:),A0(:)]);
+        % U0(U0==0) = k+1; 
+        J0 = repmat(1:k-1,k-1,1); J0 = J0(U0~=0);
+        L0 = repmat((1:k-1)',1,k-1); L0 = L0(U0~=0);
+        w = weight(k,:); w(end+1) = 0; a = aalpha(k,:);
+        W0 = w(U0(U0~=0))'; 
+        A0 = a(U0(U0~=0))';
+        Weight_mat = sparse([L(:);L0(:)],[J(:);J0(:)],[W(:);W0(:)]);
+        Alpha_mat = sparse([L(:);L0(:)],[J(:);J0(:)],[A(:);A0(:)]);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
         x = (Weight_mat.*Alpha_mat)\Z(end-t-k+1:end-1); 
     end
