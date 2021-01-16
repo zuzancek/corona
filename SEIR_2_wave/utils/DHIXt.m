@@ -31,17 +31,29 @@ end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 
 % death: najpr time-inconsistent, potom konzistentne
-omega_y = s.omega_y;       omega_o = s.omega_o;         omega = (omega_o.*varsigma+omega_y)./(1+varsigma);
-T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
-k_death = 10; x_death = 1:k_death; T_death_shape = T_death*s.T_death.std^2; T_death_scale = 1/s.T_death.std^2;
-p_T_death = pdf('Gamma',repmat(x_death,length(varsigma),1),repmat(T_death_shape,1,k_death),repmat(T_death_scale,length(varsigma),k_death));
+% omega_y = s.omega_y;       omega_o = s.omega_o;         omega = (omega_o.*varsigma+omega_y)./(1+varsigma);
+% T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
+% T_death_shape = T_death*s.T_death.std^2; T_death_scale = 1/s.T_death.std^2;
+omega_y = 2.9/100;       omega_o = 21.7/100;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); % means
+T_death_y = 6.37;        T_death_o = 8.78;            T_death = T_death_o.*varsigma+T_death_y.*(1-varsigma);
+k_death = 30; x_death = 1:k_death;                    
+p_T_death = pdf('Exponential',repmat(x_death,length(varsigma),1),repmat(T_death,1,k_death));
 % hospitalizations
 % old-young share in hospitals
 zeta0 = (1-varsigma)./varsigma.*omega_y./omega_o; zeta = zeta0./(1+zeta0);
 % recovery     
-T_rec_y = s.T_rec_y;    T_rec_o = s.T_rec_o;            T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
-k_rec = 20; x_rec = 1:k_rec;   T_rec_shape = T_rec*s.SI.std^2; T_rec_scale = 1/s.SI.std^2;
+% T_rec_y = s.T_rec_y;    T_rec_o = s.T_rec_o;            T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
+T_rec_y = 6.566; T_rec_o = 9.527; T_rec_std = 0.61; T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
+k_rec = 30; x_rec = 1:k_rec;   T_rec_shape = T_rec*T_rec_std^2; T_rec_scale = 1/T_rec_std^2;
 p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),repmat(T_rec_scale,length(zeta),k_rec));
+% hospital admission
+lambda_y = 2.32/100;    lambda_o = 31.86/100;         
+theta0 = (1-zeta)./zeta.*lambda_y./lambda_o; theta = theta0./(1+theta0);
+lambda = theta.*lambda_o+(1-theta).*lambda_y;
+T_hosp_y = 5.63;        T_hosp_o = 1.33;              T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
+k_hosp = 20; x_hosp = 1:k_hosp;                   
+p_T_hosp = pdf('Exponential',repmat(x_hosp,length(varsigma),1),repmat(T_hosp,1,k_hosp));
+
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
 % T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
@@ -71,9 +83,9 @@ hd = get_wa(p_T_death(k_death+1:end,:),H,omega(k_death+1:end),k_death);
 gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
 gamma_hd = method_params(gamma_hd);
 alpha_rec = 1-omega.*gamma_hd; 
-HR = alpha_rec./T_rec.*H;
-% HR = get_wa_inv(p_T_rec(k_rec+1:end,:),H,alpha_rec(k_rec+1:end),k_rec);
-
+% HR = alpha_rec./T_rec.*H;
+HR = extend(get_wa(p_T_rec(k_rec+1:end,:),H,alpha_rec(k_rec+1:end),k_rec),k_rec);
+IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = [IH(1);IH(:)];
 
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
 % H_y = method_params(H_y_H_o./(H_y_H_o+1)).*H;
