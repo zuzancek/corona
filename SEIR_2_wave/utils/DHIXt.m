@@ -1,9 +1,9 @@
 function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
-method_data = s.smoothing_method_data; 
+method_data = s.smoothing_method_params; 
 method_params = s.smoothing_method_params;
-firstData = dateFrom-31;% params.dataFrom;
+firstData = dateFrom-31;
 tshift = dateFrom-firstData;
 
 varsigma = extend(double(params.death_old_ratio),tshift);
@@ -24,14 +24,14 @@ if dlen
 end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 
-% death: najpr time-inconsistent, potom konzistentne
-% omega_y = s.omega_y;       omega_o = s.omega_o;         omega = (omega_o.*varsigma+omega_y)./(1+varsigma);
-% T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
-% T_death_shape = T_death*s.T_death.std^2; T_death_scale = 1/s.T_death.std^2;
+% death: najprv time-inconsistent
 omega_y = 2.9/100;       omega_o = 21.7/100;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); % means
-T_death_y = 6.37;        T_death_o = 8.78;            T_death = T_death_o.*varsigma+T_death_y.*(1-varsigma);
-k_death = 30; x_death = 1:k_death;                    
-p_T_death = pdf('Exponential',repmat(x_death,length(varsigma),1),repmat(T_death,1,k_death));
+T_death_y = 6.37;        T_death_o = 8.78;      
+% T_death_y,T_death_o are iid exponentially distributed 
+k_death = 30; x_death = 1:k_death;
+po = 1./(T_death_o.*varsigma); py = 1./(T_death_y.*(1-varsigma));
+p_T_death = repmat(po.*py./(po-py),1,k_death).*(exp(-py*x_death)-exp(-po*x_death));
+% p_T_death = pdf('Exponential',repmat(x_death,length(varsigma),1),repmat(T_death,1,k_death));
 % hospitalizations
 % old-young share in hospitals
 zeta0 = (varsigma)./(1-varsigma).*omega_y./omega_o; zeta = zeta0./(1+zeta0);
@@ -44,15 +44,24 @@ p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),r
 lambda_y = 2.32/100;    lambda_o = 31.86/100;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = 6.63;        T_hosp_o = 3.33;              T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
+T_hosp_y = 6.63;        T_hosp_o = 3.33;              % T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
 k_hosp = 20; x_hosp = 1:k_hosp;                   
-p_T_hosp = pdf('Exponential',repmat(x_hosp,length(varsigma),1),repmat(T_hosp,1,k_hosp));
+po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
+p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
 % infections
 % recovery from sickness
 T_sick_y = s.SI.mean-1; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y;
 k_sick = 20; x_sick = 1:k_sick;   T_sick_shape = T_sick*T_sick_std^2; T_sick_scale = 1/T_sick_std^2;
 eta = 1-lambda;
 p_T_sick = pdf('Gamma',repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
+
+% time shift
+ks = 30;xs = 1:ks;
+pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1-varsigma));
+pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
+lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
+p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
+T_shift = xs(find(p_T_shift==max(p_T_shift)))+1;
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
 % T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
@@ -82,7 +91,7 @@ gamma_hd = method_params(gamma_hd);
 alpha = 1-omega.*gamma_hd; 
 HR = extend(get_wa(p_T_rec,H,alpha,k_rec),k_rec);
 IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = method_data([IH(1);IH(:)]);
-I = method_data(get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));
+I = (get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));I = method_data([I(1);I(:)]);
 IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
 X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
