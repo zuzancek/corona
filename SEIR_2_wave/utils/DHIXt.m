@@ -5,12 +5,6 @@ method_data = s.smoothing_method_data;
 method_params = s.smoothing_method_params;
 firstData = dateFrom-31;% params.dataFrom;
 tshift = dateFrom-firstData;
-idxstr.D.validFrom = 1;
-idxstr.D.dispFrom = tshift+1;
-idxstr.H.validFrom = 1;
-idxstr.H.dispFrom = tshift+1;
-idxstr.HD.validFrom = 1;
-idxstr.HD.dispFrom = tshift+1;
 
 varsigma = extend(double(params.death_old_ratio),tshift);
 % cfr_hospitals = method(params.cfr_hospitals);
@@ -50,7 +44,7 @@ p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),r
 lambda_y = 2.32/100;    lambda_o = 31.86/100;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = 5.63;        T_hosp_o = 1.33;              T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
+T_hosp_y = 6.63;        T_hosp_o = 3.33;              T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
 k_hosp = 20; x_hosp = 1:k_hosp;                   
 p_T_hosp = pdf('Exponential',repmat(x_hosp,length(varsigma),1),repmat(T_hosp,1,k_hosp));
 % infections
@@ -79,19 +73,16 @@ dI_data = method_data(x.NewCases(dateFrom:dateTo));
 D = x.Deaths(firstData:dateTo)*d(dateFrom)/x.Deaths(dateFrom); 
 D(tshift+1:end) = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(firstData:dateTo));
-
-H0 = method_data(h.Hospitalizations(dateFrom-k_death:dateTo));
-H01 = method_data(h.Hospitalizations(dateFrom-k_rec:dateTo));
+AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 HD = method_data(D(2:end)-D(1:end-1));  HD = [HD(1);HD(:)];
 hd = get_wa(p_T_death,H,omega,k_death);
 gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
 gamma_hd = method_params(gamma_hd);
 alpha = 1-omega.*gamma_hd; 
-% HR = alpha_rec./T_rec.*H;
 HR = extend(get_wa(p_T_rec,H,alpha,k_rec),k_rec);
-IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = [IH(1);IH(:)];
-I = get_wa_inv(p_T_hosp(k_hosp+1:end,:),IH,lambda(k_hosp+1:end),k_hosp);
+IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = method_data([IH(1);IH(:)]);
+I = method_data(get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));
 IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
 X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
@@ -236,12 +227,12 @@ p.varsigma = varsigma;
         x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
     end
 
-    function [x] = get_wa_inv(weight,z,x0,alpha,idxFrom)
+    function [x] = get_wa_inv(weight,zvec,x0,alpha,idxFrom)
         sz = size(weight);
         weight = weight(idxFrom+1:end,:);
         alpha = alpha(idxFrom+1:end,:);
         k = sz(2);k0 = sz(1);
-        t = length(z)-idxFrom;
+        t = length(zvec)-idxFrom;
         phi = alpha./(1:k);
         if k0==1
             W = repmat(weight(k:-1:1),t,1);
@@ -251,7 +242,7 @@ p.varsigma = varsigma;
             A = phi(:,(k:-1:1));
         end        
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
-        L = (k-1)+repmat((1:t)',1,k);
+        L = repmat((1:t)',1,k);
 %         U0 = tril(repmat(1:k-1,k-1,1)); 
 %         % U0(U0==0) = k+1; 
 %         J0 = repmat(1:k-1,k-1,1); J0 = J0(U0~=0);
@@ -261,12 +252,13 @@ p.varsigma = varsigma;
 %         A0 = a(U0(U0~=0))';
         Weight_mat = sparse(L(:),J(:),W(:));
         Alpha_mat = sparse(L(:),J(:),A(:));
-        x = zeros(t+k-1,1);x(1:k-1) = x0;
+        x = zeros(t+k-1,1);
+        x(1:k-1) = x0(1:idxFrom-1);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
         function [d] = solve_lineqn(xx0)
-            d=(Weight_mat.*Alpha_mat)*xx0 - z(end-t+1:end);
+            d=(Weight_mat.*Alpha_mat)*xx0 - zvec(end-t+1:end);
         end
-        x = fsolve(@solve_lineqn,x);
+        x = fsolve(@solve_lineqn,x,optimoptions('fsolve','Display','off','Algorithm','Levenberg-Marquardt'));
     end
 
 %     function [x] = get_wa_inv(weight,Z,alpha,idxFrom)
