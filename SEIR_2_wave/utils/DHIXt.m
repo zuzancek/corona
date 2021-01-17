@@ -50,7 +50,8 @@ po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
 p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
 % infections
 % recovery from sickness
-T_sick_y = s.SI.mean-1; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y;
+T_delay = extend(T_delay,length(theta)-length(T_delay));
+T_sick_y = s.SI.mean-1; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay;
 k_sick = 20; x_sick = 1:k_sick;   T_sick_shape = T_sick*T_sick_std^2; T_sick_scale = 1/T_sick_std^2;
 eta = 1-lambda;
 p_T_sick = pdf('Gamma',repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
@@ -61,7 +62,7 @@ pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1
 pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
 lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
 p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
-T_shift = xs(find(p_T_shift==max(p_T_shift)))+1;
+T_shift = ceil(dot(p_T_shift,xs)); %xs(find(p_T_shift==max(p_T_shift)))+1;
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
 % T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
@@ -111,6 +112,10 @@ X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 % X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 % X = X_o+X_y;
 % I = I_o+I_y;
+Xts = smooth_series(X(tshift+8:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xrts = (X(tshift+8:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Ots = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
+figure;plot(Xts,'c','linewidth',1);hold on;plot(Xrts,'k','linewidth',1);plot(Ots,'m','linewidth',1);grid on;
 rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
 plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
 figure;plot(rho);hold on;plot(rho_real);
