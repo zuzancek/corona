@@ -119,7 +119,7 @@ Ots = smooth_series(Orts);
 figure;plot(Xts,'c','linewidth',2);hold on;plot(Xrts,'k','linewidth',1);
 plot(Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);grid on;plot(Ots,'m','linewidth',2);grid on;
 figure; plot(rho./(1-rho),'linewidth',1);hold on;
-plot(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma),'linewidth'1);grid on;
+plot(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma),'linewidth',1);grid on;
 rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
 plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
 figure;plot(rho);hold on;plot(rho_real);
