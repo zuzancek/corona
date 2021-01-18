@@ -1,7 +1,7 @@
 function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
-method_data = s.smoothing_method_params; 
+method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
 firstData = dateFrom-31;
 tshift = dateFrom-firstData;
@@ -112,8 +112,8 @@ X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 % X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 % X = X_o+X_y;
 % I = I_o+I_y;
-Xts = smooth_series(X(tshift+8:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift+8:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xts = smooth_series(X(tshift+T_shift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Ots = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 figure;plot(Xts,'c','linewidth',1);hold on;plot(Xrts,'k','linewidth',1);plot(Ots,'m','linewidth',1);grid on;
 rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
