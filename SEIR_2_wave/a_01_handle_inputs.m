@@ -33,6 +33,7 @@ h_t1 = enddate(hosp.ICU);
 y = process_inputs(x,tt0,t1);
 dI_inflow_ag = y.AgPosit;
 dI_inflow_pcr = resize(x.NewCases,tt0:t1);
+dI_inflow_pcr(end) = dI_inflow_pcr(end-4);
 dI_inflow_pcr_smooth = smooth_series(dI_inflow_pcr,s.smooth_width,...
     s.smooth_type,s.smooth_ends);
 dI_inflow = dI_inflow_pcr+dI_inflow_ag;
@@ -104,7 +105,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [0.5 0.75 0.01];  delay.at = [dd(2020,10,1),dd(2020,11,01),dd(2020,15,12)];
+delay.v = [0.25 0.5 0];  delay.at = [dd(2020,10,25),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 deaths_data.old_ratio = params.death_old_ratio; 
@@ -112,7 +113,9 @@ deaths_data.old_ratio_smooth = smooth_series(deaths_data.old_ratio);
 params.cfr_hospitals = cfr_ext;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay);
+other.mob = mob.SK;
+other.ptr = pos_test_ratio;
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay,other);
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = obs_ratio_real;

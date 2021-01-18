@@ -24,7 +24,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y.mean = 6.5;            s.T_sick_y.std = 0.62;
+s.T_sick_y.mean = 7;              s.T_sick_y.std = 0.62;
 s.T_sick_o.mean = 8.5;            s.T_sick_o.std = 0.62;
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
