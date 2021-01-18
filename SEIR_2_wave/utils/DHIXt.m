@@ -116,8 +116,9 @@ Xts = smooth_series(X(tshift+T_shift:end)); Xts = tseries(dateFrom:dateFrom+leng
 Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
-figure;plot(Xts,'c','linewidth',2);hold on;plot(Xrts,'k','linewidth',1);
-plot(Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);grid on;plot(Ots,'m','linewidth',2);grid on;
+figure;h1=plot(Xts,'c','linewidth',3);hold on;plot(Xrts,'Color',[0.55 0.55 0.55],'linewidth',1);
+plot(Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);grid on;h2=plot(Ots,'m','linewidth',2);grid on;
+legend([h1 h2],{'Implied by hospitals/deaths','officially reported'}); title('New cases (smooth data)');
 figure; plot(rho./(1-rho),'linewidth',1);hold on;
 plot(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma),'linewidth',1);grid on;
 rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
