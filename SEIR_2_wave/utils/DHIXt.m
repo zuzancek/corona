@@ -26,7 +26,7 @@ T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_dela
 
 % death: najprv time-inconsistent
 omega_y = 2.9/100;       omega_o = 21.7/100;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); % means
-T_death_y = 6.37;        T_death_o = 8.78;      
+T_death_y = 6.37;        T_death_o = 8.78;
 % T_death_y,T_death_o are iid exponentially distributed 
 k_death = 30; x_death = 1:k_death;
 po = 1./(T_death_o.*varsigma); py = 1./(T_death_y.*(1-varsigma));
