@@ -86,9 +86,6 @@ H = method_data(h.Hospitalizations(firstData:dateTo));
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 HD = method_data(D(2:end)-D(1:end-1));  HD = [HD(1);HD(:)];
-HD_o = varsigma(1:end-1).*HD;
-HD_y = HD-HD_o;
-hdy = get_wa(p_T_death_y,H,omega,k_death);
 hd = get_wa(p_T_death,H,omega,k_death);
 gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
 gamma_hd = method_params(gamma_hd);
