@@ -3,8 +3,9 @@ function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,t1,params,d
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
-firstData = dateFrom-31;
+firstData = params.firstData;
 tshift = dateFrom-firstData;
+cut = params.cut;
 
 varsigma = extend(double(params.death_old_ratio),tshift);
 % cfr_hospitals = method(params.cfr_hospitals);

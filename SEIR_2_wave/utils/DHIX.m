@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = DHIX(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay,other)
+function [X,I,obs_ratio_adj,sa,p] = DHIX(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
@@ -13,6 +13,7 @@ rho = cases_old_ratio(dateFrom:dateTo);
 rho_ext = cases_old_ratio;
 asymp_ratio = method_params(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
+other = params.other;
 mob = method_params(resize(other.mob,dateFrom:dateTo));
 ptr = method_params(resize(other.ptr,dateFrom:dateTo));
 
