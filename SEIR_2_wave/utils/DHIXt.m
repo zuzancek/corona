@@ -3,14 +3,9 @@ function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,t1,params,d
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
-firstData = dateFrom-31;% params.dataFrom;
+firstData = params.firstData;
 tshift = dateFrom-firstData;
-idxstr.D.validFrom = 1;
-idxstr.D.dispFrom = tshift+1;
-idxstr.H.validFrom = 1;
-idxstr.H.dispFrom = tshift+1;
-idxstr.HD.validFrom = 1;
-idxstr.HD.dispFrom = tshift+1;
+cut = params.cut;
 
 varsigma = extend(double(params.death_old_ratio),tshift);
 % cfr_hospitals = method(params.cfr_hospitals);
@@ -30,14 +25,14 @@ if dlen
 end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 
-% death: najpr time-inconsistent, potom konzistentne
-% omega_y = s.omega_y;       omega_o = s.omega_o;         omega = (omega_o.*varsigma+omega_y)./(1+varsigma);
-% T_death_y = s.T_death_y;   T_death_o = s.T_death_y;     T_death = (T_death_o.*varsigma+T_death_y)./(1+varsigma);
-% T_death_shape = T_death*s.T_death.std^2; T_death_scale = 1/s.T_death.std^2;
+% death: najprv time-inconsistent
 omega_y = 2.9/100;       omega_o = 21.7/100;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); % means
-T_death_y = 6.37;        T_death_o = 8.78;            T_death = T_death_o.*varsigma+T_death_y.*(1-varsigma);
-k_death = 30; x_death = 1:k_death;                    
-p_T_death = pdf('Exponential',repmat(x_death,length(varsigma),1),repmat(T_death,1,k_death));
+T_death_y = 6.37;        T_death_o = 8.78;
+% T_death_y,T_death_o are iid exponentially distributed 
+k_death = 30; x_death = 1:k_death;
+po = 1./(T_death_o.*varsigma); py = 1./(T_death_y.*(1-varsigma));
+p_T_death = repmat(po.*py./(po-py),1,k_death).*(exp(-py*x_death)-exp(-po*x_death));
+% p_T_death = pdf('Exponential',repmat(x_death,length(varsigma),1),repmat(T_death,1,k_death));
 % hospitalizations
 % old-young share in hospitals
 zeta0 = (varsigma)./(1-varsigma).*omega_y./omega_o; zeta = zeta0./(1+zeta0);
@@ -50,15 +45,25 @@ p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),r
 lambda_y = 2.32/100;    lambda_o = 31.86/100;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = 5.63;        T_hosp_o = 1.33;              T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
+T_hosp_y = 6.63;        T_hosp_o = 3.33;              % T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
 k_hosp = 20; x_hosp = 1:k_hosp;                   
-p_T_hosp = pdf('Exponential',repmat(x_hosp,length(varsigma),1),repmat(T_hosp,1,k_hosp));
+po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
+p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
 % infections
 % recovery from sickness
-T_sick_y = s.SI.mean-1; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y;
+T_delay = extend(T_delay,length(theta)-length(T_delay));
+T_sick_y = s.SI.mean-1; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay;
 k_sick = 20; x_sick = 1:k_sick;   T_sick_shape = T_sick*T_sick_std^2; T_sick_scale = 1/T_sick_std^2;
 eta = 1-lambda;
 p_T_sick = pdf('Gamma',repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
+
+% time shift
+ks = 30;xs = 1:ks;
+pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1-varsigma));
+pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
+lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
+p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
+T_shift = ceil(dot(p_T_shift,xs)); %xs(find(p_T_shift==max(p_T_shift)))+1;
 
 % T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
 % T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
@@ -79,19 +84,16 @@ dI_data = method_data(x.NewCases(dateFrom:dateTo));
 D = x.Deaths(firstData:dateTo)*d(dateFrom)/x.Deaths(dateFrom); 
 D(tshift+1:end) = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(firstData:dateTo));
-
-H0 = method_data(h.Hospitalizations(dateFrom-k_death:dateTo));
-H01 = method_data(h.Hospitalizations(dateFrom-k_rec:dateTo));
+AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 HD = method_data(D(2:end)-D(1:end-1));  HD = [HD(1);HD(:)];
 hd = get_wa(p_T_death,H,omega,k_death);
 gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
 gamma_hd = method_params(gamma_hd);
 alpha = 1-omega.*gamma_hd; 
-% HR = alpha_rec./T_rec.*H;
 HR = extend(get_wa(p_T_rec,H,alpha,k_rec),k_rec);
-IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = [IH(1);IH(:)];
-I = get_wa_inv(p_T_hosp(k_hosp+1:end,:),IH,lambda(k_hosp+1:end),k_hosp);
+IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = method_data([IH(1);IH(:)]);
+I = (get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));I = method_data([I(1);I(:)]);
 IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
 X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 % H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
@@ -111,6 +113,15 @@ X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 % X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 % X = X_o+X_y;
 % I = I_o+I_y;
+Xts = smooth_series(X(tshift+T_shift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
+Ots = smooth_series(Orts);
+figure;h1=plot(Xts,'c','linewidth',3);hold on;plot(Xrts,'Color',[0.55 0.55 0.55],'linewidth',1);
+plot(Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);grid on;h2=plot(Ots,'m','linewidth',2);grid on;
+legend([h1 h2],{'Implied by hospitals/deaths','officially reported'}); title('New cases (smooth data)');
+figure; plot(rho./(1-rho),'linewidth',1);hold on;
+plot(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma),'linewidth',1);grid on;
 rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
 plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
 figure;plot(rho);hold on;plot(rho_real);
@@ -236,12 +247,12 @@ p.varsigma = varsigma;
         x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
     end
 
-    function [x] = get_wa_inv(weight,z,x0,alpha,idxFrom)
+    function [x] = get_wa_inv(weight,zvec,x0,alpha,idxFrom)
         sz = size(weight);
         weight = weight(idxFrom+1:end,:);
         alpha = alpha(idxFrom+1:end,:);
         k = sz(2);k0 = sz(1);
-        t = length(z)-idxFrom;
+        t = length(zvec)-idxFrom;
         phi = alpha./(1:k);
         if k0==1
             W = repmat(weight(k:-1:1),t,1);
@@ -251,7 +262,7 @@ p.varsigma = varsigma;
             A = phi(:,(k:-1:1));
         end        
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
-        L = (k-1)+repmat((1:t)',1,k);
+        L = repmat((1:t)',1,k);
 %         U0 = tril(repmat(1:k-1,k-1,1)); 
 %         % U0(U0==0) = k+1; 
 %         J0 = repmat(1:k-1,k-1,1); J0 = J0(U0~=0);
@@ -261,12 +272,13 @@ p.varsigma = varsigma;
 %         A0 = a(U0(U0~=0))';
         Weight_mat = sparse(L(:),J(:),W(:));
         Alpha_mat = sparse(L(:),J(:),A(:));
-        x = zeros(t+k-1,1);x(1:k-1) = x0;
+        x = zeros(t+k-1,1);
+        x(1:k-1) = x0(1:idxFrom-1);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
         function [d] = solve_lineqn(xx0)
-            d=(Weight_mat.*Alpha_mat)*xx0 - z(end-t+1:end);
+            d=(Weight_mat.*Alpha_mat)*xx0 - zvec(end-t+1:end);
         end
-        x = fsolve(@solve_lineqn,x);
+        x = fsolve(@solve_lineqn,x,optimoptions('fsolve','Display','off','Algorithm','Levenberg-Marquardt'));
     end
 
 %     function [x] = get_wa_inv(weight,Z,alpha,idxFrom)
