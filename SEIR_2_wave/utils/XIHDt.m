@@ -39,6 +39,8 @@ d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 
 startFrom = max(s.k_hosp,s.k_sick,s.k_death,s.k_rec)+1;
 T_total = T+startFrom;
+T_delay = p.T_delay(end-T_total+1:end);
+
 % parameters
 % hospital admission
 k_hosp = s.k_hosp;      x_hosp = (1:k_hosp)'; 
@@ -48,9 +50,9 @@ eta_o = s.eta_o;        alpha_iho = eta_o./x_hosp.*p_T_hosp_o;
 eta_y = s.eta_y;        alpha_ihy = eta_y./x_hosp.*p_T_hosp_y;
 % recovery from sickness at home
 k_sick = s.k_sick;      x_sick = (1:k_sick)';       x_sick_mat = repmat(x_sick,T_total,1); T_sick_std2 = s.T_sick_std^2;
-T_sick_o = s.T_sick_o-p.T_delay-p.Test_to_result;   T_sick_o_shape = T_sick_o*T_sick_std2; T_sick_scale = 1/T_sick_std2;
+T_sick_o = s.T_sick_o-T_delay-p.Test_to_result;     T_sick_o_shape = T_sick_o*T_sick_std2; T_sick_scale = 1/T_sick_std2;
 p_T_sick_o = pdf(s.T_sick_pdf_type,x_sick_mat,repmat(T_sick_o_shape,1,k_sick),repmat(T_sick_scale,1,k_sick));
-T_sick_y = s.T_sick_y-p.T_delay-p.Test_to_result;   T_sick_y_shape = T_sick_y*T_sick_std2; 
+T_sick_y = s.T_sick_y-T_delay-p.Test_to_result;     T_sick_y_shape = T_sick_y*T_sick_std2; 
 p_T_sick_y = pdf(s.T_sick_pdf_type,x_sick_mat,repmat(T_sick_y_shape,1,k_sick),repmat(T_sick_scale,1,k_sick));
 alpha_iro = (1-eta_o)./x_sick_mat.*p_T_sick_o;
 alpha_iry = (1-eta_y)./x_sick_mat.*p_T_sick_y;
