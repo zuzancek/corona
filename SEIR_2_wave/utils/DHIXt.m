@@ -44,8 +44,8 @@ p_T_rec = pdf(s.T_rec_pdf_type,repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1
 lambda_y = s.eta_y;    lambda_o = s.eta_o;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = s.T_hosp_y; % 1+1/0.2752;        
-T_hosp_o = s.T_hosp_o; % 1+1/0.5951; 
+T_hosp_y = s.T_hosp_y;        
+T_hosp_o = s.T_hosp_o;  
 k_hosp = s.k_hosp;      x_hosp = 1:k_hosp;                   
 po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
 p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
@@ -90,8 +90,8 @@ I = (get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));I = method_data([I(1);I(:)]);
 IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
 X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 
-Xts = smooth_series(X(tshift+T_shift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xts = smooth_series(X(tshift:end-T_shift)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xrts = (X(tshift:end-T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
 figure;h1=plot(Xts,'c','linewidth',3);hold on;plot(Xrts,'Color',[0.55 0.55 0.55],'linewidth',1);

@@ -40,14 +40,14 @@ s.share_reas = 1;
 % death probability/time to death (at hospital)
 % s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  
 s.omega_y = 2.91/100;       s.omega_o = 21.73/100;
-s.T_death_y = 6.1387;       s.T_death_o = 9.1575;      s.T_death = 10;  % 
+s.T_death_y = 1/0.1629;       s.T_death_o = 1/0.1092;      s.T_death = 10;  % 6.1387; 9.1575
 s.k_death = 30;             s.T_death_pdf_type = 'Exponential';  
 % recovery at hospital (days to recovery)
 s.T_rec_y = 9.566;          s.T_rec_o = 12.527;         s.T_rec = 11.723;   s.T_rec_std = s.SI.std; 
 s.k_rec = 30;               s.T_rec_pdf_type = 'Gamma';
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.T_hosp_y = 3.6337;        s.T_hosp_o = 1.6804;        s.T_hosp = 3.15; 
+s.T_hosp_y = 1/0.2752;      s.T_hosp_o = 1/0.5951;        s.T_hosp = 3.15; 
 s.k_hosp = 20;              s.T_hosp_pdf_type = 'Exponential';  
 % total time shift in clinical mpdel
 s.t_shift_clin = 30;
