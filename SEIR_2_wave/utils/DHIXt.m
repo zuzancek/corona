@@ -1,17 +1,17 @@
-function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
+function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,~,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
 firstData = params.firstData;
 tshift = dateFrom-firstData;
-cut = params.cut;
+cut = params.cutoff;
+T_test_to_result = 1;
 
 varsigma = extend(double(params.death_old_ratio),tshift);
 % cfr_hospitals = method(params.cfr_hospitals);
 % delta = cfr_hospitals(dateFrom:dateTo);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
-asymp_ratio = method_params(params.asymp_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(firstData:dateTo));
 
 % delay in testing (gradual)
@@ -27,7 +27,8 @@ T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_dela
 
 % death: najprv time-inconsistent
 omega_y = 2.9/100;       omega_o = 21.7/100;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); % means
-T_death_y = 6.37;        T_death_o = 8.78;
+T_death_y = 1+1/0.1629;%6.37;        
+T_death_o = 1+1/0.1092;%8.78;
 % T_death_y,T_death_o are iid exponentially distributed 
 k_death = 30; x_death = 1:k_death;
 po = 1./(T_death_o.*varsigma); py = 1./(T_death_y.*(1-varsigma));
@@ -45,14 +46,15 @@ p_T_rec = pdf('Gamma',repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),r
 lambda_y = 2.32/100;    lambda_o = 31.86/100;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = 6.63;        T_hosp_o = 3.33;              % T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
+T_hosp_y = 1+1/0.2752; %6.63;        
+T_hosp_o = 1+1/0.5951; %3.33;              % T_hosp = T_hosp_o.*theta+T_hosp_y*(1-theta);
 k_hosp = 20; x_hosp = 1:k_hosp;                   
 po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
 p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
 % infections
 % recovery from sickness
 T_delay = extend(T_delay,length(theta)-length(T_delay));
-T_sick_y = s.SI.mean-1; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay;
+T_sick_y = s.SI.mean; T_sick_o = s.SI.mean+1; T_sick_std = s.SI.mean; T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay-T_test_to_result;
 k_sick = 20; x_sick = 1:k_sick;   T_sick_shape = T_sick*T_sick_std^2; T_sick_scale = 1/T_sick_std^2;
 eta = 1-lambda;
 p_T_sick = pdf('Gamma',repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
@@ -63,16 +65,7 @@ pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1
 pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
 lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
 p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
-T_shift = ceil(dot(p_T_shift,xs)); %xs(find(p_T_shift==max(p_T_shift)))+1;
-
-% T_death_y = s.T_death_y;                             alpha_hdy = omega_y/T_death_y; s.alpha_hdy = alpha_hdy;
-% T_death_o = s.T_death_o;                             alpha_hdo = omega_o/T_death_o; s.alpha_hdo = alpha_hdo;
-% T_rec_y = s.T_rec_y;                         alpha_hry = (1-omega_y)./T_rec_y;
-% T_rec_o = s.T_rec_o;                         alpha_hro = (1-omega_o)./T_rec_o;
-% eta_y = s.eta_y;                                     T_hosp_y = s.T_hosp_y;  alpha_ihy = eta_y./T_hosp_y;   
-% eta_o = s.eta_o;                                     T_hosp_o = s.T_hosp_o;  alpha_iho = eta_o./T_hosp_o;  
-% T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
-% T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
+T_shift = ceil(dot(p_T_shift,xs)); 
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
@@ -80,12 +73,13 @@ T_shift = ceil(dot(p_T_shift,xs)); %xs(find(p_T_shift==max(p_T_shift)))+1;
 % D(t+1) = D(t)+H_D(t);
 
 % initialization
-dI_data = method_data(x.NewCases(dateFrom:dateTo));
+dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 D = x.Deaths(firstData:dateTo)*d(dateFrom)/x.Deaths(dateFrom); 
 D(tshift+1:end) = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(firstData:dateTo));
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
+% calculation
 HD = method_data(D(2:end)-D(1:end-1));  HD = [HD(1);HD(:)];
 hd = get_wa(p_T_death,H,omega,k_death);
 gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
@@ -96,23 +90,7 @@ IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = method_data([IH(1);IH(:)]);
 I = (get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));I = method_data([I(1);I(:)]);
 IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
 X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
-% H_y_H_o = adjust_series(alpha_hdo./alpha_hdy.*H_D_y./H_D_o);
-% H_y = method_params(H_y_H_o./(H_y_H_o+1)).*H;
-% H_o = H-H_y;
-% % alpha_hdy = method_params(H_D_y./H_y(1:end-1)); alpha_hry = method_params((1-alpha_hdy.*T_death_y)./T_rec_y);alpha_hry = [alpha_hry(1);alpha_hry];
-% % alpha_hdo = method_params(H_D_o./H_y(1:end-1)); alpha_hro = method_params((1-alpha_hdo.*T_death_o)./T_rec_o);alpha_hro = [alpha_hro(1);alpha_hro];
-% H_R_o = method_data(alpha_hro.*H_o);
-% I_H_o = method_data(H_o(2:end)-H_o(1:end-1)+H_D_o+H_R_o(1:end-1));
-% H_R_y = method_data(alpha_hry.*H_y);
-% I_H_y = method_data(H_y(2:end)-H_y(1:end-1)+H_D_y+H_R_y(1:end-1));
-% I_o = method_data(I_H_o./alpha_iho);
-% % I_R_o = method_data(alpha_iro(1:end-1).*I_o); I_o = [I_o(1);I_o];
-% X_o = method_data(I_o(2:end)-I_o(1:end-1))+I_H_o+I_R_o;
-% I_y = method_data(I_H_y./alpha_ihy);
-% I_R_y = method_data(alpha_iry(1:end-1).*I_y); I_y = [I_y(1);I_y];
-% X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
-% X = X_o+X_y;
-% I = I_o+I_y;
+
 Xts = smooth_series(X(tshift+T_shift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
 Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
@@ -120,45 +98,49 @@ Ots = smooth_series(Orts);
 figure;h1=plot(Xts,'c','linewidth',3);hold on;plot(Xrts,'Color',[0.55 0.55 0.55],'linewidth',1);
 plot(Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);grid on;h2=plot(Ots,'m','linewidth',2);grid on;
 legend([h1 h2],{'Implied by hospitals/deaths','officially reported'}); title('New cases (smooth data)');
-figure; plot(rho./(1-rho),'linewidth',1);hold on;
-plot(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma),'linewidth',1);grid on;
-rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
-plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
-figure;plot(rho);hold on;plot(rho_real);
+
+rho_real_0 = method_params(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma));
+rho_real_0 = [rho_real_0(1);rho_real_0];
+rho_real = rho_real_0./(1+rho_real_0);
 
 % adjust series endpoints and get ratio
-obs_ratio_adj = tseries(t0:t1,s.obs_ratio);
-X = adjust_tail(X,2);
-X_o = adjust_tail(X_o,2);
-X_y = adjust_tail(X_y,2);
-X = tseries(dateFrom:dateTo,method_data(X));
-X_o = tseries(dateFrom:dateTo,method_data(X_o));
-X_y = tseries(dateFrom:dateTo,method_data(X_y));
-dI_data_real = resize(X,dateFrom:dateTo);
-dI_data_reported = tseries(dateFrom:dateTo,dI_data);
-dI_data_reported_old = dI_data_reported.*rho;
+X = X(tshift+T_shift:end);
+rho_real = rho_real(tshift+T_shift+1:end);
+sigma = sigma(tshift+1:end-cut);
+X_o = X.*rho_real;
+X_y = X-X_o;
+dateTo_X = dateFrom+length(X)-1;
+dateTo_R = dateFrom+length(dI_data)-1;
+dateTo_0 = min(dateTo_X,dateTo_R);
+obs_ratio_adj = tseries(t0:dateTo_0,s.obs_ratio);
+X = tseries(dateFrom:dateTo_X,method_data(X));
+X_o = tseries(dateFrom:dateTo_X,method_data(X_o));
+X_y = tseries(dateFrom:dateTo_X,method_data(X_y));
+dI_data_real = resize(X,dateFrom:dateTo_X);
+dI_data_reported = tseries(dateFrom:dateTo_R,dI_data);
+dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
-delta = dI_data_reported./dI_data_real;
+delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
 
-idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
+idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min & delta<1-s.ratio_threshold);
 idx = dateFrom:max(idx);
 X(idx) = dI_data_reported(idx);
 % X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 X_o(idx) = dI_data_reported_old(idx); X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
 X_y(idx) = dI_data_reported_old(idx); X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
 dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
-delta = dI_data_reported./dI_data_real;
+delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
 
-obs_ratio_adj(dateFrom:dateTo) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
-XX = x.NewCases;
-XX(dateFrom:dateTo) = X;
-X = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
-XX = x.NewCases.*rho_ext;
-XX(dateFrom:dateTo) = X_o;
-X_o = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
-XX = x.NewCases.*(1-rho_ext);
-XX(dateFrom:dateTo) = X_y;
-X_y = smooth_series(XX,s.smooth_width,s.smooth_type,s.smooth_ends);
+obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
+XX = resize(x.NewCases,startdate(x.NewCases):dateTo_0);
+XX(dateFrom:dateTo_0) = X;
+X = smooth_series(XX);
+XX = resize(x.NewCases,startdate(x.NewCases):dateTo_0).*rho(1);
+XX(dateFrom:dateTo_0) = X_o;
+X_o = smooth_series(XX);
+XX = resize(x.NewCases,startdate(x.NewCases):dateTo_0).*(1-rho(1));
+XX(dateFrom:dateTo_0) = X_y;
+X_y = smooth_series(XX);
 
 sa = struct;
 sa.Xs = (1-sigma(1)).*X;
