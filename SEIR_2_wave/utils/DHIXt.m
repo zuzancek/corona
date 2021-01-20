@@ -122,7 +122,7 @@ dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_report
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
 delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
 
-idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min & delta<1-s.ratio_threshold);
+idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min & delta<1-s.ratio_threshold); %#ok<MXFND>
 idx = dateFrom:max(idx);
 X(idx) = dI_data_reported(idx);
 % X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
@@ -171,7 +171,7 @@ p.rho = rho_real;
 p.rho_ext = rho_ext;
 p.varsigma = varsigma;
 
-    function [y,ys] = adjust_series(x)
+    function [y,ys] = adjust_series(x) %#ok<DEFNU>
         y = NaN+zeros(T,1);
         y(1:length(x)) = x;
         if isnan(y(1))
@@ -189,7 +189,7 @@ p.varsigma = varsigma;
         ys = method_data(y);
     end
 
-    function [x] = adjust_tail(x,k)
+    function [x] = adjust_tail(x,k) %#ok<DEFNU>
         dx = x(T-k)-x(T-k-1);
         x(T-k+1) = x(T-k)+2/3*dx;
         x(T-k+2) = x(T-k+1)+1/3*dx;
@@ -197,14 +197,6 @@ p.varsigma = varsigma;
             x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
         end        
     end
-
-%     function [x] = get_rv(y)
-%         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
-%         L = length(shape0);
-%         shape0_vec = repmat(shape0,N,1);
-%         scale0_vec = scale0*ones(N,L);
-%         x = gamrnd(shape0_vec,scale0_vec);
-%     end
 
     function [x] = get_wa(weight,Z,alpha,idxFrom)
         sz = size(weight);
