@@ -168,21 +168,7 @@ p.T_sick = T_sick;
 p.x_shift = xs;
 p.p_T_shift = p_T_shift;
 p.T_shift = T_shift;
-
-p.alpha_hdy = alpha_hdy;
-p.alpha_hdo = alpha_hdo;
-p.alpha_hry = alpha_hry;
-p.alpha_hro = alpha_hro;
-p.alpha_ihy = alpha_ihy;
-p.alpha_iho = alpha_iho;
-p.alpha_iry = alpha_iry;
-p.alpha_iro = alpha_iro;
-p.T_rec_y = T_rec_y;
-p.T_rec_o = T_rec_o;
-p.T_sick_y = T_sick_y;
-p.T_sick_o = T_sick_o;
 p.rho = rho_real;
-p.rho_ext = rho_ext;
 p.varsigma = varsigma;
 
     function [y,ys] = adjust_series(x) %#ok<DEFNU>
