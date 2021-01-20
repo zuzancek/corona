@@ -11,14 +11,14 @@ db_asympt = dbload('data/asymptomatical_cases_share.csv','dateFormat','yyyy-mm-d
 s = setparam();
 idx_fun = 2;
 out_filename_opt = {'inputs_full.mat','inputs.mat'}; out_filename = out_filename_opt{idx_fun};
-fun_opt_0 = {'DHIXe','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
+fun_opt_0 = {'DHIXe','DHIXt'}; fun_0 = str2func(fun_opt_0{idx_fun});
 fun_opt_1 = {'XIHDe','XIHD'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
 
 %% handle data
 % definitions
-cut = 3;
+cut = 0;
 dt = 1;
 t0 = startdate(x.ActiveCases);
 t0_ag = startdate(x.AgTests);
@@ -105,7 +105,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [0.25 0.5 0];  delay.at = [dd(2020,10,25),dd(2020,11,15),dd(2020,12,15)];
+delay.v = [2 1.5 1];  delay.at = [dd(2020,10,31),dd(2020,11,30),dd(2020,12,31)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 deaths_data.old_ratio = params.death_old_ratio; 
@@ -116,7 +116,7 @@ params.asymp_ratio = asymp_ratio;
 other.mob = mob.SK;
 other.ptr = pos_test_ratio;
 params.other = other;
-params.cutoff = cut;
+params.cutoff = 3;
 params.firstData = disp_from-31;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;
