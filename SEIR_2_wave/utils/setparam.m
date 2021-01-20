@@ -24,7 +24,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 7.5;               s.T_sick_o = 8.5;       s.T_sick = 7.7;
+s.T_sick_y = 8.5;               s.T_sick_o = 9.5;       s.T_sick = 8.7;
 s.T_sick_std = s.SI.std;
 s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
@@ -40,14 +40,14 @@ s.share_reas = 1;
 % death probability/time to death (at hospital)
 % s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  
 s.omega_y = 2.91/100;       s.omega_o = 21.73/100;
-s.T_death_y = 7.1387;       s.T_death_o = 10.1575;      s.T_death = 10;  % 6.1387; 9.1575
+s.T_death_y = 6.1387;       s.T_death_o = 9.1575;      s.T_death = 10;  % 
 s.k_death = 30;             s.T_death_pdf_type = 'Exponential';  
 % recovery at hospital (days to recovery)
 s.T_rec_y = 9.566;          s.T_rec_o = 12.527;         s.T_rec = 11.723;   s.T_rec_std = s.SI.std; 
 s.k_rec = 30;               s.T_rec_pdf_type = 'Gamma';
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.T_hosp_y = 4.6337;        s.T_hosp_o = 2.6804;        s.T_hosp = 3.15;  %3.6337; 1.6804
+s.T_hosp_y = 3.6337;        s.T_hosp_o = 1.6804;        s.T_hosp = 3.15; 
 s.k_hosp = 20;              s.T_hosp_pdf_type = 'Exponential';  
 % total time shift in clinical mpdel
 s.t_shift_clin = 30;
