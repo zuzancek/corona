@@ -123,11 +123,10 @@ delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom
 
 idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min & delta<1-s.ratio_threshold); %#ok<MXFND>
 idx = dateFrom:max(idx);
-X(idx) = dI_data_reported(idx);
-% X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
-X_o(idx) = dI_data_reported_old(idx); X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
-X_y(idx) = dI_data_reported_old(idx); X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
-dI_data_real(idx) = dI_data_reported(idx);dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
+X(idx) = dI_data_reported(idx);             X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
+X_o(idx) = dI_data_reported_old(idx);       X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
+X_y(idx) = dI_data_reported_old(idx);       X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
+dI_data_real(idx) = dI_data_reported(idx);  dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
 delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
 
 obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
@@ -154,6 +153,22 @@ sa.loss_o = sa.Xo-dI_data_reported_old;
 sa.loss_y = sa.Xy-dI_data_reported_young;
 
 % store params
+p.omega = omega;
+p.p_T_death = p_T_death;
+p.T_rec = T_rec;
+p.x_rec = x_rec;
+p.p_T_rec = p_T_rec;
+p.lambda = lambda;
+p.p_T_hosp = p_T_hosp;
+p.p_T_sick = p_T_sick;
+p.T_delay = T_delay;
+p.T_test_to_result = T_test_to_result;
+p.x_sick = x_sick;
+p.T_sick = T_sick;
+p.x_shift = xs;
+p.p_T_shift = p_T_shift;
+p.T_shift = T_shift;
+
 p.alpha_hdy = alpha_hdy;
 p.alpha_hdo = alpha_hdo;
 p.alpha_hry = alpha_hry;
@@ -202,7 +217,6 @@ p.varsigma = varsigma;
         weight = weight(idxFrom+1:end,:);
         alpha = alpha(idxFrom+1:end,:);
         k = sz(2);k0 = sz(1);
-        %k = length(weight);
         t = length(Z)-idxFrom;
         phi = alpha./(1:k);
         if k0==1
@@ -236,13 +250,6 @@ p.varsigma = varsigma;
         end        
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
         L = repmat((1:t)',1,k);
-%         U0 = tril(repmat(1:k-1,k-1,1)); 
-%         % U0(U0==0) = k+1; 
-%         J0 = repmat(1:k-1,k-1,1); J0 = J0(U0~=0);
-%         L0 = repmat((1:k-1)',1,k-1); L0 = L0(U0~=0);
-%         w = weight(k,:); w(end+1) = 0; a = phi(k,:);
-%         W0 = w(U0(U0~=0))'; 
-%         A0 = a(U0(U0~=0))';
         Weight_mat = sparse(L(:),J(:),W(:));
         Alpha_mat = sparse(L(:),J(:),A(:));
         x = zeros(t+k-1,1);
