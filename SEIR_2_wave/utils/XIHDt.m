@@ -1,47 +1,47 @@
 function [out] = XIHDt(x,p,s,init,dateFrom,dateTo)
 
 T = dateTo-dateFrom+1;
+delay = max(s.k_hosp,s.k_sick,s.k_death,s.k_rec)+1;
+T_total = T+delay;
+
 I0 = init.I;     
 H0 = init.H; 
 D0 = init.D;
 
 method_params = s.smoothing_method_params;
 try
-    rho = p.rho;
+    rho = p.rho(end-T_total+1:end);
 catch err
-    rho = method_params(init.rho); rho = rho(dateFrom:dateTo);
+    rho = method_params(init.rho); 
+    rho = rho(dateFrom-delay:dateTo);
+end
+try
+    T_delay = p.T_delay(end-T_total+1:end);
+catch err
+    T_delay = zeros(T_total,1);
 end
 varsigma = method_params(init.varsigma); varsigma = varsigma(dateFrom:dateTo);
      
-eta_y = s.eta_y;                   
-eta_o = s.eta_o;           
-
-% ******* Equations
-% I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
-% H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
-% D(t+1) = D(t)+H_D(t);
-
-% initialization
+% ********* initialization
 method_data = s.smoothing_method_data;
 X = method_data(x.NewCases(dateFrom:dateTo));
-X_o = X.*rho;   X_y = X-X_o;
-D0 = method_data(D0(dateFrom:dateTo));
-D_o = zeros(T,1); D_o(1) = D0(1)*varsigma(1); 
-D_y = zeros(T,1); D_y(1) = D0(1)-D_o(1); 
-H0 = method_data(H0(dateFrom:dateTo));
-H_o = zeros(T,1); H_o(1) = H0(1)*eta_o*rho(1)/(eta_o*s.old_share+eta_y*(1-s.old_share));
-H_y = zeros(T,1); H_y(1) = H0(1)-H_o(1);
-I0 = method_data(I0(dateFrom:dateTo));
-I_o = zeros(T,1); I_o(1) = I0(1)*s.old_share;
-I_y = zeros(T,1); I_y(1) = I0(1)-I_o(1);
-d_I_H_o = zeros(T,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I_H_o;
+
+% ********* arrays
+X_o = X.*rho(delay+1:end);   X_y = X-X_o;
+D0 = method_data(D0(dateFrom-delay+1:dateTo));
+D_o = zeros(T_total,1); D_o(1:delay) = D0(1:delay)*varsigma(1); 
+D_y = zeros(T_total,1); D_y(1:delay) = D0(1:delay)-D_o(1:delay); 
+H0 = method_data(H0(dateFrom-delay:dateTo));
+H_o = zeros(T_total,1); H_o(1:delay) = H0(1:delay)*s.eta_o*rho(1)/(s.eta_o*s.old_share+s.eta_y*(1-s.old_share));
+H_y = zeros(T_total,1); H_y(1:delay) = H0(1:delay)-H_o(1:delay);   
+I0 = method_data(I0(dateFrom-delay+1:dateTo));
+I_o = zeros(T_total,1); I_o(1:delay) = I0(1:delay)*rho(1:delay);
+I_y = zeros(T_total,1); I_y(1:delay) = I0(1:delay)-I_o(1:delay);
+
+d_I_H_o = zeros(T_total,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I_H_o;
 d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 
-startFrom = max(s.k_hosp,s.k_sick,s.k_death,s.k_rec)+1;
-T_total = T+startFrom;
-T_delay = p.T_delay(end-T_total+1:end);
-
-% parameters
+% ******* parameters
 % hospital admission
 k_hosp = s.k_hosp;      x_hosp = (1:k_hosp)'; 
 T_hosp_o = s.T_hosp_o;  p_T_hosp_o = pdf(s.T_hosp_pdf_type,x_hosp,1./T_hosp_o+zeros(k_hosp,1));
@@ -69,8 +69,13 @@ T_rec_y = s.T_rec_y;        T_rec_y_shape = T_rec_y*T_sick_std2;    p_T_rec_y = 
 alpha_hro = (1-omega_o)./x_rec.*p_T_rec_o;
 alpha_hry = (1-omega_y)./x_rec.*p_T_rec_y;
 
-% calculation
-for t=startFrom:T_total-1 
+% ******* Equations
+% I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
+% H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
+% D(t+1) = D(t)+H_D(t);
+
+% ******* Calculation
+for t=delay:T_total-1 
     d_I_H_o(t) = dot(alpha_iho,I_o(t-k_hosp+1:t));     d_I_R_o(t) = dot(alpha_iro(t,:),I_o(t-k_sick+1:t));
     I_o(t+1) = I_o(t)+X_o(t)-d_I_H_o(t)-d_I_R_o(t);
     d_I_H_y(t) = dot(alpha_ihy,I_y(t-k_hosp+1:t));     d_I_R_y(t) = dot(alpha_iry(t,:),I_y(t-k_sick+1:t));
@@ -97,5 +102,12 @@ out.X = out.X_o+out.X_y;
 out.I = out.I_o+out.I_y;
 out.H = out.H_o+out.H_y;
 out.D = out.D_o+out.D_y;
+
+    function [y] = extend(x,t0)
+        xlen = length(x);
+        z = x(1)+zeros(xlen+t0,1);
+        z(t0+1:end) = x;
+        y = method_params(z);
+    end
 
 end
