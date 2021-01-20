@@ -24,8 +24,9 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y.mean = 7;              s.T_sick_y.std = 0.62;
-s.T_sick_o.mean = 8.5;            s.T_sick_o.std = 0.62;
+s.T_sick_y = 7.5;               s.T_sick_o = 8.5;       s.T_sick = 7.7;
+s.T_sick_std = s.SI.std;
+s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -36,24 +37,21 @@ s.SI_obs.std = 0.62;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
-% days prior to hospital admission (from onset,adjusted for test period)
-s.T_hosp.mean = 4.5;              s.T_hosp.std = 0.62;
-s.T_hosp0.mean = s.T_hosp.mean-s.T_test.mean;    s.T_hosp0.std = 0.62;
-% time to death (from ospital admission)
-s.T_death.mean = 7;             s.T_death.std = 0.62;
-% days at hospital (in case of recovery)
-s.T_rec = 11.7;
-% share of symptomatic patients in observed cases
-s.symp_ratio_obs = 0.55;
-% death probability/time
-s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  %31
-s.T_death_y = 3.41+4;       s.T_death_o = 4.59+5;  
-% recovery at hospital
-s.T_rec_y = 10.1;            s.T_rec_o = 12.5;
+% death probability/time to death (at hospital)
+% s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  
+s.omega_y = 2.91/100;       s.omega_o = 21.73/100;
+s.T_death_y = 7.1387;       s.T_death_o = 10.1575;      s.T_death = 10;  % 6.1387; 9.1575
+s.k_death = 30;             s.T_death_pdf_type = 'Exponential';  
+% recovery at hospital (days to recovery)
+s.T_rec_y = 9.566;          s.T_rec_o = 12.527;         s.T_rec = 11.723;   s.T_rec_std = s.SI.std; 
+s.k_rec = 30;               s.T_rec_pdf_type = 'Gamma';
 % hospitalization probability/time to
 s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.eta_y = 3.32/100;         s.eta_o = 31.86/100;
-s.T_hosp_y = 4;             s.T_hosp_o = 4;
+s.T_hosp_y = 4.6337;        s.T_hosp_o = 2.6804;        s.T_hosp = 3.15;  %3.6337; 1.6804
+s.k_hosp = 20;              s.T_hosp_pdf_type = 'Exponential';  
+% total time shift in clinical mpdel
+s.t_shift_clin = 30;
+
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
 s.kappa_res_delta_0 = -0.5;
@@ -74,6 +72,8 @@ g2.alpha = 1;
 s.g2 = g2;
 s.w_vec_default = 0.5+zeros(s.T,1);
 
+% big ratios (long-term averages)
+s.symp_ratio_obs = 0.55;
 s.old_share = 0.1385;
 s.old_death_ratio = 0.8407;
 s.obs_ratio_tar = 1/5;
