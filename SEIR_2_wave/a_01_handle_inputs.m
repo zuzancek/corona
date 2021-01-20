@@ -118,7 +118,8 @@ other.ptr = pos_test_ratio;
 params.other = other;
 params.cutoff = 3;
 params.firstData = disp_from-31;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,params,delay);
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,...
+    params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = obs_ratio_real;
