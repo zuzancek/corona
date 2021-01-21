@@ -105,7 +105,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [1.5 0.5 0];  delay.at = [dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
+delay.v = [1 0.5 0];  delay.at = [dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 deaths_data.old_ratio = params.death_old_ratio; 

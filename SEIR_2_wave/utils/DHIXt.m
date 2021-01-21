@@ -71,9 +71,9 @@ p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
 T_shift = ceil(dot(p_T_shift,xs))-1;      % mean shift
 
 % ******* Equations
-% I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
-% H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
-% D(t+1) = D(t)+H_D(t);
+% I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
+% H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
+% D(t) = D(t-1)+H_D(t);
 
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
@@ -221,7 +221,7 @@ p.varsigma = varsigma;
         Weight_mat = sparse(L,J,W);
         Alpha_mat = sparse(L,J,A);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
-        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
+        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+2:end);
     end
 
     function [x] = get_wa_inv(weight,zvec,x0,alpha,idxFrom)
