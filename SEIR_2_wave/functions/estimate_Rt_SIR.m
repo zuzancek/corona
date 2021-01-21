@@ -38,7 +38,7 @@ try
     T_hosp = inputs.T_hosp;
     assert(length(T_hosp)>=length(inputs.z));
 catch err %#ok<NASGU>
-    T_hosp = s.T_hosp.mean+0*inputs.z;
+    T_hosp = s.T_hosp+0*inputs.z;
 end
 try
     rho = double(inputs.old_ratio);    
@@ -68,14 +68,14 @@ T_si_vec = get_rv(s.SI);
 % T_rec = s.T_rec;
 alpha_ihy = s.eta_y/s.T_hosp_y;        
 alpha_iho = s.eta_o/s.T_hosp_o;  
-alpha_iry = (1-s.eta_y)./(s.T_sick_y.mean-s.T_test.mean); 
-alpha_iro = (1-s.eta_o)./(s.T_sick_o.mean-s.T_test.mean);
+alpha_iry = (1-s.eta_y)./(s.T_sick_y-s.T_test.mean); 
+alpha_iro = (1-s.eta_o)./(s.T_sick_o-s.T_test.mean);
 alpha_hdy = s.omega_y/s.T_death_y;
 alpha_hdo = s.omega_o/s.T_death_o;
 alpha_hry = (1-s.omega_y)./s.T_rec_y; 
 alpha_hro = (1-s.omega_o)./s.T_rec_o; 
 % T_hosp = s.T_hosp.mean;
-alpha = ((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
+alpha = 0.25; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
