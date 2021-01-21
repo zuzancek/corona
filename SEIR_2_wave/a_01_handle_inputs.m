@@ -116,8 +116,9 @@ params.asymp_ratio = asymp_ratio;
 other.mob = mob.SK;
 other.ptr = pos_test_ratio;
 params.other = other;
-params.cutoff = 3;
+params.cutoff = 4;
 params.firstData = disp_from-31;
+params.adj = -0.175;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,...
     params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;
@@ -239,14 +240,14 @@ grid on;
 figure('Name','New cases (reported vs.true)');
 fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
 fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
-fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
+% fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
 % plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
 % plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
 % plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5]);
 % plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
 grid on;
-legend([fh1 fh2 fh3 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)', 'Reported new cases (PCR+AG tests)'}); 
+legend([fh1 fh2 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)'});%, 'Reported new cases (PCR+AG tests)'}); 
 title('New cases (smooth data)');
 
 figure('Name','New cases (reported vs.true, lost cases)');
@@ -259,7 +260,21 @@ title('New infections (PCR only)');
 legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable','"lost" symptomatical new cases'});
 grid on;
 % 
-figure('Name','Observable ratio and CFR')
+figure('Name','Testing effectivity and Old-age cases share')
+subplot(2,1,1)
+obs_ratio = 0*obs_ratio_real+s.obs_ratio;
+plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
+plot(100*resize(obs_ratio_real,disp_from:t1),'linewidth',1);
+title('Observable ratio');
+legend({'stationary (optimistic)','real (implied by hospitalizations)'});
+grid on;
+ylabel('% of total cases');
+subplot(2,1,2)
+plot(100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1),'linewidth',1);grid on;
+title('Testing effectivity (implied by hospitals)');
+
+% 
+figure('Name','Testing effectivity and Old-age cases share')
 subplot(2,1,1)
 obs_ratio = 0*obs_ratio_real+s.obs_ratio;
 plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
