@@ -105,4 +105,14 @@ out.I = out.I_o+out.I_y;
 out.H = out.H_o+out.H_y;
 out.D = out.D_o+out.D_y;
 
+figure;
+pp1=plot(smooth_series(out.X),'linewidth',1,'Color','g');hold on; plot(out.X,'Color',[0.5 0.5 0.5]);hold on;
+pp2=plot(smooth_series(out.I),'linewidth',1,'Color',[0.2 0.6 0.33]);hold on;plot(out.I,'Color',[0.5 0.5 0.5]);hold on;
+pp3=plot(smooth_series(resize(init.H,dateFrom:dateTo)),'linewidth',2,'Color','r');hold on;plot(resize(init.H,dateFrom:dateTo),'Color',[0.5 0.5 0.5]);hold on;
+pp4=plot(smooth_series(out.H),'linewidth',2,'Color','m');hold on;plot(out.H,'Color',[0.5 0.5 0.5]);hold on;
+pp5=plot(smooth_series(resize(init.D,dateFrom:dateTo)),'linewidth',2,'Color','c');hold on;plot(resize(init.D,dateFrom:dateTo),'Color',[0.5 0.5 0.5]);hold on;
+pp6=plot(smooth_series(out.D),'linewidth',2,'Color','k');hold on;plot(out.D,'Color',[0.5 0.5 0.5]);hold on;
+grid on;
+legend([pp1 pp2 pp3 pp4 pp5 pp6],{'X','I', 'H_rep', 'H', 'D_rep','D'});
+
 end

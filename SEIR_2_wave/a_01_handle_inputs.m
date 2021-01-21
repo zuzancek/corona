@@ -12,7 +12,7 @@ s = setparam();
 idx_fun = 2;
 out_filename_opt = {'results/inputs_full.mat','results/inputs.mat'}; out_filename = out_filename_opt{idx_fun};
 fun_opt_0 = {'DHIXe','DHIXt'}; fun_0 = str2func(fun_opt_0{idx_fun});
-fun_opt_1 = {'XIHDe','XIHD'}; fun_1 = str2func(fun_opt_1{idx_fun});
+fun_opt_1 = {'XIHDe','XIHDt'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
 
