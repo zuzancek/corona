@@ -177,6 +177,8 @@ p.p_T_shift = p_T_shift;
 p.T_shift = T_shift;
 p.rho = rho_real;
 p.varsigma = varsigma;
+p.omega_o = s.omega_o.*(gamma_hd);
+p.omega_y = s.omega_y.*(gamma_hd);
 
     function [y,ys] = adjust_series(x) %#ok<DEFNU>
         y = NaN+zeros(T,1);
