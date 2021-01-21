@@ -32,6 +32,7 @@ T_death_o = s.T_death_o; % 1+1/0.1092;
 k_death = s.k_death; x_death = 1:k_death;
 po = 1./(T_death_o.*varsigma); py = 1./(T_death_y.*(1-varsigma));
 p_T_death = repmat(po.*py./(po-py),1,k_death).*(exp(-py*x_death)-exp(-po*x_death));
+p_T_death = p_T_death./sum(p_T_death,2);
 % hospitalizations
 % old-young share in hospitals
 zeta0 = (varsigma)./(1-varsigma).*omega_y./omega_o; zeta = zeta0./(1+zeta0);
@@ -40,6 +41,7 @@ T_rec_y = s.T_rec_y;    T_rec_o = s.T_rec_o;            T_rec = zeta.*T_rec_o+(1
 T_rec_std = s.T_rec_std;
 k_rec = s.k_rec;        x_rec = 1:k_rec;                T_rec_shape = T_rec*T_rec_std^2; T_rec_scale = 1/T_rec_std^2;
 p_T_rec = pdf(s.T_rec_pdf_type,repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),repmat(T_rec_scale,length(zeta),k_rec));
+p_T_rec = p_T_rec./sum(p_T_rec,2);
 % hospital admission
 lambda_y = s.eta_y;    lambda_o = s.eta_o;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
@@ -49,6 +51,7 @@ T_hosp_o = s.T_hosp_o;
 k_hosp = s.k_hosp;      x_hosp = 1:k_hosp;                   
 po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
 p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
+p_T_hosp = p_T_hosp./sum(p_T_hosp,2);
 % infections
 % recovery from sickness
 T_delay = extend(T_delay,length(theta)-length(T_delay));
@@ -57,6 +60,7 @@ T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay-T_test_to_result;
 k_sick = s.k_sick;      x_sick = 1:k_sick;       T_sick_shape = T_sick*T_sick_std^2; T_sick_scale = 1/T_sick_std^2;
 eta = 1-lambda;
 p_T_sick = pdf(s.T_sick_pdf_type,repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
+p_T_sick = p_T_sick./sum(p_T_sick,2);
 
 % time shift (death->illness)
 ks = s.t_shift_clin;        xs = 1:ks;
