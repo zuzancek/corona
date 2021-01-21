@@ -3,6 +3,7 @@ function [X,I,obs_ratio_adj,sa,p] = DHIX(x,h,d,s,dateFrom,dateTo,t0,t1,params,de
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params; 
+cut = params.cutoff;
 
 death_old_ratio = method_params(params.death_old_ratio);
 varsigma = death_old_ratio(dateFrom:dateTo);
@@ -36,8 +37,8 @@ T_rec_y = s.T_rec_y;                         alpha_hry = (1-omega_y)./T_rec_y;
 T_rec_o = s.T_rec_o;                         alpha_hro = (1-omega_o)./T_rec_o;
 eta_y = s.eta_y;                                     T_hosp_y = s.T_hosp_y;  alpha_ihy = eta_y./T_hosp_y;   
 eta_o = s.eta_o;                                     T_hosp_o = s.T_hosp_o;  alpha_iho = eta_o./T_hosp_o;  
-T_sick_y = s.T_sick_y.mean-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
-T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
+T_sick_y = s.T_sick_y-s.T_test.mean-T_delay;    alpha_iry = (1-eta_y)./T_sick_y;
+T_sick_o = s.T_sick_o-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
@@ -45,7 +46,7 @@ T_sick_o = s.T_sick_o.mean-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_si
 % D(t+1) = D(t)+H_D(t);
 
 % initialization
-dI_data = method_data(x.NewCases(dateFrom:dateTo));
+dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 D = method_data(d(dateFrom:dateTo));
 H = method_data(h.Hospitalizations(dateFrom:dateTo));
 
@@ -70,21 +71,20 @@ X_y = method_data(I_y(2:end)-I_y(1:end-1))+I_H_y+I_R_y;
 X = X_o+X_y;
 I = I_o+I_y;
 rho_real = method_params(X_o./X);rho_real = [rho_real(1);rho_real];
-tshift = 6;
+tshift = T_hosp_y+T_death_y-1; %6;
 X = X(tshift:end); X_o = X_o(tshift:end); X_y = X_y(tshift:end);
 plot(X,'linewidth',1);hold on;plot(dI_data,'k','linewidth',1);grid on;
-figure;plot(rho);hold on;plot(rho_real);
 
 % simple prediction
-dmob = mob(dateTo-tshift:dateTo)./mob(dateTo-tshift); alpha_mob = 0.05; wmob = 0.4; dmob(end) = dmob(end-1)+0.66*(dmob(end-1)-dmob(end-2));
-dptr = ptr(dateTo-tshift:dateTo)./ptr(dateTo-tshift); alpha_ptr = 0.03; wptr = 1/3;
-drho = cases_old_ratio(dateTo-tshift:dateTo)./cases_old_ratio(dateTo-tshift); alpha_rho = 0.03; wrho = 1-wmob-wptr;
-chng = (dmob./(1+alpha_mob)).^wmob.*(dptr./(1+alpha_ptr)).^wptr.*(drho./(1+alpha_rho)).^wrho;
-ww = exp(-0.1.*(0:tshift)');
-ww = ww/sum(ww);
-chngrep = (dI_data(end-tshift:end)./dI_data(end-tshift)-1).*ww+1;
-pred = chngrep.*chng.*X(end); pred_o = X_o(end-tshift)./X(end-tshift).*pred;
-X = [X;pred(1:end-1)]; X_o = [X_o;pred_o(1:end-1)]; X_y = [X_y;pred(1:end-1)-pred_o(1:end-1)];
+% dmob = mob(dateTo-tshift:dateTo)./mob(dateTo-tshift); alpha_mob = 0.05; wmob = 0.4; dmob(end) = dmob(end-1)+0.66*(dmob(end-1)-dmob(end-2));
+% dptr = ptr(dateTo-tshift:dateTo)./ptr(dateTo-tshift); alpha_ptr = 0.03; wptr = 1/3;
+% drho = cases_old_ratio(dateTo-tshift:dateTo)./cases_old_ratio(dateTo-tshift); alpha_rho = 0.03; wrho = 1-wmob-wptr;
+% chng = (dmob./(1+alpha_mob)).^wmob.*(dptr./(1+alpha_ptr)).^wptr.*(drho./(1+alpha_rho)).^wrho;
+% ww = exp(-0.1.*(0:tshift)');
+% ww = ww/sum(ww);
+% chngrep = (dI_data(end-tshift:end)./dI_data(end-tshift)-1).*ww+1;
+% pred = chngrep.*chng.*X(end); pred_o = X_o(end-tshift)./X(end-tshift).*pred;
+% X = [X;pred(1:end-1)]; X_o = [X_o;pred_o(1:end-1)]; X_y = [X_y;pred(1:end-1)-pred_o(1:end-1)];
 
 % adjust series endpoints and get ratio
 obs_ratio_adj = tseries(t0:t1,s.obs_ratio);

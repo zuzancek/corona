@@ -2,6 +2,8 @@ clear all;
 close all;
 clc;
 
+mkdir('results');
+
 addpath data;
 addpath functions;
 addpath utils;

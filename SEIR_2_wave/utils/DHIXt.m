@@ -68,7 +68,7 @@ pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1
 pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
 lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
 p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
-T_shift = ceil(dot(p_T_shift,xs))-1;      % mean shift
+T_shift = ceil(dot(p_T_shift,xs));      % mean shift
 
 % ******* Equations
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
@@ -94,21 +94,24 @@ I = (get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));I = method_data([I(1);I(:)]);
 IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
 X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
 
-Xts = smooth_series(X(tshift:end-T_shift)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift:end-T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xts = smooth_series(X(tshift:end-0*T_shift)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xrts = (X(tshift:end-0*T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
-figure;h1=plot(Xts,'c','linewidth',3);hold on;plot(Xrts,'Color',[0.55 0.55 0.55],'linewidth',1);
-plot(Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);grid on;h2=plot(Ots,'m','linewidth',2);grid on;
-legend([h1 h2],{'Implied by hospitals/deaths','officially reported'}); title('New cases (smooth data)');
-
+Len = length(Xts);
+p.X_smooth = resize(Xts,dateFrom:dateFrom+Len-T_shift);
+p.X_forecast_smooth = resize(Xts,dateFrom+Len-T_shift:dateFrom+Len-1);
+p.X_raw = resize(Xrts,dateFrom:dateFrom+Len-T_shift);
+p.X_forecast_raw = resize(Xrts,dateFrom+Len-T_shift:dateFrom+Len-1);
+p.X_rep_smooth = Ots;
+p.X_rep_raw = Orts;
 rho_real_0 = method_params(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma));
 rho_real_0 = [rho_real_0(1);rho_real_0];
 rho_real = rho_real_0./(1+rho_real_0);
 
 % adjust series endpoints and get ratio
-X = X(tshift+T_shift:end);
-rho_real = rho_real(tshift+T_shift+1:end);
+X = X(tshift:end);
+rho_real = rho_real(tshift+1:end);
 sigma = sigma(tshift+1:end-cut);
 X_o = X.*rho_real;
 X_y = X-X_o;

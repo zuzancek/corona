@@ -22,6 +22,7 @@ else
     model_fnc = @estimate_Rt_SIR;
 end
 disp_to = t2-1;
+tshift = 6;
 
 %% inputs definition
 inputs_fnc = struct();
@@ -78,7 +79,7 @@ inputs_fnc.death_ratio = [];
 figure('Name','New cases (smooth data, means)')
 plot(cases_data.cases_pcr_implied,'linewidth',1); hold on;
 plot(cases_data.cases_pcr_smooth,'k--', 'linewidth',1);
-plot(cases_data.cases_total_smooth,'Color',[0.5 0 0.5],'linewidth',1);
+% plot(cases_data.cases_total_smooth,'Color',[0.5 0 0.5],'linewidth',1);
 grid on;
 title('New cases');
 legend({'Implied by hospitals','PCR reported','AG+PCR reported'});
@@ -88,53 +89,60 @@ figure('Name','Effective reproduction number, means');
 nn = length(Rt_pcr);
 Rt_smooth_series_pcr = tseries(t0+1:t2,Rt_pcr);
 Rt_smooth_series_real = tseries(t0:t2,Rt_real);
-Rt_smooth_series_test = tseries(t0+1:t2,Rt_test);
-Rt_smooth_series_total = tseries(t0+1:t2,Rt_total);
+% Rt_smooth_series_test = tseries(t0+1:t2,Rt_test);
+% Rt_smooth_series_total = tseries(t0+1:t2,Rt_total);
 plot(resize(Rt_smooth_series_pcr,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_test,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_real,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_total,disp_from:t2),'linewidth',2);hold on;
+% plot(resize(Rt_smooth_series_test,disp_from:t2),'linewidth',2);hold on;
+plot(resize(Rt_smooth_series_real,disp_from:t2-tshift),'linewidth',2);hold on;
+% plot(resize(Rt_smooth_series_total,disp_from:t2),'linewidth',2);hold on;
 title('Effective reproduction number (smooth inputs)');
-legend({'reported data, PCR only, testing is optimal',...
-    'reported data, PCR only, testing is realistic',...
-    'implied data', 'reported data, AG+PCR'});
+% legend({'reported data, PCR only, testing is optimal',...
+%     'reported data, PCR only, testing is realistic',...
+%     'implied data', 'reported data, AG+PCR'});
+legend({'reported data (PCR)','implied data'});
 grid on;
 % 
-plot_fanchart(q_mat_real,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
+plot_fanchart(q_mat_real,s,dt,disp_from,disp_to-tshift,t0,'Effective reproduction number (Rt, implied data)',true);
 plot_fanchart(q_mat_pcr,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
-plot_fanchart(q_mat_total,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG, reported data)',true);
+% plot_fanchart(q_mat_total,s,dt,disp_from,disp_to,t0,'Effective reproduction number (Rt, PCR+AG, reported data)',true);
 
 % 2./ situation in hospitals
 figure('Name','Hospitals & Deaths, means');
 subplot(2,1,1)
 Dt_pcr = tseries(t0+1:t2,Yt_pcr.Dt(1:nn));
 Dt_real = tseries(t0+1:t2,Yt_real.Dt(1:nn));
-Dt_total = tseries(t0+1:t2,Yt_total.Dt(1:nn));
+% Dt_total = tseries(t0+1:t2,Yt_total.Dt(1:nn));
+kappa_d = resize(Dt_real,disp_from:t2)./resize(hosp_data.D_smooth,disp_from:t2);
+Dt_real = resize(Dt_real,disp_from:t2)./kappa_d;
+Dt_pcr = resize(Dt_pcr,disp_from:t2)./kappa_d;
 plot(resize(Dt_pcr,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Dt_real,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Dt_total,disp_from:t2),'linewidth',2);hold on;
+% plot(resize(Dt_total,disp_from:t2),'linewidth',2);hold on;
 plot(resize(hosp_data.D_smooth,disp_from:t2),'k--','linewidth',1);hold on;
 title('Deaths (smooth inputs)');
 legend({'reported data, PCR only',...
-    'implied data', 'reported data, PCR+AG'});
+    'implied data'});
 grid on;
 subplot(2,1,2)
 Ht_pcr = tseries(t0+1:t2,Yt_pcr.Ht(1:nn));
 Ht_real = tseries(t0+1:t2,Yt_real.Ht(1:nn));
-Ht_total = tseries(t0+1:t2,Yt_total.Ht(1:nn));
+kappa_h = resize(Ht_real,disp_from:t2)./resize(hosp_data.H_smooth,disp_from:t2);
+Ht_real = resize(Ht_real,disp_from:t2)./kappa_h;
+Ht_pcr = resize(Ht_pcr,disp_from:t2)./kappa_h;
+% Ht_total = tseries(t0+1:t2,Yt_total.Ht(1:nn));
 plot(resize(Ht_pcr,disp_from:t2),'linewidth',2);hold on;
 plot(resize(Ht_real,disp_from:t2),'linewidth',2);hold on;
-plot(resize(Ht_total,disp_from:t2),'linewidth',2);hold on;
+% plot(resize(Ht_total,disp_from:t2),'linewidth',2);hold on;
 plot(resize(hosp_data.H_smooth,disp_from:t2),'k--','linewidth',1);hold on;
 title('Hospitals (smooth inputs)');
 legend({'reported data, PCR only',...
-    'implied data', 'reported data, PCR+AG'});
+    'implied data'});
 grid on;
 
 %% saving stuff
 x.Rt = Rt_smooth_series_pcr;
 x.Rt_real = Rt_smooth_series_real;
-x.Rt_test = Rt_smooth_series_test;
+% x.Rt_test = Rt_smooth_series_test;
 dbsave(x,'results.csv');
 
 Rt = tseries(t0:t2-1,Rt_pcr); %#ok<*NASGU>
@@ -145,7 +153,7 @@ Rt = tseries(t0:t2,Rt_real);
 q_mat = q_mat_real; Rt = Rt_real; Yt = Yt_real; Rt_last = Rt_last_real; Rt_dist = Rt_dist_real; Rt_rnd = Rt_rnd_real;
 save(strcat('results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-Rt = tseries(t0:t2-1,Rt_total);
-q_mat = q_mat_total; Yt = Yt_total; Rt_last = Rt_last_total; Rt_dist = Rt_dist_total; Rt_rnd = Rt_rnd_total;
-save(strcat('results_Rt_total.mat'),'s','t0','t1','q_mat',...
-    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+% Rt = tseries(t0:t2-1,Rt_total);
+% q_mat = q_mat_total; Yt = Yt_total; Rt_last = Rt_last_total; Rt_dist = Rt_dist_total; Rt_rnd = Rt_rnd_total;
+% save(strcat('results_Rt_total.mat'),'s','t0','t1','q_mat',...
+%     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');

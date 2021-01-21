@@ -12,7 +12,7 @@ s = setparam();
 idx_fun = 2;
 out_filename_opt = {'results/inputs_full.mat','results/inputs.mat'}; out_filename = out_filename_opt{idx_fun};
 fun_opt_0 = {'DHIXe','DHIXt'}; fun_0 = str2func(fun_opt_0{idx_fun});
-fun_opt_1 = {'XIHDe','XIHDt'}; fun_1 = str2func(fun_opt_1{idx_fun});
+fun_opt_1 = {'XIHDe','XIHD'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
 
@@ -105,7 +105,8 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [1 0.5 0];  delay.at = [dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
+delay.v = [1.5 0.5 0];  delay.at = [dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
+% delay.v = [0.25 0.75 0];  delay.at = [dd(2020,10,25),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
 deaths_data.old_ratio = params.death_old_ratio; 
@@ -237,6 +238,19 @@ legend({'PCR: raw','PCR: smooth'});
 grid on;
 
 figure('Name','New cases (reported vs.true)');
+fh1 = plot(par.Ots,'linewidth',2);grid on;
+fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
+fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
+plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
+plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
+plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
+plot(par.Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);
+plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
+grid on;
+legend([fh1 fh2 fh3 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)', 'Reported new cases (PCR+AG tests)'}); 
+title('New cases (smooth data)');
+
+figure('Name','New cases (reported vs.true, lost cases)');
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(resize(sa_cmp.loss_a,disp_from:t1),'linewidth',1);hold on;
