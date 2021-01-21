@@ -254,35 +254,6 @@ p.varsigma = varsigma;
         x = fsolve(@solve_lineqn,x,optimoptions('fsolve','Display','off','Algorithm','Levenberg-Marquardt'));
     end
 
-%     function [x] = get_wa_inv(weight,Z,alpha,idxFrom)
-%         sz = size(weight);
-%         weight = weight(idxFrom+1:end,:);
-%         alpha = alpha(idxFrom+1:end,:);
-%         k = sz(2);k0 = sz(1);
-%         t = length(Z)-idxFrom;
-%         phi = alpha./(1:k);
-%         if k0==1
-%             W = repmat(weight(k:-1:1),t,1);
-%             A = repmat(phi(k:-1:1),t,1);
-%         else
-%             W = weight(:,(k:-1:1));
-%             A = phi(:,(k:-1:1));
-%         end        
-%         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
-%         L = (k-1)+repmat((1:t)',1,k);
-%         U0 = tril(repmat(1:k-1,k-1,1)); 
-%         % U0(U0==0) = k+1; 
-%         J0 = repmat(1:k-1,k-1,1); J0 = J0(U0~=0);
-%         L0 = repmat((1:k-1)',1,k-1); L0 = L0(U0~=0);
-%         w = weight(k,:); w(end+1) = 0; a = phi(k,:);
-%         W0 = w(U0(U0~=0))'; 
-%         A0 = a(U0(U0~=0))';
-%         Weight_mat = sparse([L(:);L0(:)],[J(:);J0(:)],[W(:);W0(:)]);
-%         Alpha_mat = sparse([L(:);L0(:)],[J(:);J0(:)],[A(:);A0(:)]);
-%         Weight_mat = Weight_mat./sum(Weight_mat,2);
-%         x = (Weight_mat.*Alpha_mat)\Z(end-t-k+1:end-1); 
-%     end
-
     function [y] = extend(x,t0)
         xlen = length(x);
         z = x(1)+zeros(xlen+t0,1);
