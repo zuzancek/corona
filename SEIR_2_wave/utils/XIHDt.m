@@ -44,10 +44,10 @@ d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 % ******* parameters
 % hospital admission
 k_hosp = s.k_hosp;      x_hosp = (1:k_hosp)'; 
-T_hosp_o = s.T_hosp_o;  p_T_hosp_o = pdf(s.T_hosp_pdf_type,x_hosp,T_hosp_o+zeros(k_hosp,1)); p_T_hosp_o = p_T_hosp_o./sum(p_T_hosp_o);
-T_hosp_y = s.T_hosp_y;  p_T_hosp_y = pdf(s.T_hosp_pdf_type,x_hosp,T_hosp_y+zeros(k_hosp,1)); p_T_hosp_y = p_T_hosp_y./sum(p_T_hosp_y);
-eta_o = s.eta_o;        alpha_iho = eta_o./x_hosp.*p_T_hosp_o;  alpha_iho = alpha_iho(end:-1:1);
-eta_y = s.eta_y;        alpha_ihy = eta_y./x_hosp.*p_T_hosp_y;  alpha_ihy = alpha_ihy(end:-1:1);
+T_hosp_o = s.T_hosp_o;  p_T_hosp_o = pdf('Geometric',x_hosp,1/T_hosp_o+zeros(k_hosp,1)); % p_T_hosp_o = p_T_hosp_o./sum(p_T_hosp_o);
+T_hosp_y = s.T_hosp_y;  p_T_hosp_y = pdf('Geometric',x_hosp,1/T_hosp_y+zeros(k_hosp,1)); % p_T_hosp_y = p_T_hosp_y./sum(p_T_hosp_y);
+eta_o = s.eta_o;        alpha_iho = eta_o./x_hosp.*p_T_hosp_o;  alpha_iho = eta_o/T_hosp_o*alpha_iho(end:-1:1)/sum(alpha_iho); 
+eta_y = s.eta_y;        alpha_ihy = eta_y./x_hosp.*p_T_hosp_y;  alpha_ihy = eta_y/T_hosp_y*alpha_ihy(end:-1:1)/sum(alpha_ihy);
 % recovery from sickness at home
 k_sick = s.k_sick;      x_sick = (1:k_sick)';       x_sick_mat = repmat(x_sick',T_total,1); T_sick_std2 = s.T_sick_std^2;
 T_sick_o = s.T_sick_o-T_delay-p.T_test_to_result;   T_sick_o_shape = T_sick_o*T_sick_std2; T_sick_scale = 1/T_sick_std2;
@@ -58,18 +58,18 @@ alpha_iro = (1-eta_o)./x_sick_mat.*p_T_sick_o;      alpha_iro = alpha_iro(:,end:
 alpha_iry = (1-eta_y)./x_sick_mat.*p_T_sick_y;      alpha_iry = alpha_iry(:,end:-1:1);
 % death at hospital
 k_death = s.k_death;        x_death = (1:k_death)';
-T_death_o = s.T_death_o;    p_T_death_o = pdf(s.T_death_pdf_type,x_death,T_death_o+zeros(k_death,1)); p_T_death_o = p_T_death_o./sum(p_T_death_o);
-T_death_y = s.T_death_y;    p_T_death_y = pdf(s.T_death_pdf_type,x_death,T_death_y+zeros(k_death,1)); p_T_death_y = p_T_death_y./sum(p_T_death_y);
-omega_o = s.omega_o;        alpha_hdo = omega_o./x_death.*p_T_death_o;  alpha_hdo = alpha_hdo(end:-1:1);
-omega_y = s.omega_y;        alpha_hdy = omega_y./x_death.*p_T_death_y;  alpha_hdy = alpha_hdy(end:-1:1);
+T_death_o = s.T_death_o;    p_T_death_o = pdf('Geometric',x_death,1/T_death_o+zeros(k_death,1)); p_T_death_o = p_T_death_o./sum(p_T_death_o);
+T_death_y = s.T_death_y;    p_T_death_y = pdf('Geometric',x_death,1/T_death_y+zeros(k_death,1)); p_T_death_y = p_T_death_y./sum(p_T_death_y);
+omega_o = s.omega_o;        alpha_hdo = omega_o./x_death.*p_T_death_o;  alpha_hdo = omega_o/T_death_o*alpha_hdo(end:-1:1)/sum(alpha_hdo); 
+omega_y = s.omega_y;        alpha_hdy = omega_y./x_death.*p_T_death_y;  alpha_hdy = omega_y/T_death_y*alpha_hdy(end:-1:1)/sum(alpha_hdy); 
 % recovery at hospital
 k_rec = s.k_rec;            x_rec = (1:k_rec)';                     T_rec_std2 = s.T_rec_std^2; T_rec_scale = 1/T_rec_std2+zeros(k_rec,1);
 T_rec_o = s.T_rec_o;        T_rec_o_shape = T_rec_o*T_sick_std2;    
 p_T_rec_o = pdf(s.T_rec_pdf_type,x_rec-1,T_rec_o_shape+zeros(k_rec,1),T_rec_scale); p_T_rec_o = p_T_rec_o./sum(p_T_rec_o);
 T_rec_y = s.T_rec_y;        T_rec_y_shape = T_rec_y*T_sick_std2;    
 p_T_rec_y = pdf(s.T_rec_pdf_type,x_rec-1,T_rec_y_shape+zeros(k_rec,1),T_rec_scale); p_T_rec_y = p_T_rec_y./sum(p_T_rec_y);
-alpha_hro = (1-omega_o)./x_rec.*p_T_rec_o;          alpha_hro = alpha_hro(end:-1:1);
-alpha_hry = (1-omega_y)./x_rec.*p_T_rec_y;          alpha_hry = alpha_hry(end:-1:1);
+alpha_hro = (1-omega_o)./x_rec.*p_T_rec_o;          alpha_hro = (1-omega_o)/T_rec_o*alpha_hro(end:-1:1)/sum(alpha_hro);
+alpha_hry = (1-omega_y)./x_rec.*p_T_rec_y;          alpha_hry = (1-omega_y)/T_rec_y.*alpha_hry(end:-1:1)/sum(alpha_hry);
 
 % ******* Equations
 % I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);     
