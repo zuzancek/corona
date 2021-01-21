@@ -105,7 +105,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [1.5 0.5 0];  delay.at = [dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
+delay.v = [0.75 2 0.5 0];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
 % delay.v = [0.25 0.75 0];  delay.at = [dd(2020,10,25),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -242,10 +242,10 @@ fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
 fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
 fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
-plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
-plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
-plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5]);
-plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
+% plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
+% plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
+% plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5]);
+% plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
 grid on;
 legend([fh1 fh2 fh3 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)', 'Reported new cases (PCR+AG tests)'}); 
 title('New cases (smooth data)');
