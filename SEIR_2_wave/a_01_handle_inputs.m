@@ -34,16 +34,15 @@ y = process_inputs(x,tt0,t1);
 dI_inflow_ag = y.AgPosit;
 dI_inflow_pcr = resize(x.NewCases,tt0:t1);
 dI_inflow_pcr(end) = dI_inflow_pcr(end-4);
-dI_inflow_pcr_smooth = smooth_series(dI_inflow_pcr,s.smooth_width,...
-    s.smooth_type,s.smooth_ends);
+dI_inflow_pcr_smooth = smooth_series(s.smoothing_method_data(dI_inflow_pcr));
 dI_inflow = dI_inflow_pcr+dI_inflow_ag;
-dI_inflow_smooth = smooth_series(dI_inflow,s.smooth_width,s.smooth_type,s.smooth_ends);
+dI_inflow_smooth = smooth_series(s.smoothing_method_data(dI_inflow));
 
 pos_test_ratio = x.NewCases./x.Tests;
 pos_test_ratio_ag = y.AgPosit./y.AgTests;
-pos_test_ratio_smooth = smooth_series(pos_test_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
+pos_test_ratio_smooth = smooth_series(s.smoothing_method_data(pos_test_ratio));
 tests = x.Tests;
-tests_smooth = smooth_series(tests,s.smooth_width,s.smooth_type,s.smooth_ends);
+tests_smooth = smooth_series(s.smoothing_method_data(tests));
 I0 = x.TotalCases(t0)/s.obs_ratio;
 
 cases_data = struct;
@@ -105,7 +104,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [0.75 2 0.5 0];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
+delay.v = [1 2 0.5 0];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
 % delay.v = [0.25 0.75 0];  delay.at = [dd(2020,10,25),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -303,19 +302,21 @@ if idx_fun==1
     title('Deaths');
 else
     subplot(2,1,1)
-    plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
-    legend({'observed','implied by reported daily new cases','reconstructed from implied cases'});
+    ratio = resize(hospit_smooth,disp_from:t1)./resize(out_check.H,disp_from:t1);
+    plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);hold on;
+    plot(ratio.*resize(out.H,disp_from:t1),'linewidth',2);hold on;
+    % plot(ratio.*resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
+    legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
     grid on;
     title('Hospitalisations (total)');
     subplot(2,1,2)
-    plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
+    ratio = resize(deaths_total_smooth,disp_from:t1)./resize(out_check.D,disp_from:t1);
+    plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2);hold on;
+    plot(ratio.*resize(out.D,disp_from:t1),'linewidth',2);hold on;
+    % plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
     grid on;
     title('Deaths');
-    legend({'observed','implied by reported daily new cases','reconstructed from implied cases'});    
+    legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'});    
 end    
 
 %% saving stuff

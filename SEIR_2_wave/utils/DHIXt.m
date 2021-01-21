@@ -114,39 +114,28 @@ rho_real = rho_real_0./(1+rho_real_0);
 X = X(tshift:end);
 rho_real = rho_real(tshift+1:end);
 sigma = sigma(tshift+1:end-cut);
-X_o = X.*rho_real;
-X_y = X-X_o;
 dateTo_X = dateFrom+length(X)-1;
 dateTo_R = dateFrom+length(dI_data)-1;
 dateTo_0 = min(dateTo_X,dateTo_R);
 obs_ratio_adj = tseries(t0:dateTo_0,s.obs_ratio);
-X = tseries(dateFrom:dateTo_X,method_data(X));
-X_o = tseries(dateFrom:dateTo_X,method_data(X_o));
-X_y = tseries(dateFrom:dateTo_X,method_data(X_y));
+X = Xts; %tseries(dateFrom:dateTo_X,method_data(X));
+X_o = method_data(X.*rho_real);
+X_y = X-X_o;
 dI_data_real = resize(X,dateFrom:dateTo_X);
-dI_data_reported = tseries(dateFrom:dateTo_R,dI_data);
+dI_data_reported = Ots;
 dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
-delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
+% delta = method_params(resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0));
 
-idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min & delta<1-s.ratio_threshold); %#ok<MXFND>
+idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min); %#ok<MXFND> % & delta<1-s.ratio_threshold); %#ok<MXFND>
 idx = dateFrom:max(idx);
-X(idx) = dI_data_reported(idx);             X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
+dI_data_real(idx) = dI_data_reported(idx);             
 X_o(idx) = dI_data_reported_old(idx);       X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
 X_y(idx) = dI_data_reported_old(idx);       X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
-dI_data_real(idx) = dI_data_reported(idx);  dI_data_real(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
-delta = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
+delta = method_params(resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0));
+X = dI_data_real;
 
-obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio,s.smooth_width,s.smooth_type,s.smooth_ends);
-XX = resize(x.NewCases,startdate(x.NewCases):dateTo_0);
-XX(dateFrom:dateTo_0) = X;
-X = smooth_series(XX);
-XX = resize(x.NewCases,startdate(x.NewCases):dateTo_0).*rho(1);
-XX(dateFrom:dateTo_0) = X_o;
-X_o = smooth_series(XX);
-XX = resize(x.NewCases,startdate(x.NewCases):dateTo_0).*(1-rho(1));
-XX(dateFrom:dateTo_0) = X_y;
-X_y = smooth_series(XX);
+obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio);
 
 sa = struct;
 sa.Xs = (1-sigma(1)).*X;
@@ -155,10 +144,11 @@ sa.Xy = X_y;
 sa.Xa = X-sa.Xs;
 sa.dIa_data_reported = dI_data_reported.*sigma;
 sa.dIs_data_reported = dI_data_reported-sa.dIa_data_reported;
-sa.loss_a = sa.Xa-sa.dIa_data_reported;
+sa.loss_a = method_params(sa.Xa-sa.dIa_data_reported);
 sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) = 0; %#ok<FNDSB>
-sa.loss_o = sa.Xo-dI_data_reported_old;
-sa.loss_y = sa.Xy-dI_data_reported_young;
+sa.loss_s = method_params(sa.loss_s);
+sa.loss_o = method_params(sa.Xo-dI_data_reported_old);
+sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
 
 % store params
 p.omega = omega;
