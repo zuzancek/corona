@@ -238,13 +238,13 @@ legend({'PCR: raw','PCR: smooth'});
 grid on;
 
 figure('Name','New cases (reported vs.true)');
-fh1 = plot(par.Ots,'linewidth',2);grid on;
+fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
 fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
 fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
 plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
 plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
-plot(par.Orts,'linewidth',1,'Color',[0.5 0.5 0.5]);
+plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5]);
 plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
 grid on;
 legend([fh1 fh2 fh3 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)', 'Reported new cases (PCR+AG tests)'}); 

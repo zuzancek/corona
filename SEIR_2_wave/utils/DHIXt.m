@@ -99,6 +99,7 @@ Xrts = (X(tshift:end-0*T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
 Len = length(Xts);
+p = struct();
 p.X_smooth = resize(Xts,dateFrom:dateFrom+Len-T_shift);
 p.X_forecast_smooth = resize(Xts,dateFrom+Len-T_shift:dateFrom+Len-1);
 p.X_raw = resize(Xrts,dateFrom:dateFrom+Len-T_shift);
