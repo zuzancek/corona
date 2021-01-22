@@ -10,8 +10,6 @@ T_test_to_result = 1;
 adj = params.adj;
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
-% cfr_hospitals = method(params.cfr_hospitals);
-% delta = cfr_hospitals(dateFrom:dateTo);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(firstData:dateTo));
 
