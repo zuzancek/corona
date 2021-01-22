@@ -242,9 +242,9 @@ fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
 fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
 % fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
-% plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
+plot(par.X_raw,'Color',[0.55 0.55 0.55],'linewidth',1); 
 % plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
-% plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5]);
+plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5]);
 % plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
 grid on;
 legend([fh1 fh2 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)'});%, 'Reported new cases (PCR+AG tests)'}); 
@@ -292,7 +292,7 @@ grid on;
 ylabel('%');
 
 %
-figure('Name','Situation in Hospitals: Comparison')
+figure('Name','Situation in Hospitals: Comparison I')
 if idx_fun==1
     subplot(2,2,1)
     plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
@@ -317,21 +317,35 @@ if idx_fun==1
     title('Deaths');
 else
     subplot(2,1,1)
-    ratio = resize(hospit_smooth,disp_from:t1)./resize(out_check.H,disp_from:t1);
+    ratio_h = resize(hospit_smooth,disp_from:t1)./resize(out_check.H,disp_from:t1);
     plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);hold on;
-    plot(ratio.*resize(out.H,disp_from:t1),'linewidth',2);hold on;
+    plot(ratio_h.*resize(out.H,disp_from:t1),'linewidth',2);hold on;
     % plot(ratio.*resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
     legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
     grid on;
     title('Hospitalisations (total)');
     subplot(2,1,2)
-    ratio = resize(deaths_total_smooth,disp_from:t1)./resize(out_check.D,disp_from:t1);
+    ratio_d = resize(deaths_total_smooth,disp_from:t1)./resize(out_check.D,disp_from:t1);
     plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2);hold on;
-    plot(ratio.*resize(out.D,disp_from:t1),'linewidth',2);hold on;
+    plot(ratio_d.*resize(out.D,disp_from:t1),'linewidth',2);hold on;
     % plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
     grid on;
     title('Deaths');
-    legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'});    
+    legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'}); 
+    figure('Name','Situation in Hospitals: Comparison II');
+    subplot(2,1,1)
+    ratio_c = 1/3*ratio_d+2/3*ratio_h;
+    plot(resize(icu_smooth,disp_from:t1),'linewidth',2);hold on;
+    plot(resize(icu_smooth,disp_from:t1)./(2/3*resize(hospit_smooth,disp_from:t1)./(ratio_h.*resize(out.H,disp_from:t1))+1/3*resize(deaths_total_smooth,disp_from:t1)./(ratio_d.*resize(out.D,disp_from:t1))),'linewidth',2);hold on;
+    legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
+    grid on;
+    title('ICU');
+    subplot(2,1,2)
+    plot(resize(vent_smooth,disp_from:t1),'linewidth',2);hold on;
+    plot(resize(vent_smooth,disp_from:t1)./(1/3*resize(hospit_smooth,disp_from:t1)./(ratio_h.*resize(out.H,disp_from:t1))+2/3*resize(deaths_total_smooth,disp_from:t1)./(ratio_d.*resize(out.D,disp_from:t1))),'linewidth',2);hold on;
+    grid on;
+    title('Ventilations');
+    legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'}); 
 end    
 
 %% saving stuff

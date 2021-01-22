@@ -1,4 +1,4 @@
-function [lh, ph] = fanChart(xvals, quant_paths, centerline, quant,varargin)
+function [lh, ph, parent] = fanChart(xvals, quant_paths, centerline, quant,varargin)
 % FANCHART  Create a fan chart visualization
 %
 % A fan chart is a plot of time-varying distribution percentiles shown as
@@ -35,11 +35,15 @@ ip = inputParser;
 addParamValue(ip, 'parent', gca, @(x)ishandle(x)&&strcmp(get(x,'type'),'axes')); %#ok<*NVREPL>
 addParamValue(ip, 'alpha', 1, @(x)isscalar(x)&&isnumeric(x));
 addParamValue(ip, 'colormap', @boeRedMap, @(x)isa(x,'function_handle')||ischar(x)||iscell(x)&&ischar(x{1}));
+addParamValue(ip, 'midcolor',[0.69 0.91 0.973], @isnumeric);
+addParamValue(ip, 'darkcenter',false, @islogical);
 parse(ip, varargin{:});
 results = ip.Results;
 parent = results.parent;
 alpha = results.alpha;
 cmapFun = results.colormap;
+midcolor = results.midcolor;
+darkcenter = results.darkcenter;
 % Calculate fan chart bands
 % Initially we will do this with percentiles
 bands = quant_paths;
@@ -54,6 +58,9 @@ if iscell(cmapFun)
 else
     col = feval(cmapFun, ncolors);
 end
+if darkcenter
+    col = col([end:-1:1],:);
+end
 
 % Create plot
 if verLessThan('matlab', '8.4')
@@ -64,7 +71,7 @@ end
 for i = 1:ncolors
     ph(i) = patch(xplot, [bands(:,0+i);  flipud(bands(:,end-i+1))]', col(ncolors-i+1,:) ,'EdgeColor', col(ncolors-i+1,:), 'Parent', parent, 'FaceAlpha', alpha);
 end
-lh = line(xvals, centerline, 'LineWidth', 2, 'Color', [0.69 0.91 0.973], 'Parent', parent);
+lh = line(xvals, centerline, 'LineWidth', 2, 'Color',midcolor, 'Parent', parent);
 ph = flipud(ph);
 
 function map = boeRedMap(ncolors)

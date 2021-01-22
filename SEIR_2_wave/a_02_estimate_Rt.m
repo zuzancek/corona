@@ -85,6 +85,9 @@ plot(resize(Rt_smooth_series_real,disp_from+30:t2-tshift),'linewidth',2);hold on
 title('Effective reproduction number (smooth inputs)');
 legend({'reported data (PCR)','implied data'});
 grid on;
+
+plot_fancharts_cmp(q_mat_pcr(5:15,:),q_mat_real(5:15,:),s,disp_from+30,disp_to,...
+    'offsetdate',t0,'title','Effective reproduction numbers (reported vs.implied)','legend',{'reported data (PCR), CI75&','implied data'});
 % 
 plot_fanchart(q_mat_real,s,dt,disp_from+30,disp_to-tshift,t0,'Effective reproduction number (Rt, implied data)',true);
 plot_fanchart(q_mat_pcr,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
