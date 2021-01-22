@@ -75,7 +75,7 @@ alpha_hdo = s.omega_o/s.T_death_o;
 alpha_hry = (1-s.omega_y)./s.T_rec_y; 
 alpha_hro = (1-s.omega_o)./s.T_rec_o; 
 % T_hosp = s.T_hosp.mean;
-alpha = 0.25; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
+alpha = 0.75; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
@@ -109,7 +109,7 @@ idx = ones(N,1);
 % I(t+1) = I(t)+R(t)*gamma*S(t)*I(t)/pop_size-gamma*I(t);
 % z(t) = R(t)*S(t)/pop_size*<gamma,I(t)>;
 for t = 1:T
-    Rt_vec(:,t) = pop_size.*z(t)./S_vec(:,t).*T_si_vec./(I_unobs_vec(:,t)+alpha*I_obs_vec(:,t));
+    Rt_vec(:,t) = pop_size.*z(t)./S_vec(:,t).*T_si_vec./(I_unobs_vec(:,t)+I_obs_vec(:,t));
     S_vec(:,t+1) = S_vec(:,t)-z(t);
     I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);
 %     I_asympt_vec(:,t+1) = I_asympt_vec(:,t).*(1-1./T_si_vec)+sigma(t).*z_obs(t); 

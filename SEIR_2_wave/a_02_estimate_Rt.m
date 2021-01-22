@@ -37,10 +37,14 @@ params.old_ratio = smooth_series(params.old_ratio);
 params.death_ratio = deaths_data.old_ratio_smooth;
 params.asymp_ratio = cases_data.asymp_ratio_smooth;
 
+d0 = dd(2020,09,7); d1 = dd(2020,10,9);
 %% calculations
 s = setparam();
 % _mm = moving median; _smooth = quasi-gaussian smoother
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
+xx = resize(cases_data.cases_pcr_smooth,t0:t2);
+xx(d0:d1) = NaN; xx = interp(xx,t0:t2);
+cases_data.cases_pcr_smooth = xx;
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
 inputs_fnc.H0 = 0;
@@ -50,10 +54,11 @@ inputs_fnc.obs_ratio = [];
 inputs_fnc.old_ratio = [];
 inputs_fnc.death_ratio = []; 
 inputs_fnc.asymp_ratio = [];
-[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,true);
+[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
 % real (implied) data
 z0 = resize(cases_data.cases_pcr_smooth,t0:t2);
 z0(t1:t2) = cases_data.cases_pcr_implied;
+z0(d0:d1) = NaN; z0 = interp(z0,t0:t2);
 cases_data.cases_pcr_implied = z0;
 inputs_fnc.z = double(resize(z0,t0:t2));
 inputs_fnc.obs_ratio = [];
@@ -65,8 +70,8 @@ inputs_fnc.asymp_ratio = [];
 %% plotting stuff
 % 0./ cases
 figure('Name','New cases (smooth data, means)')
-plot(cases_data.cases_pcr_implied,'linewidth',1); hold on;
-plot(cases_data.cases_pcr_smooth,'k--', 'linewidth',1);
+plot(resize(cases_data.cases_pcr_implied,disp_from:t2),'linewidth',1); hold on;
+plot(resize(cases_data.cases_pcr_smooth,disp_from:t2),'k--', 'linewidth',1);
 grid on;
 title('New cases');
 legend({'Implied by hospitals','PCR reported','AG+PCR reported'});
