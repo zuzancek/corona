@@ -118,13 +118,19 @@ other.ptr = pos_test_ratio;
 params.other = other;
 params.cutoff = 4;
 params.firstData = disp_from-31;
-params.adj = -0.175;
+params.adj = -0.175; % *0
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,...
     params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = obs_ratio_real;
 cases_data.loss = sa_cmp;
+cases_data.X_smooth = par.X_smooth;
+cases_data.X_foreicast = par.X_forecast_smooth;
+cases_data.X_total = tseries(startdate(par.X_smooth):enddate(par.X_forecast_smooth),0);
+cases_data.X_total(startdate(par.X_smooth):enddate(par.X_smooth)) = par.X_smooth;
+cases_data.X_total(enddate(par.X_smooth)+1:enddate(par.X_forecast_smooth)) = par.X_forecast_smooth;
+cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 
 % alternative numbers for hospitals
 init.D = death; init.H = hospit; 

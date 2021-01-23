@@ -21,7 +21,7 @@ if s.model_seir
 else
     model_fnc = @estimate_Rt_SIR;
 end
-disp_to = t2-1;
+disp_to = t2;
 tshift = 6;
 
 %% inputs definition
@@ -44,7 +44,7 @@ s = setparam();
 % reported data, PCR only, testing is optimal (sstate observ.ratio)
 % xx = resize(cases_data.cases_pcr_smooth,t0:t2);
 % xx(d0:d1) = NaN; xx = interp(xx,t0:t2);
-cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
+cases_data.cases_pcr_smooth = smooth_series(cases_data.X_total);
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
 inputs_fnc.H0 = 0;
