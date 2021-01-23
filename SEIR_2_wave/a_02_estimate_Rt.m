@@ -12,7 +12,7 @@ load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s')
 
 t0 = dates.t0;
 t1 = dates.t1;
-t2 = dates.t2;
+t2 = dates.t2-7;
 tt0 = t0+dt;
 s = setparam();
 s.model_seir = false;
@@ -41,10 +41,9 @@ params.asymp_ratio = cases_data.asymp_ratio_smooth;
 %% calculations
 s = setparam();
 % _mm = moving median; _smooth = quasi-gaussian smoother
-% reported data, PCR only, testing is optimal (sstate observ.ratio)
-% xx = resize(cases_data.cases_pcr_smooth,t0:t2);
-% xx(d0:d1) = NaN; xx = interp(xx,t0:t2);
-cases_data.cases_pcr_smooth = smooth_series(cases_data.X_total);
+
+% 1. reported data, PCR only, testing is optimal
+cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
 inputs_fnc.H0 = 0;
@@ -54,11 +53,12 @@ inputs_fnc.old_ratio = [];
 inputs_fnc.death_ratio = []; 
 inputs_fnc.asymp_ratio = [];
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
+
 % real (implied) data
 z0 = resize(cases_data.cases_pcr_smooth,t0:t2);
-z0(t1+3:t2) = cases_data.cases_pcr_implied(t1+3:t2);
+z0(t1+3:t2) = cases_data.cases_pcr_implied_smooth(t1+3:t2);
 %z0(d0:d1) = NaN; z0 = interp(z0,t0:t2);
-cases_data.cases_pcr_implied = smooth_series(z0);
+cases_data.cases_pcr_implied = (z0);
 inputs_fnc.z = double(resize(cases_data.cases_pcr_implied,t0:t2));
 inputs_fnc.obs_ratio = [];
 inputs_fnc.old_ratio = params.old_ratio;
@@ -81,7 +81,7 @@ nn = length(Rt_pcr);
 Rt_smooth_series_pcr = tseries(t0:t0+nn-1,Rt_pcr);
 Rt_smooth_series_real = tseries(t0:t0+nn-1,Rt_real);
 plot(resize(Rt_smooth_series_pcr,disp_from+30:t2),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_real,disp_from+30:t2-tshift),'linewidth',2);hold on;
+plot(resize(Rt_smooth_series_real,disp_from+30:t2),'linewidth',2);hold on;
 title('Effective reproduction number (smooth inputs)');
 legend({'reported data (PCR)','implied data'});
 grid on;
@@ -89,7 +89,7 @@ grid on;
 plot_fancharts_cmp(q_mat_pcr(5:15,:),q_mat_real(5:15,:),s,disp_from+30,disp_to,...
     'offsetdate',t0,'title','Effective reproduction numbers (reported vs.implied, 75% CI)','legend',{'reported data (PCR)','implied data'});
 % 
-plot_fanchart(q_mat_real,s,dt,disp_from+30,disp_to-tshift,t0,'Effective reproduction number (Rt, implied data)',true);
+plot_fanchart(q_mat_real,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
 plot_fanchart(q_mat_pcr,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
 
 % 2./ situation in hospitals
