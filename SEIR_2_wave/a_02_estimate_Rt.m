@@ -12,7 +12,7 @@ load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s')
 
 t0 = dates.t0;
 t1 = dates.t1;
-t2 = dates.t2-7;
+t2 = dates.t2-5;
 tt0 = t0+dt;
 s = setparam();
 s.model_seir = false;
@@ -44,7 +44,7 @@ s = setparam();
 
 % 1. reported data, PCR only, testing is optimal
 cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
-inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
+inputs_fnc.z = double(resize(cases_data.cases_total_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
 inputs_fnc.H0 = 0;
 inputs_fnc.D0 = 0;

@@ -8,7 +8,7 @@ else
     convert = false;
 end
 if isempty(varargin)
-    w = 5;
+    w = [7 0];
 else
     w = varargin{1};
 end

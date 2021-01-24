@@ -1,4 +1,4 @@
-function [y] = mov_median(x,varargin)
+function [y] = mov_mean(x,varargin)
 
 try
     d = varargin{1};
@@ -23,7 +23,7 @@ try
         end
     end
 catch err0
-    d = [7 0];
+    d = 7;
     if isa(x,'tseries')
         dateFrom = startdate(x);
         dateTo = enddate(x);
@@ -33,10 +33,10 @@ catch err0
     end
 end
 
-y = movmedian(x(dateFrom:dateTo),d,'omitnan');
+y = movmean(x(dateFrom:dateTo),d,'omitnan');
 
 if isa(x,'tseries')
-    y = y+0*x; 
+    y = y+0*x;
 end
 
 end
