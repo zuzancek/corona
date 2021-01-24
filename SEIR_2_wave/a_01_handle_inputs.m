@@ -246,6 +246,7 @@ grid on;
 figure('Name','New cases (reported vs.true)');
 fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
 fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
+fh3 = plot(resize(cases_data.cases_total_smooth,disp_from:t1),'linewidth',2);
 % fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
 plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
 % plot(par.X_raw,'Color',[0.75 0.75 0.75],'linewidth',1); 
@@ -259,10 +260,16 @@ lab = {'september','oktober','november','december','januar'};
 mtt = d_from+cumsum([0 30 31 30 31]);
 xticks(mtt)
 xticklabels(lab);
-ylim([0 5000]);
+ylim([0 8000]);
 xlim([d_from dd(2021,1,29)]);
-legend([fh1 fh2 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)'});%, 'Reported new cases (PCR+AG tests)'}); 
+legend([fh1 fh2 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)', 'Reported cases (PCR+AG)'});%, 'Reported new cases (PCR+AG tests)'}); 
 title('New cases (smooth data)');
+
+
+xls_out.newcases_pcr_rep = par.X_rep_smooth;
+xls_out.newcases_imp = par.X_smooth;
+xls_out.newcases_imp_fcast = par.X_forecast_smooth;
+xls_out.newcases_pcr_ag_rep = resize(cases_data.cases_total_smooth,disp_from:t1);
 
 figure('Name','New cases (reported vs.true, lost cases)');
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
@@ -286,7 +293,7 @@ ylabel('% of total cases');
 subplot(2,1,2)
 plot(100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1),'linewidth',1);grid on;
 title('Testing effectivity (implied by hospitals)');
-
+xls_out.test_eff = 100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1);
 % 
 figure('Name','Testing effectivity and Old-age cases share')
 subplot(2,1,1)
@@ -337,7 +344,10 @@ else
     % plot(ratio.*resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
     legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
     grid on;
-    title('Hospitalisations (total)');
+    title('Hospitalisations (total)');    
+    xls_out.H_imp = ratio_h.*resize(out.H,disp_from:t1);
+    xls_out.H_rep = resize(hospit_smooth,disp_from:t1);
+      
     subplot(2,1,2)
     ratio_d = resize(deaths_total_smooth,disp_from:t1)./resize(out_check.D,disp_from:t1);
     plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2);hold on;
@@ -345,6 +355,9 @@ else
     % plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
     grid on;
     title('Deaths');
+    xls_out.D_imp = ratio_d.*resize(out.D,disp_from:t1);
+    xls_out.D_rep = resize(deaths_total_smooth,disp_from:t1);
+  
     legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'}); 
     figure('Name','Situation in Hospitals: Comparison II');
     subplot(2,1,1)
@@ -366,3 +379,4 @@ end
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
 mob_data.raw = yy;  mob_data.smooth = zz;
 save(out_filename,'dates','cases_data','hosp_data','deaths_data','mob_data','s');
+dbsave('xls_out.csv',xls_out);
