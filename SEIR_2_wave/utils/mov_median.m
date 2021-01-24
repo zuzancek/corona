@@ -23,7 +23,7 @@ try
         end
     end
 catch err0
-    d = [7 0];
+    d = 7;
     if isa(x,'tseries')
         dateFrom = startdate(x);
         dateTo = enddate(x);
@@ -36,7 +36,7 @@ end
 y = movmedian(x(dateFrom:dateTo),d,'omitnan');
 
 if isa(x,'tseries')
-    y = y+0*x; 
+    y = y+0*x;
 end
 
 end

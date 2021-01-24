@@ -15,7 +15,6 @@ fun_opt_0 = {'DHIXe','DHIXt'}; fun_0 = str2func(fun_opt_0{idx_fun});
 fun_opt_1 = {'XIHDe','XIHDt'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
-xls_out = struct;
 
 %% handle data
 % definitions
@@ -264,9 +263,6 @@ ylim([0 5000]);
 xlim([d_from dd(2021,1,29)]);
 legend([fh1 fh2 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)'});%, 'Reported new cases (PCR+AG tests)'}); 
 title('New cases (smooth data)');
-xls_out.newcases_rep = par.X_rep_smooth;
-xls_out.newcases_imp = par.X_smooth;
-xls_out.newcases_imp_fcast = par.X_forecast_smooth;
 
 figure('Name','New cases (reported vs.true, lost cases)');
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
@@ -290,7 +286,6 @@ ylabel('% of total cases');
 subplot(2,1,2)
 plot(100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1),'linewidth',1);grid on;
 title('Testing effectivity (implied by hospitals)');
-xls_out.test_eff = 100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1);
 
 % 
 figure('Name','Testing effectivity and Old-age cases share')
@@ -340,8 +335,6 @@ else
     plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);hold on;
     plot(ratio_h.*resize(out.H,disp_from:t1),'linewidth',2);hold on;
     % plot(ratio.*resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
-    xls_out.H_imp = ratio_h.*resize(out.H,disp_from:t1);
-    xls_out.H_rep = resize(hospit_smooth,disp_from:t1);
     legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
     grid on;
     title('Hospitalisations (total)');
@@ -349,9 +342,7 @@ else
     ratio_d = resize(deaths_total_smooth,disp_from:t1)./resize(out_check.D,disp_from:t1);
     plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2);hold on;
     plot(ratio_d.*resize(out.D,disp_from:t1),'linewidth',2);hold on;
-    % plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;    
-    xls_out.D_imp = ratio_d.*resize(out.D,disp_from:t1);
-    xls_out.D_rep = resize(deaths_total_smooth,disp_from:t1);
+    % plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
     grid on;
     title('Deaths');
     legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'}); 

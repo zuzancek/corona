@@ -76,7 +76,7 @@ alpha_hdo = s.omega_o/s.T_death_o;
 alpha_hry = (1-s.omega_y)./s.T_rec_y; 
 alpha_hro = (1-s.omega_o)./s.T_rec_o; 
 % T_hosp = s.T_hosp.mean;
-alpha = 1.175; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
+alpha = 1.15; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
 S_vec = zeros(N,T); S_vec(:,1) = pop_size-I0;
 I_vec = zeros(N,T); I_vec(:,1) = I0;
