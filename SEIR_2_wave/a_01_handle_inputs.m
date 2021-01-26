@@ -34,47 +34,47 @@ y = process_inputs(x,tt0,t1);
 dI_inflow_ag = y.AgPosit;
 dI_inflow_pcr = resize(x.NewCases,tt0:t1);
 dI_inflow_pcr(end) = dI_inflow_pcr(end-4);
-dI_inflow_pcr_smooth = smooth_series(s.smoothing_method_data(dI_inflow_pcr));
+dI_inflow_pcr_smooth = smooth_series(mov_median(dI_inflow_pcr));
 dI_inflow = dI_inflow_pcr+dI_inflow_ag;
-dI_inflow_smooth = smooth_series(s.smoothing_method_data(dI_inflow));
+dI_inflow_smooth = smooth_series(mov_median(dI_inflow));
 
 pos_test_ratio = x.NewCases./x.Tests;
 pos_test_ratio_ag = y.AgPosit./y.AgTests;
-pos_test_ratio_smooth = smooth_series(s.smoothing_method_data(pos_test_ratio));
+pos_test_ratio_smooth = smooth_series(mov_median(pos_test_ratio));
 tests = x.Tests;
-tests_smooth = smooth_series(s.smoothing_method_data(tests));
+tests_smooth = smooth_series(mov_median(tests));
 I0 = x.TotalCases(t0)/s.obs_ratio;
 
 cases_data = struct;
-cases_data.cases_ag = dI_inflow_ag;   cases_data.cases_ag_mm = mov_median(dI_inflow_ag);   cases_data.cases_ag_smooth = smooth_series(dI_inflow_ag);
-cases_data.cases_pcr = dI_inflow_pcr; cases_data.cases_pcr_mm = mov_median(dI_inflow_pcr); cases_data.cases_pcr_smooth = dI_inflow_pcr_smooth;
-cases_data.cases_total = dI_inflow;   cases_data.cases_total_mm = mov_median(dI_inflow);   cases_data.cases_total_smooth = dI_inflow_smooth;
-cases_data.ptr_pcr = pos_test_ratio;  cases_data.ptr_mm = mov_median(pos_test_ratio);      cases_data.ptr_smooth = pos_test_ratio_smooth;
-cases_data.ptr_ag = pos_test_ratio_ag;cases_data.ptr_ag_mm = mov_median(pos_test_ratio_ag);cases_data.ptr_ag_smooth = tests_smooth;
+cases_data.cases_ag = dI_inflow_ag;   cases_data.cases_ag_mm = mov_median(dI_inflow_ag);   cases_data.cases_ag_smooth = smooth_series(cases_data.cases_ag_mm);
+cases_data.cases_pcr = dI_inflow_pcr; cases_data.cases_pcr_mm = mov_median(dI_inflow_pcr); cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_mm);
+cases_data.cases_total = dI_inflow;   cases_data.cases_total_mm = mov_median(dI_inflow);   cases_data.cases_total_smooth = smooth_series(cases_data.cases_total_mm);
+cases_data.ptr_pcr = pos_test_ratio;  cases_data.ptr_mm = mov_median(pos_test_ratio);      cases_data.ptr_smooth = smooth_series(cases_data.ptr_mm);
+cases_data.ptr_ag = pos_test_ratio_ag;cases_data.ptr_ag_mm = mov_median(pos_test_ratio_ag);cases_data.ptr_ag_smooth = smooth_series(cases_data.ptr_ag_mm);
 cases_data.I0 = I0;
 
 % clinical
 hospit = hosp.Hospitalizations;
-hospit_smooth = smooth_series(hospit);
+hospit_smooth = smooth_series(mov_median(hospit));
 icu = hosp.ICU;
 icu(startdate(hospit_smooth)+40:startdate(hospit_smooth)+60) = NaN;
 icu = interp(icu,startdate(hospit_smooth):enddate(hospit_smooth));
 hosp.ICU = icu;
-icu_smooth = smooth_series(resize(icu,h_t0:h_t1),s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+icu_smooth = smooth_series(mov_median(resize(icu,h_t0:h_t1)));
 vent = hosp.Ventilation;
-vent_smooth = smooth_series(vent,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+vent_smooth = smooth_series(mov_median(vent));
 death = resize(x.Deaths,h_t0:h_t1);
-death_smooth = smooth_series(death,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+death_smooth = smooth_series(mov_median(death));
 admiss = hosp.Admission;
-admiss_smooth = smooth_series(admiss,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+admiss_smooth = smooth_series(mov_median(admiss));
 discharge = hosp.Discharge;
-discharge_smooth = smooth_series(discharge,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+discharge_smooth = smooth_series(mov_median(discharge));
 deaths_total = db_deaths.Total;
-deaths_total_smooth = smooth_series(deaths_total,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+deaths_total_smooth = smooth_series(mov_median(deaths_total));
 deaths_onCovid = db_deaths.DeathCovid;
-deaths_onCovid_smooth = smooth_series(deaths_onCovid,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+deaths_onCovid_smooth = smooth_series(mov_median(deaths_onCovid));
 deaths_withCovid = db_deaths.DeathWithCovid;
-deaths_withCovid_smooth = smooth_series(deaths_withCovid,s.smooth_width_hosp,s.smooth_type,s.smooth_ends);
+deaths_withCovid_smooth = smooth_series(mov_median(deaths_withCovid));
 
 hosp_data = struct;
 hosp_data.H_raw = hospit;           hosp_data.H_smooth = hospit_smooth;
@@ -104,7 +104,7 @@ cfr_init = []; cfr_final = 17.5;
 deaths_data.cfr = cfr_ext;                  deaths_data.cfr_smooth = cfr_ext_smooth;
 
 % observed ratio
-delay.v = [1 2 0.5 0];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
+delay.v = 0*[1 2 0.5 0];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
 % delay.v = [0.25 0.75 0];  delay.at = [dd(2020,10,25),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = db_deaths_age.TotalDeathRatioOld;
@@ -119,6 +119,7 @@ params.other = other;
 params.cutoff = 3;
 params.firstData = disp_from-31;
 params.adj = -0.175; % *0
+params.h = hospit;
 [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp,deaths_total,s,disp_from,t1,t0,t1,...
     params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;

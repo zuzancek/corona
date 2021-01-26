@@ -23,7 +23,7 @@ try
         end
     end
 catch err0
-    d = 7;
+    d = [7 0];
     if isa(x,'tseries')
         dateFrom = startdate(x);
         dateTo = enddate(x);
