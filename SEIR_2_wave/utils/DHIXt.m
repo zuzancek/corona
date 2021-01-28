@@ -1,5 +1,6 @@
 function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,~,params,delay)
 
+%% initialization
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
@@ -10,11 +11,10 @@ T_test_to_result = 1;
 adj = params.adj;
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
-% cfr_hospitals = method(params.cfr_hospitals);
-% delta = cfr_hospitals(dateFrom:dateTo);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(firstData:dateTo));
 
+%% testing
 % delay in testing (gradual)
 T_delay = NaN+zeros(T,1); T_delay(1) = 0;
 dlen = length(delay.v);
@@ -38,21 +38,25 @@ p_T_death = p_T_death./sum(p_T_death,2);
 % old-young share in hospitals
 zeta0 = (varsigma)./(1-varsigma).*omega_y./omega_o; zeta = zeta0./(1+zeta0);
 % recovery in hospitals
-T_rec_y = s.T_rec_y;    T_rec_o = s.T_rec_o;            T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
-T_rec_std = s.T_rec_std;
+T_rec_y = 7.9625;       T_rec_o = 11.7325;              T_rec = zeta.*T_rec_o+(1-zeta).*T_rec_y;
+T_rec_std = 0.5547;
 k_rec = s.k_rec;        x_rec = 1:k_rec;                T_rec_shape = T_rec*T_rec_std^2; T_rec_scale = 1/T_rec_std^2;
 p_T_rec = pdf(s.T_rec_pdf_type,repmat(x_rec,length(zeta),1),repmat(T_rec_shape,1,k_rec),repmat(T_rec_scale,length(zeta),k_rec));
 p_T_rec = p_T_rec./sum(p_T_rec,2);
 % hospital admission
-lambda_y = s.eta_y;    lambda_o = s.eta_o;         
-theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
-lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = s.T_hosp_y;        
-T_hosp_o = s.T_hosp_o;  
-k_hosp = s.k_hosp;      x_hosp = 1:k_hosp;                   
-po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
-p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
-p_T_hosp = p_T_hosp./sum(p_T_hosp,2);
+lambda_y = s.eta_y;    lambda_o = s.eta_o;      
+theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0); lambda = theta.*lambda_o+(1-theta).*lambda_y; 
+k_hosp = s.k_hosp;     x_hosp = 1:k_hosp;  
+py = 0.9425;           
+pdf_T_hosp_y = -1./log(1-py).*py.^x_hosp./x_hosp; 
+pdf_T_hosp_y = pdf_T_hosp_y./sum(pdf_T_hosp_y,2);
+po = 0.8825;           pdf_T_hosp_o = -1./log(1-po).*po.^x_hosp./x_hosp; pdf_T_hosp_o = pdf_T_hosp_o./sum(pdf_T_hosp_o,2);
+pdf_T_hosp = theta.*pdf_T_hosp_o+(1-theta).*pdf_T_hosp_y;  p_T_hosp = pdf_T_hosp./sum(pdf_T_hosp,2);
+% T_hosp_y = s.T_hosp_y;        
+% T_hosp_o = s.T_hosp_o;                   
+% po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
+% p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
+% p_T_hosp = p_T_hosp./sum(p_T_hosp,2);
 % infections
 % recovery from sickness
 T_delay = extend(T_delay,length(theta)-length(T_delay));
@@ -63,14 +67,16 @@ eta = 1-lambda;
 p_T_sick = pdf(s.T_sick_pdf_type,repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
 p_T_sick = p_T_sick./sum(p_T_sick,2);
 
-% time shift (death->illness)
+%% time shift (death->illness)
 ks = s.t_shift_clin;        xs = 1:ks;
 pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1-varsigma));
-pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
+% pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
 lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
 p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
-T_shift = ceil(dot(p_T_shift,xs));      % mean shift
-
+T_shift_1 = ceil(dot(p_T_shift,xs));      % mean shift
+[~,idx] = (max(theta));
+T_shift_0 = ceil(dot(xs(1:k_hosp)',p_T_hosp(idx,:)))+1;
+T_shift = T_shift_0+T_shift_1;
 % ******* Equations
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
 % H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
@@ -92,7 +98,7 @@ omega = extend(method_params(omega(1:end-1).*gamma_hd),1);
 HR = method_data(extend(get_wa(p_T_rec,H,1-omega,k_rec),k_rec));
 IH = H(2:end)-H(1:end-1)+HR(1:end-1)+HD;
 I = method_data(get_wa_inv(p_T_hosp(1:end-1,:),IH,AC,lambda(1:end-1),k_hosp));
-idx = ceil(max((po+py)));
+idx = 1; %ceil(max((po+py)));
 % xx = method_data(extend(get_wa(p_T_hosp(1:end-2,:),I,lambda(1:end-2),k_hosp),k_hosp));
 IR = method_data(extend(get_wa(p_T_sick(1:end-1-idx,:),I,eta(1:end-1-idx),k_sick),k_sick));
 X = method_data(I(2:end)-I(1:end-1)+IR(1:end-1)+IH(idx+1:end-1));
@@ -102,7 +108,7 @@ kk = (1+adj/T_shift).^(0:T_shift-1);
 X(end-T_shift+1:end) = X(end-T_shift+1:end).*kk';
 
 Xts = smooth_series(X(tshift:end-0*T_shift)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift:end-0*T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xrts = (X(tshift+T_shift:end-0*T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
