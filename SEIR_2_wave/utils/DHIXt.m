@@ -24,7 +24,7 @@ end
 if dlen
     T_delay(T) = delay.v(end);
 end
-T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)')+1; %#ok<FNDSB>
+T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 
 % death: najprv time-inconsistent
 omega_y = s.omega_y;       omega_o = s.omega_o;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); 
@@ -47,8 +47,8 @@ p_T_rec = p_T_rec./sum(p_T_rec,2);
 lambda_y = s.eta_y;    lambda_o = s.eta_o;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = s.T_hosp_y+1;        
-T_hosp_o = s.T_hosp_o+1;  
+T_hosp_y = s.T_hosp_y;        
+T_hosp_o = s.T_hosp_o;  
 k_hosp = s.k_hosp;      x_hosp = 1:k_hosp;                   
 po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
 p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
