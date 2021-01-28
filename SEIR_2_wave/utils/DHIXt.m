@@ -24,7 +24,7 @@ end
 if dlen
     T_delay(T) = delay.v(end);
 end
-T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
+T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)')+1; %#ok<FNDSB>
 
 % death: najprv time-inconsistent
 omega_y = s.omega_y;       omega_o = s.omega_o;          omega = (omega_o.*varsigma+omega_y)./(1+varsigma); 
@@ -47,8 +47,8 @@ p_T_rec = p_T_rec./sum(p_T_rec,2);
 lambda_y = s.eta_y;    lambda_o = s.eta_o;         
 theta0 = zeta0.*lambda_y./lambda_o; theta = theta0./(1+theta0);
 lambda = theta.*lambda_o+(1-theta).*lambda_y;
-T_hosp_y = s.T_hosp_y;        
-T_hosp_o = s.T_hosp_o;  
+T_hosp_y = s.T_hosp_y+1;        
+T_hosp_o = s.T_hosp_o+1;  
 k_hosp = s.k_hosp;      x_hosp = 1:k_hosp;                   
 po = 1./(T_hosp_o(1).*theta); py = 1./(T_hosp_y(1).*(1-theta));
 p_T_hosp = repmat(po.*py./(po-py),1,k_hosp).*(exp(-py*x_hosp)-exp(-po*x_hosp));
@@ -85,16 +85,17 @@ H = method_data(h.Hospitalizations(firstData:dateTo));
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation
-HD = method_data(D(2:end)-D(1:end-1));  HD = [HD(1);HD(:)];
-hd = get_wa(p_T_death,H,omega,k_death);
-gamma_hd =  extend(HD(k_death+1:end)./hd,k_death);
-gamma_hd = method_params(gamma_hd);
-alpha = 1-omega.*gamma_hd; 
-HR = extend(get_wa(p_T_rec,H,alpha,k_rec),k_rec);
-IH = H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end);IH = method_data([IH(1);IH(:)]);
-I = (get_wa_inv(p_T_hosp,IH,AC,lambda,k_hosp));I = method_data([I(1);I(:)]);
-IR = extend(get_wa(p_T_sick,I,eta,k_sick),k_sick);
-X = I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end);X = [X(1);X(:)];
+HD = method_data(D(2:end)-D(1:end-1));  
+hd = method_params(get_wa(p_T_death,H,omega,k_death));
+gamma_hd =  method_params(extend(HD(k_death+1:end)./hd(1:end-1),k_death));
+omega = extend(method_params(omega(1:end-1).*gamma_hd),1);
+HR = method_data(extend(get_wa(p_T_rec,H,1-omega,k_rec),k_rec));
+IH = H(2:end)-H(1:end-1)+HR(1:end-1)+HD;
+I = method_data(get_wa_inv(p_T_hosp(1:end-1,:),IH,AC,lambda(1:end-1),k_hosp));
+idx = ceil(max((po+py)));
+% xx = method_data(extend(get_wa(p_T_hosp(1:end-2,:),I,lambda(1:end-2),k_hosp),k_hosp));
+IR = method_data(extend(get_wa(p_T_sick(1:end-1-idx,:),I,eta(1:end-1-idx),k_sick),k_sick));
+X = method_data(I(2:end)-I(1:end-1)+IR(1:end-1)+IH(idx+1:end-1));
 
 % X_orig = X;
 kk = (1+adj/T_shift).^(0:T_shift-1); 
@@ -106,6 +107,13 @@ Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
+
+figure;
+bar(Orts);hold on;
+bar(Xrts);
+bar(mov_median(params.h));
+% bar(mov_median(tseries(dd(2020,9,2):dd(2020,9,2)+length(HD(32:end))-1,HD(32:end))));
+
 Len = length(Xts);
 p = struct();
 p.X_smooth = resize(Xts,dateFrom:dateFrom+Len-T_shift);
