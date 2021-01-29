@@ -1,5 +1,4 @@
-function []=plot_mobililty(mob,dateFrom,dateTo)
-
+function []=plot_mobility(mob,dateFrom,dateTo)
 
 threshold = 100;
 
@@ -22,10 +21,11 @@ ylabel('%');
 title('Mobility, raw data');
 legend(fn);
 
+% smooth
 figure('Name','Mobility, smooth data');
 for i=1:length(fn)
     yy = interp(resize(mob.(fn{i}),dateFrom:dateTo),dateFrom:dateTo);
-    zz = smooth_series(yy,s.smooth_width,s.smooth_type,s.smooth_ends);
+    zz = smooth_series(mov_median(yy));
     if i==length(fn)
         plot(zz,'linewidth',2,'Color','k');hold on;
     else
@@ -37,3 +37,5 @@ grid on;
 ylabel('%');
 title('Mobility, smooth data');
 legend(fn);
+
+end

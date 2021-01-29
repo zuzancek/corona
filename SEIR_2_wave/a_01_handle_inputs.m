@@ -118,40 +118,7 @@ hosp_data.alt = out;
 plot_clinical_statistics(data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
 
 % mobility
-threshold = 100;
-figure('Name','Mobility');
-fn = fieldnames(mob);
-for i=1:length(fn)
-    yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
-    if i==length(fn)
-        plot(yy,'linewidth',2,'Color','k');hold on;
-    else
-        plot(yy,'linewidth',1);hold on;
-    end
-end
-xl = xlim;
-bench = tseries(xl(1):xl(2),0)+threshold;
-plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
-grid on;
-ylabel('%');
-title('Mobility, raw data');
-legend(fn);
-
-figure('Name','Mobility, smooth data');
-for i=1:length(fn)
-    yy = interp(resize(mob.(fn{i}),t0:t1),t0:t1);
-    zz = smooth_series(yy,s.smooth_width,s.smooth_type,s.smooth_ends);
-    if i==length(fn)
-        plot(zz,'linewidth',2,'Color','k');hold on;
-    else
-        plot(zz,'linewidth',1);hold on;
-    end
-end
-plot(bench,'color',[0.15 0.15 0.15],'linestyle','--');
-grid on;
-ylabel('%');
-title('Mobility, smooth data');
-legend(fn);
+plot_mobility(mob,dateFrom,dateTo);
 
 % epidemiology
 figure('Name','New cases, PCR, AG')
