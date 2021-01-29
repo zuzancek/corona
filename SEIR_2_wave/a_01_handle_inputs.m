@@ -28,6 +28,8 @@ t1 = enddate(x.ActiveCases)-cut-0;
 t1_ag = enddate(x.AgTests)-cut-0;
 h_t0 = startdate(hosp.ICU);
 h_t1 = enddate(hosp.ICU);
+dateFrom = dd(2020,9,1);
+dateTo = t1;
 
 % epidemiology data
 y = process_inputs(x,tt0,t1);
@@ -54,38 +56,7 @@ cases_data.ptr_ag = pos_test_ratio_ag;cases_data.ptr_ag_mm = mov_median(pos_test
 cases_data.I0 = I0;
 
 % clinical
-hospit = hosp.Hospitalizations;
-hospit_smooth = smooth_series(mov_median(hospit));
-icu = hosp.ICU;
-icu(startdate(hospit_smooth)+40:startdate(hospit_smooth)+60) = NaN;
-icu = interp(icu,startdate(hospit_smooth):enddate(hospit_smooth));
-hosp.ICU = icu;
-icu_smooth = smooth_series(mov_median(resize(icu,h_t0:h_t1)));
-vent = hosp.Ventilation;
-vent_smooth = smooth_series(mov_median(vent));
-death = resize(x.Deaths,h_t0:h_t1);
-death_smooth = smooth_series(mov_median(death));
-admiss = hosp.Admission;
-admiss_smooth = smooth_series(mov_median(admiss));
-discharge = hosp.Discharge;
-discharge_smooth = smooth_series(mov_median(discharge));
-deaths_total = db_deaths.Total;
-deaths_total_smooth = smooth_series(mov_median(deaths_total));
-deaths_onCovid = db_deaths.DeathCovid;
-deaths_onCovid_smooth = smooth_series(mov_median(deaths_onCovid));
-deaths_withCovid = db_deaths.DeathWithCovid;
-deaths_withCovid_smooth = smooth_series(mov_median(deaths_withCovid));
-
-hosp_data = struct;
-hosp_data.H_raw = hospit;           hosp_data.H_smooth = hospit_smooth;
-hosp_data.C_raw = icu;              hosp_data.C_smooth = icu_smooth;
-hosp_data.V_raw = vent;             hosp_data.V_smooth = vent_smooth;
-hosp_data.D_raw = deaths_total;     hosp_data.D_smooth = deaths_total_smooth;
-
-deaths_data = struct;
-deaths_data.total = deaths_total; deaths_data.total_smooth = deaths_total_smooth;
-deaths_data.on = deaths_onCovid; deaths_data.on_smooth = deaths_onCovid_smooth;
-deaths_data.with = deaths_withCovid; deaths_data.with_smooth = deaths_withCovid_smooth;
+[hosp_data,deaths_data] = process_clinical_statistics(hosp,db_deaths,dateFrom,dateTo);
 
 %% calculations
 % asymptomatic share
@@ -145,7 +116,6 @@ hosp_data.alt = out;
 %% plotting stuff
 % clinical statistics
 plot_clinical_statistics(data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
-
 
 % mobility
 threshold = 100;
