@@ -1,4 +1,4 @@
-function []=plot_mobility(mob,dateFrom,dateTo)
+function [mob_data]=plot_mobility(mob,dateFrom,dateTo)
 
 threshold = 100;
 
@@ -37,5 +37,7 @@ grid on;
 ylabel('%');
 title('Mobility, smooth data');
 legend(fn);
+
+mob_data.raw = yy;  mob_data.smooth = zz;
 
 end

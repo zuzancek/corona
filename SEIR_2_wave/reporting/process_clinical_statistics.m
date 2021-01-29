@@ -1,4 +1,4 @@
-function [db_h,db_d] = process_clinical_statistics(s,d,dateFrom,dateTo)
+function [db_h,db_d] = process_clinical_statistics(s,d,a,dateFrom,dateTo)
 
 db_h = struct;
 db_d = struct;
@@ -42,8 +42,11 @@ db_h.R_raw = resize(s.Discharge,dateFrom:dateTo);
 db_h.R = mov_median(db_h.R_raw);
 db_h.R_smooth = smooth_series(db_h.R);
 
-
-db_d.total_raw = db_d.D_raw;        db_d.total = db_h.D;        db.d_total_smooth = db_h.D_smooth;
+% deaths
+db_d.old_ratio_raw = a.TotalDeathRatioOld;
+db_d.old_ratio = mov_median(db_d.old_ratio_raw);
+db_d.old_ratio_smooth = smooth_series(db_d.old_ratio);
+db_d.total_raw = db_d.D_raw;        db_d.total = db_h.D;        db_d.total_smooth = db_h.D_smooth;
 db_d.on_raw = db_d.D_on_raw;        db_d.on = db_h.D_on;        db_d.on_smooth = db_h.D_on_smooth;
 db_d.with_raw = db_d.D_with_raw;    db_d.with = db_h.D_with;    db_d.with_smooth = db_h.D_with_smooth;
 
