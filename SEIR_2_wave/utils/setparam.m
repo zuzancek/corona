@@ -10,11 +10,12 @@ s.cases_min = 750;
 s.ratio_threshold = 0.05;
 s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
+s.firstData_offset = 31;
 
 % serial interval (generation period)
 s.SI.mean = 7.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test.mean = 2.5;             s.T_test.std = s.SI.std;      
+s.T_test.mean = 3;              s.T_test.std = s.SI.std;      
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period

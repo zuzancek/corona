@@ -4,7 +4,7 @@ function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,~,params,de
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
-firstData = params.firstData;
+firstData = s.firstData_offset;
 tshift = dateFrom-firstData;
 cut = params.cutoff;
 T_test_to_result = 1;
@@ -73,10 +73,11 @@ pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1
 % pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
 lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
 p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
-T_shift_1 = ceil(dot(p_T_shift,xs));      % mean shift
+T_shift_death = ceil(dot(p_T_shift,xs));      % mean shift
 [~,idx] = (max(theta));
-T_shift_0 = ceil(dot(xs(1:k_hosp)',p_T_hosp(idx,:)))+1;
-T_shift = T_shift_0+T_shift_1;
+T_shift_hosp = ceil(dot(xs(1:k_hosp)',p_T_hosp(idx,:)))+1+T_test_to_result;
+T_shift_sick = ceil(dot(xs(1:k_sick)',p_T_sick(idx,:)))+T_test_to_result;
+T_shift = T_shift_hosp+0*T_shift_death;
 % ******* Equations
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
 % H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
@@ -98,17 +99,17 @@ omega = extend(method_params(omega(1:end-1).*gamma_hd),1);
 HR = method_data(extend(get_wa(p_T_rec,H,1-omega,k_rec),k_rec));
 IH = H(2:end)-H(1:end-1)+HR(1:end-1)+HD;
 I = method_data(get_wa_inv(p_T_hosp(1:end-1,:),IH,AC,lambda(1:end-1),k_hosp));
-idx = 1; %ceil(max((po+py)));
-% xx = method_data(extend(get_wa(p_T_hosp(1:end-2,:),I,lambda(1:end-2),k_hosp),k_hosp));
-IR = method_data(extend(get_wa(p_T_sick(1:end-1-idx,:),I,eta(1:end-1-idx),k_sick),k_sick));
-X = method_data(I(2:end)-I(1:end-1)+IR(1:end-1)+IH(idx+1:end-1));
+IR = method_data(extend(get_wa(p_T_sick(1+0*T_shift_hosp:end-2,:),I,eta(1+0*T_shift_hosp:end-2),k_sick),k_sick));
+dt = length(I(1:end-1-T_shift_sick));
+X = method_data(I(2:end-T_shift_sick)-I(1:end-1-T_shift_sick)+IR(end-dt+1:end)...
+    +IH(end-dt+1-(T_shift_sick-T_shift_hosp):end-(T_shift_sick-T_shift_hosp)));
 
 % X_orig = X;
 kk = (1+adj/T_shift).^(0:T_shift-1); 
 X(end-T_shift+1:end) = X(end-T_shift+1:end).*kk';
 
-Xts = smooth_series(X(tshift:end-0*T_shift)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift+T_shift:end-0*T_shift)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
