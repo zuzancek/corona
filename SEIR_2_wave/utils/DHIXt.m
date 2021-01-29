@@ -103,6 +103,7 @@ IR = method_data(extend(get_wa(p_T_sick(1+0*T_shift_hosp:end-2,:),I,eta(1+0*T_sh
 dt = length(I(1:end-1-T_shift_sick));
 X = method_data(I(2:end-T_shift_sick)-I(1:end-1-T_shift_sick)+IR(end-dt+1:end)...
     +IH(end-dt+1-(T_shift_sick-T_shift_hosp):end-(T_shift_sick-T_shift_hosp)));
+X = extend_tail(X,3);
 
 % X_orig = X;
 kk = (1+adj/T_shift).^(0:T_shift-1); 
@@ -219,6 +220,16 @@ p.omega_y = s.omega_y.*(gamma_hd);
         x(T-k+2) = x(T-k+1)+1/3*dx;
         for j=3:k
             x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
+        end        
+    end
+
+    function [x] = extend_tail(x,k) %#ok<DEFNU>
+        L = length(x);
+        dx = x(L)-x(L-1);
+        x(L+1) = x(L)+2/3*dx;
+        x(L+2) = x(L+1)+1/3*dx;
+        for j=3:k
+            x(L+j) = x(L+j-1)+1/3*1/(j-1)*dx;
         end        
     end
 
