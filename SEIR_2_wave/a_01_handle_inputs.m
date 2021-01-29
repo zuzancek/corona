@@ -144,29 +144,8 @@ hosp_data.alt = out;
 
 %% plotting stuff
 % clinical statistics
-figure('Name','Clinical statistics');
-subplot(2,2,1)
-plot(resize(hospit,disp_from:t1),'linewidth',1);hold on;
-plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);
-grid on;
-title('Total hospitalizations');
-subplot(2,2,2)
-plot(resize(icu,disp_from:t1),'linewidth',1);hold on;
-plot(resize(icu_smooth,disp_from:t1),'linewidth',2);
-grid on;
-title('ICU beds');
-subplot(2,2,3)
-plot(resize(vent,disp_from:t1),'linewidth',1);hold on;
-plot(resize(vent_smooth,disp_from:t1),'linewidth',2);
-grid on;
-title('Ventilations');
-subplot(2,2,4)
-pp1=plot(resize(death,disp_from:t1),'linewidth',1,'linestyle','--');hold on;
-pp2=plot(resize(deaths_total,disp_from:t1),'linewidth',1,'linestyle','--');hold on;
-plot(resize(death_smooth,disp_from:t1),'linewidth',2,'Color',pp1.Color);
-plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2,'Color',pp2.Color);
-grid on;
-title('Total Deaths (with+on covid)');
+plot_clinical_statistics(data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
+
 
 % mobility
 threshold = 100;
