@@ -120,7 +120,6 @@ figure;
 bar(Orts);hold on;
 bar(Xrts);
 bar(mov_median(params.h));
-% bar(mov_median(tseries(dd(2020,9,2):dd(2020,9,2)+length(HD(32:end))-1,HD(32:end))));
 
 Len = length(Xts);
 p = struct();
