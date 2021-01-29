@@ -4,8 +4,8 @@ function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,~,params,de
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
 method_params = s.smoothing_method_params;
-firstData = s.firstData_offset;
-tshift = dateFrom-firstData;
+tshift = s.firstData_offset;
+firstData = -tshift+dateFrom;
 cut = params.cutoff;
 T_test_to_result = 1;
 adj = params.adj;
@@ -61,7 +61,7 @@ pdf_T_hosp = theta.*pdf_T_hosp_o+(1-theta).*pdf_T_hosp_y;  p_T_hosp = pdf_T_hosp
 % recovery from sickness
 T_delay = extend(T_delay,length(theta)-length(T_delay));
 T_sick_y = s.T_sick_y;  T_sick_o = s.T_sick_o;   T_sick_std = s.T_sick_std; 
-T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay-T_test_to_result;
+T_sick = theta.*T_sick_o+(1-theta).*T_sick_y-T_delay-0*T_test_to_result;
 k_sick = s.k_sick;      x_sick = 1:k_sick;       T_sick_shape = T_sick*T_sick_std^2; T_sick_scale = 1/T_sick_std^2;
 eta = 1-lambda;
 p_T_sick = pdf(s.T_sick_pdf_type,repmat(x_sick,length(zeta),1),repmat(T_sick_shape,1,k_sick),repmat(T_sick_scale,length(zeta),k_sick));
@@ -75,8 +75,8 @@ lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
 p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
 T_shift_death = ceil(dot(p_T_shift,xs));      % mean shift
 [~,idx] = (max(theta));
-T_shift_hosp = ceil(dot(xs(1:k_hosp)',p_T_hosp(idx,:)))+1+T_test_to_result;
-T_shift_sick = ceil(dot(xs(1:k_sick)',p_T_sick(idx,:)))+T_test_to_result;
+T_shift_hosp = ceil(dot(xs(1:k_hosp)',p_T_hosp(idx,:)));
+T_shift_sick = ceil(dot(xs(1:k_sick)',p_T_sick(idx,:)));
 T_shift = T_shift_hosp+0*T_shift_death;
 % ******* Equations
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
@@ -109,7 +109,7 @@ kk = (1+adj/T_shift).^(0:T_shift-1);
 X(end-T_shift+1:end) = X(end-T_shift+1:end).*kk';
 
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift+T_shift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xrts = (X(tshift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
 Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
