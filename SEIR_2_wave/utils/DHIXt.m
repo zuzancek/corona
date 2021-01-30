@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,h,d,s,dateFrom,dateTo,t0,~,params,delay)
+function [X,I,obs_ratio_adj,sa,p] = DHIXt(x,data,s,dateFrom,dateTo,t0,~,params,delay)
 
 %% initialization
 T = dateTo-dateFrom+1;
@@ -86,9 +86,9 @@ T_shift = T_shift_hosp+0*T_shift_death;
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
-D = x.Deaths(firstData:dateTo)*d(dateFrom)/x.Deaths(dateFrom); 
-D(tshift+1:end) = method_data(d(dateFrom:dateTo));
-H = method_data(h.Hospitalizations(firstData:dateTo));
+D = x.Deaths(firstData:dateTo)*data.D(dateFrom)/x.Deaths(dateFrom); 
+D(tshift+1:end) = data.D(dateFrom:dateTo);
+H = data.H(firstData:dateTo);
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation

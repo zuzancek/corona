@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = DHIX(x,h,d,s,dateFrom,dateTo,t0,t1,params,delay)
+function [X,I,obs_ratio_adj,sa,p] = DHIX(x,data,s,dateFrom,dateTo,t0,t1,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
@@ -14,9 +14,9 @@ rho = cases_old_ratio(dateFrom:dateTo);
 rho_ext = cases_old_ratio;
 asymp_ratio = method_params(params.asymp_ratio);
 sigma = asymp_ratio(dateFrom:dateTo);
-other = params.other;
-mob = method_params(resize(other.mob,dateFrom:dateTo));
-ptr = method_params(resize(other.ptr,dateFrom:dateTo));
+% other = params.other;
+% mob = method_params(resize(other.mob,dateFrom:dateTo));
+% ptr = method_params(resize(other.ptr,dateFrom:dateTo));
 
 % delay in testing (gradual)
 T_delay = NaN+zeros(T,1); T_delay(1) = 0;
@@ -47,8 +47,8 @@ T_sick_o = s.T_sick_o-s.T_test.mean-T_delay;    alpha_iro = (1-eta_o)./T_sick_o;
 
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
-D = method_data(d(dateFrom:dateTo));
-H = method_data(h.Hospitalizations(dateFrom:dateTo));
+D = data.D(dateFrom:dateTo);
+H = data.H(dateFrom:dateTo);
 
 H_D = (D(2:end)-D(1:end-1));
 H_D_o = varsigma(1:end-1).*H_D;
@@ -100,7 +100,7 @@ dI_data_reported_old = dI_data_reported.*rho;
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
 delta = dI_data_reported./dI_data_real;
 
-idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold);
+idx = find(dI_data_real<s.cases_min & dI_data_reported<s.cases_min & delta<1-s.ratio_threshold,'last');
 idx = dateFrom:max(idx);
 X(idx) = dI_data_reported(idx);
 % X(idx) = dI_data_reported(idx); X(dateFrom:min(idx)) = dI_data_reported(dateFrom:min(idx));
@@ -167,14 +167,14 @@ p.varsigma = varsigma;
         ys = method_data(y);
     end
 
-    function [x] = adjust_tail(x,k)
-        dx = x(T-k)-x(T-k-1);
-        x(T-k+1) = x(T-k)+2/3*dx;
-        x(T-k+2) = x(T-k+1)+1/3*dx;
-        for j=3:k
-            x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
-        end        
-    end
+%     function [x] = adjust_tail(x,k)
+%         dx = x(T-k)-x(T-k-1);
+%         x(T-k+1) = x(T-k)+2/3*dx;
+%         x(T-k+2) = x(T-k+1)+1/3*dx;
+%         for j=3:k
+%             x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
+%         end        
+%     end
 
 %     function [x] = get_rv(y)
 %         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
@@ -183,38 +183,5 @@ p.varsigma = varsigma;
 %         scale0_vec = scale0*ones(N,L);
 %         x = gamrnd(shape0_vec,scale0_vec);
 %     end
-
-function [x] = get_wa(weight,Z,alpha,idxFrom)
-        k = length(weight);
-        t = length(Z)-idxFrom+1;
-        W = repmat(weight,t,1);
-        A = repmat(alpha./(1:k),t,1);
-        J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
-        L = 0*(k-1)+repmat((1:t)',1,k);
-        Weight_mat = sparse(L,J,W);
-        Alpha_mat = sparse(L,J,A);
-        Weight_mat = Weight_mat./sum(Weight_mat,2);
-        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+1:end-1);
-    end
-
-    function [x] = get_wa_inv(weight,Z,phi,idxFrom)
-        k = length(weight);
-        t = length(Z)-idxFrom+1;
-        W = repmat(weight,t,1);
-        a = phi./(1:k);
-        A = repmat(a,t,1);
-        J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
-        L = (k-1)+repmat((1:t)',1,k);
-        U0 = tril(repmat(1:k-1,k-1,1)); 
-        U0(U0==0) = k+1; w(end+1) = 0;
-        J0 = repmat(1:k-1,k-1,1);
-        L0 = repmat((1:k-1)',1,k-1);
-        W0 = w(U0(U0~=0));
-        A0 = a(U0(U0~=0));
-        Weight_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[W(:),W0(:)]);
-        Alpha_mat = sparse([L(:),L0(:)],[J(:),J0(:)],[A(:),A0(:)]);
-        Weight_mat = Weight_mat./sum(Weight_mat,2);
-        x = (Weight_mat.*Alpha_mat)\Z(end-t-k+1:end-1); 
-    end
 
 end

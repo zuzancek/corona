@@ -5,6 +5,7 @@ clc;
 mkdir('results');
 
 addpath data;
+addpath data/calibration;
 addpath functions;
 addpath utils;
 addpath plotting;

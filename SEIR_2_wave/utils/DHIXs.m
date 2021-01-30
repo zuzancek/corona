@@ -1,4 +1,4 @@
-function [X,I,obs_ratio_adj,sa,p] = DHIXs(x,h,d,s,dateFrom,dateTo,t0,~,params,delay)
+function [X,I,obs_ratio_adj,sa,p] = DHIXs(x,data,s,dateFrom,dateTo,t0,~,params,delay)
 
 T = dateTo-dateFrom+1;
 method_data = s.smoothing_method_data; 
@@ -77,9 +77,9 @@ T_shift = ceil(dot(p_T_shift,xs));      % mean shift
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
-D = x.Deaths(firstData:dateTo)*d(dateFrom)/x.Deaths(dateFrom); 
-D(tshift+1:end) = method_data(d(dateFrom:dateTo));
-H = method_data(h.Hospitalizations(firstData:dateTo));
+D = data.D(firstData:dateTo)*data.D(dateFrom)/x.Deaths(dateFrom); 
+D(tshift+1:end) = data.D(dateFrom:dateTo);
+H = data.H(firstData:dateTo);
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation

@@ -36,7 +36,7 @@ y = process_inputs(x,tt0,t1);
 [cases_data,test_data] = process_epidemiology_data(x,y,tt0,t1,s);
 
 % clinical
-[hosp_data,deaths_data] = process_clinical_statistics(hosp,db_deaths,db_deaths_age,dateFrom,dateTo);
+[hosp_data,deaths_data] = process_clinical_statistics(hosp,db_deaths,db_deaths_age,dateFrom-s.firstData_offset,dateTo);
 
 %% calculations
 % asymptomatic share
@@ -50,7 +50,7 @@ old_ratio = db_age.Old./db_age.Total;
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;     cases_data.old_ratio_raw = old_ratio_raw;
 
 % observed ratio
-delay.v = 1+[1 1.5 1 0];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15)];
+delay.v = 1+[1 1 1 0.50];  delay.at = [dd(2020,10,1),dd(2020,10,31),dd(2020,11,15),dd(2020,12,15),dd(12,31)];
 params = struct;
 params.death_old_ratio = deaths_data.old_ratio;
 params.cases_old_ratio = old_ratio;
@@ -58,7 +58,7 @@ params.asymp_ratio = asymp_ratio;
 params.cutoff = 3;
 params.adj = 0; % *0
 params.h = hosp_data.H;
-[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp_data,deaths_total,s,disp_from,t1,t0,t1,...
+[dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par] = fun_0(x,hosp_data,s,disp_from,t1,t0,t1,...
     params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
