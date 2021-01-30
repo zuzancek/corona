@@ -1,6 +1,5 @@
 function []=plot_epidemiology_reporting(cases_data,test_data,dateFrom,dateTo,varargin)
 
-
 ip = inputParser;
 addParamValue(ip, 'raw', false, @islogical); %#ok<*NVREPL>
 addParamValue(ip, 'mm', true, @islogical);
@@ -23,7 +22,7 @@ leg = {};
 if mm
     bar(resize(cases_data.cases_total,dateFrom:dateTo),'FaceAlpha',0.5,'EdgeAlpha',0.5);hold on;
     bar(resize(cases_data.cases_pcr,dateFrom:dateTo),'FaceAlpha',0.5,'EdgeAlpha',0.5);hold on;
-    leg = {leg{:},{'PCR only (7d median)','PCR+AG (7d median)'}};
+    leg = {leg{:},{'PCR only (7d median)','PCR+AG (7d median)'}}; %#ok<*CCAT>
 end
 if smooth
     plot(resize(cases_data.cases_total_smooth,dateFrom:dateTo),'linewidth',2,'Color','b');hold on;
@@ -63,37 +62,15 @@ subplot(2,1,1);
 plot(resize(100*cases_data.asymp_ratio,dateFrom:dateTo),'linewidth',1);hold on;
 plot(resize(100*cases_data.asymp_ratio_smooth,dateFrom:dateTo),'linewidth',2);hold on;
 title('Share of asymptomatic new cases (confirmed PCR only)');
-legend({'raw','smooth'}); ylabel('%');
+legend({'raw','smooth'}); 
+ylabel('%');
 grid on;
 subplot(2,1,2);
 plot(resize(100*cases_data.old_ratio,dateFrom:dateTo),'linewidth',1);hold on;
 plot(resize(100*cases_data.old_ratio_smooth,dateFrom:dateTo),'linewidth',2);hold on;
 title('Share of 65+ positive cases (confirmed PCR only)');
-legend({'raw','smooth'}); ylabel('%');
+legend({'raw','smooth'}); 
+ylabel('%');
 grid on;
 
-%
-
-
-figure('Name','New cases (reported vs.true)');
-fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
-fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
-fh3 = plot(resize(cases_data.cases_total_smooth,disp_from:t1),'linewidth',2);
-% fh3 = plot(resize(dI_inflow_smooth,disp_from:t1),'linewidth',2);hold on;
-plot(par.X_forecast_smooth,'linewidth',3, 'linestyle',':','Color',fh2.Color);
-% plot(par.X_raw,'Color',[0.75 0.75 0.75],'linewidth',1); 
-% plot(par.X_forecast_raw,'Color',[0.55 0.55 0.55],'linewidth',1,'linestyle',':');
-% plot(par.X_rep_raw,'linewidth',1,'Color',[0.5 0.5 0.5],'linestyle','-.');
-% plot(resize(cases_data.cases_pcr, startdate(par.X_rep_raw):enddate(par.X_rep_raw)),'linewidth',1,'Color',[0.75 0.75 0.75],'linestyle','-.');
-% plot(resize(dI_inflow,disp_from:t1),'linewidth',1,'Color',[0.5 0.5 0.5]);
-d_from = startdate(par.X_rep_raw);
-d_to = enddate(par.X_rep_raw);
-lab = {'september','oktober','november','december','januar'};
-mtt = d_from+cumsum([0 30 31 30 31]);
-xticks(mtt)
-xticklabels(lab);
-ylim([0 8000]);
-xlim([d_from dd(2021,1,29)]);
-legend([fh1 fh2 ],{'Reported (confirmed) new cases (PCR tests)','Implied by hospitals/deaths (+forecast)', 'Reported cases (PCR+AG)'});%, 'Reported new cases (PCR+AG tests)'}); 
-title('New cases (smooth data)');
-
+end

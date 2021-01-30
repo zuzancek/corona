@@ -81,13 +81,19 @@ y = x; y.NewCases = dI_inflow_real;
 hosp_data.alt = out;
 
 %% plotting stuff
+% 1. reporting
 % clinical statistics
-plot_clinical_statistics(data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
-
+plot_clinical_statistics(hosp_data+deaths_data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
 % mobility
 mob_data = plot_mobility(mob,dateFrom,dateTo);
-
 % epidemiology
+plot_epidemiology_reporting(cases_data,test_data,dateFrom,dateTo,'raw',false,'mm',true,'smooth',true);
+
+% 2. analysis, comparison
+% epidemiology
+% hospitals
+plot_clinical_cmp(out_check,hosp_data+deaths_data,out,dateFrom,dateTo,'mm',true,'reported',true,'reduced',true);
+
 figure('Name','New cases (reported vs.true)');
 fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;
 fh2 = plot(par.X_smooth,'linewidth',3);hold on; 
