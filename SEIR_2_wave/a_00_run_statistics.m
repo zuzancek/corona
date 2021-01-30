@@ -15,17 +15,13 @@ x = tb.day;
 s.alpha_h_y = tb.P_H_Y(end);
 s.alpha_h_o = tb.P_H_O(end);
 cdf_h_y = tb.P_H_Y./s.alpha_h_y;
-pdf_h_y = cdf_h_y(2:end)-cdf_h_y(1:end-1);
-pdf_h_y = [pdf_h_y;0]/sum(pdf_h_y);
+pdf_h_y = cdf_h_y(2:end)-cdf_h_y(1:end-1);  pdf_h_y = [pdf_h_y;0]/sum(pdf_h_y);
 pdf_h_y_s = smooth_series(pdf_h_y);pdf_h_y_s = pdf_h_y_s/sum(pdf_h_y_s);
 cdf_h_o = tb.P_H_O./s.alpha_h_o;
-pdf_h_o = cdf_h_o(2:end)-cdf_h_o(1:end-1);
-pdf_h_o = [pdf_h_o;0]/sum(pdf_h_o);
+pdf_h_o = cdf_h_o(2:end)-cdf_h_o(1:end-1);  pdf_h_o = [pdf_h_o;0]/sum(pdf_h_o);
 pdf_h_o_s = smooth_series(pdf_h_o);pdf_h_o_s = pdf_h_o_s/sum(pdf_h_o_s);
-s.T_h_o = dot(x,pdf_h_o)+1;
-s.T_h_y = dot(x,pdf_h_y)+1;
-s.T_h_o_s = dot(x,pdf_h_o_s)+1;
-s.T_h_y_s = dot(x,pdf_h_y_s)+1;
+s.T_h_o = dot(x,pdf_h_o)+1;                 s.T_h_y = dot(x,pdf_h_y)+1;
+s.T_h_o_s = dot(x,pdf_h_o_s)+1;             s.T_h_y_s = dot(x,pdf_h_y_s)+1;
 
 %% plotting 
 % hospital admission
