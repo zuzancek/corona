@@ -144,69 +144,6 @@ legend({'stationary (optimistic)','real (implied by hospitalizations)'});
 grid on;
 ylabel('% of total cases');
 
-%
-figure('Name','Situation in Hospitals: Comparison I')
-if idx_fun==1
-    subplot(2,2,1)
-    plot(resize(hospit_smooth,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out.H,disp_from:t1),'linewidth',1);hold on;
-    legend({'observed','implied by reported daily new cases'});
-    grid on;
-    title('Hospitalisations (total)');
-    subplot(2,2,2)
-    plot(resize(icu_smooth,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out.C,disp_from:t1),'linewidth',1);hold on;
-    grid on;
-    title('ICU');
-    subplot(2,2,3)
-    plot(resize(vent_smooth,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out.V,disp_from:t1),'linewidth',1);hold on;
-    grid on;
-    title('Ventilations');
-    subplot(2,2,4)
-    plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',1);hold on;
-    plot(resize(out.D,disp_from:t1),'linewidth',1);hold on;
-    grid on;
-    title('Deaths');
-else
-    subplot(2,1,1)
-    ratio_h = resize(hospit_smooth,disp_from:t1)./resize(out_check.H,disp_from:t1);
-    plot(resize(hospit_smooth,disp_from:t1),'linewidth',2);hold on;
-    plot(ratio_h.*resize(out.H,disp_from:t1),'linewidth',2);hold on;
-    % plot(ratio.*resize(out_check.H,disp_from:t1),'k--','linewidth',1);hold on;
-    legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
-    grid on;
-    title('Hospitalisations (total)');    
-    xls_out.H_imp = ratio_h.*resize(out.H,disp_from:t1);
-    xls_out.H_rep = resize(hospit_smooth,disp_from:t1);
-      
-    subplot(2,1,2)
-    ratio_d = resize(deaths_total_smooth,disp_from:t1)./resize(out_check.D,disp_from:t1);
-    plot(resize(deaths_total_smooth,disp_from:t1),'linewidth',2);hold on;
-    plot(ratio_d.*resize(out.D,disp_from:t1),'linewidth',2);hold on;
-    % plot(resize(out_check.D,disp_from:t1),'k--','linewidth',1);hold on;
-    grid on;
-    title('Deaths');
-    xls_out.D_imp = ratio_d.*resize(out.D,disp_from:t1);
-    xls_out.D_rep = resize(deaths_total_smooth,disp_from:t1);
-  
-    legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'}); 
-    figure('Name','Situation in Hospitals: Comparison II');
-    subplot(2,1,1)
-    ratio_c = 1/3*ratio_d+2/3*ratio_h;
-    plot(resize(icu_smooth,disp_from:t1),'linewidth',2);hold on;
-    plot(resize(icu_smooth,disp_from:t1)./(2/3*resize(hospit_smooth,disp_from:t1)./(ratio_h.*resize(out.H,disp_from:t1))+1/3*resize(deaths_total_smooth,disp_from:t1)./(ratio_d.*resize(out.D,disp_from:t1))),'linewidth',2);hold on;
-    legend({'observed','implied by reported daily new cases'});%,'reconstructed from implied cases'});
-    grid on;
-    title('ICU');
-    subplot(2,1,2)
-    plot(resize(vent_smooth,disp_from:t1),'linewidth',2);hold on;
-    plot(resize(vent_smooth,disp_from:t1)./(1/3*resize(hospit_smooth,disp_from:t1)./(ratio_h.*resize(out.H,disp_from:t1))+2/3*resize(deaths_total_smooth,disp_from:t1)./(ratio_d.*resize(out.D,disp_from:t1))),'linewidth',2);hold on;
-    grid on;
-    title('Ventilations');
-    legend({'observed','implied by reported daily new cases'}); %,'reconstructed from implied cases'}); 
-end    
-
 %% saving stuff
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
 save(out_filename,'dates','cases_data','test_data','hosp_data','deaths_data','mob_data','s');
