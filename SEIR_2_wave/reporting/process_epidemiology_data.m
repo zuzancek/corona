@@ -1,14 +1,14 @@
-function [cases_data,test_data]=process_epidemiology_data(x,y,dateFrom,dateTo)
+function [cases_data,test_data]=process_epidemiology_data(x,y,dateFrom,dateTo,s)
 
 dI_inflow_ag = y.AgPosit;
 dI_inflow_pcr = resize(x.NewCases,dateFrom:dateTo);
 dI_inflow = dI_inflow_pcr+dI_inflow_ag;
 
-I0 = x.TotalCases(t0)/s.obs_ratio;
+I0 = x.TotalCases(dateFrom)/s.obs_ratio;
 
 test_data = struct;
-test_data.ptr_pcr_raw = x.NewCases./x.Tests;   test_data.ptr_pcr = mov_median(test_data.ptr_pcr);   test_data.ptr_pcr_smooth = smooth_series(test_data.ptr_pcr);
-test_data.ptr_ag_raw = y.AgPosit./y.AgTests;   test_data.ptr_ag = mov_median(test_data.ptr_ag);     test_data.ptr_ag_smooth = smooth_series(test_data.ptr_ag);
+test_data.ptr_pcr_raw = x.NewCases./x.Tests;   test_data.ptr_pcr = mov_median(test_data.ptr_pcr_raw);   test_data.ptr_pcr_smooth = smooth_series(test_data.ptr_pcr);
+test_data.ptr_ag_raw = y.AgPosit./y.AgTests;   test_data.ptr_ag = mov_median(test_data.ptr_ag_raw);     test_data.ptr_ag_smooth = smooth_series(test_data.ptr_ag);
 test_data.tests_pcr_raw = x.Tests;             test_data.tests_pcr = mov_median(x.Tests);           test_data.test_pcr_smooth = smooth_series(test_data.tests_pcr);
 test_data.tests_ag_raw = y.AgTests;            test_data.tests_ag = mov_median(y.AgTests);          test_data.test_ag_smooth = smooth_series(test_data.tests_ag);
 

@@ -33,7 +33,7 @@ dateTo = t1;
 
 % epidemiological
 y = process_inputs(x,tt0,t1);
-[cases_data,test_data] = process_epidemiology_data(x,y,tt0,t1);
+[cases_data,test_data] = process_epidemiology_data(x,y,tt0,t1,s);
 
 % clinical
 [hosp_data,deaths_data] = process_clinical_statistics(hosp,db_deaths,db_deaths_age,dateFrom,dateTo);
