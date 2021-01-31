@@ -23,7 +23,7 @@ pdf_h_o = cdf_h_o(2:end)-cdf_h_o(1:end-1);  pdf_h_o = [pdf_h_o;0]/sum(pdf_h_o);
 pdf_h_o_s = smooth_series(pdf_h_o);pdf_h_o_s = pdf_h_o_s/sum(pdf_h_o_s);
 s.T_h_o = dot(x,pdf_h_o)+1;                 s.T_h_y = dot(x,pdf_h_y)+1;
 s.T_h_o_s = dot(x,pdf_h_o_s)+1;             s.T_h_y_s = dot(x,pdf_h_y_s)+1;
-get_prob_dist(N_rand,x,cdf_h_y,'do_plot',true);
+get_prob_dist(N_rand,x,pdf_h_y_s,'do_plot',true);
 
 
 %% plotting 
