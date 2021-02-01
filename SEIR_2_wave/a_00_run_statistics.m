@@ -40,3 +40,5 @@ s.alpha_r_o = tb.P_R_O(end);
 s.opt_fit_r_y = get_prob_dist(N_rand,x,pdf_r_y_s,'do_plot',true,'title','PRY');
 s.opt_fit_r_o = get_prob_dist(N_rand,x,pdf_r_o_s,'do_plot',true,'title','PRO');
 
+%% saving stuff
+save('results/optimal_fit.mat','s');

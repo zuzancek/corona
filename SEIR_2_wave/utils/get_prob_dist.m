@@ -77,7 +77,7 @@ if do_fitdist
         end
     end
     [~,idx] = sort(dist);
-    idx_ker = find(find(strcmp(dist_list,'Kernel'))==idx);
+    idx_ker = find(strcmp(dist_list,'Kernel'));
     idx_opt = idx(1);
     if idx_ker == idx_opt
         idx_opt = idx(2);
@@ -90,9 +90,9 @@ if do_fitdist
         histogram(rv_grid',length(time_grid),'Normalization','probability','binwidth',1,...
             'FaceColor',0.65*col,'EdgeColor',0.5*col,'FaceAlpha',0.5,'EdgeAlpha',0.5); hold on;
         for i=1:N
-            if i==idx(idx_opt) 
+            if i==find(idx==idx_opt) 
                 plot(time_grid,d{idx_opt}.pdf/sum(d{idx_opt}.pdf),'linewidth',2,'color','m');
-            elseif i==idx(idx_ker)              
+            elseif i==find(idx==idx_ker)               
                 plot(time_grid,d{idx_ker}.pdf/sum(d{idx_ker}.pdf),'-.','linewidth',1,'color','k');
             else
                 plot(time_grid,d{idx(i)}.pdf/sum(d{idx(i)}.pdf),'linewidth',1);
