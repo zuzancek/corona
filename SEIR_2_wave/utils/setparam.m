@@ -126,6 +126,7 @@ s.smoothing_method_params = @smooth_series;
         s.eta_o = db.s.opt_fit_h_o.alpha;
         s.pdf_h_o = db.s.opt_fit_h_o.pdf;
         s.t_h_o = db.s.opt_fit_h_o.time_grid;
+        s.k_hosp = 20;
         % death
         s.omega_y = db.s.opt_fit_d_y.alpha;
         s.pdf_d_y = db.s.opt_fit_d_y.pdf;
@@ -133,11 +134,13 @@ s.smoothing_method_params = @smooth_series;
         s.omega_o = db.s.opt_fit_d_o.alpha;
         s.pdf_d_o = db.s.opt_fit_d_o.pdf;
         s.t_d_o = db.s.opt_fit_d_o.time_grid;
+        s.k_death = 30;
         % recovery
         s.pdf_r_y = db.s.opt_fit_r_y.pdf;
         s.t_r_y = db.s.opt_fit_r_y.time_grid;
         s.pdf_r_o = db.s.opt_fit_r_o.pdf;
-        s.t_r_o = db.s.opt_fit_r_o.time_grid;        
+        s.t_r_o = db.s.opt_fit_r_o.time_grid;
+        s.k_rec = 30;
     end
 end
 
