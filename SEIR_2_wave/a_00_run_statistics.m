@@ -28,10 +28,17 @@ s.opt_fit_h_o = get_prob_dist(N_rand,x,pdf_h_o_s,'do_plot',true,'title','PHO');
 % 2. Death (time to, probability ... during hospital stay)
 s.alpha_d_y = tb.P_D_Y(end);
 s.alpha_d_o = tb.P_D_O(end);  
-[pdf_d_y_s,cdf_d_y_s] = apply_censoring(tb.P_D_Y./s.alpha_d_y,30);
-[pdf_d_o_s,cdf_d_o_s] = apply_censoring(tb.P_D_O./s.alpha_d_o,30);
+[pdf_d_y_s,cdf_d_y_s] = apply_censoring(tb.P_D_Y./s.alpha_d_y,25);
+[pdf_d_o_s,cdf_d_o_s] = apply_censoring(tb.P_D_O./s.alpha_d_o,25);
 s.opt_fit_d_y = get_prob_dist(N_rand,x,pdf_d_y_s,'do_plot',true,'title','PDY');
 s.opt_fit_d_o = get_prob_dist(N_rand,x,pdf_d_o_s,'do_plot',true,'title','PDO');
+% 3. Recovery (time to, probability ... during hospital stay)
+s.alpha_r_y = tb.P_R_Y(end);
+s.alpha_r_o = tb.P_R_O(end);  
+[pdf_r_y_s,cdf_r_y_s] = apply_censoring(tb.P_R_Y./s.alpha_r_y,25);
+[pdf_r_o_s,cdf_r_o_s] = apply_censoring(tb.P_R_O./s.alpha_r_o,25);
+s.opt_fit_r_y = get_prob_dist(N_rand,x,pdf_r_y_s,'do_plot',true,'title','PRY');
+s.opt_fit_r_o = get_prob_dist(N_rand,x,pdf_r_o_s,'do_plot',true,'title','PRO');
 
 %% plotting 
 % hospital admission
