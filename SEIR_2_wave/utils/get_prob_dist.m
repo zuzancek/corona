@@ -53,7 +53,7 @@ if do_fitdist
         try
             d{i}.obj = fitdist(rv_grid,dist_list{i});
             d{i}.cdf = cdf(d{i}.obj,time_grid);
-            d{i}.pdf = pdf(d{i}.obj,time_grid);
+            d{i}.pdf = pdf(d{i}.obj,time_grid); d{i}.pdf = d{i}.pdf./sum(d{i}.pdf);
             dist(i) = norm(pdf_grid(1:idx_last)-d{i}.pdf(1:idx_last));
             d{i}.diff = dist(i);
             d{i}.mean = mean(d{i}.obj);
@@ -77,7 +77,7 @@ if do_fitdist
             'FaceColor',0.65*col,'EdgeColor',0.5*col,'FaceAlpha',0.5,'EdgeAlpha',0.5); hold on;
         for i=1:N
             if i==2 
-                plot(time_grid,d{idx(2)}.pdf/sum(d{idx(2)}.pdf),'linewidth',2,'color','g');
+                plot(time_grid,d{idx(2)}.pdf/sum(d{idx(2)}.pdf),'linewidth',2,'color','m');
             elseif i==1               
                 plot(time_grid,d{1}.pdf/sum(d{1}.pdf),'-.','linewidth',1,'color','k');
             else
