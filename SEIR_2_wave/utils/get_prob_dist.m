@@ -10,6 +10,7 @@ ip = inputParser;
 addParamValue(ip, 'do_plot', true, @islogical);%#ok<*NVREPL>
 addParamValue(ip, 'do_fitdist', true, @islogical);%#ok<*NVREPL>
 addParamValue(ip, 'competitive_risk', true, @islogical);%#ok<*NVREPL>
+addParamValue(ip, 'censor', Inf, @isnumeric);%#ok<*NVREPL>
 addParamValue(ip, 'title', '', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'tol',.05, @isnumeric);%#ok<*NVREPL>
 addParamValue(ip, 'plot_num',5, @isnumeric);%#ok<*NVREPL>
@@ -28,6 +29,7 @@ tol = results.tol;
 N = results.plot_num;
 LargeNum = 1000;
 competitive_risk = results.competitive_risk;
+censor_idx = results.censor;
 
 rnd_val = rand(N_rand,1);
 min_val = min(rnd_val); max_val =  max(rnd_val);
@@ -38,6 +40,9 @@ if competitive_risk
     pdf_grid = pdf_base_grid;
 else
     pdf_grid = time_grid.*pdf_base_grid; 
+end
+if ~isinf(censor_idx)
+    pdf_grid(censor_idx+1:end) = 0;
 end
 pdf_grid = pdf_grid./sum(pdf_grid);
 cdf_grid = cumsum(pdf_grid);
