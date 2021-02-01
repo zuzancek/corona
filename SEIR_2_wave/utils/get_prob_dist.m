@@ -7,6 +7,7 @@ function [opt_fit,kernel_fit,pdf_grid,cdf_grid,rv_grid] = get_prob_dist(N_rand,t
 
 ip = inputParser;
 addParamValue(ip, 'do_plot', true, @islogical);%#ok<*NVREPL>
+addParamValue(ip, 'do_ecdf', false, @islogical);%#ok<*NVREPL>
 addParamValue(ip, 'do_fitdist', true, @islogical);%#ok<*NVREPL>
 addParamValue(ip, 'censor', Inf, @isnumeric);%#ok<*NVREPL>
 addParamValue(ip, 'title', '', @ischar);%#ok<*NVREPL>
@@ -25,6 +26,7 @@ dist_list = results.dist_list;
 tit = results.title;
 tol = results.tol;
 N = results.plot_num;
+do_ecdf = results.do_ecdf;
 LargeNum = 1000;
 
 rnd_val = rand(N_rand,1);
@@ -42,7 +44,7 @@ opt_fit = kernel_fit;
 f=ecdf(rv_grid); 
 idx_last = find(f>1-tol,1);
 
-if do_plot
+if do_ecdf
     figure('Name',strcat('Empirical Distribution (',tit,')'));
     [f,x]=ecdf(rv_grid); x(1)=0; 
     subplot(3,1,1); plot(x,f);grid on;title('CDF(x)');
@@ -75,12 +77,10 @@ if do_fitdist
         end
     end
     [~,idx] = sort(dist);
+    idx_ker = find(find(strcmp(dist_list,'Kernel'))==idx);
     idx_opt = idx(1);
-    if strcmp(d{idx_opt}.type,'Kernel')
+    if idx_ker == idx_opt
         idx_opt = idx(2);
-        idx_k = 1;
-    else
-        idx_k = find(idx==find(strcmp(dist_list,'Kernel')));
     end
     opt_fit = d{idx_opt};
     fprintf('\n********** Error minimizing distribution: %s\n',opt_fit.type);
@@ -90,10 +90,10 @@ if do_fitdist
         histogram(rv_grid',length(time_grid),'Normalization','probability','binwidth',1,...
             'FaceColor',0.65*col,'EdgeColor',0.5*col,'FaceAlpha',0.5,'EdgeAlpha',0.5); hold on;
         for i=1:N
-            if i==idx_opt
-                plot(time_grid,d{idx(2)}.pdf/sum(d{idx(2)}.pdf),'linewidth',2,'color','m');
-            elseif i==idx_k               
-                plot(time_grid,d{idx_k}.pdf/sum(d{1}.pdf),'-.','linewidth',1,'color','k');
+            if i==idx(idx_opt) 
+                plot(time_grid,d{idx_opt}.pdf/sum(d{idx_opt}.pdf),'linewidth',2,'color','m');
+            elseif i==idx(idx_ker)              
+                plot(time_grid,d{idx_ker}.pdf/sum(d{idx_ker}.pdf),'-.','linewidth',1,'color','k');
             else
                 plot(time_grid,d{idx(i)}.pdf/sum(d{idx(i)}.pdf),'linewidth',1);
             end
