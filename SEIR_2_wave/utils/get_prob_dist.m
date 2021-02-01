@@ -75,7 +75,13 @@ if do_fitdist
         end
     end
     [~,idx] = sort(dist);
-    idx_opt = idx(2);
+    idx_opt = idx(1);
+    if strcmp(d{idx_opt}.type,'Kernel')
+        idx_opt = idx(2);
+        idx_k = 1;
+    else
+        idx_k = find(idx==find(strcmp(dist_list,'Kernel')));
+    end
     opt_fit = d{idx_opt};
     fprintf('\n********** Error minimizing distribution: %s\n',opt_fit.type);
     if do_plot
@@ -84,10 +90,10 @@ if do_fitdist
         histogram(rv_grid',length(time_grid),'Normalization','probability','binwidth',1,...
             'FaceColor',0.65*col,'EdgeColor',0.5*col,'FaceAlpha',0.5,'EdgeAlpha',0.5); hold on;
         for i=1:N
-            if i==2 
+            if i==idx_opt
                 plot(time_grid,d{idx(2)}.pdf/sum(d{idx(2)}.pdf),'linewidth',2,'color','m');
-            elseif i==1               
-                plot(time_grid,d{1}.pdf/sum(d{1}.pdf),'-.','linewidth',1,'color','k');
+            elseif i==idx_k               
+                plot(time_grid,d{idx_k}.pdf/sum(d{1}.pdf),'-.','linewidth',1,'color','k');
             else
                 plot(time_grid,d{idx(i)}.pdf/sum(d{idx(i)}.pdf),'linewidth',1);
             end
