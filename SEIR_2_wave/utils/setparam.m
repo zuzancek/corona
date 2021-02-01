@@ -1,4 +1,4 @@
-function [s] = setparam()
+function [s] = setparam(varargin)
 
 s = struct;
 s.pop_size = 5443120;
@@ -38,19 +38,25 @@ s.SI_obs.std = 0.62;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
+
+try
+    db = load('results/optimal_fit.mat','s');
+    set_prob_data();
+catch
+end
+
 % death probability/time to death (at hospital)
-% s.omega_y = 5.15/100;       s.omega_o = (37.16/100);  
-s.omega_y = 2.91/100;       s.omega_o = 21.73/100;
-s.T_death_y = 1/0.1629;       s.T_death_o = 1/0.1092;      s.T_death = 10;  % 6.1387; 9.1575
-s.k_death = 30;             s.T_death_pdf_type = 'Exponential';  
+% s.omega_y = 2.91/100;       s.omega_o = 21.73/100;
+% s.T_death_y = 1/0.1629;       s.T_death_o = 1/0.1092;      s.T_death = 10;  % 6.1387; 9.1575
+% s.k_death = 30;             s.T_death_pdf_type = 'Exponential';  
 % recovery at hospital (days to recovery)
-s.T_rec_y = 9.566;          s.T_rec_o = 12.527;         s.T_rec = 11.723;   s.T_rec_std = s.SI.std; 
-s.k_rec = 30;               s.T_rec_pdf_type = 'Gamma';
+% s.T_rec_y = 9.566;          s.T_rec_o = 12.527;         s.T_rec = 11.723;   s.T_rec_std = s.SI.std; 
+% s.k_rec = 30;               s.T_rec_pdf_type = 'Gamma';
 % hospitalization probability/time to
-s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-s.T_hosp_y = 1/0.2752;      s.T_hosp_o = 1/0.5951;        s.T_hosp = 3.15; 
-s.k_hosp = 20;              s.T_hosp_pdf_type = 'Exponential';  
-% total time shift in clinical mpdel
+% s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
+% s.T_hosp_y = 1/0.2752;      s.T_hosp_o = 1/0.5951;        s.T_hosp = 3.15; 
+% s.k_hosp = 20;              s.T_hosp_pdf_type = 'Exponential';  
+% total time shift in clinical model
 s.t_shift_clin = 30;
 
 s.alpha_weight = 0.25;
@@ -112,5 +118,26 @@ s.shift_max = 2*s.SI.mean;
 s.smoothing_method_data = @mov_median;
 s.smoothing_method_params = @smooth_series;
 
+    function[]=set_prob_data()
+        % hospital admission
+        s.eta_y = db.s.opt_fit_h_y.alpha;
+        s.pdf_h_y = db.s.opt_fit_h_y.pdf;
+        s.t_h_y = db.s.opt_fit_h_y.time_grid;
+        s.eta_o = db.s.opt_fit_h_o.alpha;
+        s.pdf_h_o = db.s.opt_fit_h_o.pdf;
+        s.t_h_o = db.s.opt_fit_h_o.time_grid;
+        % death
+        s.omega_y = db.s.opt_fit_d_y.alpha;
+        s.pdf_d_y = db.s.opt_fit_d_y.pdf;
+        s.t_d_y = db.s.opt_fit_d_y.time_grid;
+        s.omega_o = db.s.opt_fit_d_o.alpha;
+        s.pdf_d_o = db.s.opt_fit_d_o.pdf;
+        s.t_d_o = db.s.opt_fit_d_o.time_grid;
+        % recovery
+        s.pdf_r_y = db.s.opt_fit_r_y.pdf;
+        s.t_r_y = db.s.opt_fit_r_y.time_grid;
+        s.pdf_r_o = db.s.opt_fit_r_o.pdf;
+        s.t_r_o = db.s.opt_fit_r_o.time_grid;        
+    end
 end
 
