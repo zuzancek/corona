@@ -23,8 +23,8 @@ pdf_h_o = cdf_h_o(2:end)-cdf_h_o(1:end-1);  pdf_h_o = [pdf_h_o;0]/sum(pdf_h_o);
 pdf_h_o_s = smooth_series(pdf_h_o);pdf_h_o_s = pdf_h_o_s/sum(pdf_h_o_s);
 s.T_h_o = dot(x,pdf_h_o)+1;                 s.T_h_y = dot(x,pdf_h_y)+1;
 s.T_h_o_s = dot(x,pdf_h_o_s)+1;             s.T_h_y_s = dot(x,pdf_h_y_s)+1;
-opt_fit_h_y = get_prob_dist(N_rand,x,pdf_h_y_s,'do_plot',true);
-opt_fit_h_o = get_prob_dist(N_rand,x,pdf_h_o_s,'do_plot',true);
+opt_fit_h_y = get_prob_dist(N_rand,x,pdf_h_y_s,'do_plot',true,'title','PHY');
+opt_fit_h_o = get_prob_dist(N_rand,x,pdf_h_o_s,'do_plot',true,'title','PHO');
 
 %% plotting 
 % hospital admission
