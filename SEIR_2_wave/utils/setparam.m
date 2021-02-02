@@ -42,7 +42,7 @@ s.share_reas = 1;
 try
     db = load('results/optimal_fit.mat','s');
     set_prob_data();
-catch err
+catch err %#ok<NASGU>
     a_00_run_statistics();
     db = load('results/optimal_fit.mat','s');
     set_prob_data();
@@ -143,9 +143,11 @@ s.smoothing_method_params = @smooth_series;
         s.pdf_r_o = db.s.opt_fit_r_o.pdf(2:s.k_rec+1)/sum(db.s.opt_fit_r_o.pdf(2:s.k_rec+1));
         % recovery at home
         s.k_sick = 20;
-        s.time_s = 0:s.k_sick+1;
-        s.pdf_s_y = pdf('Gamma',s.time_s,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); s.pdf_s_y = pdf_s_y(2:s.k_sick+1)./sum(pdf_s_y(2:s.k_sick+1));
-        s.pdf_s_o = pdf('Gamma',s.time_s,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); s.pdf_s_o = pdf_s_o(2:s.k_sick+1)./sum(pdf_s_o(2:s.k_sick+1));
+        s.time_s = (1:s.k_sick)';
+        s.pdf_s_y = pdf('Gamma',s.time_s,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); 
+        s.pdf_s_y = s.pdf_s_y(2:s.k_sick)./sum(s.pdf_s_y(2:s.k_sick));
+        s.pdf_s_o = pdf('Gamma',s.time_s,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); 
+        s.pdf_s_o = s.pdf_s_o(2:s.k_sick)./sum(s.pdf_s_o(2:s.k_sick));
     end
 end
 
