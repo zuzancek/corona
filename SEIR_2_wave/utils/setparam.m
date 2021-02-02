@@ -42,7 +42,7 @@ s.share_reas = 1;
 try
     db = load('results/optimal_fit.mat','s');
     set_prob_data();
-catch
+catch err
     a_00_run_statistics();
     db = load('results/optimal_fit.mat','s');
     set_prob_data();

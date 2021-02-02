@@ -1,7 +1,5 @@
-function [s]=run_clinical_inputs_statistics(filename)
+function [s]=run_clinical_inputs_statistics(tb)
 
-tb = readtable(filename);
-save('data/calibration/hosp_data_raw.mat','tb');
 
 %% initialization
 x = tb.day;

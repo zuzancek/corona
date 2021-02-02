@@ -13,7 +13,7 @@ cdf_data_smooth(1) = 0;
 
 %
 pdf_data_smooth = cdf_data_smooth(2:end)-cdf_data_smooth(1:end-1);
-pdf_data_smooth = smooth_series([pdf_data_smooth;0],ceil(s_width/2),s_type,ends);
+pdf_data_smooth = smooth_series([pdf_data_smooth;0],ceil(s_width/2),s_type,s_ends);
 pdf_data_smooth = pdf_data_smooth/sum(pdf_data_smooth);
 
 end
