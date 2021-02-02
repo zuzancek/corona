@@ -1,6 +1,5 @@
 function [s]=run_clinical_inputs_statistics(tb)
 
-
 %% initialization
 x = tb.day;
 N_rand = 50000;

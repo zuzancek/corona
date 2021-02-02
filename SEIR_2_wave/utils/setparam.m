@@ -126,28 +126,36 @@ s.smoothing_method_params = @smooth_series;
         s.k_hosp = 20;
         s.eta_y = db.s.opt_fit_h_y.alpha;
         s.pdf_h_y = db.s.opt_fit_h_y.pdf(2:s.k_hosp+1)/sum(db.s.opt_fit_h_y.pdf(2:s.k_hosp+1));
+        s.T_hosp_y_mean = db.s.opt_fit_h_y.mean;
         s.time_h = db.s.opt_fit_h_y.time_grid(2:s.k_hosp+1);
         s.eta_o = db.s.opt_fit_h_o.alpha;
         s.pdf_h_o = db.s.opt_fit_h_o.pdf(2:s.k_hosp+1)/sum(db.s.opt_fit_h_o.pdf(2:s.k_hosp+1));
+        s.T_hosp_o_mean = db.s.opt_fit_h_o.mean;
         % death
         s.k_death = 30;
         s.omega_y = db.s.opt_fit_d_y.alpha;
         s.pdf_d_y = db.s.opt_fit_d_y.pdf(2:s.k_death+1)/sum(db.s.opt_fit_d_y.pdf(2:s.k_death+1));
+        s.T_death_o_mean = db.s.opt_fit_d_o.mean;
         s.time_d = db.s.opt_fit_d_y.time_grid(2:s.k_death+1);
         s.omega_o = db.s.opt_fit_d_o.alpha;
         s.pdf_d_o = db.s.opt_fit_d_o.pdf(2:s.k_death+1)/sum(db.s.opt_fit_d_o.pdf(2:s.k_death+1));
+        s.T_death_y_mean = db.s.opt_fit_d_y.mean;
         % recovery at hospital
         s.k_rec = 30;
         s.pdf_r_y = db.s.opt_fit_r_y.pdf(2:s.k_rec+1)/sum(db.s.opt_fit_r_y.pdf(2:s.k_rec+1));
+        s.T_rec_o_mean = db.s.opt_fit_r_o.mean;
         s.time_r = db.s.opt_fit_r_y.time_grid(2:s.k_rec+1);
         s.pdf_r_o = db.s.opt_fit_r_o.pdf(2:s.k_rec+1)/sum(db.s.opt_fit_r_o.pdf(2:s.k_rec+1));
+        s.T_rec_y_mean = db.s.opt_fit_r_y.mean;
         % recovery at home
         s.k_sick = 20;
         s.time_s = (1:s.k_sick)';
         s.pdf_s_y = pdf('Gamma',s.time_s,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); 
-        s.pdf_s_y = s.pdf_s_y(2:s.k_sick)./sum(s.pdf_s_y(2:s.k_sick));
+        s.pdf_s_y = s.pdf_s_y(2:s.k_sick)./sum(s.pdf_s_y(2:s.k_sick));        
+        s.T_sick_y_mean = dot(s.time_s,s.pdf_s_y);
         s.pdf_s_o = pdf('Gamma',s.time_s,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); 
         s.pdf_s_o = s.pdf_s_o(2:s.k_sick)./sum(s.pdf_s_o(2:s.k_sick));
+        s.T_sick_o_mean = dot(s.time_s,s.pdf_s_o);
     end
 end
 
