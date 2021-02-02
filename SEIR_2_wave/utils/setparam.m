@@ -43,6 +43,9 @@ try
     db = load('results/optimal_fit.mat','s');
     set_prob_data();
 catch
+    a_00_run_statistics();
+    db = load('results/optimal_fit.mat','s');
+    set_prob_data();
 end
 
 % death probability/time to death (at hospital)
@@ -122,25 +125,27 @@ s.smoothing_method_params = @smooth_series;
         % hospital admission
         s.k_hosp = 20;
         s.eta_y = db.s.opt_fit_h_y.alpha;
-        s.pdf_h_y = db.s.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db.s.opt_fit_h_y.pdf(1:s.k_hosp+1));
-        s.t_h_y = db.s.opt_fit_h_y.time_grid;
+        s.pdf_h_y = db.s.opt_fit_h_y.pdf(2:s.k_hosp+1)/sum(db.s.opt_fit_h_y.pdf(2:s.k_hosp+1));
+        s.time_h = db.s.opt_fit_h_y.time_grid(2:s.k_hosp+1);
         s.eta_o = db.s.opt_fit_h_o.alpha;
-        s.pdf_h_o = db.s.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db.s.opt_fit_h_o.pdf(1:s.k_hosp+1));
-        s.t_h_o = db.s.opt_fit_h_o.time_grid;
+        s.pdf_h_o = db.s.opt_fit_h_o.pdf(2:s.k_hosp+1)/sum(db.s.opt_fit_h_o.pdf(2:s.k_hosp+1));
         % death
         s.k_death = 30;
         s.omega_y = db.s.opt_fit_d_y.alpha;
-        s.pdf_d_y = db.s.opt_fit_d_y.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_y.pdf(1:s.k_death+1));
-        s.t_d_y = db.s.opt_fit_d_y.time_grid;
+        s.pdf_d_y = db.s.opt_fit_d_y.pdf(2:s.k_death+1)/sum(db.s.opt_fit_d_y.pdf(2:s.k_death+1));
+        s.time_d = db.s.opt_fit_d_y.time_grid(2:s.k_death+1);
         s.omega_o = db.s.opt_fit_d_o.alpha;
-        s.pdf_d_o = db.s.opt_fit_d_o.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_o.pdf(1:s.k_death+1));
-        s.t_d_o = db.s.opt_fit_d_o.time_grid;
-        % recovery
+        s.pdf_d_o = db.s.opt_fit_d_o.pdf(2:s.k_death+1)/sum(db.s.opt_fit_d_o.pdf(2:s.k_death+1));
+        % recovery at hospital
         s.k_rec = 30;
-        s.pdf_r_y = db.s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db.s.opt_fit_r_y.pdf(1:s.k_rec+1));
-        s.t_r_y = db.s.opt_fit_r_y.time_grid;
-        s.pdf_r_o = db.s.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db.s.opt_fit_r_o.pdf(1:s.k_rec+1));
-        s.t_r_o = db.s.opt_fit_r_o.time_grid;
+        s.pdf_r_y = db.s.opt_fit_r_y.pdf(2:s.k_rec+1)/sum(db.s.opt_fit_r_y.pdf(2:s.k_rec+1));
+        s.time_r = db.s.opt_fit_r_y.time_grid(2:s.k_rec+1);
+        s.pdf_r_o = db.s.opt_fit_r_o.pdf(2:s.k_rec+1)/sum(db.s.opt_fit_r_o.pdf(2:s.k_rec+1));
+        % recovery at home
+        s.k_sick = 20;
+        s.time_s = 0:s.k_sick+1;
+        s.pdf_s_y = pdf('Gamma',s.time_s,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); s.pdf_s_y = pdf_s_y(2:s.k_sick+1)./sum(pdf_s_y(2:s.k_sick+1));
+        s.pdf_s_o = pdf('Gamma',s.time_s,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); s.pdf_s_o = pdf_s_o(2:s.k_sick+1)./sum(pdf_s_o(2:s.k_sick+1));
     end
 end
 
