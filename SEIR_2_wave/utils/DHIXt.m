@@ -26,21 +26,21 @@ if dlen
 end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 
-r = set_yo_ratios();
+r0 = set_yo_ratios();
 
 % death
 k_death = s.k_death;
 omega_y = s.omega_y;         pdf_d_y = repmat(s.pdf_d_y',length(varsigma),1);
 omega_o = s.omega_o;         pdf_d_o = repmat(s.pdf_d_o',length(varsigma),1);
 % rho = repmat(varsigma./(1-varsigma),1,k_death);
-pdf_d = r.rho_ho_h.*pdf_d_o+(1-r.rho_ho_h).*pdf_d_y;
+pdf_d = r0.rho_ho_h.*pdf_d_o+(1-r0.rho_ho_h).*pdf_d_y;
 omega = sum(pdf_d,2);        pdf_d = pdf_d./omega;                 time_d = s.time_d;
 weight_d = pdf_d./repmat(time_d',length(varsigma),1);
 % recovery
 k_rec = s.k_rec;
 pdf_r_y = repmat(s.pdf_r_y',length(varsigma),1);
 pdf_r_o = repmat(s.pdf_r_o',length(varsigma),1);
-pdf_r = r.rho_ro_r.*pdf_r_o+(1-r.rho_ro_r).*pdf_r_y;
+pdf_r = r0.rho_ro_r.*pdf_r_o+(1-r0.rho_ro_r).*pdf_r_y;
 omega_r = sum(pdf_r,2);        pdf_r = pdf_r./omega_r;             time_r = s.time_r;
 weight_r = pdf_r./repmat(time_r',length(varsigma),1);
 % hospital admission
@@ -48,18 +48,17 @@ k_hosp = s.k_hosp;
 eta_y = s.eta_y;        eta_o = s.eta_o;
 pdf_h_y = repmat(s.pdf_h_y',length(varsigma),1);
 pdf_h_o = repmat(s.pdf_h_o',length(varsigma),1);
-pdf_h = r.rho_io_i.*pdf_h_o+(1-r.rho_io_i).*pdf_h_y;
+pdf_h = r0.rho_io_i.*pdf_h_o+(1-r0.rho_io_i).*pdf_h_y;
 eta = sum(pdf_h,2);        pdf_h = pdf_h./eta;             time_h = s.time_h;
 weight_h = pdf_h./repmat(time_h',length(varsigma),1);
 % recovery from sickness
-T_delay = extend(T_delay,length(theta)-length(T_delay));
-k_sick = s.k_sick; time_s = s.time_s;
-pdf_s_y = pdf('Gamma',repmat(time_s',length(varsigma),1),repmat((s.T_sick_y-T_delay)*s.T_sick_std^2,1,k_sick),1/s.T_sick_std^2+zeros(length(T_delay),k_sick)); 
-pdf_s_y = pdf_s_y(2:s.k_sick+1)./sum(pdf_s_y(2:s.k_sick+1));
-pdf_s_o = pdf('Gamma',repmat(time_s',length(varsigma),1),repmat((s.T_sick_o-T_delay)*s.T_sick_std^2,1,k_sick),1/s.T_sick_std^2+zeros(length(T_delay),k_sick));pdf_s_o = pdf_s_o(2:s.k_sick+1)./sum(pdf_s_o(2:s.k_sick+1));
-pdf_s = r.rho_so_s.*pdf_s_o+(1-r.rho_so_s).*pdf_s_y;
+T_delay = extend(T_delay,length(varsigma)-length(T_delay));
+k_sick = s.k_sick; 
+[pdf_s_y,time_s] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2);
+pdf_s_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2);
+pdf_s = r0.rho_so_s.*pdf_s_o+(1-r0.rho_so_s).*pdf_s_y;
 pdf_s = pdf_s./sum(pdf_s,2);             
-weight_s = pdf_s./repmat(time_s',length(varsigma),1);
+weight_s = pdf_s./time_s;
 
 %% time shift (death->illness)
 % ks = s.t_shift_clin;        xs = 1:ks;
@@ -86,9 +85,9 @@ H = data.H(firstData:dateTo);
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation
-HD = method_data(D(2:end)-D(1:end-1));  
+HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
 hd = method_params(get_wa(pdf_d,H,omega,k_death));
-gamma_hd =  method_params(extend(HD(k_death+1:end)./hd(1:end-1),k_death));
+gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
 omega = extend(method_params(omega(1:end-1).*gamma_hd),1);
 HR = method_data(extend(get_wa(pdf_r,H,1-omega,k_rec),k_rec));
 IH = H(2:end)-H(1:end-1)+HR(1:end-1)+HD;
@@ -202,9 +201,17 @@ p.omega_y = s.omega_y.*(gamma_hd);
         r.io_i = r.io_iy./(1+r.io_iy);
         r.rho_io_i = repmat(r.io_i,1,s.k_hosp); %
         a_s_y = (1-s.eta_y)./s.T_sick_y_mean; a_s_o = (1-s.eta_o)./s.T_sick_o_mean;
-        r.so_sy = (a_s_o./a_s_y).*r.so_sy;
+        r.so_sy = (a_s_o./a_s_y).*r.ho_hy;
         r.so_s = r.so_sy./(1+r.so_sy);
         r.rho_so_s = repmat(r.so_s,1,s.k_sick); %
+    end
+
+    function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
+        weights = 0:pnts_num;
+        pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
+        pdf_x = pdf_x./sum(pdf_x,2); 
+        pdf_x = pdf_x(:,2:end);
+        pnt_x = repmat(weights(2:end),T_num,1);
     end
 
     function [y,ys] = adjust_series(x) %#ok<DEFNU>
@@ -234,7 +241,7 @@ p.omega_y = s.omega_y.*(gamma_hd);
         end        
     end
 
-    function [x] = extend_tail(x,k) %#ok<DEFNU>
+    function [x] = extend_tail(x,k) 
         L = length(x);
         dx = x(L)-x(L-1);
         x(L+1) = x(L)+2/3*dx;
