@@ -60,17 +60,6 @@ pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
 pdf_ir = pdf_ir./sum(pdf_ir,2);             
 % weight_ir = pdf_ir./time_ir;
 
-%% time shift (death->illness)
-% ks = s.t_shift_clin;        xs = 1:ks;
-% pp(1) = 1./(mean(T_death_o).*mean(varsigma));pp(2) = 1./(mean(T_death_y).*mean(1-varsigma));
-% % pp(3) = 1./(mean(T_hosp_o).*mean(theta));pp(4) = 1./(mean(T_hosp_y).*mean(1-theta));
-% lmat = repmat(pp,length(pp),1)-pp'; lmat(lmat==0) = NaN;
-% p_T_shift = prod(pp).*sum(exp(-pp'.*xs)./repmat(prod(lmat,2,'omitnan'),1,ks),1);
-% T_shift_death = ceil(dot(p_T_shift,xs));      % mean shift
-% [~,idx] = (max(theta));
-% T_shift_hosp = ceil(dot(xs(1:k_hosp)',p_T_hosp(idx,:)));
-% T_shift_sick = ceil(dot(xs(1:k_sick)',p_T_sick(idx,:)));
-% T_shift = T_shift_hosp+0*T_shift_death;
 % ******* Equations
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
 % H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
@@ -114,10 +103,10 @@ bar(mov_median(params.h));
 
 Len = length(Xts);
 p = struct();
-p.X_smooth = resize(Xts,dateFrom:dateFrom+Len-T_shift);
-p.X_forecast_smooth = resize(Xts,dateFrom+Len-T_shift:dateFrom+Len-1);
-p.X_raw = resize(Xrts,dateFrom:dateFrom+Len-T_shift);
-p.X_forecast_raw = resize(Xrts,dateFrom+Len-T_shift:dateFrom+Len-1);
+p.X_smooth = resize(Xts,dateFrom:dateFrom+Len);
+p.X_forecast_smooth = resize(Xts,dateFrom+Len:dateFrom+Len-1);
+p.X_raw = resize(Xrts,dateFrom:dateFrom+Len);
+p.X_forecast_raw = resize(Xrts,dateFrom+Len:dateFrom+Len-1);
 p.X_rep_smooth = Ots;
 p.X_rep_forecast_smooth = resize(Ots0,enddate(Ots)+1:dateTo);
 p.X_rep_raw = Orts;
