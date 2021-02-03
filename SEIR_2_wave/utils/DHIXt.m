@@ -8,7 +8,6 @@ tshift = s.firstData_offset;
 firstData = -tshift+dateFrom;
 cut = 0*params.cutoff;
 T_test_to_result = 1;
-% adj = params.adj;
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
@@ -30,9 +29,8 @@ r0 = set_yo_ratios_params();
 
 % death
 k_death = s.k_death;
-omega_y = s.omega_y;         pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
-omega_o = s.omega_o;         pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
-% rho = repmat(varsigma./(1-varsigma),1,k_death);
+pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
+pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
 % weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
@@ -83,11 +81,6 @@ IH = extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1);
 I = extend(method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp)),1);
 IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick),k_sick));
 X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
-X = extend_tail(X,1);
-
-% X_orig = X;
-% kk = (1+adj/T_shift).^(0:T_shift-1); 
-% X(end-T_shift+1:end) = X(end-T_shift+1:end).*kk';
 
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
 Xrts = (X(tshift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
@@ -110,14 +103,12 @@ p.X_forecast_raw = resize(Xrts,dateFrom+Len:dateFrom+Len-1);
 p.X_rep_smooth = Ots;
 p.X_rep_forecast_smooth = resize(Ots0,enddate(Ots)+1:dateTo);
 p.X_rep_raw = Orts;
-rho_real_0 = method_params(lambda_y./lambda_o.*omega_y./omega_o.*varsigma./(1-varsigma));
-rho_real_0 = [rho_real_0(1);rho_real_0];
-rho_real = rho_real_0./(1+rho_real_0);
+rho_real = method_params([r0.rho_real_xo_x(1);r0.rho_real_xo_x]);
 
 % adjust series endpoints and get ratio
 X = X(tshift:end);
-rho_real = rho_real(tshift+1:end);
-sigma = sigma(tshift+1:end-cut);
+rho_real = rho_real(end-length(X)+1:end);
+sigma = sigma(end-length(X)+1:end);
 dateTo_X = dateFrom+length(X)-1;
 dateTo_R = dateFrom+length(dI_data)-1;
 dateTo_0 = min(dateTo_X,dateTo_R);
@@ -129,7 +120,6 @@ dI_data_real = resize(X,dateFrom:dateTo_X);
 dI_data_reported = Ots;
 dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
-% delta = method_params(resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0));
 
 idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min); %#ok<MXFND> % & delta<1-s.ratio_threshold); %#ok<MXFND>
 idx = dateFrom:max(idx);
@@ -199,6 +189,8 @@ p.omega_y = s.omega_y.*(gamma_hd);
         r.iro_iry = (a_ir_o./a_ir_y).*r.io_iy;
         r.iro_ir = r.iro_iry./(1+r.iro_iry);
         r.rho_iro_ir = repmat(r.iro_ir,1,s.k_sick); %
+        r.xo_xy = (a_ih_o+a_ir_o)./(a_ih_y+a_ir_y).*r.io_iy;
+        r.rho_real_xo_x = r.xo_xy./(1+r.xo_xy);
     end
 
     function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
@@ -233,16 +225,6 @@ p.omega_y = s.omega_y.*(gamma_hd);
         x(T-k+2) = x(T-k+1)+1/3*dx;
         for j=3:k
             x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
-        end        
-    end
-
-    function [x] = extend_tail(x,k) 
-        L = length(x);
-        dx = x(L)-x(L-1);
-        x(L+1) = x(L)+2/3*dx;
-        x(L+2) = x(L+1)+1/3*dx;
-        for j=3:k
-            x(L+j) = x(L+j-1)+1/3*1/(j-1)*dx;
         end        
     end
 
