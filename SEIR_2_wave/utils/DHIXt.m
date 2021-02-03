@@ -6,7 +6,7 @@ method_data = s.smoothing_method_data;
 method_params = s.smoothing_method_params;
 tshift = s.firstData_offset;
 firstData = -tshift+dateFrom;
-cut = params.cutoff;
+cut = 0*params.cutoff;
 T_test_to_result = 1;
 % adj = params.adj;
 
@@ -34,7 +34,7 @@ omega_y = s.omega_y;         pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
 omega_o = s.omega_o;         pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 % rho = repmat(varsigma./(1-varsigma),1,k_death);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
-pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r.omega;         % time_hd = s.time_d;
+pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
 % weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
 % recovery
 k_rec = s.k_rec;
@@ -49,9 +49,9 @@ pdf_ih_y = repmat(s.pdf_h_y',length(varsigma),1);
 pdf_ih_o = repmat(s.pdf_h_o',length(varsigma),1);
 pdf_ih = r0.rho_io_i.*pdf_ih_o+(1-r0.rho_io_i).*pdf_ih_y;
 pdf_ih = pdf_ih./sum(pdf_ih,2);             % time_ih = s.time_h;
-eta = r.eta;
+eta = r0.eta;
 % weight_ih = pdf_ih./repmat(time_ih',length(varsigma),1);
-% recovery from sickness
+% recovery from sickness, mild cases, no need of hospital care
 T_delay = extend(T_delay,length(varsigma)-length(T_delay));
 k_sick = s.k_sick; 
 [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
