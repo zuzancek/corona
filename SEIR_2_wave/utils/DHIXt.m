@@ -8,7 +8,7 @@ tshift = s.firstData_offset;
 firstData = -tshift+dateFrom;
 cut = params.cutoff;
 T_test_to_result = 1;
-adj = params.adj;
+% adj = params.adj;
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
@@ -26,7 +26,7 @@ if dlen
 end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
 
-r0 = set_yo_ratios();
+r0 = set_yo_ratios_params();
 
 % death
 k_death = s.k_death;
@@ -34,30 +34,31 @@ omega_y = s.omega_y;         pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
 omega_o = s.omega_o;         pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 % rho = repmat(varsigma./(1-varsigma),1,k_death);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
-omega_hd = sum(pdf_hd,2);        pdf_hd = pdf_hd./omega_hd;                 time_hd = s.time_d;
-weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
+pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r.omega;         % time_hd = s.time_d;
+% weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
 % recovery
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_r_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_r_o',length(varsigma),1);
 pdf_hr = r0.rho_hro_hr.*pdf_hr_o+(1-r0.rho_hro_hr).*pdf_hr_y;
-omega_hr = sum(pdf_hr,2);        pdf_hr = pdf_hr./omega_hr;             time_hr = s.time_r;
-weight_hr = pdf_hr./repmat(time_hr',length(varsigma),1);
+pdf_hr = pdf_hr./sum(pdf_hr,2);             % time_hr = s.time_r;
+% weight_hr = pdf_hr./repmat(time_hr',length(varsigma),1);
 % hospital admission
 k_hosp = s.k_hosp;
 pdf_ih_y = repmat(s.pdf_h_y',length(varsigma),1);
 pdf_ih_o = repmat(s.pdf_h_o',length(varsigma),1);
 pdf_ih = r0.rho_io_i.*pdf_ih_o+(1-r0.rho_io_i).*pdf_ih_y;
-omega_ih = sum(pdf_ih,2);        pdf_ih = pdf_ih./omega_ih;             time_ih = s.time_h;
-weight_ih = pdf_ih./repmat(time_ih',length(varsigma),1);
+pdf_ih = pdf_ih./sum(pdf_ih,2);             % time_ih = s.time_h;
+eta = r.eta;
+% weight_ih = pdf_ih./repmat(time_ih',length(varsigma),1);
 % recovery from sickness
 T_delay = extend(T_delay,length(varsigma)-length(T_delay));
 k_sick = s.k_sick; 
-[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2);
+[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2);
 pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
 pdf_ir = pdf_ir./sum(pdf_ir,2);             
-weight_ir = pdf_ir./time_ir;
+% weight_ir = pdf_ir./time_ir;
 
 %% time shift (death->illness)
 % ks = s.t_shift_clin;        xs = 1:ks;
@@ -85,13 +86,13 @@ AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation
 HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
-hd = method_params(get_wa(pdf_hd,H,omega_hd,k_death));
+hd = method_params(get_wa(pdf_hd,H,omega,k_death));
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
-omega_hd = (method_params(omega_hd.*gamma_hd));
-HR = method_data(extend(get_wa(pdf_hr,H,1-omega_hd,k_rec),k_rec));
+omega = (method_params(omega.*gamma_hd));
+HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec),k_rec));
 IH = extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1);
-I = extend(method_data(get_wa_inv(pdf_ih,IH,AC,omega_ih,k_hosp)),1);
-IR = method_data(extend(get_wa(pdf_ir(:,:),I,omega_ih,k_sick),k_sick));
+I = extend(method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp)),1);
+IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick),k_sick));
 X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
 X = extend_tail(X,1);
 
@@ -165,7 +166,7 @@ sa.loss_o = method_params(sa.Xo-dI_data_reported_old);
 sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
 
 % store params
-p.omega = omega_hd;
+p.omega = omega;
 p.p_T_death = p_T_death;
 p.T_rec = T_rec;
 p.x_rec = x_rec;
@@ -185,24 +186,30 @@ p.varsigma = varsigma;
 p.omega_o = s.omega_o.*(gamma_hd);
 p.omega_y = s.omega_y.*(gamma_hd);
 
-    function [r] = set_yo_ratios()
+    function [r] = set_yo_ratios_params()
         r.hdo_hdy = varsigma./(1-varsigma);
         a_hd_y = (s.omega_y/s.T_death_y_mean); a_hd_o = (s.omega_o/s.T_death_o_mean);
         r.ho_hy = (a_hd_y./a_hd_o).*r.hdo_hdy;
         r.ho_h = r.ho_hy./(1+r.ho_hy);
-        r.rho_ho_h = repmat(r.ho_h,1,s.k_death); %
-        a_r_y = ((1-s.omega_y)/s.T_rec_y_mean); a_r_o = ((1-s.omega_o)/s.T_rec_o_mean);
-        r.ro_ry = (a_r_o./a_r_y).*r.ho_hy;
-        r.ro_r = r.ro_ry./(1+r.ro_ry);
-        r.rho_hro_hr = repmat(r.ro_r,1,s.k_rec); %
-        a_h_y = s.eta_y./s.T_hosp_y_mean; a_h_o = s.eta_o./s.T_hosp_o_mean;
-        r.io_iy = a_h_y./a_h_o.*(a_hd_o+a_r_o)./(a_hd_y+a_r_y).*r.ho_hy;
+        r.rho_ho_h = repmat(r.ho_h,1,s.k_death); 
+        r.omega = s.omega_o.*r.rho_ho_h+s.omega_y.*(1-r.rho_ho_h);
+        %
+        a_hr_y = ((1-s.omega_y)/s.T_rec_y_mean); a_hr_o = ((1-s.omega_o)/s.T_rec_o_mean);
+        r.hro_hry = (a_hr_o./a_hr_y).*r.ho_hy;
+        r.hro_hr = r.hro_hry./(1+r.hro_hry);
+        r.rho_hro_hr = repmat(r.hro_hr,1,s.k_rec); 
+        %
+        r.iho_ihy = (a_hd_o+a_hr_o)./(a_hd_y+a_hr_y).*r.ho_hy;
+        a_ih_y = s.eta_y./s.T_hosp_y_mean; a_ih_o = s.eta_o./s.T_hosp_o_mean;
+        r.io_iy = a_ih_y./a_ih_o.*r.iho_ihy;
         r.io_i = r.io_iy./(1+r.io_iy);
-        r.rho_io_i = repmat(r.io_i,1,s.k_hosp); %
-        a_s_y = (1-s.eta_y)./s.T_sick_y_mean; a_s_o = (1-s.eta_o)./s.T_sick_o_mean;
-        r.so_sy = (a_s_o./a_s_y).*r.io_iy;
-        r.so_s = r.so_sy./(1+r.so_sy);
-        r.rho_iro_ir = repmat(r.so_s,1,s.k_sick); %
+        r.rho_io_i = repmat(r.io_i,1,s.k_hosp); 
+        r.eta = s.eta_o.*r.rho_io_i+(1-r.rho_io_i).*s.eta_y;
+        %
+        a_ir_y = (1-s.eta_y)./s.T_sick_y_mean; a_ir_o = (1-s.eta_o)./s.T_sick_o_mean;
+        r.iro_iry = (a_ir_o./a_ir_y).*r.io_iy;
+        r.iro_ir = r.iro_iry./(1+r.iro_iry);
+        r.rho_iro_ir = repmat(r.iro_ir,1,s.k_sick); %
     end
 
     function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
