@@ -149,13 +149,16 @@ s.smoothing_method_params = @smooth_series;
         s.T_rec_y_mean = db.s.opt_fit_r_y.mean;
         % recovery at home
         s.k_sick = 20;
-        s.time_s = (1:s.k_sick)';
+        s.time_s = (0:s.k_sick)';
         s.pdf_s_y = pdf('Gamma',s.time_s,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); 
-        s.pdf_s_y = s.pdf_s_y(2:s.k_sick)./sum(s.pdf_s_y(2:s.k_sick));        
+        s.pdf_s_y = s.pdf_s_y./sum(s.pdf_s_y);        
         s.T_sick_y_mean = dot(s.time_s,s.pdf_s_y);
         s.pdf_s_o = pdf('Gamma',s.time_s,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); 
-        s.pdf_s_o = s.pdf_s_o(2:s.k_sick)./sum(s.pdf_s_o(2:s.k_sick));
+        s.pdf_s_o = s.pdf_s_o./sum(s.pdf_s_o);
         s.T_sick_o_mean = dot(s.time_s,s.pdf_s_o);
+        s.pdf_s_o = s.pdf_s_o(2:end);        
+        s.pdf_s_y = s.pdf_s_y(2:end);
+        s.time_s = s.time_s(2:end);
     end
 end
 
