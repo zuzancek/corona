@@ -15,7 +15,7 @@ s.firstData_offset = 31;
 % serial interval (generation period)
 s.SI.mean = 7.5;                s.SI.std = 0.62;
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test.mean = 3;              s.T_test.std = s.SI.std;      
+s.T_test.mean = 2;              s.T_test.std = s.SI.std;      
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
 % infectious period
@@ -25,7 +25,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 10;               s.T_sick_o = 14;       s.T_sick = 13;
+s.T_sick_y = 11;               s.T_sick_o = 14;       s.T_sick = 13;
 s.T_sick_std = s.SI.std;
 s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
@@ -48,17 +48,6 @@ catch err %#ok<NASGU>
     set_prob_data();
 end
 
-% death probability/time to death (at hospital)
-% s.omega_y = 2.91/100;       s.omega_o = 21.73/100;
-% s.T_death_y = 1/0.1629;       s.T_death_o = 1/0.1092;      s.T_death = 10;  % 6.1387; 9.1575
-% s.k_death = 30;             s.T_death_pdf_type = 'Exponential';  
-% recovery at hospital (days to recovery)
-% s.T_rec_y = 9.566;          s.T_rec_o = 12.527;         s.T_rec = 11.723;   s.T_rec_std = s.SI.std; 
-% s.k_rec = 30;               s.T_rec_pdf_type = 'Gamma';
-% hospitalization probability/time to
-% s.eta_y = 2.32/100;         s.eta_o = 31.86/100;
-% s.T_hosp_y = 1/0.2752;      s.T_hosp_o = 1/0.5951;        s.T_hosp = 3.15; 
-% s.k_hosp = 20;              s.T_hosp_pdf_type = 'Exponential';  
 % total time shift in clinical model
 s.t_shift_clin = 30;
 

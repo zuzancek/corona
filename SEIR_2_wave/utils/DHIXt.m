@@ -50,9 +50,10 @@ eta = r0.eta;
 % weight_ih = pdf_ih./repmat(time_ih',length(varsigma),1);
 % recovery from sickness, mild cases, no need of hospital care
 T_delay = extend(T_delay,length(varsigma)-length(T_delay));
+T_obs = T_delay+s.T_test.mean;
 k_sick = s.k_sick; 
-[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
-pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_delay)*s.T_sick_std^2,1./s.T_sick_std^2);
+[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
+pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
 pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
 pdf_ir = pdf_ir./sum(pdf_ir,2);             
 % weight_ir = pdf_ir./time_ir;
