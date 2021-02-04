@@ -84,7 +84,7 @@ X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
 
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
 Xrts = (X(tshift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
-Orts = tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data);
+Orts = method_data(tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data));
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
