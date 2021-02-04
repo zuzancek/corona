@@ -32,6 +32,7 @@ pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
+gamma_hd = (s.omega_y.*pdf_hd_y)/(s.omega_o.*pdf_hd_o);
 % weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
 % recovery
 k_rec = s.k_rec;
