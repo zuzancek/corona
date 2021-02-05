@@ -28,8 +28,8 @@ r0 = set_yo_ratios_params();
 
 % death
 k_death = s.k_death;
-pdf_hd_y = repmat([s.pdf_d_y]',length(varsigma),1);
-pdf_hd_o = repmat([s.pdf_d_o]',length(varsigma),1);
+pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
+pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
 gamma_hd = (s.omega_y.*pdf_hd_y)/(s.omega_o.*pdf_hd_o);
@@ -76,10 +76,10 @@ AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
 hd = method_params(get_wa(pdf_hd,H,omega,k_death+1));
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
-omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death);
-HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec+1));
+omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death+1);
+HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
 IH = extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1);
-I = extend(method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp)),1);
+I = method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp+1));
 IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick+1),k_sick));
 X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
 
