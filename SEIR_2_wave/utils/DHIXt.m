@@ -74,7 +74,8 @@ AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation
 HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
-hd = method_params(get_wa(pdf_hd,H,omega,k_death+1));
+[hd,hd_t] = (get_wa(pdf_hd,H,omega,k_death+1));
+hd = method_params(hd); hd_t = extend(method_data(hd_t),k_death);
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
 omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death+1);
 HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
@@ -283,10 +284,10 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
     end
 
     function [y] = extend(x,t0)
-        xlen = length(x);
-        z = x(1)+zeros(xlen+t0,1);
-        z(t0+1:end) = x;
-        y = method_params(z);
+        [xlen,xwid] = size(x);
+        z = x(1,:)+zeros(xlen+t0,xwid);
+        z(t0+1:end,:) = x;
+        y = method_data(z);
     end
 
 end
