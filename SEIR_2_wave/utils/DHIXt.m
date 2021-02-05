@@ -23,6 +23,8 @@ if dlen
     T_delay(T) = delay.v(end);
 end
 T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
+T_delay = extend(T_delay,length(varsigma)-length(T_delay));
+T_obs = T_delay+s.T_test.mean;
 
 r0 = set_yo_ratios_params();
 
@@ -50,8 +52,6 @@ pdf_ih = pdf_ih./sum(pdf_ih,2);             % time_ih = s.time_h;
 eta = r0.eta;
 % weight_ih = pdf_ih./repmat(time_ih',length(varsigma),1);
 % recovery from sickness, mild cases, no need of hospital care
-T_delay = extend(T_delay,length(varsigma)-length(T_delay));
-T_obs = T_delay+s.T_test.mean;
 k_sick = s.k_sick; 
 [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
@@ -78,13 +78,13 @@ hd = method_params(get_wa(pdf_hd,H,omega,k_death+1));
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
 omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death+1);
 HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
-IH = extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1);
+IH = method_data(extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1));
 I = method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp+1));
 IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick+1),k_sick));
 X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
 
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
-Xrts = (X(tshift:end)); Xrts = tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts);
+Xrts = (X(tshift:end)); Xrts = method_data(tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts));
 Orts = method_data(tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data));
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
