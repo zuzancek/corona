@@ -228,7 +228,7 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
         end        
     end
 
-    function [x] = get_wa(weight,Z,alpha,idxFrom)
+    function [x,x_mat] = get_wa(weight,Z,alpha,idxFrom)
         sz = size(weight);
         weight = weight(idxFrom:end,:);
         alpha = alpha(idxFrom:end,:);
@@ -247,7 +247,12 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
         Weight_mat = sparse(L,J,W);
         Alpha_mat = sparse(L,J,A);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
-        x = (Weight_mat.*Alpha_mat)*Z(end-t-k+2:end);
+        Z = Z(end-t-k+2:end);
+        x = (Weight_mat.*Alpha_mat)*Z;
+        zvec = repmat((1:t)',1,k)+repmat((0:k-1),t,1);
+        Z_mat = Z(zvec);  
+        W = W./sum(W,2);
+        x_mat = (W.*A).*Z_mat;
     end
 
     function [x] = get_wa_inv(weight,zvec,x0,alpha,idxFrom)
