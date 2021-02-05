@@ -28,8 +28,8 @@ r0 = set_yo_ratios_params();
 
 % death
 k_death = s.k_death;
-pdf_hd_y = repmat([0;s.pdf_d_y]',length(varsigma),1);
-pdf_hd_o = repmat([0;s.pdf_d_o]',length(varsigma),1);
+pdf_hd_y = repmat([s.pdf_d_y]',length(varsigma),1);
+pdf_hd_o = repmat([s.pdf_d_o]',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
 gamma_hd = (s.omega_y.*pdf_hd_y)/(s.omega_o.*pdf_hd_o);
@@ -77,7 +77,7 @@ HD = extend(method_data(D(2:end)-D(1:end-1)),1);
 hd = method_params(get_wa(pdf_hd,H,omega,k_death+1));
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
 omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death);
-HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
+HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec+1));
 IH = extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1);
 I = extend(method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp)),1);
 IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick+1),k_sick));
@@ -177,19 +177,19 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
         a_hr_y = ((1-s.omega_y)/s.T_rec_y_mean); a_hr_o = ((1-s.omega_o)/s.T_rec_o_mean);
         r.hro_hry = (a_hr_o./a_hr_y).*r.ho_hy;
         r.hro_hr = r.hro_hry./(1+r.hro_hry);
-        r.rho_hro_hr = repmat(r.hro_hr,1,s.k_rec); 
+        r.rho_hro_hr = repmat(r.hro_hr,1,s.k_rec+1); 
         %
         r.iho_ihy = (a_hd_o+a_hr_o)./(a_hd_y+a_hr_y).*r.ho_hy;
         a_ih_y = s.eta_y./s.T_hosp_y_mean; a_ih_o = s.eta_o./s.T_hosp_o_mean;
         r.io_iy = a_ih_y./a_ih_o.*r.iho_ihy;
         r.io_i = r.io_iy./(1+r.io_iy);
-        r.rho_io_i = repmat(r.io_i,1,s.k_hosp); 
+        r.rho_io_i = repmat(r.io_i,1,s.k_hosp+1); 
         r.eta = s.eta_o.*r.rho_io_i+(1-r.rho_io_i).*s.eta_y;
         %
         a_ir_y = (1-s.eta_y)./s.T_sick_y_mean; a_ir_o = (1-s.eta_o)./s.T_sick_o_mean;
         r.iro_iry = (a_ir_o./a_ir_y).*r.io_iy;
         r.iro_ir = r.iro_iry./(1+r.iro_iry);
-        r.rho_iro_ir = repmat(r.iro_ir,1,s.k_sick); %
+        r.rho_iro_ir = repmat(r.iro_ir,1,s.k_sick+1); %
         r.xo_xy = (a_ih_o+a_ir_o)./(a_ih_y+a_ir_y).*r.io_iy;
         r.rho_real_xo_x = r.xo_xy./(1+r.xo_xy);
     end
@@ -198,8 +198,7 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
         weights = 0:pnts_num;
         pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
         pdf_x = pdf_x./sum(pdf_x,2); 
-        pdf_x = pdf_x(:,2:end);
-        pnt_x = repmat(weights(2:end),T_num,1);
+        pnt_x = repmat(weights,T_num,1);
     end
 
     function [y,ys] = adjust_series(x) %#ok<DEFNU>
@@ -253,11 +252,11 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
 
     function [x] = get_wa_inv(weight,zvec,x0,alpha,idxFrom)
         sz = size(weight);
-        weight = weight(idxFrom+1:end,:);
-        alpha = alpha(idxFrom+1:end,:);
+        weight = weight(idxFrom:end,:);
+        alpha = alpha(idxFrom:end,:);
         k = sz(2);k0 = sz(1);
-        t = length(zvec)-idxFrom;
-        phi = alpha./(1:k);
+        t = length(zvec)-idxFrom+1;        
+        phi = alpha./repmat((0:k-1),t,1); phi(:,1)=0; 
         if k0==1
             W = repmat(weight(k:-1:1),t,1);
             A = repmat(phi(k:-1:1),t,1);
