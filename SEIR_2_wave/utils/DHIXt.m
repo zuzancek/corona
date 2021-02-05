@@ -28,8 +28,8 @@ r0 = set_yo_ratios_params();
 
 % death
 k_death = s.k_death;
-pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
-pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
+pdf_hd_y = repmat([0;s.pdf_d_y]',length(varsigma),1);
+pdf_hd_o = repmat([0;s.pdf_d_o]',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
 gamma_hd = (s.omega_y.*pdf_hd_y)/(s.omega_o.*pdf_hd_o);
@@ -74,13 +74,13 @@ AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 
 % calculation
 HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
-hd = method_params(get_wa(pdf_hd,H,omega,k_death));
+hd = method_params(get_wa(pdf_hd,H,omega,k_death+1));
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
 omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death);
-HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec),k_rec));
+HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
 IH = extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1);
 I = extend(method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp)),1);
-IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick),k_sick));
+IR = method_data(extend(get_wa(pdf_ir(:,:),I,1-eta,k_sick+1),k_sick));
 X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
 
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
@@ -171,7 +171,7 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
         a_hd_y = (s.omega_y/s.T_death_y_mean); a_hd_o = (s.omega_o/s.T_death_o_mean);
         r.ho_hy = (a_hd_y./a_hd_o).*r.hdo_hdy;
         r.ho_h = r.ho_hy./(1+r.ho_hy);
-        r.rho_ho_h = repmat(r.ho_h,1,s.k_death); 
+        r.rho_ho_h = repmat(r.ho_h,1,s.k_death+1); 
         r.omega = s.omega_o.*r.rho_ho_h+s.omega_y.*(1-r.rho_ho_h);
         %
         a_hr_y = ((1-s.omega_y)/s.T_rec_y_mean); a_hr_o = ((1-s.omega_o)/s.T_rec_o_mean);
@@ -231,11 +231,11 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
 
     function [x] = get_wa(weight,Z,alpha,idxFrom)
         sz = size(weight);
-        weight = weight(idxFrom+1:end,:);
-        alpha = alpha(idxFrom+1:end,:);
+        weight = weight(idxFrom:end,:);
+        alpha = alpha(idxFrom:end,:);
         k = sz(2);k0 = sz(1);
-        t = length(Z)-idxFrom;
-        phi = alpha./(1:k);
+        t = length(Z)-idxFrom+1;
+        phi = alpha./repmat((0:k-1),t,1); phi(:,1)=0; 
         if k0==1
             W = repmat(weight(end:-1:1),t,1);
             A = repmat(phi(end:-1:1),t,1);
