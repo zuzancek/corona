@@ -44,8 +44,7 @@ pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
 kappa_hd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
-HD_o = HD.*varsigma;                HD_y = H-HD_o;
-H_o_ini = H.*r0.rho_ho_h(1,:);      H_y_ini = H-H_o_ini;
+omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
 % recovery
 k_rec = s.k_rec;
@@ -79,13 +78,24 @@ AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 % D(t) = D(t-1)+H_D(t);
 
 % calculation
-HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
-[hd,hd_t] = (get_wa(pdf_hd,H,omega,k_death+1));
-hd = method_params(hd); hd_t = extend(method_data(hd_t),k_death);
-gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
-hd_t = hd_t.*gamma_hd;
-hd_o = method_params(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1));
-omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death+1);
+HD = extend(method_data(D(2:end)-D(1:end-1)),1); 
+HD_o = HD.*varsigma;                HD_y = HD-HD_o;
+H_o_ini = H.*r0.rho_ho_h(:,1);      H_y_ini = H-H_o_ini;
+% [hd,hd_t] = (get_wa(pdf_hd,H,omega,k_death+1));
+% hd = method_params((get_wa(pdf_hd,H,omega,k_death+1))); 
+% hd_t = extend(method_data(hd_t),k_death);
+% gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
+% hd_t = hd_t.*gamma_hd;
+h_o = method_params(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1));
+h_y = method_params(get_wa_inv(pdf_hd_y,HD_y,H_y_ini,omega_y,k_death+1));
+h = h_o+h_y;
+H_o = method_params(h_o./h).*H; H_y = H-H_o;
+kappa_h = h./H; 
+HR_o = method_data(extend(get_wa(pdf_hr_o,H_o,1-omega_o,k_rec+1),k_rec));
+HR_o = method_data(extend(get_wa(pdf_hr_y,H_y,1-omega_y,k_rec+1),k_rec));
+
+omega_o = omega_o(:,1).*kappa_h; omega_y = omega_y(:,1).*kappa_h;
+% omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death+1);
 HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
 IH = method_data(extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1));
 I = method_data(get_wa_inv(pdf_ih,IH,AC,eta,k_hosp+1));
@@ -181,6 +191,8 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
         r.ho_hy = (a_hd_y./a_hd_o).*r.hdo_hdy;
         r.ho_h = r.ho_hy./(1+r.ho_hy);
         r.rho_ho_h = repmat(r.ho_h,1,s.k_death+1); 
+        r.omega_o = s.omega_o+zeros(length(varsigma),s.k_death+1);
+        r.omega_y = s.omega_y+zeros(length(varsigma),s.k_death+1);
         r.omega = s.omega_o.*r.rho_ho_h+s.omega_y.*(1-r.rho_ho_h);
         %
         a_hr_y = ((1-s.omega_y)/s.T_rec_y_mean); a_hr_o = ((1-s.omega_o)/s.T_rec_o_mean);
