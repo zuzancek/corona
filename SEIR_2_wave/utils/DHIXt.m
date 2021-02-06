@@ -26,15 +26,26 @@ T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_dela
 T_delay = extend(T_delay,length(varsigma)-length(T_delay));
 T_obs = T_delay+s.T_test.mean;
 
+%% data processing
+% initialization
+dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
+dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
+D = x.Deaths(firstData:dateTo)*data.D(dateFrom)/x.Deaths(dateFrom); 
+D(tshift+1:end) = data.D(dateFrom:dateTo);
+H = data.H(firstData:dateTo);
+
 r0 = set_yo_ratios_params();
 
+%% params initialization
 % death
 k_death = s.k_death;
 pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
-gamma_hd = (s.omega_y.*pdf_hd_y)/(s.omega_o.*pdf_hd_o);
+kappa_hd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
+HD_o = HD.*varsigma;                HD_y = H-HD_o;
+H_o_ini = H.*r0.rho_ho_h(1,:);      H_y_ini = H-H_o_ini;
 % weight_hd = pdf_hd./repmat(time_hd',length(varsigma),1);
 % recovery
 k_rec = s.k_rec;
@@ -56,7 +67,10 @@ k_sick = s.k_sick;
 [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
 pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
-pdf_ir = pdf_ir./sum(pdf_ir,2);             
+pdf_ir = pdf_ir./sum(pdf_ir,2);     
+
+AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
+
 % weight_ir = pdf_ir./time_ir;
 
 % ******* Equations
@@ -64,19 +78,13 @@ pdf_ir = pdf_ir./sum(pdf_ir,2);
 % H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
 % D(t) = D(t-1)+H_D(t);
 
-% initialization
-dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
-dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
-D = x.Deaths(firstData:dateTo)*data.D(dateFrom)/x.Deaths(dateFrom); 
-D(tshift+1:end) = data.D(dateFrom:dateTo);
-H = data.H(firstData:dateTo);
-AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
-
 % calculation
 HD = extend(method_data(D(2:end)-D(1:end-1)),1);  
 [hd,hd_t] = (get_wa(pdf_hd,H,omega,k_death+1));
 hd = method_params(hd); hd_t = extend(method_data(hd_t),k_death);
 gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
+hd_t = hd_t.*gamma_hd;
+hd_o = method_params(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1));
 omega = repmat((method_params(omega(:,1).*gamma_hd)),1,k_death+1);
 HR = method_data(extend(get_wa(pdf_hr,H,1-omega,k_rec+1),k_rec));
 IH = method_data(extend(H(2:end)-H(1:end-1)+HR(2:end)+HD(2:end),1));
