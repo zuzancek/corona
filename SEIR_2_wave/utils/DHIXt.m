@@ -30,10 +30,9 @@ T_obs = T_delay+s.T_test.mean;
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
-D = x.Deaths(firstData:dateTo)*data.D(dateFrom)/x.Deaths(dateFrom); 
-D(tshift+1:end) = data.D(dateFrom:dateTo);
+D = data.D(firstData:dateTo);
 H = data.H(firstData:dateTo);
-H_ini = method_data(data.H(firstData-k_death+2:dateTo));
+H_ini = method_data(data.H(firstData-s.k_death+2:dateTo));
 
 r0 = set_yo_ratios_params();
 

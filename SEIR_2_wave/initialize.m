@@ -6,6 +6,7 @@ mkdir('results');
 
 addpath data;
 addpath data/calibration;
+addpath data/raw_data;
 addpath functions;
 addpath utils;
 addpath plotting;
