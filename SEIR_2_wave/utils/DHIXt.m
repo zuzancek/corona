@@ -33,6 +33,7 @@ dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
 D = x.Deaths(firstData:dateTo)*data.D(dateFrom)/x.Deaths(dateFrom); 
 D(tshift+1:end) = data.D(dateFrom:dateTo);
 H = data.H(firstData:dateTo);
+H_ini = method_data(data.H(firstData-k_death+2:dateTo));
 
 r0 = set_yo_ratios_params();
 
@@ -68,17 +69,16 @@ pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
 pdf_ir = pdf_ir./sum(pdf_ir,2);     
 
 AC = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
-AC_o = r0.io_i.*AC; AC_y = (1-r0.io_i).*AC;
+AC_o = extend(r0.io_i,length(AC)-length(r0.io_i)).*AC; 
+AC_y = AC-AC_o;
 
-% weight_ir = pdf_ir./time_ir;
-
-% ******* Equations
+% ******* Equations, both in O/Y version + aggregation
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
 % H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
 % D(t) = D(t-1)+H_D(t);
 
 % calculation
-% hospital death
+% hospital deaths (Y,O,agg)
 HD = extend(method_data(D(2:end)-D(1:end-1)),1); 
 HD_o = HD.*varsigma;                HD_y = HD-HD_o;
 H_o_ini = H.*r0.rho_ho_h(:,1);      H_y_ini = H-H_o_ini;
