@@ -25,7 +25,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 10;                s.T_sick_o = 14;       s.T_sick = 13;
+s.T_sick_y = 11;                s.T_sick_o = 14;       s.T_sick = 13;
 s.T_sick_std = s.SI.std;
 s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
@@ -107,7 +107,7 @@ s.min_dif = 1;
 s.max_dif = 4;
 s.shift_max = 2*s.SI.mean;
 
-s.smoothing_method_data = @mov_median;
+s.smoothing_method_data = @mov_median_adj;
 s.smoothing_method_params = @smooth_series;
 
     function[]=set_prob_data()
@@ -123,7 +123,7 @@ s.smoothing_method_params = @smooth_series;
         s.obj_hosp_y = db.s.opt_fit_h_y.obj;
         s.obj_hosp_o = db.s.opt_fit_h_o.obj;
         % death
-        s.k_death = 30;
+        s.k_death = 40;
         s.omega_y = db.s.opt_fit_d_y.alpha;
         s.pdf_d_y = db.s.opt_fit_d_y.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_y.pdf(1:s.k_death+1));
         s.T_death_o_mean = db.s.opt_fit_d_o.mean;
@@ -134,7 +134,7 @@ s.smoothing_method_params = @smooth_series;
         s.obj_death_y = db.s.opt_fit_d_y.obj;
         s.obj_death_o = db.s.opt_fit_d_o.obj;
         % recovery at hospital
-        s.k_rec = 30;
+        s.k_rec = 40;
         s.pdf_r_y = db.s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db.s.opt_fit_r_y.pdf(1:s.k_rec+1));
         s.T_rec_o_mean = db.s.opt_fit_r_o.mean;
         s.time_r = db.s.opt_fit_r_y.time_grid(1:s.k_rec+1);
