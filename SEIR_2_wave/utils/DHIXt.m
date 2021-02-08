@@ -65,10 +65,10 @@ pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_obs)*s.T
 pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
 pdf_ir = pdf_ir./sum(pdf_ir,2);     
 
-I_ini = method_params(x.ActiveCases(firstData-k_hosp+2:dateTo));
+I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 I_o_ini = extend(r0.io_i,length(I_ini)-length(r0.io_i)).*I_ini; 
 I_y_ini = I_ini-I_o_ini;
-H_ini = method_params(data.H(firstData-s.k_death+2:dateTo));
+H_ini = method_data(data.H(firstData-s.k_death+2:dateTo));
 H_o_ini = extend(r0.rho_ho_h(:,1),length(H_ini)-length(r0.rho_ho_h(:,1))).*H_ini;       
 H_y_ini = H_ini-H_o_ini;
 
@@ -79,18 +79,13 @@ H_y_ini = H_ini-H_o_ini;
 
 % calculation
 % hospital deaths (Y,O,agg)
-HD = (extend(method_params(D(2:end)-D(1:end-1)),1)); 
-HD_o = method_params(HD.*varsigma);                HD_y = HD-HD_o;
-
-% [hd,hd_t] = (get_wa(pdf_hd,H,omega,k_death+1));
-% hd = method_params((get_wa(pdf_hd,H,omega,k_death+1))); 
-% hd_t = extend(method_data(hd_t),k_death);
-% gamma_hd =  method_params(extend(HD(k_death+1:end)./hd,k_death));
-% hd_t = hd_t.*gamma_hd;
-h_o = max(0,method_params(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1)));
-h_y = max(0,method_params(get_wa_inv(pdf_hd_y,HD_y,H_y_ini,omega_y,k_death+1)));
+HD = extend(D(2:end)-D(1:end-1),1); 
+HD_o = HD.*varsigma;                
+HD_y = HD-HD_o;
+h_o = max(0,method_data(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1)));
+h_y = max(0,method_data(get_wa_inv(pdf_hd_y,HD_y,H_y_ini,omega_y,k_death+1)));
 h = max(1,h_o+h_y);
-H_o = method_params(h_o./h).*H; 
+H_o = method_data(h_o./h).*H; 
 H_y = H-H_o;
 kappa_h = method_params(h./H); 
 omega_o = omega_o.*repmat(kappa_h,1,k_death+1);
