@@ -36,7 +36,7 @@ end
 y0 = movmedian(x(dateFrom:dateTo,:),d,'omitnan');
 y1 = 0.5*(y0(floor(d/2):end-1)+y0(ceil(d/2):end));
 y = smooth_series(x(dateFrom:dateTo,:),d(1));
-y(1:length(y1)-1,:) = y1(2:end-1);
+y(1:length(y1)-1,:) = y1(2:end);
 
 if isa(x,'tseries')
     y = y+0*x;
