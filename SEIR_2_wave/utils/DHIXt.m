@@ -131,9 +131,12 @@ Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
 
 figure;
-bar(Orts);hold on;
-bar(Xrts);
-bar(mov_median(params.h));
+bar(Orts,'FaceAlpha',0.5);hold on;
+bar(Xrts,'FaceAlpha',0.5);
+bar(mov_median(params.h),'FaceAlpha',0.5,'FaceColor','k');
+grid on;
+legend({'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
+title('New cases: reported vs. real');
 
 Len = length(Xts);
 p = struct();
