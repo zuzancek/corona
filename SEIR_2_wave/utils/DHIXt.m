@@ -99,12 +99,12 @@ HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec));
 HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec));
 HR = HR_o+HR_y;
 % hospital admission
-IH_o = (extend(method_params(H_o(2:end)-H_o(1:end-1))+HR_o(2:end)+HD_o(2:end),1));
-IH_y = (extend(method_params(H_y(2:end)-H_y(1:end-1))+HR_y(2:end)+HD_y(2:end),1));
+IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
+IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_y+IH_o;
 % active cases (true)
-I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1));
-I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1));
+I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
+I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
 % recovered at home (no hospital needed)
 IR_o = (extend(get_wa(pdf_ir_o(:,:),I_o,1-eta_o,k_sick+1),k_sick));
