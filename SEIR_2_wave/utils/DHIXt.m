@@ -130,16 +130,16 @@ title('New cases: reported vs. real');
 
 fcast_per = max(r0.T_sick_mean,r0.T_hosp.mean);
 Len = length(Xts)-fcast_per;
-p = struct();
-p.X_smooth = resize(Xts,dateFrom:dateFrom+Len);
-p.X_smooth_total = resize(Xts,dateFrom:dateFrom+Len+fcast_per); 
-p.X_forecast_smooth = resize(Xts,dateFrom+Len:dateFrom+Len);
-p.X_raw = resize(Xrts,dateFrom:dateFrom+Len);
-p.X_raw_total = resize(Xrts,dateFrom:dateFrom+Len+fcast_per);
-p.X_forecast_raw = resize(Xrts,dateFrom+Len:dateFrom+Len);
-p.X_rep_smooth = Ots;
-p.X_rep_forecast_smooth = resize(Ots0,enddate(Ots)+1:dateTo);
-p.X_rep_raw = Orts;
+res = struct();
+res.X_smooth = resize(Xts,dateFrom:dateFrom+Len);
+res.X_smooth_total = resize(Xts,dateFrom:dateFrom+Len+fcast_per); 
+res.X_forecast_smooth = resize(Xts,dateFrom+Len:dateFrom+Len);
+res.X_raw = resize(Xrts,dateFrom:dateFrom+Len);
+res.X_raw_total = resize(Xrts,dateFrom:dateFrom+Len+fcast_per);
+res.X_forecast_raw = resize(Xrts,dateFrom+Len:dateFrom+Len);
+res.X_rep_smooth = Ots;
+res.X_rep_forecast_smooth = resize(Ots0,enddate(Ots)+1:dateTo);
+res.X_rep_raw = Orts;
 rho_real = method_params([r0.rho_real_xo_x(1);r0.rho_real_xo_x]);
 
 % adjust series endpoints and get ratio
@@ -194,6 +194,7 @@ res.X = X; res.X_o = X_o; res.X_y = X_y;
 % store params
 ini.I = I_ini; ini.I_o = I_o_ini; ini.I_y = I_y_ini;
 ini.H = H_ini; ini.H_o = H_o_ini; ini.H_y = H_y_ini;
+p = struct();
 p.ini = ini;
 p.varsigma = varsigma;
 p.rho = rho;

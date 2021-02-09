@@ -58,18 +58,16 @@ params.asymp_ratio = asymp_ratio;
 params.cutoff = 3;
 params.adj = 0; % *0
 params.h = hosp_data.H;
-[dI_inflow_real, res_implied, par] = fun_0(x,hosp_data,s,disp_from,t1,t0,...
+[dI_inflow_real, res_implied, params] = fun_0(x,hosp_data,s,disp_from,t1,t0,...
     params,delay);
 % [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = res_implied.obs_ratio_adj;
 cases_data.loss = res_implied.sa;
-cases_data.X_smooth = par.X_smooth;
-cases_data.X_forecast = par.X_forecast_smooth;
-cases_data.X_total = tseries(startdate(par.X_smooth):enddate(par.X_forecast_smooth),0);
-cases_data.X_total(startdate(par.X_smooth):enddate(par.X_smooth)) = par.X_smooth;
-cases_data.X_total(enddate(par.X_smooth)+1:enddate(par.X_forecast_smooth)) = par.X_forecast_smooth;
+cases_data.X_smooth = res_implied.X_smooth;
+cases_data.X_forecast = res_implied.X_forecast_smooth;
+cases_data.X_total = res_implied.X_smooth_total;
 cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 
 % alternative numbers for hospitals
