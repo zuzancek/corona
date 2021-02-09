@@ -1,14 +1,17 @@
-function [out] = XIHDt(x,p,s,init,dateFrom,dateTo,firstDate)
+function [out] = XIHDt(x,p,s,init,dateFrom,dateTo)
 
 T = dateTo-dateFrom+1;
-T_total = dateTo-firstDate+1;
+burnin = s.firstData_offset;
+firstData = -tshift+dateFrom;
+
+T_total = dateTo-firstData+1;
 shift_i = max(s.k_hosp,s.k_sick);
 shift_h = max(s.k_death,s.k_rec);
 shift = max(shift_i,shift_h);
-burnin = dateFrom-firstDate;
-I0 = init.I(firstDate-shift_i+2:dateTo);
-H0 = init.H(firstDate-shift_h+2:dateTo);
-D0 = init.D(firstDate:dateTo);
+
+I0 = init.I(firstData-shift_i+2:dateTo);
+H0 = init.H(firstData-shift_h+2:dateTo);
+D0 = init.D(firstData:dateTo);
 
 method_params = s.smoothing_method_params;
 method_data = s.smoothing_method_data;
@@ -30,7 +33,7 @@ varsigma = method_params(init.varsigma);
 varsigma = varsigma(dateFrom:dateTo);
 
 % ********* initialization
-X = method_data(x.NewCases(firstDate:dateTo));
+X = method_data(x.NewCases(firstData:dateTo));
 
 % ********* arrays (key)
 % new cases: Old/Young

@@ -128,7 +128,7 @@ grid on;
 legend({'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
 title('New cases: reported vs. real');
 
-fcast_per = max(r0.T_sick_mean,r0.T_hosp.mean);
+fcast_per = ceil(max(r0.T_hosp_mean));
 Len = length(Xts)-fcast_per;
 res = struct();
 res.X_smooth = resize(Xts,dateFrom:dateFrom+Len);
@@ -241,6 +241,7 @@ p.zeta_y = zeta_y;
         r.eta_o = s.eta_o+zeros(length(varsigma),s.k_hosp+1);
         r.eta_y = s.eta_y+zeros(length(varsigma),s.k_hosp+1);
         r.T_hosp_mean = s.T_hosp_o_mean.*r.rho_io_i+s.T_hosp_y_mean.*(1-r.rho_io_i);
+        r.T_hosp_mean = r.T_hosp_mean(:,1);
         %
         a_ir_y = (1-s.eta_y)./s.T_sick_y_mean; a_ir_o = (1-s.eta_o)./s.T_sick_o_mean;
         r.iro_iry = (a_ir_o./a_ir_y).*r.io_iy;
@@ -249,6 +250,7 @@ p.zeta_y = zeta_y;
         r.xo_xy = (a_ih_o+a_ir_o)./(a_ih_y+a_ir_y).*r.io_iy;
         r.rho_real_xo_x = r.xo_xy./(1+r.xo_xy);
         r.T_sick_mean = s.T_sick_o_mean.*r.rho_io_i+s.T_sick_y_mean.*(1-r.rho_io_i)-T_obs;
+        r.T_sick_mean = r.T_sick_mean(:,1);
     end
 
     function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)

@@ -74,7 +74,7 @@ cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 init = hosp_data;
 init.I = x.ActiveCases; 
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
-[out] = fun_1(x,par,s,init,disp_from,t1);
+[out] = fun_1(x,params,s,init,disp_from,t1);
 y = x; y.NewCases = dI_inflow_real;
 [out_check] = fun_1(y,par,s,init,disp_from,t1);
 hosp_data.alt = out;
