@@ -121,9 +121,12 @@ Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
 
 figure;
-bar(Orts,'FaceAlpha',0.5);hold on;
-bar(Xrts,'FaceAlpha',0.5);
-bar(mov_median(params.h),'FaceAlpha',0.5,'FaceColor','k');
+bar(Orts,'FaceAlpha',0.65);hold on;
+bar(Xrts,'FaceAlpha',0.45);
+bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.33,'FaceColor','k');
+plot(Ots,'b','linewidth',2);
+plot(Xts,'r','linewidth',2);
+plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'k--','linewidth',1);
 grid on;
 legend({'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
 title('New cases: reported vs. real');
