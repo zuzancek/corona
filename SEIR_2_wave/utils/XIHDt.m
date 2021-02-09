@@ -23,7 +23,7 @@ try
     T_delay = init.T_delay(end-T_total+1:end);
 catch err %#ok<NASGU>
     T_delay = zeros(T,1);
-end
+end 
 rho = extend(rho,shift_i);
 T_obs = T_delay+s.T_test.mean;
 varsigma = method_params(init.varsigma);
@@ -61,11 +61,11 @@ pdf_ih_y = extend(p.pdf_ih_y,T_total+k_hosp-size(p.pdf_ih_y,1)); alpha_ihy = s.e
 alpha_iho = alpha_iho(:,end:-1:1);
 alpha_ihy = alpha_ihy(:,end:-1:1);
 % recovery from sickness at home
-k_sick = p.k_sick;      t_sick = s.time_s;
-pdf_ir_o = extend(p.pdf_ir_o,T_total+k_sick-size(p.pdf_ir_o,1)); alpha_iro = (1-s.eta_o).*pdf_ir_o./repmat(t_sick,T_total+k_sick,1);
-pdf_ir_y = extend(p.pdf_ir_y,T_total+k_sick-size(p.pdf_ir_y,1)); alpha_iry = (1-s.eta_y).*pdf_ir_y./repmat(t_sick,T_total+k_sick,1);
-alpha_iro = alpha_iro(:,end:-1:1);
-alpha_iry = alpha_iry(:,end:-1:1);
+k_sick = p.k_sick;      
+[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+k_sick-size(p.pdf_ir_o,1),'Gamma',(s.T_sick_o-T_obs).*T_sick_std^2,1./s.T_sick_std^2);
+pdf_ir_y = create_weights(k_sick,T_total+k_sick-size(p.pdf_ir_y,1),'Gamma',(s.T_sick_y-T_obs).*T_sick_std^2,1./s.T_sick_std^2);
+alpha_iro = (1-s.eta_o).*pdf_ir_o./repmat(time_ir,T_total+k_sick,1);    alpha_iro = alpha_iro(:,end:-1:1);
+alpha_iry = (1-s.eta_y).*pdf_ir_y./repmat(time_ir,T_total+k_sick,1);    alpha_iry = alpha_iry(:,end:-1:1);
 % death at hospital
 k_death = p.k_death;      t_death = s.time_d;
 pdf_hd_o = extend(p.pdf_hd_o,T_total+k_death-size(p.pdf_hd_o,1)); alpha_hdo = s.omega_o.*pdf_hd_o./repmat(t_death,T_total+k_death,1);
@@ -130,5 +130,11 @@ legend([pp1 pp3 pp4 pp5 pp6],{'X','H_rep', 'H', 'D_rep','D'});
         y = method_data(z);
     end
 
+    function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
+        weights = 0:pnts_num;
+        pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
+        pdf_x = pdf_x./sum(pdf_x,2); 
+        pnt_x = repmat(weights,T_num,1);
+    end
 
 end
