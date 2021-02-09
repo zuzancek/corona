@@ -1,4 +1,4 @@
-function [X,res,p] = DHIXt(x,data,s,dateFrom,dateTo,t0,~,params,delay)
+function [X,res,p] = DHIXt(x,data,s,dateFrom,dateTo,t0,params,delay)
 
 %% initialization
 T = dateTo-dateFrom+1;
@@ -39,29 +39,29 @@ r0 = set_yo_ratios_params();
 k_death = s.k_death;
 pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
-pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
-pdf_hd = pdf_hd./sum(pdf_hd,2);             omega = r0.omega;         % time_hd = s.time_d;
-kappa_hd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
+% pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
+% pdf_hd = pdf_hd./sum(pdf_hd,2);             
+% kappa_hd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
 omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % recovery
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_r_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_r_o',length(varsigma),1);
-pdf_hr = r0.rho_hro_hr.*pdf_hr_o+(1-r0.rho_hro_hr).*pdf_hr_y;
-pdf_hr = pdf_hr./sum(pdf_hr,2);             
+% pdf_hr = r0.rho_hro_hr.*pdf_hr_o+(1-r0.rho_hro_hr).*pdf_hr_y;
+% pdf_hr = pdf_hr./sum(pdf_hr,2);             
 % hospital admission
 k_hosp = s.k_hosp;
 pdf_ih_y = repmat(s.pdf_h_y',length(varsigma),1);
 pdf_ih_o = repmat(s.pdf_h_o',length(varsigma),1);
-pdf_ih = r0.rho_io_i.*pdf_ih_o+(1-r0.rho_io_i).*pdf_ih_y;
-pdf_ih = pdf_ih./sum(pdf_ih,2);             % time_ih = s.time_h;
+% pdf_ih = r0.rho_io_i.*pdf_ih_o+(1-r0.rho_io_i).*pdf_ih_y;
+% pdf_ih = pdf_ih./sum(pdf_ih,2);             % time_ih = s.time_h;
 eta_o = r0.eta_o;       eta_y = r0.eta_y;
 % recovery from sickness, mild cases, no need of hospital care
 k_sick = s.k_sick; 
-[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); %#ok<ASGLU>
+[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); 
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
-pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
-pdf_ir = pdf_ir./sum(pdf_ir,2);     
+% pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
+% pdf_ir = pdf_ir./sum(pdf_ir,2);     
 
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 I_o_ini = extend(r0.io_i,length(I_ini)-length(r0.io_i)).*I_ini; 
