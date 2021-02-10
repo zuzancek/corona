@@ -1,12 +1,18 @@
 function [db_h,db_d] = process_clinical_statistics(s,d,a,dateFrom,dateTo)
 
-db_h = struct;
+db_h = struct; 
 db_d = struct;
 
-% total hospitalizations
-db_h.H_raw = resize(s.Hospitalizations,dateFrom:dateTo);
-db_h.H = mov_median_adj(db_h.H_raw);
-db_h.H_smooth = smooth_series(db_h.H);
+% hospitalizations (confirmed, suspected, total)
+db_h.H_c_raw = resize(s.Hospitalizations_Confirmed,dateFrom:dateTo);
+db_h.H_c = mov_median_adj(db_h.H_c_raw);
+db_h.H_c_smooth = smooth_series(db_h.H_c);
+db_h.H_s_raw = resize(s.Hospitalizations_Suspected,dateFrom:dateTo);
+db_h.H_s = mov_median_adj(db_h.H_s_raw);
+db_h.H_s_smooth = smooth_series(db_h.H_s);
+db_h.H_raw = db_h.H_s_raw+db_h.H_c_raw;
+db_h.H = db_h.H_s+db_h.H_c;
+db_h.H_smooth = db_h.H_s_smooth+db_h.H_c_smooth;
 
 % ICU (missing data)
 c = s.ICU;
