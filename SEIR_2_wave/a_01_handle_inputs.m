@@ -75,7 +75,7 @@ init.I = x.ActiveCases;
 init.T_delay = params.T_delay;
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = fun_1(x,params,s,init,disp_from,t1);
-y = x; y.NewCases = dI_inflow_real;
+y = x; y.NewCases = res_implied.X_all;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
 

@@ -134,6 +134,8 @@ title('New cases: reported vs. real');
 fcast_per = ceil(max(r0.T_hosp_mean));
 Len = length(Xts)-fcast_per;
 res = struct();
+res.X_all = adjust_tail(X,1);
+res.X_smooth_all = smooth_series(res.X_all);
 res.X_smooth = resize(Xts,dateFrom:dateFrom+Len);
 res.X_smooth_total = resize(Xts,dateFrom:dateFrom+Len+fcast_per); 
 res.X_forecast_smooth = resize(Xts,dateFrom+Len:dateFrom+Len);
