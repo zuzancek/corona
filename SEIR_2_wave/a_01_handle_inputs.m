@@ -50,7 +50,7 @@ old_ratio = db_age.Old./db_age.Total;
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;     cases_data.old_ratio_raw = old_ratio_raw;
 
 % observed ratio
-delay.v = ([0.5 1 0.5 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
+delay.v = 0*([0.5 1 0.5 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = deaths_data.old_ratio;
 params.cases_old_ratio = old_ratio;
@@ -70,12 +70,16 @@ cases_data.X_total = res_implied.X_smooth_total;
 cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 
 % alternative numbers for hospitals
+% with officially reported inputs
 init = hosp_data;
 init.I = x.ActiveCases; 
 init.T_delay = params.T_delay;
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = fun_1(x,params,s,init,disp_from,t1);
-y = x; y.NewCases = res_implied.X_all;
+% with implied inputs - check the error
+y = x; 
+y.NewCases = res_implied.X_all;
+init.rho = params.rho;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
 

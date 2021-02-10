@@ -10,7 +10,7 @@ cut = 0*params.cutoff;
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
-sigma = method_params(params.asymp_ratio(firstData:dateTo));
+sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
 
 %% testing
 % delay in testing (gradual)
@@ -134,7 +134,7 @@ title('New cases: reported vs. real');
 fcast_per = ceil(max(r0.T_hosp_mean));
 Len = length(Xts)-fcast_per;
 res = struct();
-res.X_all = adjust_tail(X,1);
+res.X_all = tseries(firstData:dateTo,[X;X(end)]);
 res.X_smooth_all = smooth_series(res.X_all);
 res.X_smooth = resize(Xts,dateFrom:dateFrom+Len);
 res.X_smooth_total = resize(Xts,dateFrom:dateFrom+Len+fcast_per); 
@@ -145,31 +145,32 @@ res.X_forecast_raw = resize(Xrts,dateFrom+Len:dateFrom+Len);
 res.X_rep_smooth = Ots;
 res.X_rep_forecast_smooth = resize(Ots0,enddate(Ots)+1:dateTo);
 res.X_rep_raw = Orts;
-rho_real = method_params([r0.rho_real_xo_x(1);r0.rho_real_xo_x]);
 
 % adjust series endpoints and get ratio
+% X = [X;X(end)]; X_o = [X_o;X_o(end)]; X_y = [X_y;X_y(end)];
+rho_real = method_data(tseries(firstData:dateTo,[X_o;X_o(end)])./tseries(firstData:dateTo,[X;X(end)])); 
+rho_real_smooth = method_params(rho_real);
 X = X(tshift:end);
-rho_real = rho_real(end-length(X)+1:end);
+X_o = X_o(tshift:end);
+X_y = X-X_o;
 sigma = sigma(end-length(X)+1:end);
-dateTo_X = dateFrom+length(X)-1;
-dateTo_R = dateFrom+length(dI_data)-1;
+dateTo_X = dateFrom+length(X);
+dateTo_R = dateFrom+length(dI_data);
 dateTo_0 = min(dateTo_X,dateTo_R);
 obs_ratio_adj = tseries(t0:dateTo_0,s.obs_ratio);
 X = Xts; %tseries(dateFrom:dateTo_X,method_data(X));
-X_o = method_data(X.*rho_real);
-X_y = X-X_o;
-dI_data_real = resize(X,dateFrom:dateTo_X);
+dI_data_real = resize(X,firstData:dateTo_X);
 dI_data_reported = Ots;
 dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
 
-idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min); %#ok<MXFND> % & delta<1-s.ratio_threshold); %#ok<MXFND>
-idx = dateFrom:max(idx);
-dI_data_real(idx) = dI_data_reported(idx);             
-X_o(idx) = dI_data_reported_old(idx);       X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
-X_y(idx) = dI_data_reported_old(idx);       X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
+% idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min); %#ok<MXFND> % & delta<1-s.ratio_threshold); %#ok<MXFND>
+% idx = dateFrom:max(idx);
+% dI_data_real(idx) = dI_data_reported(idx);             
+% X_o(idx) = dI_data_reported_old(idx);       X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
+% X_y(idx) = dI_data_reported_old(idx);       X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
 delta = method_params(resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0));
-X = dI_data_real;
+% X = dI_data_real;
 
 obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio);
 
@@ -202,7 +203,8 @@ ini.H = H_ini; ini.H_o = H_o_ini; ini.H_y = H_y_ini;
 p = struct();
 p.ini = ini;
 p.varsigma = varsigma;
-p.rho = rho;
+p.rho = rho_real;
+p.rho_smooth = rho_real_smooth;
 p.sigma = sigma;
 p.burnin = tshift;
 p.T_delay = T_delay;

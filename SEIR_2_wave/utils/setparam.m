@@ -112,22 +112,22 @@ s.smoothing_method_params = @smooth_series;
     function[]=set_prob_data()
         % hospital admission
         s.k_hosp = 20;
-        s.eta_y = db.s.opt_fit_h_y.alpha*1.5;
+        s.eta_y = db.s.opt_fit_h_y.alpha*1.25;
         s.pdf_h_y = db.s.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db.s.opt_fit_h_y.pdf(1:s.k_hosp+1));
         s.T_hosp_y_mean = db.s.opt_fit_h_y.mean;
         s.time_h = db.s.opt_fit_h_y.time_grid(1:s.k_hosp+1);
-        s.eta_o = db.s.opt_fit_h_o.alpha;
+        s.eta_o = db.s.opt_fit_h_o.alpha*0.75;
         s.pdf_h_o = db.s.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db.s.opt_fit_h_o.pdf(1:s.k_hosp+1));
         s.T_hosp_o_mean = db.s.opt_fit_h_o.mean;
         s.obj_hosp_y = db.s.opt_fit_h_y.obj;
         s.obj_hosp_o = db.s.opt_fit_h_o.obj;
         % death
         s.k_death = 40;
-        s.omega_y = db.s.opt_fit_d_y.alpha;
+        s.omega_y = db.s.opt_fit_d_y.alpha/0.8;
         s.pdf_d_y = db.s.opt_fit_d_y.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_y.pdf(1:s.k_death+1));
         s.T_death_o_mean = db.s.opt_fit_d_o.mean;
         s.time_d = db.s.opt_fit_d_y.time_grid(1:s.k_death+1);
-        s.omega_o = db.s.opt_fit_d_o.alpha;
+        s.omega_o = db.s.opt_fit_d_o.alpha/0.8;
         s.pdf_d_o = db.s.opt_fit_d_o.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_o.pdf(1:s.k_death+1));
         s.T_death_y_mean = db.s.opt_fit_d_y.mean;
         s.obj_death_y = db.s.opt_fit_d_y.obj;
