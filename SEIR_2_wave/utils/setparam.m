@@ -25,7 +25,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 12;                s.T_sick_o = 14;       s.T_sick = 13;
+s.T_sick_y = 10;                s.T_sick_o = 14;       s.T_sick = 13;
 s.T_sick_std = s.SI.std;
 s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
@@ -83,7 +83,6 @@ s.threshold = 0.05;
 s.scale_fact = 4;
 
 s.smooth_width = 7;
-s.smooth_width_hosp = 5;
 s.smooth_type = 5;
 s.smooth_ends = 1;
 
@@ -113,7 +112,7 @@ s.smoothing_method_params = @smooth_series;
     function[]=set_prob_data()
         % hospital admission
         s.k_hosp = 20;
-        s.eta_y = db.s.opt_fit_h_y.alpha;
+        s.eta_y = db.s.opt_fit_h_y.alpha*1.5;
         s.pdf_h_y = db.s.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db.s.opt_fit_h_y.pdf(1:s.k_hosp+1));
         s.T_hosp_y_mean = db.s.opt_fit_h_y.mean;
         s.time_h = db.s.opt_fit_h_y.time_grid(1:s.k_hosp+1);

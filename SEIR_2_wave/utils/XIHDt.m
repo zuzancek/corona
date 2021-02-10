@@ -1,4 +1,4 @@
-function [out] = XIHDt(x,p,s,init,dateFrom,dateTo)
+function [out_rep,out_full] = XIHDt(x,p,s,init,dateFrom,dateTo)
 
 T = dateTo-dateFrom+1;
 burnin = s.firstData_offset;
@@ -120,29 +120,43 @@ for t=1:T_total
 end
 
 % store results
-out = struct;
-out.X_o = tseries(dateFrom:dateTo,X_o);
-out.X_y = tseries(dateFrom:dateTo,X_y);
-out.I_o = tseries(dateFrom:dateTo,I_o(burnin+1:end));
-out.I_y = tseries(dateFrom:dateTo,I_y(burnin+1:end));
-out.H_o = tseries(dateFrom:dateTo,H_o(burnin+1:end));
-out.H_y = tseries(dateFrom:dateTo,H_y(burnin+1:end));
-out.D_o = tseries(dateFrom:dateTo,D_o(burnin+1:end));
-out.D_y = tseries(dateFrom:dateTo,D_y(burnin+1:end));
-out.X = out.X_o+out.X_y;
-out.I = out.I_o+out.I_y;
-out.H = out.H_o+out.H_y;
-out.D = out.D_o+out.D_y;
+out_full = struct;
+out_full.X_o = tseries(firstData:dateTo,X_o(end-T_total+1:end));
+out_full.X_y = tseries(firstData:dateTo,X_y(end-T_total+1:end));
+out_full.I_o = tseries(firstData:dateTo,I_o(end-T_total+1:end));
+out_full.I_y = tseries(firstData:dateTo,I_y(end-T_total+1:end));
+out_full.H_o = tseries(firstData:dateTo,H_o(end-T_total+1:end));
+out_full.H_y = tseries(firstData:dateTo,H_y(end-T_total+1:end));
+out_full.D_o = tseries(firstData:dateTo,D_o(end-T_total+1:end));
+out_full.D_y = tseries(firstData:dateTo,D_y(end-T_total+1:end));
+out_full.X = out_full.X_o+out_full.X_y;
+out_full.I = out_full.I_o+out_full.I_y;
+out_full.H = out_full.H_o+out_full.H_y;
+out_full.D = out_full.D_o+out_full.D_y;
+
+out_rep = out_full;
+out_rep.X_o = resize(out_rep.X_o,dateFrom:dateTo);
+out_rep.X_y = resize(out_rep.X_y,dateFrom:dateTo);
+out_rep.I_o = resize(out_rep.I_o,dateFrom:dateTo);
+out_rep.I_y = resize(out_rep.I_y,dateFrom:dateTo);
+out_rep.H_o = resize(out_rep.H_o,dateFrom:dateTo);
+out_rep.H_y = resize(out_rep.H_y,dateFrom:dateTo);
+out_rep.D_o = resize(out_rep.D_o,dateFrom:dateTo);
+out_rep.D_y = resize(out_rep.D_y,dateFrom:dateTo);
+out_rep.X = out_rep.X_o+out_rep.X_y;
+out_rep.I = out_rep.I_o+out_rep.I_y;
+out_rep.H = out_rep.H_o+out_rep.H_y;
+out_rep.D = out_rep.D_o+out_rep.D_y;
 
 figure;
-pp1=plot(smooth_series(out.X),'linewidth',1,'Color','g');hold on; plot(out.X,'Color',[0.5 0.5 0.5]);hold on;
-% pp2=plot(smooth_series(out.I),'linewidth',1,'Color',[0.2 0.6 0.33]);hold on;plot(out.I,'Color',[0.5 0.5 0.5]);hold on;
-pp3=plot(smooth_series(resize(init.H,dateFrom:dateTo)),'linewidth',2,'Color','r');hold on;plot(resize(init.H,dateFrom:dateTo),'Color',[0.5 0.5 0.5]);hold on;
-pp4=plot(smooth_series(out.H),'linewidth',2,'Color','m');hold on;plot(out.H,'Color',[0.5 0.5 0.5]);hold on;
-pp5=plot(smooth_series(resize(init.D,dateFrom:dateTo)),'linewidth',2,'Color','c');hold on;plot(resize(init.D,dateFrom:dateTo),'Color',[0.5 0.5 0.5]);hold on;
-pp6=plot(smooth_series(out.D),'linewidth',2,'Color','k');hold on;plot(out.D,'Color',[0.5 0.5 0.5]);hold on;
+pp3=bar(out_rep.H); hold on;
+pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
+pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
+plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
+pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
+pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
 grid on;
-legend([pp1 pp3 pp4 pp5 pp6],{'X','H_rep', 'H', 'D_rep','D'});
+legend([pp1 pp2 pp3 pp4 pp5],{'X','H\_rep', 'H', 'D\_rep','D'});
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);

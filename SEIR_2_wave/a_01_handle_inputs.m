@@ -50,17 +50,16 @@ old_ratio = db_age.Old./db_age.Total;
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;     cases_data.old_ratio_raw = old_ratio_raw;
 
 % observed ratio
-delay.v = 1*([1.5 2.5 1 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
+delay.v = ([0.5 1 0.5 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = deaths_data.old_ratio;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
 params.cutoff = 3;
-params.adj = 0; % *0
+params.adj = 0; 
 params.h = hosp_data.H;
 [dI_inflow_real, res_implied, params] = fun_0(x,hosp_data,s,disp_from,t1,t0,...
     params,delay);
-% [dI_inflow_real, I_real, obs_ratio_real,sa_cmp,par
 cases_data.cases_pcr_implied = dI_inflow_real;
 cases_data.cases_pcr_implied_smooth = smooth_series(dI_inflow_real);
 cases_data.obs_ratio = res_implied.obs_ratio_adj;
@@ -73,11 +72,11 @@ cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 % alternative numbers for hospitals
 init = hosp_data;
 init.I = x.ActiveCases; 
-init.T_delay = params.T_obs;
+init.T_delay = params.T_delay;
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = fun_1(x,params,s,init,disp_from,t1);
 y = x; y.NewCases = dI_inflow_real;
-[out_check] = fun_1(y,par,s,init,disp_from,t1);
+[out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
 
 %% plotting stuff
