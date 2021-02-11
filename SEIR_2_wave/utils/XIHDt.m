@@ -12,6 +12,8 @@ shift = max(shift_i,shift_h);
 I0 = init.I(firstData-shift_i+2:dateTo);
 H0 = init.H(firstData-shift_h+2:dateTo);
 D0 = init.D(firstData:dateTo);
+IH0 = init.IH(end-T+1:end);
+HR0 = init.HR(end-T+1:end);
 
 method_params = s.smoothing_method_params;
 method_data = s.smoothing_method_data;
@@ -129,10 +131,16 @@ out_full.H_o = tseries(firstData:dateTo,H_o(end-T_total+1:end));
 out_full.H_y = tseries(firstData:dateTo,H_y(end-T_total+1:end));
 out_full.D_o = tseries(firstData:dateTo,D_o(end-T_total+1:end));
 out_full.D_y = tseries(firstData:dateTo,D_y(end-T_total+1:end));
+out_full.IH_y = tseries(firstData:dateTo,d_I_H_y);
+out_full.IH_o = tseries(firstData:dateTo,d_I_H_o);
+out_full.HR_y = tseries(firstData:dateTo,d_H_R_y);
+out_full.HR_o = tseries(firstData:dateTo,d_H_R_o);
 out_full.X = out_full.X_o+out_full.X_y;
 out_full.I = out_full.I_o+out_full.I_y;
 out_full.H = out_full.H_o+out_full.H_y;
 out_full.D = out_full.D_o+out_full.D_y;
+out_full.IH = out_full.IH_o+out_full.IH_y;
+out_full.HR = out_full.HR_o+out_full.HR_y;
 
 out_rep = out_full;
 out_rep.X_o = resize(out_rep.X_o,dateFrom:dateTo);
@@ -143,10 +151,15 @@ out_rep.H_o = resize(out_rep.H_o,dateFrom:dateTo);
 out_rep.H_y = resize(out_rep.H_y,dateFrom:dateTo);
 out_rep.D_o = resize(out_rep.D_o,dateFrom:dateTo);
 out_rep.D_y = resize(out_rep.D_y,dateFrom:dateTo);
+out_rep.IH_y = resize(out_rep.IH_y,dateFrom:dateTo);
+out_rep.IH_o = resize(out_rep.IH_o,dateFrom:dateTo);
+out_rep.HR_y = resize(out_rep.HR_y,dateFrom:dateTo);
+out_rep.HR_o = resize(out_rep.HR_o,dateFrom:dateTo);
 out_rep.X = out_rep.X_o+out_rep.X_y;
 out_rep.I = out_rep.I_o+out_rep.I_y;
 out_rep.H = out_rep.H_o+out_rep.H_y;
 out_rep.D = out_rep.D_o+out_rep.D_y;
+out_rep.IH = out_rep.IH_o+out_rep.IH_y;
 
 figure;
 pp3=bar(out_rep.H); hold on;
@@ -156,8 +169,25 @@ plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
 pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
 pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
 grid on;
-legend([pp1 pp2 pp3 pp4 pp5],{'New cases','Fospitalizations - reported', ...
+legend([pp1 pp2 pp3 pp4 pp5],{'New cases','Hospitalizations - reported', ...
     'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative'});
+
+figure;
+subplot(2,1,1)
+pp1=bar((resize(init.IH,dateFrom:dateTo)),'FaceAlpha',0.5);hold on;
+pp2=plot(out_rep.IH,'linewidth',2);
+pp3=plot(tseries(dateFrom:dateTo,IH0),'linewidth',2,'Color',[1 1 1]*0.5);
+grid on;
+legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
+title('Hospital admissions');
+
+subplot(2,1,2)
+pp1=bar((resize(init.HR,dateFrom:dateTo)),'FaceAlpha',0.5);hold on;
+pp2=plot(out_rep.HR,'linewidth',2);
+pp3=plot(tseries(dateFrom:dateTo,HR0),'linewidth',2,'Color',[1 1 1]*0.5);
+grid on;
+legend({[pp1 pp2 pp3],'Reported','Implied top-down (2x)','Implied bottom-up'});
+title('Hospital discharges');
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);

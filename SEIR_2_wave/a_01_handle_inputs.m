@@ -74,6 +74,8 @@ cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 init = hosp_data;
 init.I = x.ActiveCases; 
 init.T_delay = params.T_delay;
+init.IH = res_implied.IH;
+init.HR = res_implied.HR;
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = fun_1(x,params,s,init,disp_from,t1);
 % with implied inputs - check the error
