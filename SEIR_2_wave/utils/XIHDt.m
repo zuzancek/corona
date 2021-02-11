@@ -186,7 +186,7 @@ pp1=bar(resize(init.R,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
 pp2=plot(out_rep.HR,'linewidth',2);
 pp3=plot(tseries(dateFrom:dateTo,HR0),'linewidth',2,'Color',[1 1 1]*0.5);
 grid on;
-legend({[pp1 pp2 pp3],'Reported','Implied top-down (2x)','Implied bottom-up'});
+legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
 title('Hospital discharges');
 
     function [y] = extend(x,t0)
