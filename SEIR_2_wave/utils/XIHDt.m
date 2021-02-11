@@ -156,7 +156,8 @@ plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
 pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
 pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
 grid on;
-legend([pp1 pp2 pp3 pp4 pp5],{'X','H\_rep', 'H', 'D\_rep','D'});
+legend([pp1 pp2 pp3 pp4 pp5],{'New cases','Fospitalizations - reported', ...
+    'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative'});
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);
