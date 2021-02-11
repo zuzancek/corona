@@ -174,7 +174,7 @@ legend([pp1 pp2 pp3 pp4 pp5],{'New cases','Hospitalizations - reported', ...
 
 figure;
 subplot(2,1,1)
-pp1=bar((resize(init.IH,dateFrom:dateTo)),'FaceAlpha',0.5);hold on;
+pp1=bar(resize(init.A,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
 pp2=plot(out_rep.IH,'linewidth',2);
 pp3=plot(tseries(dateFrom:dateTo,IH0),'linewidth',2,'Color',[1 1 1]*0.5);
 grid on;
@@ -182,7 +182,7 @@ legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
 title('Hospital admissions');
 
 subplot(2,1,2)
-pp1=bar((resize(init.HR,dateFrom:dateTo)),'FaceAlpha',0.5);hold on;
+pp1=bar(resize(init.R,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
 pp2=plot(out_rep.HR,'linewidth',2);
 pp3=plot(tseries(dateFrom:dateTo,HR0),'linewidth',2,'Color',[1 1 1]*0.5);
 grid on;
