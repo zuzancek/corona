@@ -131,6 +131,26 @@ grid on;
 legend({'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
 title('New cases: reported vs. real');
 
+Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
+Dis = tseries(dateFrom:dateTo,HR(end-length(Xts)+1:end));
+Adm_rep = method_data(tseries(dateFrom:dateTo,data.A(end-length(Xts)+1:end)));
+Adm = tseries(dateFrom:dateTo,IH(end-length(Xts)+1:end));
+figure;
+subplot(2,1,1)
+bar(Adm_rep);hold on;
+plot(Adm,'linewidth',2); 
+grid on;
+title('Admissions');
+legend({'Reported','Implied'});
+
+subplot(2,1,2)
+bar(Dis_rep);hold on;
+plot(Dis,'linewidth',2); 
+grid on;
+title('Discharges');
+legend({'Reported','Implied'});
+
+%
 fcast_per = ceil(max(r0.T_hosp_mean));
 Len = length(Xts)-fcast_per;
 res = struct();
