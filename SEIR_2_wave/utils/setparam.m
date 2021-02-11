@@ -38,6 +38,7 @@ s.SI_obs.std = 0.62;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
+s.S_H_rate = 0.16;
 
 try
     db = load('results/optimal_fit.mat','s');

@@ -27,6 +27,11 @@ db_h.V_raw = resize(s.Ventilation,dateFrom:dateTo);
 db_h.V = mov_median_adj(db_h.V_raw);
 db_h.V_smooth = smooth_series(db_h.V);
 
+% ECMO
+db_h.E_raw = resize(s.OAIM,dateFrom:dateTo);
+db_h.E = mov_median_adj(db_h.E_raw);
+db_h.E_smooth = smooth_series(db_h.E);
+
 % Deaths
 db_h.D_on_raw = resize(d.DeathCovid,dateFrom:dateTo);
 db_h.D_on = mov_median_adj(db_h.D_on_raw);
@@ -47,6 +52,10 @@ db_h.A_smooth = smooth_series(db_h.A);
 db_h.R_raw = resize(s.Discharge,dateFrom:dateTo);
 db_h.R = mov_median_adj(db_h.R_raw);
 db_h.R_smooth = smooth_series(db_h.R);
+
+% ratios (severe+critical cases, mild cases)
+db_h.S_H_rate = smooth_series((db_h.C+db_h.V+db_h.E)/db_h.H);
+db_h.M_H_rate = 1-db_h.S_H_rate;
 
 % deaths
 db_d.old_ratio_raw = a.TotalDeathRatioOld;
