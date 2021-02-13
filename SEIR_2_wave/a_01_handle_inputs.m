@@ -55,6 +55,7 @@ params = struct;
 params.death_old_ratio = deaths_data.old_ratio;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
+params.serious_cases_ratio = hosp_data.S_H_rate;
 params.cutoff = 3;
 params.adj = 0; 
 params.h = hosp_data.H;
@@ -76,12 +77,14 @@ init.I = x.ActiveCases;
 init.T_delay = params.T_delay;
 init.IH = res_implied.IH;
 init.HR = res_implied.HR;
+init.omega_o = s.omega_o; init.omega_y = s.omega_y;
 init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 [out] = fun_1(x,params,s,init,disp_from,t1);
 % with implied inputs - check the error
 y = x; 
 y.NewCases = res_implied.X_all;
 init.rho = params.rho;
+init.omega_o = params.omega_o; init.omega_y = params.omega_y;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
 

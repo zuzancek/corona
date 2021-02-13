@@ -11,7 +11,8 @@ cut = 0*params.cutoff;
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
-
+psi = extend(double(resize(params.serious_cases_ratio,dateFrom:dateTo)),tshift);
+scale = (s.omega_o-s.omega_o_m)./(s.omega_o_s-s.omega_o_m);
 %% testing
 % delay in testing (gradual)
 T_delay = NaN+zeros(T,1); T_delay(1) = 0;
@@ -46,7 +47,15 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % recovery
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_r_y',length(varsigma),1);
+pdf_hr_y_s = repmat(s.pdf_r_y_s,length(varsigma),1);
+pdf_hr_y_m = repmat(s.pdf_r_y_m,length(varsigma),1);
+% pdf_hr_y = psi.*pdf_hr_y_s+(1-psi).*pdf_hr_y_m;
+% T1 = sum(repmat([0:k_rec],length(varsigma),1).*pdf_hr_y,2);
 pdf_hr_o = repmat(s.pdf_r_o',length(varsigma),1);
+pdf_hr_o_s = repmat(s.pdf_r_o_s,length(varsigma),1);
+pdf_hr_o_m = repmat(s.pdf_r_o_m,length(varsigma),1);
+% pdf_hr_o = psi.*pdf_hr_o_s+(1-psi).*pdf_hr_o_m;
+% T2 = sum(repmat([0:k_rec],length(varsigma),1).*pdf_hr_o,2);
 % pdf_hr = r0.rho_hro_hr.*pdf_hr_o+(1-r0.rho_hro_hr).*pdf_hr_y;
 % pdf_hr = pdf_hr./sum(pdf_hr,2);             
 % hospital admission
@@ -93,6 +102,9 @@ omega_y = omega_y.*repmat(kappa_h,1,k_death+1);
 % H_y_ini(end-length(H_y)+1:end) = H_y;
 zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
 zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
+w = kappa_h.*scale;
+pdf_hr_o = w.*pdf_hr_o_s+pdf_hr_o_m.*(1-w);
+pdf_hr_y = w.*pdf_hr_y_s+pdf_hr_y_m.*(1-w);
 HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec));
 HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec));
 HR = HR_o+HR_y;
@@ -113,6 +125,7 @@ X_o = method_data(I_o(2:end)-I_o(1:end-1)+IR_o(2:end)+IH_o(2:end));
 X_y = method_data(I_y(2:end)-I_y(1:end-1)+IR_y(2:end)+IH_y(2:end));
 X = X_o+X_y;
 
+fcast_per = ceil(max(r0.T_hosp_mean));
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
 Xrts = (X(tshift:end)); Xrts = method_data(tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts));
 Orts = method_data(tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data));
@@ -121,14 +134,16 @@ Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
 
 figure;
-bar(Orts,'FaceAlpha',0.65);hold on;
-bar(Xrts,'FaceAlpha',0.45);
-bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.33,'FaceColor','k');
+pp1=bar(Orts,'FaceAlpha',0.85);hold on;
+p=bar(resize(Xrts,dateFrom:dateTo-fcast_per-1),'FaceAlpha',0.7);
+bar(resize(Xrts,dateTo-fcast_per:dateTo),'FaceAlpha',0.4,'FaceColor',p.FaceColor);
+pp2=bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.33,'FaceColor','k');
 plot(Ots,'b','linewidth',2);
-plot(Xts,'r','linewidth',2);
+plot(resize(Xts,dateFrom:dateTo-fcast_per-1),'r','linewidth',2);
+plot(resize(Xts,dateTo-fcast_per:dateTo),'r-.','linewidth',2);
 plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'k--','linewidth',1);
 grid on;
-legend({'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
+legend([pp1 p pp2],{'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
 title('New cases: reported vs. real');
 
 Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
@@ -151,7 +166,6 @@ title('Discharges');
 legend({'Reported','Implied'});
 
 %
-fcast_per = ceil(max(r0.T_hosp_mean));
 Len = length(Xts)-fcast_per;
 res = struct();
 res.X_all = tseries(firstData:dateTo,[X;X(end)]);

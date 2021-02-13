@@ -53,7 +53,7 @@ db_h.R_raw = resize(s.Discharge,dateFrom:dateTo);
 db_h.R = mov_median_adj(db_h.R_raw);
 db_h.R_smooth = smooth_series(db_h.R);
 
-% ratios (severe+critical cases, mild cases)
+% ratios (severe + critical cases, mild cases vs total hospitalizations)
 db_h.S_H_rate = smooth_series((db_h.C+db_h.V+db_h.E)/db_h.H);
 db_h.M_H_rate = 1-db_h.S_H_rate;
 

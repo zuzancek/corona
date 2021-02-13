@@ -124,22 +124,36 @@ s.smoothing_method_params = @smooth_series;
         s.obj_hosp_o = db.s.opt_fit_h_o.obj;
         % death
         s.k_death = 40;
-        s.omega_y = db.s.opt_fit_d_y.alpha/0.8;
+        s.omega_y = db.s.opt_fit_d_y.alpha/0.8; % on/with deaths
+        s.omega_y_m = s.omega_y*0.5; s.omega_y_s = s.omega_y*4;
         s.pdf_d_y = db.s.opt_fit_d_y.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_y.pdf(1:s.k_death+1));
         s.T_death_o_mean = db.s.opt_fit_d_o.mean;
         s.time_d = db.s.opt_fit_d_y.time_grid(1:s.k_death+1);
-        s.omega_o = db.s.opt_fit_d_o.alpha/0.8;
+        s.omega_o = db.s.opt_fit_d_o.alpha/0.8; % on/with deaths
+        s.omega_o_m = s.omega_o*0.5; s.omega_o_s = s.omega_o*3;
         s.pdf_d_o = db.s.opt_fit_d_o.pdf(1:s.k_death+1)/sum(db.s.opt_fit_d_o.pdf(1:s.k_death+1));
         s.T_death_y_mean = db.s.opt_fit_d_y.mean;
         s.obj_death_y = db.s.opt_fit_d_y.obj;
         s.obj_death_o = db.s.opt_fit_d_o.obj;
         % recovery at hospital
         s.k_rec = 40;
-        s.pdf_r_y = db.s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db.s.opt_fit_r_y.pdf(1:s.k_rec+1));
+        s.pdf_r_y = db.s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db.s.opt_fit_r_y.pdf(1:s.k_rec+1));      
+        s.T_rec_y_mean = db.s.opt_fit_r_y.mean;
+        pobj = makedist('Burr','alpha',db.s.opt_fit_r_y.obj.alpha-5,'c',db.s.opt_fit_r_y.obj.c+1,'k',db.s.opt_fit_r_y.obj.k);
+        s.T_rec_y_s_mean = mean(pobj);
+        s.pdf_r_y_s = pdf(pobj,0:s.k_rec)/sum(pdf(pobj,0:s.k_rec));
+        pobj = makedist('Burr','alpha',db.s.opt_fit_r_y.obj.alpha+2.5,'c',db.s.opt_fit_r_y.obj.c-0.3,'k',db.s.opt_fit_r_y.obj.k);
+        s.T_rec_y_m_mean = mean(pobj);
+        s.pdf_r_y_m = pdf(pobj,0:s.k_rec)/sum(pdf(pobj,0:s.k_rec));
         s.T_rec_o_mean = db.s.opt_fit_r_o.mean;
         s.time_r = db.s.opt_fit_r_y.time_grid(1:s.k_rec+1);
         s.pdf_r_o = db.s.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db.s.opt_fit_r_o.pdf(1:s.k_rec+1));
-        s.T_rec_y_mean = db.s.opt_fit_r_y.mean;
+        pobj = makedist('Rayleigh','B',db.s.opt_fit_r_o.obj.B+7.5);
+        s.T_rec_o_s_mean = mean(pobj);
+        s.pdf_r_o_s = pdf(pobj,0:s.k_rec)/sum(pdf(pobj,0:s.k_rec));
+        pobj = makedist('Rayleigh','B',db.s.opt_fit_r_o.obj.B-1);
+        s.T_rec_o_m_mean = mean(pobj);
+        s.pdf_r_o_m = pdf(pobj,0:s.k_rec)/sum(pdf(pobj,0:s.k_rec));  
         s.obj_rec_y = db.s.opt_fit_r_y.obj;
         s.obj_rec_o = db.s.opt_fit_r_o.obj;        
         % recovery at home
