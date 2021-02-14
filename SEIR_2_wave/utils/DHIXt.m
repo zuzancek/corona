@@ -48,15 +48,15 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % recovery
 k_rec = s.k_rec;
 % pdf_hr_y = repmat(s.pdf_r_y',length(varsigma),1);
-pdf_hr_y_s = repmat(s.pdf_r_y_s,length(varsigma),1);
-pdf_hr_y_m = repmat(s.pdf_r_y_m,length(varsigma),1);
+pdf_hr_y_s = repmat(s.pdf_r_y_s',length(varsigma),1);
+pdf_hr_y_m = repmat(s.pdf_r_y_m',length(varsigma),1);
 % pdf_hr_y = psi.*pdf_hr_y_s+(1-psi).*pdf_hr_y_m;
 T_rec_m = r0.rho_ho_h.*s.T_rec_o_m_mean+(1-r0.rho_ho_h).*s.T_rec_y_m_mean;
 T_rec_s = r0.rho_ho_h.*s.T_rec_o_s_mean+(1-r0.rho_ho_h).*s.T_rec_y_s_mean;
 % T1 = sum(repmat([0:k_rec],length(varsigma),1).*pdf_hr_y,2);
 % pdf_hr_o = repmat(s.pdf_r_o',length(varsigma),1);
-pdf_hr_o_s = repmat(s.pdf_r_o_s,length(varsigma),1);
-pdf_hr_o_m = repmat(s.pdf_r_o_m,length(varsigma),1);
+pdf_hr_o_s = repmat(s.pdf_r_o_s',length(varsigma),1);
+pdf_hr_o_m = repmat(s.pdf_r_o_m',length(varsigma),1);
 % pdf_hr_o = psi.*pdf_hr_o_s+(1-psi).*pdf_hr_o_m;
 % T2 = sum(repmat([0:k_rec],length(varsigma),1).*pdf_hr_o,2);
 % pdf_hr = r0.rho_hro_hr.*pdf_hr_o+(1-r0.rho_hro_hr).*pdf_hr_y;
@@ -116,7 +116,7 @@ IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
 IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_y+IH_o;
 % active cases (true)
-rho = (kappa_h-1).*scale.*T_rec_s./T_rec_m;
+rho = (kappa_h-1).*T_rec_s(:,1)./T_rec_m(:,1);
 eta_o = eta_o.*(1-rho);
 eta_y = eta_y.*(1-rho);
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
