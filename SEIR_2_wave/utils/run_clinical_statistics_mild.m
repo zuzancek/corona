@@ -16,6 +16,7 @@ for i=1:n
     pdf_severe(end+1:k) = 0;    db_severe.(fn{i}).pdf = pdf_severe;     db_severe.(fn{i}).time_grid = 0:k-1;
     pdf_mild = (pdf_total-ratio.*pdf_severe)./(1-ratio);
     alpha = (db_total.(fn{i}).alpha-ratio.*db_total.(fn{i}).alpha)./(1-ratio);
+    m = (db_total.(fn{i}).mean-ratio.*db_total.(fn{i}).mean)./(1-ratio);
     db_mild.(fn{i}).type = '';
     db_mild.(fn{i}).obj = [];
     db_mild.(fn{i}).pdf = pdf_mild;
@@ -23,6 +24,7 @@ for i=1:n
     db_mild.(fn{i}).diff = 0;
     db_mild.(fn{i}).time_grid = 0:k-1;
     db_mild.(fn{i}).alpha = alpha;
+    db_mild.(fn{i}).mean = m;
 end
 
 db{1} = db_total;
