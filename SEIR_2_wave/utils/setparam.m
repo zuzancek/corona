@@ -41,7 +41,7 @@ s.share_reas = 1;
 s.S_H_rate = 0.16;
 
 try
-    db = load('results/optimal_fit.mat','s');
+    db = load('results/optimal_fit.mat','stat_total','stat_severe','stat_mild','weight');
     set_prob_data();
 catch err %#ok<NASGU>
     a_00_run_statistics();
