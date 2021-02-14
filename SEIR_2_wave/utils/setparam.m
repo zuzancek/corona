@@ -12,6 +12,9 @@ s.env_from = dd(2020,10,8);
 s.wave_2_from = dd(2020,9,1);
 s.firstData_offset = 31;
 s.deaths_with_covid_share = .2;
+s.S_H_rate = 0.16;
+s.S_H_rate_0 = 0.25;
+s.scale_s_h = s.S_H_rate_0/s.S_H_rate;
 
 % serial interval (generation period)
 s.SI.mean = 7.5;                s.SI.std = 0.62;
@@ -39,7 +42,6 @@ s.SI_obs.std = 0.62;
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
-s.S_H_rate = 0.16;
 
 try
     db = load('results/optimal_fit.mat','stat_total','stat_severe','stat_mild','weight');
