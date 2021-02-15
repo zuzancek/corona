@@ -27,11 +27,17 @@ catch err %#ok<NASGU>
     rho = rho(dateFrom:dateTo);
 end
 try
+    varrho = init.varrho(end-T_total+1:end);
+catch err %#ok<NASGU>
+    varrho = zeros(T,1);
+end
+try
     T_delay = init.T_delay(end-T_total+1:end);
 catch err %#ok<NASGU>
     T_delay = zeros(T,1);
 end 
 rho = extend(rho,shift_i);
+varrho = extend(varrho,T_total-length(varrho));
 T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift_i);
 varsigma = method_params(init.varsigma);
 varsigma = extend(varsigma(dateFrom:dateTo),burnin);
@@ -66,31 +72,31 @@ d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 % hospital admission
 k_hosp = s.k_hosp;      t_hosp = s.time_h;
 % pdf_ih_o = extend(p.pdf_ih_o,T_total+k_hosp-size(p.pdf_ih_o,1)); 
-alpha_iho = s.eta_o.*p.pdf_ih_o./repmat(t_hosp',T_total,1);%repmat(t_hosp',T_total+k_hosp,1);
+alpha_iho = s.eta_o.*(1-varrho).*p.pdf_ih_o./repmat(t_hosp,T_total,1);%repmat(t_hosp',T_total+k_hosp,1);
 % pdf_ih_y = extend(p.pdf_ih_y,T_total+k_hosp-size(p.pdf_ih_y,1)); 
-alpha_ihy = s.eta_y.*p.pdf_ih_y./repmat(t_hosp',T_total,1);
+alpha_ihy = s.eta_y.*(1-varrho).*p.pdf_ih_y./repmat(t_hosp,T_total,1);
 alpha_iho = alpha_iho(:,end:-1:1);
 alpha_ihy = alpha_ihy(:,end:-1:1);
 % recovery from sickness at home
 k_sick = s.k_sick;      
-[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
+[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o+varrho.*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
+pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y+varrho.*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
 alpha_iro = (1-s.eta_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
 alpha_iry = (1-s.eta_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
 % death at hospital
 k_death = s.k_death;      t_death = s.time_d;
 % pdf_hd_o = extend(p.pdf_hd_o,T_total+k_death-size(p.pdf_hd_o,1)); 
-alpha_hdo = omega_o.*p.pdf_hd_o./repmat(t_death',T_total+0*k_death,1);
+alpha_hdo = omega_o.*p.pdf_hd_o./repmat(t_death,T_total+0*k_death,1);
 % pdf_hd_y = extend(p.pdf_hd_y,T_total+k_death-size(p.pdf_hd_y,1)); 
-alpha_hdy = omega_y.*p.pdf_hd_y./repmat(t_death',T_total+0*k_death,1);
+alpha_hdy = omega_y.*p.pdf_hd_y./repmat(t_death,T_total+0*k_death,1);
 alpha_hdo = alpha_hdo(:,end:-1:1);
 alpha_hdy = alpha_hdy(:,end:-1:1);
 % recovery at hospital
 k_rec = s.k_rec;      t_rec = s.time_r;
 % pdf_hr_o = extend(p.pdf_hr_o,T_total+k_rec-size(p.pdf_hr_o,1)); 
-alpha_hro = (1-omega_o).*p.pdf_hr_o./repmat(t_rec',T_total+0*k_rec,1);
+alpha_hro = (1-omega_o).*p.pdf_hr_o./repmat(t_rec,T_total+0*k_rec,1);
 % pdf_hr_y = extend(p.pdf_hr_y,T_total+k_rec-size(p.pdf_hr_y,1)); 
-alpha_hry = (1-omega_y).*p.pdf_hr_y./repmat(t_rec',T_total+0*k_rec,1);
+alpha_hry = (1-omega_y).*p.pdf_hr_y./repmat(t_rec,T_total+0*k_rec,1);
 alpha_hro = alpha_hro(:,end:-1:1);
 alpha_hry = alpha_hry(:,end:-1:1);
 

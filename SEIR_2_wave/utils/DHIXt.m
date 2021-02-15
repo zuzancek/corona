@@ -116,15 +116,15 @@ IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
 IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_y+IH_o;
 % active cases (true)
-rho = (kappa_h-1).*scale.*T_rec_s(:,1)./T_rec_m(:,1);
-eta_o = eta_o.*(1-rho);
-eta_y = eta_y.*(1-rho);
+varrho = (kappa_h-1).*scale.*T_rec_s(:,1)./T_rec_m(:,1);
+eta_o = eta_o.*(1-varrho);
+eta_y = eta_y.*(1-varrho);
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
 % recovered at home (no hospital needed)
-[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y+rho.*s.T_rec_y_m_mean-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); 
-pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o+rho.*s.T_rec_o_m_mean-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
+[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y+varrho.*s.T_rec_y_m_mean-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); 
+pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o+varrho.*s.T_rec_o_m_mean-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
 IR_o = (extend(get_wa(pdf_ir_o(:,:),I_o,1-eta_o,k_sick+1),k_sick));
 IR_y = (extend(get_wa(pdf_ir_y(:,:),I_y,1-eta_y,k_sick+1),k_sick));
 IR = IR_o+IR_y;
@@ -245,6 +245,7 @@ ini.H = H_ini; ini.H_o = H_o_ini; ini.H_y = H_y_ini;
 p = struct();
 p.ini = ini;
 p.varsigma = varsigma;
+p.varrho = varrho;
 p.rho = rho_real;
 p.rho_smooth = rho_real_smooth;
 p.sigma = sigma;
@@ -265,6 +266,8 @@ p.omega_o = omega_o;
 p.omega_y = omega_y;
 p.zeta_o = zeta_o;
 p.zeta_y = zeta_y;
+p.eta_o = eta_o;
+p.eta_y = eta_y;
 
     function [r] = set_yo_ratios_params()
         r.hdo_hdy = varsigma./(1-varsigma);

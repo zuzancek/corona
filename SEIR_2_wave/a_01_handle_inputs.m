@@ -84,6 +84,7 @@ init.rho = old_ratio; init.varsigma = db_deaths_age.TotalDeathRatioOld;
 y = x; 
 y.NewCases = res_implied.X_all;
 init.rho = params.rho;
+init.varrho = params.varrho;
 init.omega_o = params.omega_o; init.omega_y = params.omega_y;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
