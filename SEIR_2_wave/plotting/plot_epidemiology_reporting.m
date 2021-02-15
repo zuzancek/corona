@@ -22,17 +22,17 @@ leg = {};
 if mm
     bar(resize(cases_data.cases_total,dateFrom:dateTo),'FaceAlpha',0.5,'EdgeAlpha',0.5);hold on;
     bar(resize(cases_data.cases_pcr,dateFrom:dateTo),'FaceAlpha',0.5,'EdgeAlpha',0.5);hold on;
-    leg = {leg{:},{'PCR only (7d median)','PCR+AG (7d median)'}}; %#ok<*CCAT>
+    leg = {leg{:},'PCR only (7d median)','PCR+AG (7d median)'}; %#ok<*CCAT>
 end
 if smooth
     plot(resize(cases_data.cases_total_smooth,dateFrom:dateTo),'linewidth',2,'Color','b');hold on;
     plot(resize(cases_data.cases_pcr_smooth,dateFrom:dateTo),'linewidth',2,'Color','r');hold on;
-    leg = {leg{:},{'PCR only (smooth)','PCR+AG (smooth)'}};
+    leg = {leg{:},'PCR only (smooth)','PCR+AG (smooth)'};
 end
 if raw
     plot(resize(cases_data.cases_total_raw,dateFrom:dateTo),'linewidth',1,'Color',[0 0.25 0.75],'linestyle','-.');hold on;
     plot(resize(cases_data.cases_pcr_raw,dateFrom:dateTo),'linewidth',1,'Color',[0.75 0.25 0],'linestyle','-.');hold on;
-    leg = {leg{:},{'PCR only (raw)','PCR+AG (raw)'}};
+    leg = {leg{:},'PCR only (raw)','PCR+AG (raw)'};
 end
 title('New infections (confirmed only)');
 grid on;
@@ -40,16 +40,16 @@ legend(leg);
 
 figure('Name','Testing characteristics I.');
 subplot(2,1,1)
-plot(resize(test_data.ptr_pcr,dateFrom:dateTo),'linewidth',1); hold on;
-plot(resize(test_data.ptr_ag,dateFrom:dateTo),'linewidth',1); hold on;
+bar(resize(test_data.ptr_pcr,dateFrom:dateTo),'FaceAlpha',0.5); hold on;
+bar(resize(test_data.ptr_ag,dateFrom:dateTo),'FaceAlpha',0.5); hold on;
 pp1=plot(resize(test_data.ptr_pcr_smooth,dateFrom:dateTo),'Color','b','linewidth',2);
-pp2=plot(resize(test_data.ptr_ag_smooth,dateFrom:dateTo),'Color','r','linewidth',2);
+pp2=plot(resize(smooth_series(test_data.ptr_ag),dateFrom:dateTo),'Color','r','linewidth',2);
 title('Positive tests ratio');
 legend([pp1 pp2],{'PCR','AG'});
 grid on;
 subplot(2,1,2);
-plot(resize(test_data.tests_pcr,dateFrom:dateTo),'linewidth',1);hold on;
-plot(resize(test_data.tests_ag,dateFrom:dateTo),'linewidth',1);hold on;
+bar(resize(test_data.tests_pcr,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+bar(resize(test_data.tests_ag,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
 pp1=plot(resize(test_data.tests_pcr_smooth,dateFrom:dateTo),'Color','b','linewidth',2);
 pp2=plot(resize(test_data.tests_ag_smooth,dateFrom:dateTo),'Color','r','linewidth',2);
 title('Tests (reported)');
@@ -59,15 +59,15 @@ grid on;
 %
 figure('Name','Testing characteristics II.')
 subplot(2,1,1);
-plot(resize(100*cases_data.asymp_ratio,dateFrom:dateTo),'linewidth',1);hold on;
-plot(resize(100*cases_data.asymp_ratio_smooth,dateFrom:dateTo),'linewidth',2);hold on;
+bar(resize(100*cases_data.asymp_ratio,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+plot(resize(100*cases_data.asymp_ratio_smooth,dateFrom:dateTo),'linewidth',2,'Color','b');hold on;
 title('Share of asymptomatic new cases (confirmed PCR only)');
 legend({'raw','smooth'}); 
 ylabel('%');
 grid on;
 subplot(2,1,2);
-plot(resize(100*cases_data.old_ratio,dateFrom:dateTo),'linewidth',1);hold on;
-plot(resize(100*cases_data.old_ratio_smooth,dateFrom:dateTo),'linewidth',2);hold on;
+bar(resize(100*cases_data.old_ratio,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+plot(resize(100*cases_data.old_ratio_smooth,dateFrom:dateTo),'linewidth',2,'Color','b');hold on;
 title('Share of 65+ positive cases (confirmed PCR only)');
 legend({'raw','smooth'}); 
 ylabel('%');
