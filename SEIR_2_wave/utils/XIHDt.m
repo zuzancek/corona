@@ -83,8 +83,8 @@ alpha_iho = alpha_iho(:,end:-1:1);
 alpha_ihy = alpha_ihy(:,end:-1:1);
 % recovery from sickness at home
 k_sick = s.k_sick;      
-[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o+0*varrho.*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y+0*varrho.*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
+[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o+0*varrho./kappa.*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
+pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y+0*varrho./kappa*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
 alpha_iro = (1-s.eta_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
 alpha_iry = (1-s.eta_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
 % death at hospital
