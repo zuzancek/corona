@@ -41,9 +41,9 @@ legend(leg);
 figure('Name','Testing characteristics I.');
 subplot(2,1,1)
 bar(resize(test_data.ptr_pcr,dateFrom:dateTo),'FaceAlpha',0.5); hold on;
-bar(resize(test_data.ptr_ag,dateFrom:dateTo),'FaceAlpha',0.5); hold on;
+bar(resize(test_data.ptr_ag,startdate(test_data.ptr_ag):dateTo),'FaceAlpha',0.5); hold on;
 pp1=plot(resize(test_data.ptr_pcr_smooth,dateFrom:dateTo),'Color','b','linewidth',2);
-pp2=plot(resize(smooth_series(test_data.ptr_ag),dateFrom:dateTo),'Color','r','linewidth',2);
+pp2=plot(resize(test_data.ptr_ag,startdate(test_data.ptr_ag):dateTo),'Color','r','linewidth',2);
 title('Positive tests ratio');
 legend([pp1 pp2],{'PCR','AG'});
 grid on;
