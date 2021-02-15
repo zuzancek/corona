@@ -16,24 +16,16 @@ scale = s.S_H_rate;
 
 %% testing
 % delay in testing (gradual)
-T_delay = NaN+zeros(T,1); T_delay(1) = 0;
-dlen = length(delay.v);
-for i=1:dlen
-    T_delay(delay.at(i)-dateFrom) = delay.v(i);
-end
-if dlen
-    T_delay(T) = delay.v(end);
-end
-T_delay = method_params(interp1(find(~isnan(T_delay)),T_delay(find(~isnan(T_delay))),1:T)'); %#ok<FNDSB>
-T_delay = extend(T_delay,length(varsigma)-length(T_delay));
+T_delay = create_series(delay);
 T_obs = T_delay+s.T_test.mean;
 
 %% data processing
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
-D = method_data(data.D(firstData:dateTo));
-H = method_data(data.H(firstData:dateTo));
+D = method_data(data.D(firstData:dateTo)); % cummulative datehs
+H = method_data(data.H(firstData:dateTo)); % hospitalizations
+R = method_data(data.R(firstData:end)); % discharges from hospital
 r0 = set_yo_ratios_params();
 
 %% params initialization
@@ -43,7 +35,7 @@ pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
 % pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
 % pdf_hd = pdf_hd./sum(pdf_hd,2);             
-% kappa_hd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
+% kappa_dd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
 omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % recovery
 k_rec = s.k_rec;
@@ -97,26 +89,30 @@ h_y = max(0,method_data(get_wa_inv(pdf_hd_y,HD_y,H_y_ini,omega_y,k_death+1)));
 h = max(1,h_o+h_y);
 H_o = method_data(h_o./h).*H; 
 H_y = H-H_o;
-kappa_h = method_params(h./H); 
-omega_o = omega_o.*repmat(kappa_h,1,k_death+1);
-omega_y = omega_y.*repmat(kappa_h,1,k_death+1);
+kappa_d = method_params(h./H); 
+omega_o = omega_o.*repmat(kappa_d,1,k_death+1);
+omega_y = omega_y.*repmat(kappa_d,1,k_death+1);
 % recovery at hospital
 % H_o_ini(end-length(H_o)+1:end) = H_o;
 % H_y_ini(end-length(H_y)+1:end) = H_y;
 zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
 zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
-w = kappa_h.*scale;
+w = kappa_d.*scale;
 pdf_hr_o = w.*pdf_hr_o_s+pdf_hr_o_m.*(1-w);
 pdf_hr_y = w.*pdf_hr_y_s+pdf_hr_y_m.*(1-w);
 HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec));
 HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec));
+HR = HR_o+HR_y;
+kappa_r = method_params(R./HR);
+HR_o = HR_o.*kappa_r;
+HR_y = HR_y.*kappa_r;
 HR = HR_o+HR_y;
 % hospital admission
 IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
 IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_y+IH_o;
 % active cases (true)
-varrho = (kappa_h-1).*scale.*T_rec_s(:,1)./T_rec_m(:,1);
+varrho = (kappa_d-1).*scale.*T_rec_s(:,1)./T_rec_m(:,1);
 eta_o = eta_o.*(1-varrho);
 eta_y = eta_y.*(1-varrho);
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
@@ -398,6 +394,19 @@ p.eta_y = eta_y;
         z = x(1,:)+zeros(xlen+t0,xwid);
         z(t0+1:end,:) = x;
         y = method_data(z);
+    end
+
+    function [y] = create_series(str)
+        y = NaN+zeros(T,1); y(1) = 0;
+        dlen = length(str.v);
+        for ii=1:dlen
+            y(str.at(ii)-dateFrom) = str.v(ii);
+        end
+        if dlen
+            y(T) = str.v(end);
+        end
+        y = method_params(interp1(find(~isnan(y)),y(find(~isnan(y))),1:T)'); %#ok<FNDSB>
+        y = extend(y,length(varsigma)-length(y));
     end
 
 end

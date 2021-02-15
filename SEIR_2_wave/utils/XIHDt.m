@@ -71,9 +71,7 @@ d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
 % ******* parameters
 % hospital admission
 k_hosp = s.k_hosp;      t_hosp = s.time_h;
-% pdf_ih_o = extend(p.pdf_ih_o,T_total+k_hosp-size(p.pdf_ih_o,1)); 
-alpha_iho = s.eta_o.*(1-varrho).*p.pdf_ih_o./repmat(t_hosp,T_total,1);%repmat(t_hosp',T_total+k_hosp,1);
-% pdf_ih_y = extend(p.pdf_ih_y,T_total+k_hosp-size(p.pdf_ih_y,1)); 
+alpha_iho = s.eta_o.*(1-varrho).*p.pdf_ih_o./repmat(t_hosp,T_total,1);
 alpha_ihy = s.eta_y.*(1-varrho).*p.pdf_ih_y./repmat(t_hosp,T_total,1);
 alpha_iho = alpha_iho(:,end:-1:1);
 alpha_ihy = alpha_ihy(:,end:-1:1);
