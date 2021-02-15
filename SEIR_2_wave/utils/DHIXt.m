@@ -12,7 +12,7 @@ varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift)
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
 psi = extend(double(resize(params.serious_cases_ratio,dateFrom:dateTo)),tshift);
-scale = s.scale_s_h;
+scale = s.S_H_rate;
 
 %% testing
 % delay in testing (gradual)
@@ -116,7 +116,7 @@ IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
 IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_y+IH_o;
 % active cases (true)
-rho = (kappa_h-1).*T_rec_s(:,1)./T_rec_m(:,1);
+rho = (kappa_h-1).*scale.*T_rec_s(:,1)./T_rec_m(:,1);
 eta_o = eta_o.*(1-rho);
 eta_y = eta_y.*(1-rho);
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
