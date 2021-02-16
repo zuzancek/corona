@@ -4,8 +4,8 @@ function [s]=run_clinical_inputs_statistics(tb)
 x = tb.day;
 N_rand = 50000;
 s_width = 10; s_type = 5; s_ends = 1;
-last_idx_d = 35;
-last_idx_r = 40;
+last_idx_d = 50;
+last_idx_r = 50;
 
 %% calculations
 % 1. Hospital admission (time to, probability)
