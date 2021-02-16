@@ -26,7 +26,6 @@ D = method_data(data.D(firstData:dateTo)); % cummulative datehs
 H = method_data(data.H(firstData:dateTo)); % hospitalizations
 S = method_data(data.S(firstData:end)); % serious cases in hospitals
 M = H-S; % non-serious, moderate cases
-% R = method_data(data.R(firstData:end)); % discharges from hospital
 r0 = set_yo_ratios_params();
 
 %% params initialization
@@ -58,8 +57,6 @@ eta_o = r0.eta_o;   eta_y = r0.eta_y;
 % B./ recovery
 k_sick = s.k_sick;
 mu_o = r0.mu_o;   mu_y = r0.mu_y;
-% pdf_ir_y = repmat(s.pdf_ir_y',length(varsigma),1);
-% pdf_ir_o = repmat(s.pdf_ir_o',length(varsigma),1);
 T_rec_i_std = s.T_sick_std;
 T_rec_i_y = s.T_sick_y;
 T_rec_i_o = s.T_sick_o;
@@ -73,7 +70,7 @@ H_y_ini = H_ini-H_o_ini;
 S_ini = method_data(data.S(firstData-s.k_death+2:dateTo));
 S_o_ini = extend(r0.rho_ho_h(:,1),length(S_ini)-length(r0.rho_ho_h(:,1))).*S_ini;       
 S_y_ini = S_ini-S_o_ini;
-% M_ini = H_ini-S_ini;
+M_ini = H_ini-S_ini;
 M_o_ini = H_o_ini-S_o_ini;
 M_y_ini = H_y_ini-S_y_ini;
 
@@ -264,7 +261,6 @@ ini.M = M_ini; ini.M_o = M_o_ini; ini.M_y = M_y_ini;
 p = struct();
 p.ini = ini;
 p.varsigma = varsigma;
-p.varrho = varrho;
 p.rho = rho_real;
 p.rho_smooth = rho_real_smooth;
 p.sigma = sigma;

@@ -135,7 +135,7 @@ s.smoothing_method_params = @smooth_series;
         s.T_ser_o_mean = db_s.opt_fit_h_o.mean;
         % hospital admission
         s.k_hosp = 20;        
-        s.eta_y = db_t.opt_fit_h_y.alpha*1.25;
+        s.eta_y = db_t.opt_fit_h_y.alpha*1.5;
         s.eta_o = db_t.opt_fit_h_o.alpha*0.75;        
         s.pdf_m_y = db_t.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1));
         s.pdf_m_o = db_t.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1));        
