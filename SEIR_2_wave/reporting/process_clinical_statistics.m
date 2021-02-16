@@ -32,6 +32,11 @@ db_h.E_raw = resize(s.OAIM,dateFrom:dateTo);
 db_h.E = mov_median_adj(db_h.E_raw);
 db_h.E_smooth = smooth_series(db_h.E);
 
+% Serious cases
+db_h.S_raw = db_h.C_raw+db_h.V_raw+db_h.E_raw;
+db_h.S = db_h.C+db_h.V+db_h.E;
+db_h.S_smooth = smooth_series(db_h.S);
+
 % Deaths
 db_h.D_on_raw = resize(d.DeathCovid,dateFrom:dateTo);
 db_h.D_on = mov_median_adj(db_h.D_on_raw);

@@ -12,7 +12,6 @@ varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift)
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
 psi = extend(double(resize(params.serious_cases_ratio,dateFrom:dateTo)),tshift);
-scale = s.S_H_rate;
 
 %% testing
 % delay in testing (gradual)
@@ -25,51 +24,46 @@ dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
 D = method_data(data.D(firstData:dateTo)); % cummulative datehs
 H = method_data(data.H(firstData:dateTo)); % hospitalizations
-R = method_data(data.R(firstData:end)); % discharges from hospital
+S = method_data(data.S(firstData:end)); % serious cases in hospitals
+M = H-S; % non-serious, moderate cases
+% R = method_data(data.R(firstData:end)); % discharges from hospital
 r0 = set_yo_ratios_params();
 
 %% params initialization
-% death
+% ******* 1./ serious cases (hospital needed)
+% A./ death
 k_death = s.k_death;
-pdf_hd_y = repmat(s.pdf_d_y',length(varsigma),1);
-pdf_hd_o = repmat(s.pdf_d_o',length(varsigma),1);
-% pdf_hd = r0.rho_ho_h.*pdf_hd_o+(1-r0.rho_ho_h).*pdf_hd_y;
-% pdf_hd = pdf_hd./sum(pdf_hd,2);             
-% kappa_dd = (s.omega_y.*pdf_hd_y)./(s.omega_o.*pdf_hd_o);
+pdf_sd_y = repmat(s.pdf_d_y',length(varsigma),1);
+pdf_sd_o = repmat(s.pdf_d_o',length(varsigma),1);
 omega_o = r0.omega_o;   omega_y = r0.omega_y;
-% recovery
+% B./ recovery
 k_rec = s.k_rec;
-% pdf_hr_y = repmat(s.pdf_r_y',length(varsigma),1);
-pdf_hr_y_s = repmat(s.pdf_r_y_s',length(varsigma),1);
-pdf_hr_y_m = repmat(s.pdf_r_y_m',length(varsigma),1);
-obj_r_y_s = s.obj_r_y_s;
-obj_r_y = s.obj_r_y;
-% pdf_hr_y = psi.*pdf_hr_y_s+(1-psi).*pdf_hr_y_m;
-T_rec_m = r0.rho_ho_h.*s.T_rec_o_m_mean+(1-r0.rho_ho_h).*s.T_rec_y_m_mean;
-T_rec_s = r0.rho_ho_h.*s.T_rec_o_s_mean+(1-r0.rho_ho_h).*s.T_rec_y_s_mean;
-% T1 = sum(repmat([0:k_rec],length(varsigma),1).*pdf_hr_y,2);
-% pdf_hr_o = repmat(s.pdf_r_o',length(varsigma),1);
-pdf_hr_o_s = repmat(s.pdf_r_o_s',length(varsigma),1);
-pdf_hr_o_m = repmat(s.pdf_r_o_m',length(varsigma),1);
-obj_r_o_s = s.obj_r_o_s;
-obj_r_o = s.obj_r_o;
-% pdf_hr_o = psi.*pdf_hr_o_s+(1-psi).*pdf_hr_o_m;
-% T2 = sum(repmat([0:k_rec],length(varsigma),1).*pdf_hr_o,2);
-% pdf_hr = r0.rho_hro_hr.*pdf_hr_o+(1-r0.rho_hro_hr).*pdf_hr_y;
-% pdf_hr = pdf_hr./sum(pdf_hr,2);             
-% hospital admission
-k_hosp = s.k_hosp;
-pdf_ih_y = repmat(s.pdf_h_y',length(varsigma),1);
-pdf_ih_o = repmat(s.pdf_h_o',length(varsigma),1);
-% pdf_ih = r0.rho_io_i.*pdf_ih_o+(1-r0.rho_io_i).*pdf_ih_y;
-% pdf_ih = pdf_ih./sum(pdf_ih,2);             % time_ih = s.time_h;
-eta_o = r0.eta_o;       eta_y = r0.eta_y;
-% recovery from sickness, mild cases, no need of hospital care
-k_sick = s.k_sick; 
-% [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); 
-% pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
-% pdf_ir = r0.rho_iro_ir.*pdf_ir_o+(1-r0.rho_iro_ir).*pdf_ir_y;
-% pdf_ir = pdf_ir./sum(pdf_ir,2);     
+pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
+pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
+% ******* 2./ moderate cases (hospital needed)
+% A./ admission to ICU
+pdf_ms_y = repmat(s.pdf_s_y',length(varsigma),1);
+pdf_ms_o = repmat(s.pdf_s_o',length(varsigma),1);
+theta_o = r0.theta_o;   theta_y = r0.theta_y;
+% B./ recovery
+vartheta_o = r0.vartheta_o;   vartheta_y = r0.vartheta_y;
+pdf_mr_y = repmat(s.pdf_mr_y',length(varsigma),1);
+pdf_mr_o = repmat(s.pdf_mr_o',length(varsigma),1);
+% ******* 2./ mild/asymptomatic cases (no hospital needed)
+% A./ admission to hospital
+pdf_im_y = repmat(s.pdf_m_y',length(varsigma),1);
+pdf_im_o = repmat(s.pdf_m_o',length(varsigma),1);
+eta_o = r0.eta_o;   eta_y = r0.eta_y;
+% B./ recovery
+k_sick = s.k_sick;
+mu_o = r0.mu_o;   mu_y = r0.mu_y;
+% pdf_ir_y = repmat(s.pdf_ir_y',length(varsigma),1);
+% pdf_ir_o = repmat(s.pdf_ir_o',length(varsigma),1);
+T_rec_i_std = s.T_sick_std;
+T_rec_i_y = s.T_sick_y;
+T_rec_i_o = s.T_sick_o;
+
+
 
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 I_o_ini = extend(r0.io_i,length(I_ini)-length(r0.io_i)).*I_ini; 
@@ -77,61 +71,69 @@ I_y_ini = I_ini-I_o_ini;
 H_ini = method_data(data.H(firstData-s.k_death+2:dateTo));
 H_o_ini = extend(r0.rho_ho_h(:,1),length(H_ini)-length(r0.rho_ho_h(:,1))).*H_ini;       
 H_y_ini = H_ini-H_o_ini;
+S_ini = method_data(data.S(firstData-s.k_death+2:dateTo));
+S_o_ini = extend(r0.rho_ho_h(:,1),length(S_ini)-length(r0.rho_ho_h(:,1))).*S_ini;       
+S_y_ini = S_ini-S_o_ini;
+% M_ini = H_ini-S_ini;
+M_o_ini = H_o_ini-S_o_ini;
+M_y_ini = H_y_ini-S_y_ini;
 
 % ******* Equations, both in O/Y version + aggregation
 % I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
-% H(t) = H(t-1)+I_H(t)-H_D(t)-H_R(t);
-% D(t) = D(t-1)+H_D(t);
+% M(t) = M(t-1)+I_M(t)-M_S(t)-M_R(t);
+% S(t) = S(t-1)+M_S(t)-S_D(t)-S_R(t);
+% D(t) = D(t-1)+S_D(t);
 
 % calculation
-% hospital deaths (Y,O,agg)
-HD = extend(D(2:end)-D(1:end-1),1); 
-HD_o = HD.*varsigma;                
-HD_y = HD-HD_o;
-h_o = max(0,method_data(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1)));
-h_y = max(0,method_data(get_wa_inv(pdf_hd_y,HD_y,H_y_ini,omega_y,k_death+1)));
-h = max(1,h_o+h_y);
-H_o = method_data(h_o./h).*H; 
-H_y = H-H_o;
-kappa_d = method_params(h./H); 
+% hospital deaths (Y,O,agg) and serious cases
+SD = extend(D(2:end)-D(1:end-1),1); 
+SD_o = SD.*varsigma;                
+SD_y = SD-SD_o;
+s_o = max(0,method_data(get_wa_inv(pdf_sd_o,SD_o,S_o_ini,omega_o,k_death+1)));
+s_y = max(0,method_data(get_wa_inv(pdf_sd_y,SD_y,S_y_ini,omega_y,k_death+1)));
+S_o = method_data(s_o./max(1,s_o+s_y)).*S; 
+S_y = S-S_o;
+kappa_d = method_params((s_o+s_y)./S); 
 omega_o = omega_o.*repmat(kappa_d,1,k_death+1);
 omega_y = omega_y.*repmat(kappa_d,1,k_death+1);
-% recovery at hospital
-% H_o_ini(end-length(H_o)+1:end) = H_o;
-% H_y_ini(end-length(H_y)+1:end) = H_y;
+% serious cases
 zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
 zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
-w = kappa_d.*scale;
-pdf_hr_o = w.*pdf_hr_o_s+pdf_hr_o_m.*(1-w);
-pdf_hr_y = w.*pdf_hr_y_s+pdf_hr_y_m.*(1-w);
-HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec));
-HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec));
-HR = HR_o+HR_y;
-kappa_r = method_params(R./HR);
-HR_o = HR_o.*kappa_r;
-HR_y = HR_y.*kappa_r;
-HR = HR_o+HR_y;
-% hospital admission
-IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
-IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
-IH = IH_y+IH_o;
-% active cases (true)
-varrho = (kappa_d-1).*scale.*T_rec_s(:,1)./T_rec_m(:,1);
-eta_o = eta_o.*(1-0*varrho);
-eta_y = eta_y.*(1-0*varrho);
-I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
-I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
+SR_o = (extend(get_wa(pdf_sr_o,S_o,zeta_o,k_rec+1),k_rec));
+SR_y = (extend(get_wa(pdf_sr_y,S_y,zeta_y,k_rec+1),k_rec));
+SR = SR_o+SR_y;
+% moderate (non-serious) hospital cases: admission to ICU/..., recovery
+MS_o = (extend(S_o(2:end)-S_o(1:end-1)+SR_o(2:end)+SD_o(2:end),1));
+MS_y = (extend(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SD_y(2:end),1));
+% MS = MS_y+MS_o;
+M_o = (get_wa_inv(pdf_ms_o,MS_o,M_o_ini,theta_o,k_ser+1)); M_o = method_params(extend(M_o(1:end-1),1));
+M_y = (get_wa_inv(pdf_ms_y,MS_y,M_y_ini,theta_y,k_ser+1)); M_y = method_params(extend(M_y(1:end-1),1));
+% M = M_o+M_y;
+MR_o = (extend(get_wa(pdf_mr_o,M_o,vartheta_o,k_rec+1),k_rec));
+MR_y = (extend(get_wa(pdf_mr_y,M_y,vartheta_y,k_rec+1),k_rec));
+MR = MR_o+MR_y;
+% non-hospital cases: admission to hospital, recovery
+IM_o = (extend(M_o(2:end)-M_o(1:end-1)+MR_o(2:end)+MS_o(2:end),1));
+IM_y = (extend(M_y(2:end)-M_y(1:end-1)+MR_y(2:end)+MS_y(2:end),1));
+IM = IM_y+IM_o;
+I_o = (get_wa_inv(pdf_im_o,IM_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
+I_y = (get_wa_inv(pdf_im_y,IM_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
-% recovered at home (no hospital needed)
-[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_y+0*varrho./kappa_r.*s.T_rec_y_m_mean-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2); 
-pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(s.T_sick_o+0*varrho./kappa_r.*s.T_rec_o_m_mean-T_obs)*s.T_sick_std^2,1./s.T_sick_std^2);
-IR_o = (extend(get_wa(pdf_ir_o(:,:),I_o,1-eta_o,k_sick+1),k_sick));
-IR_y = (extend(get_wa(pdf_ir_y(:,:),I_y,1-eta_y,k_sick+1),k_sick));
+[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_y-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2); 
+pdf_ir_o = create_weights(k_rec,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2);
+IR_o = (extend(get_wa(pdf_ir_o(:,:),I_o,mu_o,k_sick+1),k_sick));
+IR_y = (extend(get_wa(pdf_ir_y(:,:),I_y,mu_y,k_sick+1),k_sick));
 IR = IR_o+IR_y;
 % inflow of new cases
 X_o = method_data(I_o(2:end)-I_o(1:end-1)+IR_o(2:end)+IH_o(2:end));
 X_y = method_data(I_y(2:end)-I_y(1:end-1)+IR_y(2:end)+IH_y(2:end));
 X = X_o+X_y;
+
+% aggregations
+H = M+S;
+H_o = M_o+S_o;
+H_y = M_y+S_y;
+R = IR+MR+SR; 
 
 fcast_per = ceil(max(r0.T_hosp_mean));
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
@@ -155,9 +157,9 @@ legend([pp1 p pp2],{'New cases: officially reported','New cases: implied by hosp
 title('New cases: reported vs. real');
 
 Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
-Dis = tseries(dateFrom:dateTo,HR(end-length(Xts)+1:end));
+Dis = tseries(dateFrom:dateTo,R(end-length(Xts)+1:end));
 Adm_rep = method_data(tseries(dateFrom:dateTo,data.A(end-length(Xts)+1:end)));
-Adm = tseries(dateFrom:dateTo,IH(end-length(Xts)+1:end));
+Adm = tseries(dateFrom:dateTo,IM(end-length(Xts)+1:end));
 
 figure;
 subplot(2,1,1)
@@ -267,8 +269,8 @@ p.burnin = tshift;
 p.T_delay = T_delay;
 p.T_obs = T_obs;
 p.par = r0;
-p.pdf_hd_y = pdf_hd_y;
-p.pdf_hd_o = pdf_hd_o;
+p.pdf_sd_y = pdf_sd_y;
+p.pdf_sd_o = pdf_sd_o;
 p.pdf_hr_y = pdf_hr_y;
 p.pdf_hr_o = pdf_hr_o;
 p.time_ir = time_ir;
@@ -284,28 +286,27 @@ p.eta_o = eta_o;
 p.eta_y = eta_y;
 p.kappa_r = kappa_r;
 
-    function [r] = adjust_distributions(k) %#ok<DEFNU>
-        pp = obj_r_y; 
-        obj_r_y = pp;
-        L = length(k);
-        dd = makedist('Burr','alpha',pp.alpha.*k,'c',pp.c+zeros(L,1),'k',pp.k+zeros(L,1));
-        r.pdf_r_y = pdf(dd,0:k_rec); r.pdf_r_y = r.pdf_r_y./sum(r.pdf_r_y,2);
-        pp = obj_r_o; pp.B = pp.B.*k; obj_r_o = pp;
-        r.pdf_r_o = pdf(obj_r_o,0:k_rec); r.pdf_r_o = r.pdf_r_o./sum(r.pdf_r_o,2);
-        pp = obj_r_y_s; pp.omega = pp.omega.*k; obj_r_y_s = pp;
-        r.pdf_r_y_s = pdf(obj_r_y_s,0:k_rec); r.pdf_r_y_s = r.pdf_r_y_s./sum(r.pdf_r_y_s,2);
-        pp = obj_r_o_s; pp.omega = pp.omega.*k; obj_r_o_s = pp;
-        r.pdf_r_o_s = pdf(obj_r_o_s,0:k_rec); r.pdf_r_o_s = r.pdf_r_o_s./sum(r.pdf_r_o_s,2);
-    end
-
     function [r] = set_yo_ratios_params()
+        % death (serious cases only)
+        r.omega_o = s.omega_o+zeros(length(varsigma),s.k_death+1);
+        r.omega_y = s.omega_y+zeros(length(varsigma),s.k_death+1);
+        % admission to ICU...
+        r.theta_o = s.theta_o+zeros(length(varsigma),s.k_ser+1);
+        r.theta_y = s.theta_y+zeros(length(varsigma),s.k_ser+1);
+        r.vartheta_o = 1-s.theta_o+zeros(length(varsigma),s.k_rec+1);
+        r.vartheta_y = 1-s.theta_y+zeros(length(varsigma),s.k_rec+1);
+        % admission to hospital
+        r.eta_o = s.eta_o+zeros(length(varsigma),s.k_hosp+1);
+        r.eta_y = s.eta_y+zeros(length(varsigma),s.k_hosp+1);
+        r.mu_o = 1-s.eta_o+zeros(length(varsigma),s.k_sick+1);
+        r.mu_y = 1-s.eta_y+zeros(length(varsigma),s.k_sick+1);
+        
+
         r.hdo_hdy = varsigma./(1-varsigma);
         a_hd_y = (s.omega_y/s.T_death_y_mean); a_hd_o = (s.omega_o/s.T_death_o_mean);
         r.ho_hy = (a_hd_y./a_hd_o).*r.hdo_hdy;
         r.ho_h = r.ho_hy./(1+r.ho_hy);
         r.rho_ho_h = repmat(r.ho_h,1,s.k_death+1); 
-        r.omega_o = s.omega_o+zeros(length(varsigma),s.k_death+1);
-        r.omega_y = s.omega_y+zeros(length(varsigma),s.k_death+1);
         r.omega = s.omega_o.*r.rho_ho_h+s.omega_y.*(1-r.rho_ho_h);
         %
         a_hr_y = ((1-s.omega_y)/s.T_rec_y_mean); a_hr_o = ((1-s.omega_o)/s.T_rec_o_mean);
