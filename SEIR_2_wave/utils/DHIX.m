@@ -140,7 +140,10 @@ X = X_o+X_y;
 H = M+S;
 H_o = M_o+S_o;
 H_y = M_y+S_y;
-R = IR+MR+SR; 
+RX = (IR+MR+SR);
+R = cumsum(RX);
+RHX = (MR+SR);
+RH = cumsum(RHX);
 
 fcast_per = ceil(max(r0.T_hosp_mean));
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
@@ -164,7 +167,7 @@ legend([pp1 p pp2],{'New cases: officially reported','New cases: implied by hosp
 title('New cases: reported vs. real');
 
 Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
-Dis = tseries(dateFrom:dateTo,R(end-length(Xts)+1:end));
+Dis = tseries(dateFrom:dateTo,RHX(end-length(Xts)+1:end));
 Adm_rep = method_data(tseries(dateFrom:dateTo,data.A(end-length(Xts)+1:end)));
 Adm = tseries(dateFrom:dateTo,IM(end-length(Xts)+1:end));
 
@@ -181,20 +184,6 @@ plot(Dis,'linewidth',2);
 grid on;
 title('Discharges');
 legend({'Reported','Implied'});
-
-figure;
-subplot(2,1,1)
-plot(tseries(dateTo-length(kappa_s)+1:dateTo,kappa_s),'linewidth',1);hold on;
-plot(tseries(dateTo-length(kappa_r)+1:dateTo,kappa_r),'linewidth',1);hold on;
-grid on;
-legend({'exceeding deaths','exceeding recoveries'});
-title('Parameters adjustment');
-subplot(2,1,2)
-plot(tseries(dateTo-length(w)+1:dateTo,w.*H),'linewidth',1);hold on;
-plot(tseries(dateTo-length(psi)+1:dateTo,psi.*H),'linewidth',1);hold on;
-grid on;
-legend({'implied','observed'});
-title('Serious cases');
 
 %
 Len = length(Xts)-fcast_per;
