@@ -11,7 +11,7 @@ cut = 0*params.cutoff;
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
-psi = extend(double(resize(params.serious_cases_ratio,dateFrom:dateTo)),tshift);
+% psi = extend(double(resize(params.serious_cases_ratio,dateFrom:dateTo)),tshift);
 
 %% testing
 % delay in testing (gradual)
@@ -47,7 +47,6 @@ pdf_ms_y = repmat(s.pdf_s_y',length(varsigma),1);
 pdf_ms_o = repmat(s.pdf_s_o',length(varsigma),1);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ recovery
-vartheta_o = r0.vartheta_o;   vartheta_y = r0.vartheta_y;
 pdf_mr_y = repmat(s.pdf_mr_y',length(varsigma),1);
 pdf_mr_o = repmat(s.pdf_mr_o',length(varsigma),1);
 % ******* 2./ mild/asymptomatic cases (no hospital needed)
@@ -105,7 +104,7 @@ SR = SR_o+SR_y;
 % moderate (non-serious) hospital cases: admission to ICU/..., recovery
 MS_o = (extend(S_o(2:end)-S_o(1:end-1)+SR_o(2:end)+SD_o(2:end),1));
 MS_y = (extend(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SD_y(2:end),1));
-% MS = MS_y+MS_o;
+MS = MS_y+MS_o;
 m_o = max(0,method_data(get_wa_inv(pdf_ms_o,MS_o,M_o_ini,theta_o,k_ser+1)));
 m_y = max(0,method_data(get_wa_inv(pdf_ms_y,MS_y,M_y_ini,theta_y,k_ser+1)));
 M_o = method_data(m_o./max(1,m_o+m_y)).*M; 
@@ -245,15 +244,23 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
 res.I = I;
 res.obs_ratio_adj = obs_ratio_adj;
 res.sa = sa;
-res.D = D; res.HD = HD; res.HD_o = HD_o; res.HD_y = HD_y; 
+res.D = D; res.SD = SD; res.SD_o = SD_o; res.SD_y = SD_y; 
+res.S = S; res.S_o = S_o; res.S_y = S_y;
+res.SR = SR; res.SR_o = SR_o; res.SR_y = SR_y;
+res.MS = MS; res.MS_o = MS_o; res.MS_y = MS_y; 
+res.M = M; res.M_o = M_o; res.M_y = M_y;
+res.MR = MR; res.MR_o = MR_o; res.MR_y = MR_y;
 res.H = H; res.H_o = H_o; res.H_y = H_y;
-res.HR = HR; res.HR_o = HR_o; res.HR_y = HR_y;
-res.IH = IH; res.IH_o = IH_o; res.IH_y = IH_y;
+res.IM = IM; res.IM_o = IM_o; res.IM_y = IM_y;
 res.IR = IR; res.IR_o = IR_o; res.IR_y = IR_y;
+res.R = R; res.RH = RH; res.RX = RX; res.RHX = RHX;
 res.X = X; res.X_o = X_o; res.X_y = X_y;
 % store params
 ini.I = I_ini; ini.I_o = I_o_ini; ini.I_y = I_y_ini;
 ini.H = H_ini; ini.H_o = H_o_ini; ini.H_y = H_y_ini;
+ini.S = S_ini; ini.S_o = S_o_ini; ini.S_y = S_y_ini;
+ini.M = M_ini; ini.M_o = M_o_ini; ini.M_y = M_y_ini;
+
 p = struct();
 p.ini = ini;
 p.varsigma = varsigma;
@@ -267,20 +274,29 @@ p.T_obs = T_obs;
 p.par = r0;
 p.pdf_sd_y = pdf_sd_y;
 p.pdf_sd_o = pdf_sd_o;
-p.pdf_hr_y = pdf_hr_y;
-p.pdf_hr_o = pdf_hr_o;
-p.time_ir = time_ir;
-p.pdf_ih_y = pdf_ih_y;
-p.pdf_ih_o = pdf_ih_o;
+p.pdf_sr_y = pdf_sr_y;
+p.pdf_sr_o = pdf_sr_o;
+p.pdf_mr_y = pdf_mr_y;
+p.pdf_mr_o = pdf_mr_o;
 p.pdf_ir_y = pdf_ir_y;
 p.pdf_ir_o = pdf_ir_o;
+p.pdf_ms_y = pdf_ms_y;
+p.pdf_ms_o = pdf_ms_o;
+p.pdf_im_y = pdf_im_y;
+p.pdf_im_o = pdf_im_o;
+p.time_ir = time_ir;
 p.omega_o = omega_o;
 p.omega_y = omega_y;
 p.zeta_o = zeta_o;
 p.zeta_y = zeta_y;
 p.eta_o = eta_o;
 p.eta_y = eta_y;
-p.kappa_r = kappa_r;
+p.theta_y = theta_y;
+p.theta_o = theta_o;
+p.vartheta_y = vartheta_y;
+p.vartheta_o = vartheta_o;
+p.kappa_m = kappa_m;
+p.kappa_s = kappa_s;
 
     function [r] = set_yo_ratios_params()
         % death (serious cases only)
@@ -295,8 +311,7 @@ p.kappa_r = kappa_r;
         r.eta_o = s.eta_o+zeros(length(varsigma),s.k_hosp+1);
         r.eta_y = s.eta_y+zeros(length(varsigma),s.k_hosp+1);
         r.mu_o = 1-s.eta_o+zeros(length(varsigma),s.k_sick+1);
-        r.mu_y = 1-s.eta_y+zeros(length(varsigma),s.k_sick+1);       
-
+        r.mu_y = 1-s.eta_y+zeros(length(varsigma),s.k_sick+1); 
         r.hdo_hdy = varsigma./(1-varsigma);
         a_hd_y = (s.omega_y/s.T_death_y_mean); a_hd_o = (s.omega_o/s.T_death_o_mean);
         r.ho_hy = (a_hd_y./a_hd_o).*r.hdo_hdy;
