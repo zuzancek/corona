@@ -11,6 +11,7 @@ shift = max(shift_i,shift_h);
 
 I0 = init.I(firstData-shift_i+2:dateTo);
 H0 = init.H(firstData-shift_h+2:dateTo);
+S0 = init.S(firstData-shift_h+2:dateTo);
 D0 = init.D(firstData:dateTo);
 IH0 = init.IH(end-T+1:end);
 HR0 = init.HR(end-T+1:end);
@@ -60,10 +61,13 @@ I0 = extend(I0,T_total+shift_i-length(I0));
 I_o = zeros(T_total+shift,1); 
 I_o(end-T_total-shift_i+1:end) = (I0.*rho(end-length(I0)+1:end));
 I_y = extend(I0,shift_i)-I_o;
-% hospitalizations: Old/Young
-H0 = extend(H0,T_total+shift-length(H0));
-H_o = H0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
-H_y = H0-H_o;
+% hospitalizations: Old/Young, moderate cases (M) vs intensive care (S)
+M0 = extend(H0-S0,T_total+shift-length(H0));
+M_o = M0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
+M_y = M0-M_o;
+S0 = extend(S0,T_total+shift-length(S0));
+S_o = S0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
+S_y = S0-S_o;
 % deaths: Old/Young
 D0 = extend(D0,T_total+shift-length(D0));
 D_o = zeros(T_total+shift,1); 
@@ -71,22 +75,36 @@ D_o(1:shift) = D0(1)*varsigma(1);
 D_y = D0-D_o;
 
 % other arrays
-d_I_H_o = zeros(T_total,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I_H_o;
-d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o; d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o;
+d_I_M_o = zeros(T_total,1);  d_I_M_y = d_I_M_o; d_I_R_o = d_I_M_o; d_I_R_y = d_I_M_o;
+d_M_S_o = d_I_M_o; d_M_S_y = d_I_M_o; d_M_R_o = d_I_M_o; d_M_R_y = d_I_M_o;
+d_S_D_o = d_I_M_o; d_S_D_y = d_I_M_o; d_S_R_o = d_I_M_o; d_S_R_y = d_I_M_o;
 
 % ******* parameters
-% hospital admission
+% ******* 1./ mild/asymptomatic cases, no hospital needed
+% A./ hospital admission
 k_hosp = s.k_hosp;      t_hosp = s.time_h;
-alpha_iho = s.eta_o.*(1-0*varrho).*p.pdf_ih_o./repmat(t_hosp,T_total,1);
-alpha_ihy = s.eta_y.*(1-0*varrho).*p.pdf_ih_y./repmat(t_hosp,T_total,1);
-alpha_iho = alpha_iho(:,end:-1:1);
-alpha_ihy = alpha_ihy(:,end:-1:1);
-% recovery from sickness at home
+alpha_imo = p.eta_o.*p.pdf_im_o./repmat(t_hosp,T_total,1);
+alpha_imy = p.eta_y.*p.pdf_im_y./repmat(t_hosp,T_total,1);
+alpha_imo = alpha_imo(:,end:-1:1);
+alpha_imy = alpha_imy(:,end:-1:1);
+% B./ recovery from sickness at home
 k_sick = s.k_sick;      
-[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o+0*varrho./kappa.*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y+0*varrho./kappa*s.T_rec_o_m_mean-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-alpha_iro = (1-s.eta_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
-alpha_iry = (1-s.eta_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
+[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
+pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
+alpha_iro = (1-p.mu_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
+alpha_iry = (1-p.mu_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
+% ******** 2./ moderate cases, at hospital, no intensive case needed
+% A./ admission to ICU...
+k_ser = s.k_ser;
+pdf_ms_y = repmat(s.pdf_s_y',length(varsigma),1);
+pdf_ms_o = repmat(s.pdf_s_o',length(varsigma),1);
+theta_o = p.theta_o;   theta_y = p.theta_y;
+% B./ recovery (at hospital, no IC)
+pdf_mr_y = repmat(s.pdf_mr_y',length(varsigma),1);
+pdf_mr_o = repmat(s.pdf_mr_o',length(varsigma),1);
+% ******* 3./ serious cases (hospital+Intensive care needed)
+
+
 % death at hospital
 k_death = s.k_death;      t_death = s.time_d;
 % pdf_hd_o = extend(p.pdf_hd_o,T_total+k_death-size(p.pdf_hd_o,1)); 
@@ -113,24 +131,24 @@ alpha_hry = alpha_hry(:,end:-1:1);
 for t=1:T_total
     tt = t+shift;
     %
-    d_I_H_o(t) = dot(alpha_iho(t,1:end-1),I_o(tt-k_hosp:tt-1));     
+    d_I_M_o(t) = dot(alpha_imo(t,1:end-1),I_o(tt-k_hosp:tt-1));     
     d_I_R_o(t) = dot(alpha_iro(t,1:end-1),I_o(tt-k_sick:tt-1));
-    I_o(tt) = I_o(tt-1)+X_o(t)-d_I_H_o(t)-d_I_R_o(t);
+    I_o(tt) = I_o(tt-1)+X_o(t)-d_I_M_o(t)-d_I_R_o(t);
     %
-    d_I_H_y(t) = dot(alpha_ihy(t,1:end-1),I_y(tt-k_hosp:tt-1));     
+    d_I_M_y(t) = dot(alpha_imy(t,1:end-1),I_y(tt-k_hosp:tt-1));     
     d_I_R_y(t) = dot(alpha_iry(t,1:end-1),I_y(tt-k_sick:tt-1));
-    I_y(tt) = I_y(tt-1)+X_y(t)-d_I_H_y(t)-d_I_R_y(t);
+    I_y(tt) = I_y(tt-1)+X_y(t)-d_I_M_y(t)-d_I_R_y(t);
     %
-    d_H_D_o(t) = dot(alpha_hdo(t,1:end-1),H_o(tt-k_death:tt-1));    
-    d_H_R_o(t) = dot(alpha_hro(t,1:end-1),H_o(tt-k_rec:tt-1));
-    H_o(tt) = H_o(tt-1)+d_I_H_o(t)-d_H_D_o(t)-d_H_R_o(t);
+    d_S_D_o(t) = dot(alpha_hdo(t,1:end-1),H_o(tt-k_death:tt-1));    
+    d_S_R_o(t) = dot(alpha_hro(t,1:end-1),H_o(tt-k_rec:tt-1));
+    H_o(tt) = H_o(tt-1)+d_I_M_o(t)-d_S_D_o(t)-d_S_R_o(t);
     %
-    d_H_D_y(t) = dot(alpha_hdy(t,1:end-1),H_y(tt-k_death:tt-1));    
-    d_H_R_y(t) = dot(alpha_hry(t,1:end-1),H_y(tt-k_rec:tt-1));
-    H_y(tt) = H_y(tt-1)+d_I_H_y(t)-d_H_D_y(t)-d_H_R_y(t);
+    d_S_D_y(t) = dot(alpha_hdy(t,1:end-1),H_y(tt-k_death:tt-1));    
+    d_S_R_y(t) = dot(alpha_hry(t,1:end-1),H_y(tt-k_rec:tt-1));
+    H_y(tt) = H_y(tt-1)+d_I_M_y(t)-d_S_D_y(t)-d_S_R_y(t);
     %
-    D_o(tt) = D_o(tt-1)+d_H_D_o(t);
-    D_y(tt) = D_y(tt-1)+d_H_D_y(t);
+    D_o(tt) = D_o(tt-1)+d_S_D_o(t);
+    D_y(tt) = D_y(tt-1)+d_S_D_y(t);
 end
 
 % store results
@@ -143,10 +161,10 @@ out_full.H_o = tseries(firstData:dateTo,H_o(end-T_total+1:end));
 out_full.H_y = tseries(firstData:dateTo,H_y(end-T_total+1:end));
 out_full.D_o = tseries(firstData:dateTo,D_o(end-T_total+1:end));
 out_full.D_y = tseries(firstData:dateTo,D_y(end-T_total+1:end));
-out_full.IH_y = tseries(firstData:dateTo,d_I_H_y);
-out_full.IH_o = tseries(firstData:dateTo,d_I_H_o);
-out_full.HR_y = tseries(firstData:dateTo,d_H_R_y);
-out_full.HR_o = tseries(firstData:dateTo,d_H_R_o);
+out_full.IH_y = tseries(firstData:dateTo,d_I_M_y);
+out_full.IH_o = tseries(firstData:dateTo,d_I_M_o);
+out_full.HR_y = tseries(firstData:dateTo,d_S_R_y);
+out_full.HR_o = tseries(firstData:dateTo,d_S_R_o);
 out_full.X = out_full.X_o+out_full.X_y;
 out_full.I = out_full.I_o+out_full.I_y;
 out_full.H = out_full.H_o+out_full.H_y;
