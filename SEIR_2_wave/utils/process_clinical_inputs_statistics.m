@@ -1,4 +1,4 @@
-function [db] = process_clinical_statistics(db)
+function [db] = process_clinical_inputs_statistics(db)
 
 db_total = db{1};
 db_severe = db{2};

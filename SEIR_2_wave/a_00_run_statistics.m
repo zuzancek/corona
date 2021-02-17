@@ -25,6 +25,6 @@ for i=1:2
 end
 
 %  calculate remaining statistics
-db = process_clinical_statistics(out_db);
+db = process_clinical_inputs_statistics(out_db);
 stat_total = db{1};  stat_severe = db{2}; stat_mild = db{3}; weight = par.S_H_rate;
 save(filename_out,'stat_total','stat_severe','stat_mild','weight');
