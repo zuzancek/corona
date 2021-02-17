@@ -15,8 +15,6 @@ S0 = init.S(firstData-shift_h+2:dateTo);
 D0 = init.D(firstData:dateTo);
 IH0 = init.IH(end-T+1:end);
 HR0 = init.HR(end-T+1:end);
-omega_o = init.omega_o;
-omega_y = init.omega_y;
 
 method_params = s.smoothing_method_params;
 method_data = s.smoothing_method_data;
@@ -28,14 +26,14 @@ catch err %#ok<NASGU>
     rho = rho(dateFrom:dateTo);
 end
 try
-    varrho = init.varrho(end-T_total+1:end);
+    kappa_s = init.kappa_s(end-T_total+1:end);
 catch err %#ok<NASGU>
-    varrho = zeros(T,1);
+    kappa_s = ones(T,1);
 end
 try
-    kappa = init.kappa(end-T_total+1:end);
+    kappa_m = init.kappa_m(end-T_total+1:end);
 catch err %#ok<NASGU>
-    kappa = ones(T,1);
+    kappa_m = ones(T,1);
 end
 try
     T_delay = init.T_delay(end-T_total+1:end);
@@ -43,8 +41,8 @@ catch err %#ok<NASGU>
     T_delay = zeros(T,1);
 end 
 rho = extend(rho,shift_i);
-varrho = extend(varrho,T_total-length(varrho));
-kappa = extend(kappa,T_total-length(kappa));
+kappa_s = extend(kappa_s,T_total-length(kappa_s));
+kappa_m = extend(kappa_m,T_total-length(kappa_m));
 T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift_i);
 varsigma = method_params(init.varsigma);
 varsigma = extend(varsigma(dateFrom:dateTo),burnin);
@@ -95,37 +93,50 @@ alpha_iro = (1-p.mu_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
 alpha_iry = (1-p.mu_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
 % ******** 2./ moderate cases, at hospital, no intensive case needed
 % A./ admission to ICU...
-k_ser = s.k_ser;
+k_ser = s.k_ser;  t_ser = s.time_ser;
 pdf_ms_y = repmat(s.pdf_s_y',length(varsigma),1);
 pdf_ms_o = repmat(s.pdf_s_o',length(varsigma),1);
-theta_o = p.theta_o;   theta_y = p.theta_y;
+theta_o = s.theta_o.*repmat(kappa_m,1,k_ser+1);
+theta_y = s.theta_y.*repmat(kappa_m,1,k_ser+1);
+alpha_mso = theta_o.*pdf_ms_o./repmat(t_ser,T_total,1);
+alpha_msy = theta_y.*pdf_ms_y./repmat(t_ser,T_total,1);
+alpha_mso = alpha_mso(:,end:-1:1);
+alpha_msy = alpha_msy(:,end:-1:1);
 % B./ recovery (at hospital, no IC)
+k_rec = s.k_rec; t_rec = s.time_rec;
 pdf_mr_y = repmat(s.pdf_mr_y',length(varsigma),1);
 pdf_mr_o = repmat(s.pdf_mr_o',length(varsigma),1);
+vartheta_o = 1-theta_o(:,1).*repmat(kappa_m,1,k_rec+1);
+vartheta_y = 1-theta_y(:,1).*repmat(kappa_m,1,k_rec+1);
+alpha_mro = vartheta_o.*pdf_mr_o./t_rec;    alpha_mro = alpha_mro(:,end:-1:1);
+alpha_mry = vartheta_y.*pdf_mr_y./t_rec;    alpha_mry = alpha_mry(:,end:-1:1);
 % ******* 3./ serious cases (hospital+Intensive care needed)
+% A./ deaths
+k_death = s.k_death; t_death = s.time_d;
+pdf_sd_y = repmat(s.pdf_d_y',length(varsigma),1);
+pdf_sd_o = repmat(s.pdf_d_o',length(varsigma),1);
+omega_o = s.omega_o.*repmat(kappa_s,1,k_death+1);   
+omega_y = s.omega_y.*repmat(kappa_s,1,k_death+1);
+alpha_sdo = omega_o.*pdf_sd_o./repmat(t_death,T_total,1);
+alpha_sdy = omega_y.*pdf_sd_y./repmat(t_death,T_total,1);
+alpha_sdo = alpha_sdo(:,end:-1:1);
+alpha_sdy = alpha_sdy(:,end:-1:1);
+% B./ recovery
+k_rec = s.k_rec;    t_rec = s.time_r;
+pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
+pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
+zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
+zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
+alpha_sro = zeta_o.*pdf_sr_o./repmat(t_rec,T_total,1);
+alpha_sry = zeta_y.*pdf_sr_y./repmat(t_rec,T_total,1);
+alpha_sro = alpha_sro(:,end:-1:1);
+alpha_sry = alpha_sry(:,end:-1:1);
 
-
-% death at hospital
-k_death = s.k_death;      t_death = s.time_d;
-% pdf_hd_o = extend(p.pdf_hd_o,T_total+k_death-size(p.pdf_hd_o,1)); 
-alpha_hdo = omega_o.*p.pdf_hd_o./repmat(t_death,T_total+0*k_death,1);
-% pdf_hd_y = extend(p.pdf_hd_y,T_total+k_death-size(p.pdf_hd_y,1)); 
-alpha_hdy = omega_y.*p.pdf_hd_y./repmat(t_death,T_total+0*k_death,1);
-alpha_hdo = alpha_hdo(:,end:-1:1);
-alpha_hdy = alpha_hdy(:,end:-1:1);
-% recovery at hospital
-k_rec = s.k_rec;      t_rec = s.time_r;
-% pdf_hr_o = extend(p.pdf_hr_o,T_total+k_rec-size(p.pdf_hr_o,1)); 
-alpha_hro = (1-omega_o).*kappa.*p.pdf_hr_o./repmat(t_rec,T_total+0*k_rec,1);
-% pdf_hr_y = extend(p.pdf_hr_y,T_total+k_rec-size(p.pdf_hr_y,1)); 
-alpha_hry = (1-omega_y).*kappa.*p.pdf_hr_y./repmat(t_rec,T_total+0*k_rec,1);
-alpha_hro = alpha_hro(:,end:-1:1);
-alpha_hry = alpha_hry(:,end:-1:1);
-
-% ******* Equations
-% I(t+1) = I(t)+X(t)-I_H(t)-I_R(t);
-% H(t+1) = H(t)+I_H(t)-H_D(t)-H_R(t);
-% D(t+1) = D(t)+H_D(t);
+% ******* Equations, both in O/Y version + aggregation
+% I(t) = I(t-1)+X(t)-I_M(t)-I_R(t);     
+% M(t) = M(t-1)+I_M(t)-M_S(t)-M_R(t);
+% S(t) = S(t-1)+M_S(t)-S_D(t)-S_R(t);
+% D(t) = D(t-1)+S_D(t);
 
 % ******* Calculation
 for t=1:T_total
@@ -139,13 +150,21 @@ for t=1:T_total
     d_I_R_y(t) = dot(alpha_iry(t,1:end-1),I_y(tt-k_sick:tt-1));
     I_y(tt) = I_y(tt-1)+X_y(t)-d_I_M_y(t)-d_I_R_y(t);
     %
-    d_S_D_o(t) = dot(alpha_hdo(t,1:end-1),H_o(tt-k_death:tt-1));    
-    d_S_R_o(t) = dot(alpha_hro(t,1:end-1),H_o(tt-k_rec:tt-1));
-    H_o(tt) = H_o(tt-1)+d_I_M_o(t)-d_S_D_o(t)-d_S_R_o(t);
+    d_M_S_o(t) = dot(alpha_mso(t,1:end-1),M_o(tt-k_ser:tt-1));     
+    d_M_R_o(t) = dot(alpha_mro(t,1:end-1),M_o(tt-k_rec:tt-1));
+    M_o(tt) = M_o(tt-1)+d_I_M_o(t)-d_M_S_o(t)-d_M_R_o(t);
     %
-    d_S_D_y(t) = dot(alpha_hdy(t,1:end-1),H_y(tt-k_death:tt-1));    
-    d_S_R_y(t) = dot(alpha_hry(t,1:end-1),H_y(tt-k_rec:tt-1));
-    H_y(tt) = H_y(tt-1)+d_I_M_y(t)-d_S_D_y(t)-d_S_R_y(t);
+    d_M_S_y(t) = dot(alpha_msy(t,1:end-1),M_y(tt-k_ser:tt-1));     
+    d_M_R_y(t) = dot(alpha_mry(t,1:end-1),M_y(tt-k_rec:tt-1));
+    M_y(tt) = M_y(tt-1)+d_I_M_y(t)-d_M_S_y(t)-d_M_R_y(t);
+    %
+    d_S_D_o(t) = dot(alpha_sdo(t,1:end-1),S_o(tt-k_death:tt-1));    
+    d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));
+    S_o(tt) = S_o(tt-1)+d_M_S_o(t)-d_S_D_o(t)-d_S_R_o(t);
+    %
+    d_S_D_y(t) = dot(alpha_sdy(t,1:end-1),S_y(tt-k_death:tt-1));    
+    d_S_R_y(t) = dot(alpha_sry(t,1:end-1),S_y(tt-k_rec:tt-1));
+    S_y(tt) = S_y(tt-1)+d_M_S_y(t)-d_S_D_y(t)-d_S_R_y(t);
     %
     D_o(tt) = D_o(tt-1)+d_S_D_o(t);
     D_y(tt) = D_y(tt-1)+d_S_D_y(t);
@@ -157,16 +176,22 @@ out_full.X_o = tseries(firstData:dateTo,X_o(end-T_total+1:end));
 out_full.X_y = tseries(firstData:dateTo,X_y(end-T_total+1:end));
 out_full.I_o = tseries(firstData:dateTo,I_o(end-T_total+1:end));
 out_full.I_y = tseries(firstData:dateTo,I_y(end-T_total+1:end));
-out_full.H_o = tseries(firstData:dateTo,H_o(end-T_total+1:end));
-out_full.H_y = tseries(firstData:dateTo,H_y(end-T_total+1:end));
+out_full.M_o = tseries(firstData:dateTo,M_o(end-T_total+1:end));
+out_full.M_y = tseries(firstData:dateTo,M_y(end-T_total+1:end));
+out_full.S_o = tseries(firstData:dateTo,S_o(end-T_total+1:end));
+out_full.S_y = tseries(firstData:dateTo,S_y(end-T_total+1:end));
 out_full.D_o = tseries(firstData:dateTo,D_o(end-T_total+1:end));
 out_full.D_y = tseries(firstData:dateTo,D_y(end-T_total+1:end));
 out_full.IH_y = tseries(firstData:dateTo,d_I_M_y);
 out_full.IH_o = tseries(firstData:dateTo,d_I_M_o);
-out_full.HR_y = tseries(firstData:dateTo,d_S_R_y);
-out_full.HR_o = tseries(firstData:dateTo,d_S_R_o);
+out_full.HR_y = tseries(firstData:dateTo,d_S_R_y+d_M_R_y);
+out_full.HR_o = tseries(firstData:dateTo,d_S_R_o+d_M_R_o);
 out_full.X = out_full.X_o+out_full.X_y;
 out_full.I = out_full.I_o+out_full.I_y;
+out_full.M = out_full.M_o+out_full.M_y;
+out_full.S = out_full.S_o+out_full.S_y;
+out_full.H_y = out_full.S_y+out_full.M_y;
+out_full.H_o = out_full.S_o+out_full.M_o;
 out_full.H = out_full.H_o+out_full.H_y;
 out_full.D = out_full.D_o+out_full.D_y;
 out_full.IH = out_full.IH_o+out_full.IH_y;
@@ -177,8 +202,10 @@ out_rep.X_o = resize(out_rep.X_o,dateFrom:dateTo);
 out_rep.X_y = resize(out_rep.X_y,dateFrom:dateTo);
 out_rep.I_o = resize(out_rep.I_o,dateFrom:dateTo);
 out_rep.I_y = resize(out_rep.I_y,dateFrom:dateTo);
-out_rep.H_o = resize(out_rep.H_o,dateFrom:dateTo);
-out_rep.H_y = resize(out_rep.H_y,dateFrom:dateTo);
+out_rep.M_o = resize(out_rep.M_o,dateFrom:dateTo);
+out_rep.M_y = resize(out_rep.M_y,dateFrom:dateTo);
+out_rep.S_o = resize(out_rep.S_o,dateFrom:dateTo);
+out_rep.S_y = resize(out_rep.S_y,dateFrom:dateTo);
 out_rep.D_o = resize(out_rep.D_o,dateFrom:dateTo);
 out_rep.D_y = resize(out_rep.D_y,dateFrom:dateTo);
 out_rep.IH_y = resize(out_rep.IH_y,dateFrom:dateTo);
@@ -186,7 +213,10 @@ out_rep.IH_o = resize(out_rep.IH_o,dateFrom:dateTo);
 out_rep.HR_y = resize(out_rep.HR_y,dateFrom:dateTo);
 out_rep.HR_o = resize(out_rep.HR_o,dateFrom:dateTo);
 out_rep.X = out_rep.X_o+out_rep.X_y;
-out_rep.I = out_rep.I_o+out_rep.I_y;
+out_rep.M = out_rep.M_o+out_rep.M_y;
+out_rep.S = out_rep.S_o+out_rep.S_y;
+out_rep.H_y = out_rep.S_y+out_rep.M_y;
+out_rep.H_o = out_rep.S_o+out_rep.M_o;
 out_rep.H = out_rep.H_o+out_rep.H_y;
 out_rep.D = out_rep.D_o+out_rep.D_y;
 out_rep.IH = out_rep.IH_o+out_rep.IH_y;

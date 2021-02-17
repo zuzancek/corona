@@ -75,7 +75,7 @@ M_o_ini = H_o_ini-S_o_ini;
 M_y_ini = H_y_ini-S_y_ini;
 
 % ******* Equations, both in O/Y version + aggregation
-% I(t) = I(t-1)+X(t)-I_H(t)-I_R(t);     
+% I(t) = I(t-1)+X(t)-I_M(t)-I_R(t);     
 % M(t) = M(t-1)+I_M(t)-M_S(t)-M_R(t);
 % S(t) = S(t-1)+M_S(t)-S_D(t)-S_R(t);
 % D(t) = D(t-1)+S_D(t);
