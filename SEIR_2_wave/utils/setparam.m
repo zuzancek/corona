@@ -127,8 +127,8 @@ s.smoothing_method_params = @smooth_series;
         s.time_d = db_s.opt_fit_d_y.time_grid(1:s.k_death+1);
         % admission to ICU, ventilation, ECMO
         s.k_ser = 15;
-        s.theta_y = db_s.opt_fit_h_y.alpha./db_t.opt_fit_h_y.alpha;
-        s.theta_o = db_s.opt_fit_h_o.alpha./db_t.opt_fit_h_o.alpha;
+        s.theta_y = db_s.opt_fit_h_y.alpha;
+        s.theta_o = db_s.opt_fit_h_o.alpha;
         s.pdf_s_y = db_s.opt_fit_h_y.pdf(1:s.k_ser+1)/sum(db_s.opt_fit_h_y.pdf(1:s.k_ser+1));
         s.pdf_s_o = db_s.opt_fit_h_o.pdf(1:s.k_ser+1)/sum(db_s.opt_fit_h_o.pdf(1:s.k_ser+1));
         s.T_ser_y_mean = db_s.opt_fit_h_y.mean;
