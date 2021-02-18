@@ -48,9 +48,9 @@ for i=1:n
         db_s.(xd) = db_severe.(xd);
         alpha = db_total.(xd).alpha/db_s.(xh).alpha;
         cdf_sd = db_total.(xd).cdf./db_s.(xh).cdf;
-        pdf_sd = cdf_sd(2:end)-cdf_sd(1:end-1); pdf_sd(end+1) = 0;  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
+        pdf_sd = [cdf_sd(2:end)-cdf_sd(1:end-1);0];  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
         ecdf_sd = db_total.(xd).ecdf./db_s.(xh).ecdf;
-        epdf_sd = ecdf_sd(2:end)-ecdf_sd(1:end-1); epdf_sd(end+1) = 0;  epdf_sd = epdf_sd./sum(epdf_sd);
+        epdf_sd = [ecdf_sd(2:end)-ecdf_sd(1:end-1);0];  epdf_sd = epdf_sd./sum(epdf_sd);
         m = dot(pdf_sd,0:k-1);
         db_s.(fn{i}).type = '';             
         db_s.(fn{i}).obj = [];
@@ -68,13 +68,14 @@ for i=1:n
         xd = strcat('opt_fit_d_',x0);       
         xh = strcat('opt_fit_h_',x0);      
         xr = strcat('opt_fit_r_',x0);
-        db_s.(xd) = db_severe.(xd);
+        db_s.(xr) = db_severe.(xr);
         alpha_m = 1-db_s.(xh).alpha;
         alpha_s = 1-db_s.(xd).alpha;
+        alpha_r = db_total.(xr).alpha;
         cdf_sr = cdf_s; ecdf_sr = ecdf_s; pdf_sr = pdf_s; epdf_sr = epdf_s;
-        cdf_mr = ((1-db_total.(xd).alpha).*db_total.(xd).cdf...
+        cdf_mr = (alpha_r.*db_total.(xr).cdf...
             -db_s.(xh).alpha.*alpha_s.*cdf_sr.*db_s.(xh).cdf)/alpha_m;        
-        ecdf_mr = ((1-db_total.(xd).alpha).*db_total.(xd).ecdf...
+        ecdf_mr = (alpha_r.*db_total.(xr).ecdf...
             -db_s.(xh).alpha.*alpha_s.*ecdf_sr.*db_s.(xh).ecdf)/alpha_m;        
         pdf_mr = [cdf_mr(2:end)-cdf_mr(1:end-1);0]; pdf_mr = pdf_mr/sum(pdf_mr);
         epdf_mr = [ecdf_mr(2:end)-ecdf_mr(1:end-1);0]; epdf_mr = epdf_mr/sum(epdf_mr);   
@@ -109,7 +110,7 @@ db{3} = db_s;
         dy = y(2:end)-y(1:end-1);
         idx = find(dy>=0.01,1);
         y(2:idx) = NaN; y(1) = 0;
-        z = interp1(find(~isnan(y)),y(find(~isnan(y))),1:length(y),'pchip');
+        z = reshape(interp1(find(~isnan(y)),y(find(~isnan(y))),1:length(y),'pchip'),[],1);
     end
 
 end
