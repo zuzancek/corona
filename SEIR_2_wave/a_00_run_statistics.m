@@ -5,7 +5,10 @@ run_hosp = false;
 out_db = cell(3,1);
 filename_out = 'results/optimal_fit.mat';
 
+do_load = true;
 %% definitions
+
+if ~do_load
 for i=1:2
     if i==1
         filename_in = 'data/calibration/hosp_data.xlsx';
@@ -22,6 +25,10 @@ for i=1:2
 
     %% saving stuff
     out_db{i} = s;
+end
+save('out.mat','out_db');
+else
+    load('out.mat','out_db');
 end
 
 %  calculate remaining statistics
