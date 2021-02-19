@@ -24,18 +24,18 @@ for i=1:n
     ecdf_s(end+1:k) = 1;    db_severe.(fn{i}).ecdf = ecdf_s;
     if endsWith(fn{i},'h_y') || endsWith(fn{i},'h_o')
         cdf_ms = adjust_cdf(min(1,max(0,cdf_s./cdf_h))); cdf_ms(isnan(cdf_ms)) = 0;
-        pdf_ms = cdf_ms(2:end)-cdf_ms(1:end-1); pdf_ms(end+1) = 0;  pdf_ms = pdf_ms./sum(pdf_ms); %#ok<*AGROW>
+        pdf_ms = [0;cdf_ms(2:end)-cdf_ms(1:end-1)];  pdf_ms = pdf_ms./sum(pdf_ms); %#ok<*AGROW>
         ecdf_ms = ecdf_s./ecdf_h; 
         ecdf_ms = adjust_cdf(ecdf_ms);
-        epdf_ms = ecdf_ms(2:end)-ecdf_ms(1:end-1); epdf_ms(end+1) = 0;  epdf_ms = epdf_ms./sum(epdf_ms);
+        epdf_ms = [0;ecdf_ms(2:end)-ecdf_ms(1:end-1)];  epdf_ms = epdf_ms./sum(epdf_ms);
         alpha = db_severe.(fn{i}).alpha./db_total.(fn{i}).alpha;
         m = dot(pdf_ms,0:k-1);
         db_s.(fn{i}).type = '';             
         db_s.(fn{i}).obj = [];
         db_s.(fn{i}).pdf = pdf_ms;
-        db_s.(fn{i}).cdf = cumsum(pdf_ms);
+        db_s.(fn{i}).cdf = cdf_ms;
         db_s.(fn{i}).epdf = epdf_ms;
-        db_s.(fn{i}).ecdf = cumsum(epdf_ms);
+        db_s.(fn{i}).ecdf = ecdf_ms;
         db_s.(fn{i}).diff = 0;
         db_s.(fn{i}).time_grid = 0:k-1;
         db_s.(fn{i}).alpha = alpha;
@@ -48,9 +48,9 @@ for i=1:n
         db_s.(xd) = db_severe.(xd);
         alpha = db_total.(xd).alpha/db_s.(xh).alpha;
         cdf_sd = db_total.(xd).cdf./db_s.(xh).cdf;
-        pdf_sd = [cdf_sd(2:end)-cdf_sd(1:end-1);0];  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
+        pdf_sd = [0;cdf_sd(2:end)-cdf_sd(1:end-1)];  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
         ecdf_sd = db_total.(xd).ecdf./db_s.(xh).ecdf;
-        epdf_sd = [ecdf_sd(2:end)-ecdf_sd(1:end-1);0];  epdf_sd = epdf_sd./sum(epdf_sd);
+        epdf_sd = [0;ecdf_sd(2:end)-ecdf_sd(1:end-1)];  epdf_sd = epdf_sd./sum(epdf_sd);
         m = dot(pdf_sd,0:k-1);
         db_s.(fn{i}).type = '';             
         db_s.(fn{i}).obj = [];
@@ -77,8 +77,8 @@ for i=1:n
             -db_s.(xh).alpha.*alpha_s.*cdf_sr.*db_s.(xh).cdf)/alpha_m;        
         ecdf_mr = (alpha_r.*db_total.(xr).ecdf...
             -db_s.(xh).alpha.*alpha_s.*ecdf_sr.*db_s.(xh).ecdf)/alpha_m;        
-        pdf_mr = [cdf_mr(2:end)-cdf_mr(1:end-1);0]; pdf_mr = pdf_mr/sum(pdf_mr);
-        epdf_mr = [ecdf_mr(2:end)-ecdf_mr(1:end-1);0]; epdf_mr = epdf_mr/sum(epdf_mr);   
+        pdf_mr = [0;cdf_mr(2:end)-cdf_mr(1:end-1)]; pdf_mr = pdf_mr/sum(pdf_mr);
+        epdf_mr = [0;ecdf_mr(2:end)-ecdf_mr(1:end-1)]; epdf_mr = epdf_mr/sum(epdf_mr);   
         m_m = dot(epdf_mr,0:k-1);
         m_s = dot(epdf_sr,0:k-1);
         db_s.(fn{i}) = db_severe.(fn{i});
@@ -118,3 +118,4 @@ db{3} = db_s;
     end
 
 end
+
