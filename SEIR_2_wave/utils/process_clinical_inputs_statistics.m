@@ -47,17 +47,17 @@ for i=1:n
         xh = strcat('opt_fit_h_',x0);
         db_s.(xd) = db_severe.(xd);
         alpha = db_total.(xd).alpha/db_s.(xh).alpha;
-        cdf_sd = db_total.(xd).cdf./db_s.(xh).cdf;
+        cdf_sd = db_total.(xd).cdf./db_s.(xh).cdf;  cdf_sd(isnan(cdf_sd)) = 0;
         pdf_sd = [0;cdf_sd(2:end)-cdf_sd(1:end-1)];  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
-        ecdf_sd = db_total.(xd).ecdf./db_s.(xh).ecdf;
+        ecdf_sd = db_total.(xd).ecdf./db_s.(xh).ecdf; ecdf_sd(isnan(ecdf_sd)) = 0;
         epdf_sd = [0;ecdf_sd(2:end)-ecdf_sd(1:end-1)];  epdf_sd = epdf_sd./sum(epdf_sd);
         m = dot(pdf_sd,0:k-1);
         db_s.(fn{i}).type = '';             
         db_s.(fn{i}).obj = [];
         db_s.(fn{i}).pdf = pdf_sd;
-        db_s.(fn{i}).cdf = cumsum(pdf_sd);
+        db_s.(fn{i}).cdf = cdf_sd;
         db_s.(fn{i}).epdf = epdf_sd;
-        db_s.(fn{i}).ecdf = cumsum(epdf_sd);
+        db_s.(fn{i}).ecdf = ecdf_sd;
         db_s.(fn{i}).diff = 0;
         db_s.(fn{i}).time_grid = 0:k-1;
         db_s.(fn{i}).alpha = alpha;
