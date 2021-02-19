@@ -33,7 +33,7 @@ r0 = set_yo_ratios_params();
 k_death = s.k_death;
 pdf_sd_y = repmat(s.pdf_d_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_d_o',length(varsigma),1);
-omega_o = r0.omega_o;   omega_y = r0.omega_y;
+omega_o = 0.9+0*r0.omega_o;   omega_y = 0.3+0*r0.omega_y;
 % B./ recovery
 k_rec = s.k_rec;
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
@@ -89,8 +89,8 @@ s_y = max(0,method_data(get_wa_inv(pdf_sd_y,SD_y,S_y_ini,omega_y,k_death+1)));
 S_o = method_data(s_o./max(1,s_o+s_y)).*S; 
 S_y = S-S_o;
 kappa_s = method_params((s_o+s_y)./S); 
-omega_o = omega_o.*repmat(kappa_s,1,k_death+1);
-omega_y = omega_y.*repmat(kappa_s,1,k_death+1);
+omega_o = min(1,omega_o.*repmat(kappa_s,1,k_death+1));
+omega_y = min(1,omega_y.*repmat(kappa_s,1,k_death+1));
 % serious cases
 zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
 zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);

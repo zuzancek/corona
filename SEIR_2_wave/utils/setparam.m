@@ -29,7 +29,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 10;                 s.T_sick_o = 14;       s.T_sick = 11;
+s.T_sick_y = 9;                 s.T_sick_o = 13;       s.T_sick = 11;
 s.T_sick_std = s.SI.std;
 s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
@@ -118,13 +118,20 @@ s.smoothing_method_params = @smooth_series;
         db_t = db.stat_total; db_s = db.stat_severe; db_m = db.stat_mild;
         % death (serious cases only, use db_s database)
         s.k_death = 40;
-        s.omega_y = db_s.opt_fit_d_y.alpha; %/(1-s.deaths_with_covid_share);
-        s.omega_o = db_s.opt_fit_d_o.alpha; %/(1-s.deaths_with_covid_share);
-        s.pdf_d_y = max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1)));
-        s.pdf_d_o = max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1)));
-        s.T_death_y_mean = db_s.opt_fit_d_y.mean;
-        s.T_death_o_mean = db_s.opt_fit_d_o.mean;
-        s.time_d = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);
+        s.omega_y = db_t.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
+        s.omega_o = db_t.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
+        s.pdf_d_y = max(0,db_t.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_t.opt_fit_d_y.pdf(1:s.k_death+1)));
+        s.pdf_d_o = max(0,db_t.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_t.opt_fit_d_o.pdf(1:s.k_death+1)));
+        s.T_death_y_mean = db_t.opt_fit_d_y.mean;
+        s.T_death_o_mean = db_t.opt_fit_d_o.mean;
+        s.time_d = reshape(db_t.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
+        s.omega_y_s = db_s.opt_fit_d_y.alpha; %/(1-s.deaths_with_covid_share);
+        s.omega_o_s = db_s.opt_fit_d_o.alpha; %/(1-s.deaths_with_covid_share);
+        s.pdf_d_y_s = max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1)));
+        s.pdf_d_o_s = max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1)));
+        s.T_death_y_mean_s = db_s.opt_fit_d_y.mean;
+        s.T_death_o_mean_s = db_s.opt_fit_d_o.mean;
+        s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
         % admission to ICU, ventilation, ECMO
         s.k_ser = 15;
         s.theta_y = db_s.opt_fit_h_y.alpha;
@@ -145,6 +152,10 @@ s.smoothing_method_params = @smooth_series;
         s.time_h = reshape(db_t.opt_fit_h_y.time_grid(1:s.k_hosp+1),1,[]);
         % recovery (serious,moderate,home)
         s.k_rec = 40;
+        s.pdf_hr_y = db_t.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_t.opt_fit_r_y.pdf(1:s.k_rec+1));
+        s.pdf_hr_o = db_t.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db_t.opt_fit_r_o.pdf(1:s.k_rec+1));
+        s.T_rec_h_y_mean = db_t.opt_fit_r_y.mean;
+        s.T_rec_h_o_mean = db_t.opt_fit_r_o.mean;        
         s.pdf_sr_y = db_s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_s.opt_fit_r_y.pdf(1:s.k_rec+1));
         s.pdf_sr_o = db_s.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db_s.opt_fit_r_o.pdf(1:s.k_rec+1));
         s.T_rec_s_y_mean = db_s.opt_fit_r_y.mean;
