@@ -44,7 +44,7 @@ s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.share_reas = 1;
 
 try
-    db = load('results/optimal_fit.mat','stat_total','stat_severe','stat_mild','weight');
+    db = load('results/optimal_fit.mat','stat_total','stat_severe','stat_mild');
     set_prob_data();
 catch err %#ok<NASGU>
     a_00_run_statistics();
@@ -118,10 +118,10 @@ s.smoothing_method_params = @smooth_series;
         db_t = db.stat_total; db_s = db.stat_severe; db_m = db.stat_mild;
         % death (serious cases only, use db_s database)
         s.k_death = 40;
-        s.omega_y = db_s.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
-        s.omega_o = db_s.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
-        s.pdf_d_y = db_s.opt_fit_d_y.pdf(1:s.k_death+1)/sum(db_s.opt_fit_d_y.pdf(1:s.k_death+1));
-        s.pdf_d_o = db_s.opt_fit_d_o.pdf(1:s.k_death+1)/sum(db_s.opt_fit_d_o.pdf(1:s.k_death+1));
+        s.omega_y = db_s.opt_fit_d_y.alpha; %/(1-s.deaths_with_covid_share);
+        s.omega_o = db_s.opt_fit_d_o.alpha; %/(1-s.deaths_with_covid_share);
+        s.pdf_d_y = max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1)));
+        s.pdf_d_o = max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1)));
         s.T_death_y_mean = db_s.opt_fit_d_y.mean;
         s.T_death_o_mean = db_s.opt_fit_d_o.mean;
         s.time_d = db_s.opt_fit_d_y.time_grid(1:s.k_death+1);

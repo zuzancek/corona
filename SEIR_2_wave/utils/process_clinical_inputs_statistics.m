@@ -23,7 +23,7 @@ for i=1:n
     ecdf_h(end+1:k) = 1;    db_total.(fn{i}).ecdf = ecdf_h;
     ecdf_s(end+1:k) = 1;    db_severe.(fn{i}).ecdf = ecdf_s;
     if endsWith(fn{i},'h_y') || endsWith(fn{i},'h_o')
-        cdf_ms = cdf_s./cdf_h; cdf_ms(isnan(cdf_ms)) = 0;
+        cdf_ms = adjust_cdf(min(1,max(0,cdf_s./cdf_h))); cdf_ms(isnan(cdf_ms)) = 0;
         pdf_ms = cdf_ms(2:end)-cdf_ms(1:end-1); pdf_ms(end+1) = 0;  pdf_ms = pdf_ms./sum(pdf_ms); %#ok<*AGROW>
         ecdf_ms = ecdf_s./ecdf_h; 
         ecdf_ms = adjust_cdf(ecdf_ms);
@@ -108,9 +108,13 @@ db{3} = db_s;
 
     function [z]=adjust_cdf(y)
         dy = y(2:end)-y(1:end-1);
-        idx = find(dy>=0.01,1);
-        y(2:idx) = NaN; y(1) = 0;
-        z = reshape(interp1(find(~isnan(y)),y(find(~isnan(y))),1:length(y),'pchip'),[],1);
+        idx = find(dy<0);
+        if ~isempty(idx)
+            y(2:idx(end)+1) = NaN; y(1) = 0;
+            z = (reshape(interp1(find(~isnan(y)),y(find(~isnan(y))),1:length(y),'pchip'),[],1)); %#ok<FNDSB>
+        else
+            z = y;
+        end
     end
 
 end
