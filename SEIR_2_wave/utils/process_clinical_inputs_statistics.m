@@ -47,10 +47,10 @@ for i=1:n
         xh = strcat('opt_fit_h_',x0);
         db_s.(xd) = db_severe.(xd);
         alpha = db_total.(xd).alpha/db_s.(xh).alpha;
-        cdf_sd = db_total.(xd).cdf./db_s.(xh).cdf;  cdf_sd(isnan(cdf_sd)) = 0;
-        pdf_sd = [0;cdf_sd(2:end)-cdf_sd(1:end-1)];  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
-        ecdf_sd = db_total.(xd).ecdf./db_s.(xh).ecdf; ecdf_sd(isnan(ecdf_sd)) = 0;
-        epdf_sd = [0;ecdf_sd(2:end)-ecdf_sd(1:end-1)];  epdf_sd = epdf_sd./sum(epdf_sd);
+        cdf_sd = min(1,max(0,db_total.(xd).cdf./db_s.(xh).cdf));  cdf_sd(isnan(cdf_sd)) = 0;
+        pdf_sd = max(0,[0;cdf_sd(2:end)-cdf_sd(1:end-1)]);  pdf_sd = pdf_sd./sum(pdf_sd); %#ok<*AGROW>
+        ecdf_sd = min(1,max(0,db_total.(xd).ecdf./db_s.(xh).ecdf)); ecdf_sd(isnan(ecdf_sd)) = 0;
+        epdf_sd = max(0,[0;ecdf_sd(2:end)-ecdf_sd(1:end-1)]);  epdf_sd = epdf_sd./sum(epdf_sd);
         m = dot(pdf_sd,0:k-1);
         db_s.(fn{i}).type = '';             
         db_s.(fn{i}).obj = [];
@@ -73,12 +73,12 @@ for i=1:n
         alpha_s = 1-db_s.(xd).alpha;
         alpha_r = db_total.(xr).alpha;
         cdf_sr = cdf_s; ecdf_sr = ecdf_s; pdf_sr = pdf_s; epdf_sr = epdf_s;
-        cdf_mr = (alpha_r.*db_total.(xr).cdf...
-            -db_s.(xh).alpha.*alpha_s.*cdf_sr.*db_s.(xh).cdf)/alpha_m;        
-        ecdf_mr = (alpha_r.*db_total.(xr).ecdf...
-            -db_s.(xh).alpha.*alpha_s.*ecdf_sr.*db_s.(xh).ecdf)/alpha_m;        
-        pdf_mr = [0;cdf_mr(2:end)-cdf_mr(1:end-1)]; pdf_mr = pdf_mr/sum(pdf_mr);
-        epdf_mr = [0;ecdf_mr(2:end)-ecdf_mr(1:end-1)]; epdf_mr = epdf_mr/sum(epdf_mr);   
+        cdf_mr = min(1,max(0,(alpha_r.*db_total.(xr).cdf...
+            -db_s.(xh).alpha.*alpha_s.*cdf_sr.*db_s.(xh).cdf)/alpha_m));        
+        ecdf_mr = min(1,max(0,(alpha_r.*db_total.(xr).ecdf...
+            -db_s.(xh).alpha.*alpha_s.*ecdf_sr.*db_s.(xh).ecdf)/alpha_m));        
+        pdf_mr = max(0,[0;cdf_mr(2:end)-cdf_mr(1:end-1)]); pdf_mr = pdf_mr/sum(pdf_mr);
+        epdf_mr = max(0,[0;ecdf_mr(2:end)-ecdf_mr(1:end-1)]); epdf_mr = epdf_mr/sum(epdf_mr);   
         m_m = dot(epdf_mr,0:k-1);
         m_s = dot(epdf_sr,0:k-1);
         db_s.(fn{i}) = db_severe.(fn{i});
