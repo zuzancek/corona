@@ -29,7 +29,7 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 9;                 s.T_sick_o = 13;       s.T_sick = 11;
+s.T_sick_y = 10;                 s.T_sick_o = 14;       s.T_sick = 11;
 s.T_sick_std = s.SI.std;
 s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
@@ -124,7 +124,7 @@ s.smoothing_method_params = @smooth_series;
         s.pdf_d_o = max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1)));
         s.T_death_y_mean = db_s.opt_fit_d_y.mean;
         s.T_death_o_mean = db_s.opt_fit_d_o.mean;
-        s.time_d = db_s.opt_fit_d_y.time_grid(1:s.k_death+1);
+        s.time_d = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);
         % admission to ICU, ventilation, ECMO
         s.k_ser = 15;
         s.theta_y = db_s.opt_fit_h_y.alpha;
@@ -133,15 +133,16 @@ s.smoothing_method_params = @smooth_series;
         s.pdf_s_o = db_s.opt_fit_h_o.pdf(1:s.k_ser+1)/sum(db_s.opt_fit_h_o.pdf(1:s.k_ser+1));
         s.T_ser_y_mean = db_s.opt_fit_h_y.mean;
         s.T_ser_o_mean = db_s.opt_fit_h_o.mean;
+        s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
         % hospital admission
         s.k_hosp = 20;        
-        s.eta_y = db_t.opt_fit_h_y.alpha*1.5;
-        s.eta_o = db_t.opt_fit_h_o.alpha*0.75;        
+        s.eta_y = db_t.opt_fit_h_y.alpha;
+        s.eta_o = db_t.opt_fit_h_o.alpha;        
         s.pdf_m_y = db_t.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1));
         s.pdf_m_o = db_t.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1));        
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;
         s.T_hosp_o_mean = db_t.opt_fit_h_o.mean;
-        s.time_h = db_t.opt_fit_h_y.time_grid(1:s.k_hosp+1);
+        s.time_h = reshape(db_t.opt_fit_h_y.time_grid(1:s.k_hosp+1),1,[]);
         % recovery (serious,moderate,home)
         s.k_rec = 40;
         s.pdf_sr_y = db_s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_s.opt_fit_r_y.pdf(1:s.k_rec+1));
@@ -154,15 +155,15 @@ s.smoothing_method_params = @smooth_series;
         s.T_rec_m_o_mean = db_m.opt_fit_r_o.mean;
         s.T_rec_y_mean = db_t.opt_fit_r_y.mean;
         s.T_rec_o_mean = db_t.opt_fit_r_o.mean;
-        s.time_r = db_s.opt_fit_r_y.time_grid(1:s.k_rec+1);
+        s.time_r = reshape(db_s.opt_fit_r_y.time_grid(1:s.k_rec+1),1,[]);
         s.k_sick = 20;
-        s.time_s = (0:s.k_sick)';
-        s.pdf_ir_y = pdf('Gamma',s.time_s,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); 
+        s.time_k = reshape((0:s.k_sick),1,[]);
+        s.pdf_ir_y = pdf('Gamma',s.time_k,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); 
         s.pdf_ir_y = s.pdf_ir_y./sum(s.pdf_ir_y);        
-        s.T_rec_i_y_mean = dot(s.time_s,s.pdf_ir_y);
-        s.pdf_ir_o = pdf('Gamma',s.time_s,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); 
+        s.T_rec_i_y_mean = dot(s.time_k,s.pdf_ir_y);
+        s.pdf_ir_o = pdf('Gamma',s.time_k,s.T_sick_o*s.T_sick_std^2,1/s.T_sick_std^2); 
         s.pdf_ir_o = s.pdf_ir_o./sum(s.pdf_ir_o);
-        s.T_rec_i_o_mean = dot(s.time_s,s.pdf_ir_o); 
+        s.T_rec_i_o_mean = dot(s.time_k,s.pdf_ir_o); 
         s.obj_sick_y = makedist('Gamma','a',s.T_sick_y*s.T_sick_std^2,'b',1/s.T_sick_std^2);
         s.obj_sick_o = makedist('Gamma','a',s.T_sick_o*s.T_sick_std^2,'b',1/s.T_sick_std^2);        
     end

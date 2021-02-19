@@ -283,6 +283,8 @@ p.zeta_y = zeta_y;
 p.eta_o = eta_o;
 p.eta_y = eta_y;
 p.kappa_r = kappa_r;
+p.kappa_s = kappa_r;
+p.kappa_m = 1;
 
     function [r] = adjust_distributions(k) %#ok<DEFNU>
         pp = obj_r_y; 

@@ -11,7 +11,6 @@ cut = 0*params.cutoff;
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
-% psi = extend(double(resize(params.serious_cases_ratio,dateFrom:dateTo)),tshift);
 
 %% testing
 % delay in testing (gradual)
@@ -197,7 +196,6 @@ res.X_rep_forecast_smooth = resize(Ots0,enddate(Ots)+1:dateTo);
 res.X_rep_raw = Orts;
 
 % adjust series endpoints and get ratio
-% X = [X;X(end)]; X_o = [X_o;X_o(end)]; X_y = [X_y;X_y(end)];
 rho_real = method_data(tseries(firstData:dateTo,[X_o;X_o(end)])./tseries(firstData:dateTo,[X;X(end)])); 
 rho_real_smooth = method_params(rho_real);
 X = X(tshift:end);
@@ -208,7 +206,7 @@ dateTo_X = dateFrom+length(X);
 dateTo_R = dateFrom+length(dI_data);
 dateTo_0 = min(dateTo_X,dateTo_R);
 obs_ratio_adj = tseries(t0:dateTo_0,s.obs_ratio);
-X = Xts; %tseries(dateFrom:dateTo_X,method_data(X));
+X = Xts; 
 dI_data_real = resize(X,firstData:dateTo_X);
 dI_data_reported = Ots;
 dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
@@ -249,7 +247,9 @@ res.M = M; res.M_o = M_o; res.M_y = M_y;
 res.MR = MR; res.MR_o = MR_o; res.MR_y = MR_y;
 res.H = H; res.H_o = H_o; res.H_y = H_y;
 res.IM = IM; res.IM_o = IM_o; res.IM_y = IM_y;
+res.IH = IM; res.IH_o = IM_o; res.IH_y = IM_y;
 res.IR = IR; res.IR_o = IR_o; res.IR_y = IR_y;
+res.HR = SR+MR; res.HR_o = SR_o+MR_o; res.HR_y = SR_y+MR_y;
 res.R = R; res.RH = RH; res.RX = RX; res.RHX = RHX;
 res.X = X; res.X_o = X_o; res.X_y = X_y;
 % store params
@@ -295,6 +295,7 @@ p.vartheta_y = vartheta_y;
 p.vartheta_o = vartheta_o;
 p.kappa_m = kappa_m;
 p.kappa_s = kappa_s;
+p.kappa_r = kappa_s;
 
     function [r] = set_yo_ratios_params()
         % death (serious cases only)

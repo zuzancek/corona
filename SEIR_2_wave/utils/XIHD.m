@@ -89,11 +89,11 @@ alpha_imy = alpha_imy(:,end:-1:1);
 k_sick = s.k_sick;      
 [pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
 pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-alpha_iro = (1-p.mu_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
-alpha_iry = (1-p.mu_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
+alpha_iro = p.mu_o.*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
+alpha_iry = p.mu_y.*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
 % ******** 2./ moderate cases, at hospital, no intensive case needed
 % A./ admission to ICU...
-k_ser = s.k_ser;  t_ser = s.time_ser;
+k_ser = s.k_ser;  t_ser = s.time_s;
 pdf_ms_y = repmat(s.pdf_s_y',length(varsigma),1);
 pdf_ms_o = repmat(s.pdf_s_o',length(varsigma),1);
 theta_o = s.theta_o.*repmat(kappa_m,1,k_ser+1);
@@ -103,7 +103,7 @@ alpha_msy = theta_y.*pdf_ms_y./repmat(t_ser,T_total,1);
 alpha_mso = alpha_mso(:,end:-1:1);
 alpha_msy = alpha_msy(:,end:-1:1);
 % B./ recovery (at hospital, no IC)
-k_rec = s.k_rec; t_rec = s.time_rec;
+k_rec = s.k_rec; t_rec = s.time_r;
 pdf_mr_y = repmat(s.pdf_mr_y',length(varsigma),1);
 pdf_mr_o = repmat(s.pdf_mr_o',length(varsigma),1);
 vartheta_o = 1-theta_o(:,1).*repmat(kappa_m,1,k_rec+1);
@@ -125,8 +125,8 @@ alpha_sdy = alpha_sdy(:,end:-1:1);
 k_rec = s.k_rec;    t_rec = s.time_r;
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
-zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
-zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
+zeta_o = repmat(1-omega_o(:,1).*kappa_s,1,k_rec+1);
+zeta_y = repmat(1-omega_y(:,1).*kappa_s,1,k_rec+1);
 alpha_sro = zeta_o.*pdf_sr_o./repmat(t_rec,T_total,1);
 alpha_sry = zeta_y.*pdf_sr_y./repmat(t_rec,T_total,1);
 alpha_sro = alpha_sro(:,end:-1:1);
