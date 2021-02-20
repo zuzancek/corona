@@ -125,8 +125,8 @@ s.smoothing_method_params = @smooth_series;
         s.T_death_y_mean = db_t.opt_fit_d_y.mean;
         s.T_death_o_mean = db_t.opt_fit_d_o.mean;
         s.time_d = reshape(db_t.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
-        s.omega_y_s = db_s.opt_fit_d_y.alpha; %/(1-s.deaths_with_covid_share);
-        s.omega_o_s = db_s.opt_fit_d_o.alpha; %/(1-s.deaths_with_covid_share);
+        s.omega_y_s = db_s.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
+        s.omega_o_s = db_s.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
         s.pdf_sd_y = max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1)));
         s.pdf_sd_o = max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1)));
         s.T_death_y_mean_s = db_s.opt_fit_d_y.mean;
@@ -150,7 +150,7 @@ s.smoothing_method_params = @smooth_series;
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;
         s.T_hosp_o_mean = db_t.opt_fit_h_o.mean;
         s.time_h = reshape(db_t.opt_fit_h_y.time_grid(1:s.k_hosp+1),1,[]);
-        % recovery (serious,moderate,home)
+        % recovery (hospital (incl.serious),home)
         s.k_rec = 40;
         s.pdf_hr_y = db_t.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_t.opt_fit_r_y.pdf(1:s.k_rec+1));
         s.pdf_hr_o = db_t.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db_t.opt_fit_r_o.pdf(1:s.k_rec+1));
