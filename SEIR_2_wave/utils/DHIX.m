@@ -24,7 +24,6 @@ dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
 D = method_data(data.D(firstData:dateTo)); % cummulative datehs
 H = method_data(data.H(firstData:dateTo)); % hospitalizations
 S = method_data(data.S(firstData:end)); % serious cases in hospitals
-M = H-S; % non-serious, moderate cases
 r0 = set_yo_ratios_params();
 
 %% params initialization
@@ -44,6 +43,8 @@ k_hosp = s.k_hosp;
 pdf_ih_y = repmat(s.pdf_ih_y',length(varsigma),1);
 pdf_ih_o = repmat(s.pdf_ih_o',length(varsigma),1);
 eta_o = r0.eta_o;   eta_y = r0.eta_y;
+T_hosp_o_mean = s.T_hosp_o_mean;
+T_hosp_y_mean = s.T_hosp_y_mean;
 % B./ recovery
 k_sick = s.k_sick;
 % mu_o = r0.mu_o;   mu_y = r0.mu_y;
@@ -61,7 +62,6 @@ theta_o = r0.theta_o;   theta_y = r0.theta_y;
 T_ser_y_mean = s.T_ser_y_mean;
 T_ser_o_mean = s.T_ser_o_mean;
 % B./ death
-k_death = s.k_death;
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
@@ -117,8 +117,8 @@ IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_o+IH_y;
 % ***** serious cases
 % shares
-s_o = theta_o./eta_o.*T_hosp_o_mean./T_ser_o_mean.*H_o;
-s_y = theta_y./eta_y.*T_hosp_y_mean./T_ser_y_mean.*H_y;
+s_o = theta_o(:,1)./eta_o(:,1).*T_hosp_o_mean./T_ser_o_mean.*H_o;
+s_y = theta_y(:,1)./eta_y(:,1).*T_hosp_y_mean./T_ser_y_mean.*H_y;
 s_tot = max(1,(s_o+s_y));
 S_o = s_o./s_tot.*S;
 S_y = S-S_o;
@@ -134,21 +134,20 @@ SR_o = (extend(get_wa(pdf_sr_o,S_o,zeta_o_s,k_rec+1),k_rec));
 SR_y = (extend(get_wa(pdf_sr_y,S_y,zeta_y_s,k_rec+1),k_rec));
 SR = SR_o+SR_y;
 % admission
-IS_o = method_data(S_o(2:end)-S_o(1:end-1)+SR_o(2:end)+SH_o(2:end));
-IS_y = method_data(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SH_y(2:end));
+IS_o = method_data(extend(S_o(2:end)-S_o(1:end-1)+SR_o(2:end)+SD_o(2:end),1));
+IS_y = method_data(extend(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SD_y(2:end),1));
 IS = IS_o+IS_y;
 % ***** home
 % shares
-I_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
-I_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
+i_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o,k_ser+1)); i_o = method_params(extend(i_o(1:end-1),1));
+i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y,k_ser+1)); i_y = method_params(extend(i_y(1:end-1),1));
+% i = i_o+i_y;
+I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
+I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
-i_o = (get_wa_inv(pdf_is_o,IH_o,I_o_ini,theta_o,k_hosp+1)); i_o = method_params(extend(i_o(1:end-1),1));
-i_y = (get_wa_inv(pdf_is_y,IH_y,I_y_ini,theta_y,k_hosp+1)); i_y = method_params(extend(i_y(1:end-1),1));
-i = i_o+i_y;
 % admission
-kappa_h = method_params(i./I);
-eta_o = eta_o.*kappa_h;
-eta_y = eta_y.*kappa_h;
+kappa_h_o = method_params(I_o./i_o); eta_o = eta_o.*kappa_h_o;
+kappa_h_y = method_params(I_y./i_y); eta_y = eta_y.*kappa_h_y;
 % recovery
 mu_o = repmat(1-eta_o(:,1),1,k_sick+1);
 mu_y = repmat(1-eta_y(:,1),1,k_sick+1);
@@ -161,9 +160,9 @@ X_y = method_data(I_y(2:end)-I_y(1:end-1)+IR_y(2:end)+IH_y(2:end));
 X = X_o+X_y;
 
 %% aggregations
-M = H-S;
-M_o = H_o-S_o;
-M_y = H_y-S_y;
+M = H-S; M_o = H_o-S_o; M_y = H_y-S_y;
+MR = HR-SR; MR_o = HR_o-SR_o; MR_y = HR_y-SR_y;
+MD = HD-SD; MD_o = HD_o-SD_o; MD_y = HD_y-SD_y;
 
 fcast_per = ceil(max(r0.T_hosp_mean));
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
@@ -177,19 +176,21 @@ figure;
 pp1=bar(Orts,'FaceAlpha',0.85);hold on;
 p=bar(resize(Xrts,dateFrom:dateTo-fcast_per-1),'FaceAlpha',0.7);
 bar(resize(Xrts,dateTo-fcast_per:dateTo),'FaceAlpha',0.4,'FaceColor',p.FaceColor);
-pp2=bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.33,'FaceColor','k');
+pp2=bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor',[0.5 0.5 0.5]);
+pp3=bar(mov_median(resize(params.s,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor','k');
 plot(Ots,'b','linewidth',2);
 plot(resize(Xts,dateFrom:dateTo-fcast_per-1),'r','linewidth',2);
 plot(resize(Xts,dateTo-fcast_per:dateTo),'r-.','linewidth',2);
-plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'k--','linewidth',1);
+plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'--','Color',[0.25 0.25 0.25],'linewidth',1);
+plot(smooth_series(mov_median(resize(params.s,dateFrom:dateTo))),'k-.','linewidth',1);
 grid on;
-legend([pp1 p pp2],{'New cases: officially reported','New cases: implied by hospitals', 'Patients at hospitals'});
+legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by hospitals', 'Hospitalizations', 'Intensive Care'});
 title('New cases: reported vs. real');
 
 Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
-Dis = tseries(dateFrom:dateTo,RHX(end-length(Xts)+1:end));
+Dis = tseries(dateFrom:dateTo,HR(end-length(Xts)+1:end));
 Adm_rep = method_data(tseries(dateFrom:dateTo,data.A(end-length(Xts)+1:end)));
-Adm = tseries(dateFrom:dateTo,IM(end-length(Xts)+1:end));
+Adm = tseries(dateFrom:dateTo,IH(end-length(Xts)+1:end));
 
 figure;
 subplot(2,1,1)
@@ -267,15 +268,14 @@ res.sa = sa;
 res.D = D; res.SD = SD; res.SD_o = SD_o; res.SD_y = SD_y; 
 res.S = S; res.S_o = S_o; res.S_y = S_y;
 res.SR = SR; res.SR_o = SR_o; res.SR_y = SR_y;
-res.MS = MS; res.MS_o = MS_o; res.MS_y = MS_y; 
 res.M = M; res.M_o = M_o; res.M_y = M_y;
 res.MR = MR; res.MR_o = MR_o; res.MR_y = MR_y;
+res.MD = MD; res.MD_o = MD_o; res.MD_y = MD_y;
 res.H = H; res.H_o = H_o; res.H_y = H_y;
-res.IM = IM; res.IM_o = IM_o; res.IM_y = IM_y;
-res.IH = IM; res.IH_o = IM_o; res.IH_y = IM_y;
+res.IH = IH; res.IH_o = IH_o; res.IH_y = IH_y;
+res.IS = IS; res.IS_o = IS_o; res.IS_y = IS_y;
 res.IR = IR; res.IR_o = IR_o; res.IR_y = IR_y;
-res.HR = SR+MR; res.HR_o = SR_o+MR_o; res.HR_y = SR_y+MR_y;
-res.R = R; res.RH = RH; res.RX = RX; res.RHX = RHX;
+res.HR = HR; res.HR_o = HR_o; res.HR_y = HR_y;
 res.X = X; res.X_o = X_o; res.X_y = X_y;
 % store params
 ini.I = I_ini; ini.I_o = I_o_ini; ini.I_y = I_y_ini;
@@ -297,17 +297,21 @@ p.pdf_sd_y = pdf_sd_y;
 p.pdf_sd_o = pdf_sd_o;
 p.pdf_sr_y = pdf_sr_y;
 p.pdf_sr_o = pdf_sr_o;
-p.pdf_mr_y = pdf_mr_y;
-p.pdf_mr_o = pdf_mr_o;
+p.pdf_hr_y = pdf_hr_y;
+p.pdf_hr_o = pdf_hr_o;
+p.pdf_hd_y = pdf_hd_y;
+p.pdf_hd_o = pdf_hd_o;
 p.pdf_ir_y = pdf_ir_y;
 p.pdf_ir_o = pdf_ir_o;
-p.pdf_ms_y = pdf_ms_y;
-p.pdf_ms_o = pdf_ms_o;
-p.pdf_im_y = pdf_im_y;
-p.pdf_im_o = pdf_im_o;
+p.pdf_is_y = pdf_is_y;
+p.pdf_is_o = pdf_is_o;
+p.pdf_ih_y = pdf_ih_y;
+p.pdf_ih_o = pdf_ih_o;
 p.time_ir = time_ir;
 p.omega_o = omega_o;
 p.omega_y = omega_y;
+p.omega_o_s = omega_o_s;
+p.omega_y_s = omega_y_s;
 p.zeta_o = zeta_o;
 p.zeta_y = zeta_y;
 p.eta_o = eta_o;
@@ -316,16 +320,17 @@ p.mu_o = mu_o;
 p.mu_y = mu_y;
 p.theta_y = theta_y;
 p.theta_o = theta_o;
-p.vartheta_y = vartheta_y;
-p.vartheta_o = vartheta_o;
-p.kappa_m = kappa_m;
+p.kappa_d = kappa_d;
 p.kappa_s = kappa_s;
-p.kappa_r = kappa_s;
+p.kappa_h_o = kappa_h_o;
+p.kappa_h_y = kappa_h_y;
 
     function [r] = set_yo_ratios_params()
-        % death (serious cases only)
+        % death (h+s)
         r.omega_o = s.omega_o+zeros(length(varsigma),s.k_death+1);
         r.omega_y = s.omega_y+zeros(length(varsigma),s.k_death+1);
+        r.omega_o_s = s.omega_o_s+zeros(length(varsigma),s.k_death+1);
+        r.omega_y_s = s.omega_y_s+zeros(length(varsigma),s.k_death+1);
         % admission to ICU...
         r.theta_o = s.theta_o+zeros(length(varsigma),s.k_ser+1);
         r.theta_y = s.theta_y+zeros(length(varsigma),s.k_ser+1);

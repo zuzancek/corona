@@ -29,9 +29,9 @@ s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
 s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
 s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
 % sickness/symptoms period
-s.T_sick_y = 9;                 s.T_sick_o = 13;       s.T_sick = 11;
+s.T_sick_y = 10;                 s.T_sick_o = 14;       s.T_sick = 11;
 s.T_sick_std = s.SI.std;
-s.k_sick = 20;                  s.T_sick_pdf_type = 'Gamma'; 
+s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma'; 
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
 s.T_pre.std = s.SI.std;
@@ -142,9 +142,9 @@ s.smoothing_method_params = @smooth_series;
         s.T_ser_o_mean = db_s.opt_fit_h_o.mean;
         s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
         % hospital admission
-        s.k_hosp = 20;        
-        s.eta_y = db_t.opt_fit_h_y.alpha;
-        s.eta_o = db_t.opt_fit_h_o.alpha;        
+        s.k_hosp = 25;        
+        s.eta_y = 1.25*db_t.opt_fit_h_y.alpha;
+        s.eta_o = 0.85*db_t.opt_fit_h_o.alpha;        
         s.pdf_ih_y = db_t.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1));
         s.pdf_ih_o = db_t.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1));        
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;
@@ -167,7 +167,7 @@ s.smoothing_method_params = @smooth_series;
         s.T_rec_y_mean = db_t.opt_fit_r_y.mean;
         s.T_rec_o_mean = db_t.opt_fit_r_o.mean;
         s.time_r = reshape(db_s.opt_fit_r_y.time_grid(1:s.k_rec+1),1,[]);
-        s.k_sick = 20;
+        s.k_sick = 25;
         s.time_k = reshape((0:s.k_sick),1,[]);
         s.pdf_ir_y = pdf('Gamma',s.time_k,s.T_sick_y*s.T_sick_std^2,1/s.T_sick_std^2); 
         s.pdf_ir_y = s.pdf_ir_y./sum(s.pdf_ir_y);        

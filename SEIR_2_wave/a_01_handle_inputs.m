@@ -50,7 +50,7 @@ old_ratio = db_age.Old./db_age.Total;
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;     cases_data.old_ratio_raw = old_ratio_raw;
 
 % observed ratio
-delay.v = 0*([0.5 1 0.5 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
+delay.v = 1*([0.5 1 0.5 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = deaths_data.old_ratio;
 params.cases_old_ratio = old_ratio;
@@ -59,6 +59,7 @@ params.serious_cases_ratio = hosp_data.S_H_rate;
 params.cutoff = 3;
 params.adj = 0; 
 params.h = hosp_data.H;
+params.s = hosp_data.S;
 [dI_inflow_real, res_implied, params] = fun_0(x,hosp_data,s,disp_from,t1,t0,...
     params,delay);
 cases_data.cases_pcr_implied = dI_inflow_real;
