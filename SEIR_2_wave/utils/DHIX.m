@@ -11,6 +11,7 @@ cut = 0*params.cutoff;
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
+delta = extend(double(resize(params.death_adj,dateFrom:dateTo)),tshift);
 
 %% testing
 % delay in testing (gradual)
@@ -32,7 +33,7 @@ r0 = set_yo_ratios_params();
 k_death = s.k_death;
 pdf_hd_y = repmat(s.pdf_hd_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_hd_o',length(varsigma),1);
-omega_o = r0.omega_o;   omega_y = r0.omega_y;
+omega_o = r0.omega_o./delta;   omega_y = r0.omega_y./delta;
 % B./ recovery
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
@@ -64,7 +65,7 @@ T_ser_o_mean = s.T_ser_o_mean;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
-omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
+omega_o_s = r0.omega_o_s./delta;   omega_y_s = r0.omega_y_s./delta;
 % C./ recovery
 zeta_o_s = repmat(1-omega_o_s(:,1),1,k_rec+1);
 zeta_y_s = repmat(1-omega_y_s(:,1),1,k_rec+1);
@@ -324,6 +325,7 @@ p.kappa_d = kappa_d;
 p.kappa_s = kappa_s;
 p.kappa_h_o = kappa_h_o;
 p.kappa_h_y = kappa_h_y;
+p.delta = delta;
 
     function [r] = set_yo_ratios_params()
         % death (h+s)
