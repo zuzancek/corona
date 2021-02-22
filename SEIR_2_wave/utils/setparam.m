@@ -118,8 +118,8 @@ s.smoothing_method_params = @smooth_series;
         db_t = db.stat_total; db_s = db.stat_severe; db_m = db.stat_mild;
         % death (serious cases only, use db_s database)
         s.k_death = 40;
-        s.omega_y = db_t.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
-        s.omega_o = db_t.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
+        s.omega_y = db_t.opt_fit_d_y.alpha; %/(1-s.deaths_with_covid_share);
+        s.omega_o = db_t.opt_fit_d_o.alpha; %/(1-s.deaths_with_covid_share);
         s.pdf_hd_y = max(0,db_t.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_t.opt_fit_d_y.pdf(1:s.k_death+1)));
         s.pdf_hd_o = max(0,db_t.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_t.opt_fit_d_o.pdf(1:s.k_death+1)));
         s.T_death_y_mean = db_t.opt_fit_d_y.mean;

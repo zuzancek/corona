@@ -5,7 +5,7 @@ burnin = s.firstData_offset;
 firstData = -burnin+dateFrom;
 
 T_total = dateTo-firstData+1;
-shift_i = max(s.k_hosp,s.k_sick);
+shift_i = max([s.k_hosp,s.k_sick, s.k_ser]);
 shift_h = max(s.k_death,s.k_rec);
 shift = max(shift_i,shift_h);
 
@@ -50,12 +50,12 @@ try
 catch err %#ok<NASGU>
     T_delay = zeros(T,1);
 end 
-rho = extend(rho,shift_i);
+rho = extend(rho,shift);
 % kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_h_o = extend(kappa_h_o,T_total-length(kappa_h_o));
 kappa_h_y = extend(kappa_h_y,T_total-length(kappa_h_y));
 kappa_d = extend(kappa_d,T_total-length(kappa_d));
-T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift_i);
+T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift);
 varsigma = method_params(init.varsigma);
 varsigma = extend(varsigma(dateFrom:dateTo),burnin);
 
@@ -67,10 +67,11 @@ X = method_data(x.NewCases(firstData:dateTo));
 X_o = X.*rho(end-T_total+1:end);
 X_y = X-X_o;
 % active cases: Young/old
-I0 = extend(I0,T_total+shift_i-length(I0));
-I_o = zeros(T_total+shift,1); 
-I_o(end-T_total-shift_i+1:end) = (I0.*rho(end-length(I0)+1:end));
-I_y = extend(I0,shift_i)-I_o;
+I0 = extend(I0,T_total+shift-length(I0));
+I_o = 0*I0;
+I_o(end-T_total-shift+1:end) = (I0.*rho(end-length(I0)+1:end));
+I_y = I0-I_o;
+J_o = I_o; J_y = I_y;
 % hospitalizations: Old/Young, moderate cases (M) vs intensive care (S)
 H0 = extend(H0,T_total+shift-length(H0));
 H_o = H0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
@@ -83,10 +84,11 @@ D0 = extend(D0,T_total+shift-length(D0));
 D_o = zeros(T_total+shift,1); 
 D_o(1:shift) = D0(1)*varsigma(1);
 D_y = D0-D_o;
+F_y = D_y; F_o = D_o;
 
 % other arrays
 d_I_H_o = zeros(T_total,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I_H_o;
-d_I_S_o = d_I_H_o; d_I_S_y = d_I_H_o; 
+d_J_S_o = d_I_H_o; d_J_S_y = d_I_H_o; d_J_R_o = d_I_H_o; d_J_R_y = d_I_H_o;
 d_S_R_o = d_I_H_o; d_S_R_y = d_I_H_o; d_S_D_o = d_I_H_o; d_S_D_y = d_I_H_o; 
 d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o; d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o;
 
@@ -117,15 +119,21 @@ alpha_hdo = alpha_hdo(:,end:-1:1);
 alpha_hdy = alpha_hdy(:,end:-1:1);
 % B./ recovery
 k_rec = s.k_rec; t_rec = s.time_r;
+pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
+pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
 alpha_hro = (1-s.omega_o.*kappa_d).*pdf_hr_o./t_rec;    alpha_hro = alpha_hro(:,end:-1:1);
 alpha_hry = (1-s.omega_y.*kappa_d).*pdf_hr_y./t_rec;    alpha_hry = alpha_hry(:,end:-1:1);
 % ******* 3./ serious cases (hospital+Intensive care needed)
 % A./ admission (ECMO, ICU, Ventilation)
-k_ser = s.k_ser; t_ser = s.time_ser;
-alpha_iso = s.theta_o.*p.pdf_is_o./repmat(t_ser,T_total,1);
-alpha_isy = s.theta_y.*p.pdf_is_y./repmat(t_ser,T_total,1);
-alpha_iso = alpha_iso(:,end:-1:1);
-alpha_isy = alpha_isy(:,end:-1:1);
+k_ser = s.k_ser; t_ser = 0:k_ser;
+alpha_jso = s.theta_o.*p.pdf_is_o./repmat(t_ser,T_total,1);
+alpha_jsy = s.theta_y.*p.pdf_is_y./repmat(t_ser,T_total,1);
+alpha_jso = alpha_jso(:,end:-1:1);
+alpha_jsy = alpha_jsy(:,end:-1:1);
+alpha_jro = (1-s.theta_o).*pdf_ir_o./time_ir; 
+alpha_jry = (1-s.theta_y).*pdf_ir_y./time_ir; 
+alpha_jro = alpha_jro(:,end:-1:1);
+alpha_jry = alpha_jry(:,end:-1:1);
 % B./ deaths
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
@@ -147,7 +155,7 @@ alpha_sry = alpha_sry(:,end:-1:1);
 % S(t) = S(t-1)+M_S(t)-S_D(t)-S_R(t);
 % D(t) = D(t-1)+S_D(t);
 
-% ******* Calculation
+% ******* Calculation I.
 for t=1:T_total
     tt = t+shift;
     %
@@ -167,20 +175,35 @@ for t=1:T_total
     d_H_R_y(t) = dot(alpha_hry(t,1:end-1),H_y(tt-k_rec:tt-1));
     H_y(tt) = H_y(tt-1)+d_I_H_y(t)-d_H_D_y(t)-d_H_R_y(t);    
     %
-    d_I_S_o(t) = dot(alpha_iso(t,1:end-1),I_o(tt-k_ser:tt-1));     
-    d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));   
-    d_S_D_o(t) = dot(alpha_sdo(t,1:end-1),S_o(tt-k_death:tt-1));
-    S_o(tt) = S_o(tt-1)+d_I_S_o(t)-d_S_R_o(t)-d_S_D_o(t);
-    %
-    d_I_S_y(t) = dot(alpha_isy(t,1:end-1),I_y(tt-k_ser:tt-1));     
-    d_S_R_y(t) = dot(alpha_sry(t,1:end-1),S_y(tt-k_rec:tt-1));   
-    d_S_D_y(t) = dot(alpha_sdy(t,1:end-1),S_y(tt-k_death:tt-1));
-    S_y(tt) = S_y(tt-1)+d_I_S_y(t)-d_S_R_y(t)-d_S_D_y(t);
-    %
     D_o(tt) = D_o(tt-1)+d_H_D_o(t);
     D_y(tt) = D_y(tt-1)+d_H_D_y(t);
 end
 
+% ******* Calculation II.
+for t=1:T_total
+    tt = t+shift;
+    %
+    d_J_S_o(t) = dot(alpha_jso(t,1:end-1),J_o(tt-k_ser:tt-1));     
+    d_J_R_o(t) = dot(alpha_jro(t,1:end-1),J_o(tt-k_sick:tt-1));
+    J_o(tt) = J_o(tt-1)+X_o(t)-d_J_S_o(t)-d_J_R_o(t);
+    %
+    d_J_S_y(t) = dot(alpha_jsy(t,1:end-1),J_y(tt-k_ser:tt-1));     
+    d_J_R_y(t) = dot(alpha_jry(t,1:end-1),J_y(tt-k_sick:tt-1));
+    J_y(tt) = J_y(tt-1)+X_y(t)-d_J_H_y(t)-d_J_R_y(t);
+    %    
+    d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));   
+    d_S_D_o(t) = dot(alpha_sdo(t,1:end-1),S_o(tt-k_death:tt-1));
+    S_o(tt) = S_o(tt-1)+d_J_S_o(t)-d_S_R_o(t)-d_S_D_o(t);
+    %
+    d_S_R_y(t) = dot(alpha_sry(t,1:end-1),S_y(tt-k_rec:tt-1));   
+    d_S_D_y(t) = dot(alpha_sdy(t,1:end-1),S_y(tt-k_death:tt-1));
+    S_y(tt) = S_y(tt-1)+d_J_S_y(t)-d_S_R_y(t)-d_S_D_y(t);
+    %
+    F_o(tt) = F_o(tt-1)+d_S_D_o(t);
+    F_y(tt) = F_y(tt-1)+d_S_D_y(t);
+end
+
+%% process results
 % store results
 out_full = struct;
 out_full.X_o = tseries(firstData:dateTo,X_o(end-T_total+1:end));
@@ -193,6 +216,8 @@ out_full.S_o = tseries(firstData:dateTo,S_o(end-T_total+1:end));
 out_full.S_y = tseries(firstData:dateTo,S_y(end-T_total+1:end));
 out_full.D_o = tseries(firstData:dateTo,D_o(end-T_total+1:end));
 out_full.D_y = tseries(firstData:dateTo,D_y(end-T_total+1:end));
+out_full.F_o = tseries(firstData:dateTo,F_o(end-T_total+1:end));
+out_full.F_y = tseries(firstData:dateTo,F_y(end-T_total+1:end));
 out_full.IH_y = tseries(firstData:dateTo,d_I_H_y);
 out_full.IH_o = tseries(firstData:dateTo,d_I_H_o);
 out_full.HR_y = tseries(firstData:dateTo,d_H_R_y);
@@ -202,6 +227,7 @@ out_full.I = out_full.I_o+out_full.I_y;
 out_full.H = out_full.H_o+out_full.H_y;
 out_full.S = out_full.S_o+out_full.S_y;
 out_full.D = out_full.D_o+out_full.D_y;
+out_full.F = out_full.F_o+out_full.F_y;
 out_full.IH = out_full.IH_o+out_full.IH_y;
 out_full.HR = out_full.HR_o+out_full.HR_y;
 
@@ -216,6 +242,8 @@ out_rep.S_o = resize(out_rep.S_o,dateFrom:dateTo);
 out_rep.S_y = resize(out_rep.S_y,dateFrom:dateTo);
 out_rep.D_o = resize(out_rep.D_o,dateFrom:dateTo);
 out_rep.D_y = resize(out_rep.D_y,dateFrom:dateTo);
+out_rep.F_o = resize(out_rep.F_o,dateFrom:dateTo);
+out_rep.F_y = resize(out_rep.F_y,dateFrom:dateTo);
 out_rep.IH_y = resize(out_rep.IH_y,dateFrom:dateTo);
 out_rep.IH_o = resize(out_rep.IH_o,dateFrom:dateTo);
 out_rep.HR_y = resize(out_rep.HR_y,dateFrom:dateTo);
@@ -225,6 +253,7 @@ out_full.I = out_rep.I_o+out_rep.I_y;
 out_full.H = out_rep.H_o+out_rep.H_y;
 out_full.S = out_rep.S_o+out_rep.S_y;
 out_full.D = out_rep.D_o+out_rep.D_y;
+out_full.F = out_rep.F_o+out_rep.F_y;
 out_full.IH = out_rep.IH_o+out_rep.IH_y;
 out_full.HR = out_rep.HR_o+out_rep.HR_y;
 
