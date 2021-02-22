@@ -69,5 +69,6 @@ db_d.old_ratio_smooth = smooth_series(db_d.old_ratio);
 db_d.total_raw = db_h.D_raw;        db_d.total = db_h.D;        db_d.total_smooth = db_h.D_smooth;
 db_d.on_raw = db_h.D_on_raw;        db_d.on = db_h.D_on;        db_d.on_smooth = db_h.D_on_smooth;
 db_d.with_raw = db_h.D_with_raw;    db_d.with = db_h.D_with;    db_d.with_smooth = db_h.D_with_smooth;
+db_d.delta = mov_median_adj(db_h.D_on./db_h.D);
 
 end

@@ -189,7 +189,7 @@ for t=1:T_total
     %
     d_J_S_y(t) = dot(alpha_jsy(t,1:end-1),J_y(tt-k_ser:tt-1));     
     d_J_R_y(t) = dot(alpha_jry(t,1:end-1),J_y(tt-k_sick:tt-1));
-    J_y(tt) = J_y(tt-1)+X_y(t)-d_J_H_y(t)-d_J_R_y(t);
+    J_y(tt) = J_y(tt-1)+X_y(t)-d_J_S_y(t)-d_J_R_y(t);
     %    
     d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));   
     d_S_D_o(t) = dot(alpha_sdo(t,1:end-1),S_o(tt-k_death:tt-1));
