@@ -143,8 +143,8 @@ s.smoothing_method_params = @smooth_series;
         s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
         % hospital admission
         s.k_hosp = 25;        
-        s.eta_y = 1.25*db_t.opt_fit_h_y.alpha;
-        s.eta_o = 0.85*db_t.opt_fit_h_o.alpha;        
+        s.eta_y =1*db_t.opt_fit_h_y.alpha; % 1.25
+        s.eta_o = 1*db_t.opt_fit_h_o.alpha; % 0.85   
         s.pdf_ih_y = db_t.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1));
         s.pdf_ih_o = db_t.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1));        
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;

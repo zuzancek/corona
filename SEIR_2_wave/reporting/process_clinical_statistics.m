@@ -16,19 +16,23 @@ db_h.H_smooth = db_h.H_s_smooth+db_h.H_c_smooth;
 
 % ICU (missing data)
 c = s.ICU;
-c(startdate(db_h.H_smooth)+40:startdate(db_h.H_smooth)+60) = NaN;
-c = interp(c,startdate(db_h.H_smooth):enddate(db_h.H_smooth));
+date0 = min(find(resize(c,dateFrom:dateTo)>0)); %#ok<MXFND>
+c(dateFrom:dateTo) = c(date0)./db_h.H(date0).*db_h.H;
 db_h.C_raw = c;
 db_h.C = mov_median_adj(c);
 db_h.C_smooth = smooth_series(db_h.C);
 
 % Ventilations
-db_h.V_raw = resize(s.Ventilation,dateFrom:dateTo);
+v = s.Ventilation;
+v(dateFrom:dateTo) = v(date0)./db_h.H(date0).*db_h.H;
+db_h.V_raw = v;
 db_h.V = mov_median_adj(db_h.V_raw);
 db_h.V_smooth = smooth_series(db_h.V);
 
 % ECMO
-db_h.E_raw = resize(s.OAIM,dateFrom:dateTo);
+e = s.OAIM;
+e(dateFrom:dateTo) = e(date0)./db_h.H(date0).*db_h.H;
+db_h.E_raw = e;
 db_h.E = mov_median_adj(db_h.E_raw);
 db_h.E_smooth = smooth_series(db_h.E);
 

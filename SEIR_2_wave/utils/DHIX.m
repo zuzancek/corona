@@ -11,7 +11,7 @@ cut = 0*params.cutoff;
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
-delta = extend(double(resize(params.death_adj,dateFrom:dateTo)),tshift);
+delta = 1+0*extend(double(resize(params.death_adj,dateFrom:dateTo)),tshift);
 
 %% testing
 % delay in testing (gradual)
@@ -149,6 +149,9 @@ I = I_o+I_y;
 % admission
 kappa_h_o = method_params(I_o./i_o); eta_o = eta_o.*kappa_h_o;
 kappa_h_y = method_params(I_y./i_y); eta_y = eta_y.*kappa_h_y;
+I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
+I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
+I = I_o+I_y;
 % recovery
 mu_o = repmat(1-eta_o(:,1),1,k_sick+1);
 mu_y = repmat(1-eta_y(:,1),1,k_sick+1);
