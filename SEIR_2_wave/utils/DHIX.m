@@ -52,8 +52,6 @@ k_hosp = s.k_hosp;
 pdf_ih_y = repmat(s.pdf_ih_y',length(varsigma),1);
 pdf_ih_o = repmat(s.pdf_ih_o',length(varsigma),1);
 eta_o = r0.eta_o;   eta_y = r0.eta_y;
-T_hosp_o_mean = s.T_hosp_o_mean;
-T_hosp_y_mean = s.T_hosp_y_mean;
 % B./ recovery
 k_sick = s.k_sick;
 % mu_o = r0.mu_o;   mu_y = r0.mu_y;
@@ -68,15 +66,11 @@ k_ser = s.k_ser;
 pdf_is_y = repmat(s.pdf_is_y',length(varsigma),1);
 pdf_is_o = repmat(s.pdf_is_o',length(varsigma),1);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
-T_ser_y_mean = s.T_ser_y_mean;
-T_ser_o_mean = s.T_ser_o_mean;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
 omega_o_s = r0.omega_o_s./nu;   omega_y_s = r0.omega_y_s./nu;
 % C./ recovery
-zeta_o_s = repmat(1-omega_o_s(:,1),1,k_rec+1);
-zeta_y_s = repmat(1-omega_y_s(:,1),1,k_rec+1);
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
 
@@ -137,10 +131,14 @@ theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
 % conditions than expected
 % deaths
+omega_o_s = min(1,omega_o_s.*repmat(kappa_d,1,k_death+1));
+omega_y_s = min(1,omega_y_s.*repmat(kappa_d,1,k_death+1));
 SD_o = (extend(get_wa(pdf_sd_o,S_o,omega_o_s,k_death+1),k_death));
 SD_y = (extend(get_wa(pdf_sd_y,S_y,omega_y_s,k_death+1),k_death));
 SD = SD_o+SD_y;
 % recovery
+zeta_o_s = repmat(1-omega_o_s(:,1),1,k_rec+1);
+zeta_y_s = repmat(1-omega_y_s(:,1),1,k_rec+1);
 SR_o = (extend(get_wa(pdf_sr_o,S_o,zeta_o_s,k_rec+1),k_rec));
 SR_y = (extend(get_wa(pdf_sr_y,S_y,zeta_y_s,k_rec+1),k_rec));
 SR = SR_o+SR_y;
@@ -199,11 +197,6 @@ plot(smooth_series(mov_median(resize(params.s,dateFrom:dateTo))),'k-.','linewidt
 grid on;
 legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by hospitals', 'Hospitalizations', 'Intensive Care'});
 title('New cases: reported vs. real');
-
-Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
-Dis = tseries(dateFrom:dateTo,HR(end-length(Xts)+1:end));
-Adm_rep = method_data(tseries(dateFrom:dateTo,data.A(end-length(Xts)+1:end)));
-Adm = tseries(dateFrom:dateTo,IH(end-length(Xts)+1:end));
 
 %
 Len = length(Xts)-fcast_per;
