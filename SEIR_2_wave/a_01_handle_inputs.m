@@ -111,6 +111,7 @@ reported_data = hosp_data+deaths_data;
 true_data = out_check;
 counterfact_data = out;
 plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',true,'reported',true);
+plot_epidemiology_cmp(res_implied,counterfact_data,reported_data,dateFrom,dateTo,'implied',true,'reported',true);
 
 figure('Name','New cases (reported vs.true)');
 fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;

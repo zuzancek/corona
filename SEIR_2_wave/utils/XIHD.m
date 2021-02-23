@@ -13,8 +13,6 @@ I0 = init.I(firstData-shift_i+2:dateTo);
 H0 = init.H(firstData-shift_h+2:dateTo);
 S0 = init.S(firstData-shift_h+2:dateTo);
 D0 = init.D(firstData:dateTo);
-IH0 = init.IH(end-T+1:end);
-HR0 = init.HR(end-T+1:end);
 
 method_params = s.smoothing_method_params;
 method_data = s.smoothing_method_data;
@@ -274,36 +272,19 @@ out_full.F = out_rep.F_o+out_rep.F_y;
 out_full.IH = out_rep.IH_o+out_rep.IH_y;
 out_full.HR = out_rep.HR_o+out_rep.HR_y;
 
-figure;
-pp3=bar(out_rep.H); hold on;
-pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
-pp7=bar(out_rep.S,'FaceColor',0.25*[1 1 1]); hold on;
-pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
-plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
-pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
-pp6=plot((resize(init.S,dateFrom:dateTo)),'k','linewidth',2);hold on;
-pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
-grid on;
-legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
-    'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
-    'Serious cases - reported', 'Serious cases - implied'});
-% 
 % figure;
-% subplot(2,1,1)
-% pp1=bar(resize(init.A,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
-% pp2=plot(out_rep.IH,'linewidth',2);
-% pp3=plot(tseries(dateFrom:dateTo,IH0),'linewidth',2,'Color',[1 1 1]*0.5);
+% pp3=bar(out_rep.H); hold on;
+% pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
+% pp7=bar(out_rep.S,'FaceColor',0.25*[1 1 1]); hold on;
+% pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
+% plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
+% pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
+% pp6=plot((resize(init.S,dateFrom:dateTo)),'k','linewidth',2);hold on;
+% pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
 % grid on;
-% legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
-% title('Hospital admissions');
-% 
-% subplot(2,1,2)
-% pp1=bar(resize(init.R,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
-% pp2=plot(out_rep.HR,'linewidth',2);
-% pp3=plot(tseries(dateFrom:dateTo,HR0),'linewidth',2,'Color',[1 1 1]*0.5);
-% grid on;
-% legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
-% title('Hospital discharges');
+% legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
+%     'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
+%     'Serious cases - reported', 'Serious cases - implied'});
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);
