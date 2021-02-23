@@ -90,6 +90,7 @@ init.kappa_d = params.kappa_d;
 init.nu = params.nu;
 init.kappa_h_o = params.kappa_h_o;
 init.kappa_h_y = params.kappa_h_y;
+init.kappa_s = params.kappa_s;
 init.omega_o = params.omega_o; init.omega_y = params.omega_y;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
@@ -106,7 +107,10 @@ plot_epidemiology_reporting(cases_data,test_data,dateFrom,dateTo,'raw',false,'mm
 % 2. analysis, comparison
 % epidemiology
 % hospitals
-plot_clinical_cmp(out_check,hosp_data+deaths_data,out,dateFrom,dateTo,'mm',true,'reported',true,'reduced',true);
+reported_data = hosp_data+deaths_data;
+true_data = out_check;
+counterfact_data = out;
+plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',true,'reported',true);
 
 figure('Name','New cases (reported vs.true)');
 fh1 = plot(par.X_rep_smooth,'linewidth',2);hold on;

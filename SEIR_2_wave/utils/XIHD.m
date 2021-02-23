@@ -31,6 +31,11 @@ catch err %#ok<NASGU>
     nu = ones(T,1);
 end
 try
+    kappa_s = init.kappa_s(end-T_total+1:end);
+catch err %#ok<NASGU>
+    kappa_s = ones(T,1);
+end
+try
     kappa_h_y = init.kappa_h_y(end-T_total+1:end);
 catch err %#ok<NASGU>
     kappa_h_y = ones(T,1);
@@ -55,6 +60,7 @@ nu = extend(nu,T_total-length(nu));
 % kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_h_o = extend(kappa_h_o,T_total-length(kappa_h_o));
 kappa_h_y = extend(kappa_h_y,T_total-length(kappa_h_y));
+kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_d = extend(kappa_d,T_total-length(kappa_d));
 T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift);
 varsigma = method_params(init.varsigma);
@@ -127,26 +133,30 @@ alpha_hry = (1-s.omega_y.*kappa_d./nu).*pdf_hr_y./t_rec;    alpha_hry = alpha_hr
 % ******* 3./ serious cases (hospital+Intensive care needed)
 % A./ admission (ECMO, ICU, Ventilation)
 k_ser = s.k_ser; t_ser = 0:k_ser;
-alpha_jso = s.theta_o.*p.pdf_is_o./repmat(t_ser,T_total,1);
-alpha_jsy = s.theta_y.*p.pdf_is_y./repmat(t_ser,T_total,1);
+alpha_jso = s.theta_o.*kappa_s.*p.pdf_is_o./repmat(t_ser,T_total,1);
+alpha_jsy = s.theta_y.*kappa_s.*p.pdf_is_y./repmat(t_ser,T_total,1);
 alpha_jso = alpha_jso(:,end:-1:1);
 alpha_jsy = alpha_jsy(:,end:-1:1);
-alpha_jro = (1-s.theta_o).*pdf_ir_o./time_ir; 
-alpha_jry = (1-s.theta_y).*pdf_ir_y./time_ir; 
+alpha_jro = (1-s.theta_o.*kappa_s).*pdf_ir_o./time_ir; 
+alpha_jry = (1-s.theta_y.*kappa_s).*pdf_ir_y./time_ir; 
 alpha_jro = alpha_jro(:,end:-1:1);
 alpha_jry = alpha_jry(:,end:-1:1);
 % B./ deaths
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
-alpha_sdo = s.omega_o_s.*kappa_d./nu.*pdf_sd_o./repmat(t_death,T_total,1);
-alpha_sdy = s.omega_y_s.*kappa_d./nu.*pdf_sd_y./repmat(t_death,T_total,1);
+% alpha_sdo = s.omega_o_s.*kappa_d./nu.*pdf_sd_o./repmat(t_death,T_total,1);
+% alpha_sdy = s.omega_y_s.*kappa_d./nu.*pdf_sd_y./repmat(t_death,T_total,1);
+alpha_sdo = s.omega_o_s.*pdf_sd_o./repmat(t_death,T_total,1);
+alpha_sdy = s.omega_y_s.*pdf_sd_y./repmat(t_death,T_total,1);
 alpha_sdo = alpha_sdo(:,end:-1:1);
 alpha_sdy = alpha_sdy(:,end:-1:1);
 % C./ recovery
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
-alpha_sro = (1-s.omega_o_s.*kappa_d./nu).*pdf_sr_o./repmat(t_rec,T_total,1);
-alpha_sry = (1-s.omega_y_s.*kappa_d./nu).*pdf_sr_y./repmat(t_rec,T_total,1);
+% alpha_sro = (1-s.omega_o_s.*kappa_d./nu).*pdf_sr_o./repmat(t_rec,T_total,1);
+% alpha_sry = (1-s.omega_y_s.*kappa_d./nu).*pdf_sr_y./repmat(t_rec,T_total,1);
+alpha_sro = (1-s.omega_o_s).*pdf_sr_o./repmat(t_rec,T_total,1);
+alpha_sry = (1-s.omega_y_s).*pdf_sr_y./repmat(t_rec,T_total,1);
 alpha_sro = alpha_sro(:,end:-1:1);
 alpha_sry = alpha_sry(:,end:-1:1);
 
@@ -223,9 +233,12 @@ out_full.IH_y = tseries(firstData:dateTo,d_I_H_y);
 out_full.IH_o = tseries(firstData:dateTo,d_I_H_o);
 out_full.HR_y = tseries(firstData:dateTo,d_H_R_y);
 out_full.HR_o = tseries(firstData:dateTo,d_H_R_o);
+out_full.M_o = out_full.H_o-out_full.S_o;
+out_full.M_y = out_full.H_y-out_full.S_y;
 out_full.X = out_full.X_o+out_full.X_y;
 out_full.I = out_full.I_o+out_full.I_y;
 out_full.H = out_full.H_o+out_full.H_y;
+out_full.M = out_full.M_o+out_full.M_y;
 out_full.S = out_full.S_o+out_full.S_y;
 out_full.D = out_full.D_o+out_full.D_y;
 out_full.F = out_full.F_o+out_full.F_y;
@@ -245,6 +258,8 @@ out_rep.D_o = resize(out_rep.D_o,dateFrom:dateTo);
 out_rep.D_y = resize(out_rep.D_y,dateFrom:dateTo);
 out_rep.F_o = resize(out_rep.F_o,dateFrom:dateTo);
 out_rep.F_y = resize(out_rep.F_y,dateFrom:dateTo);
+out_rep.M_o = resize(out_rep.M_o,dateFrom:dateTo);
+out_rep.M_y = resize(out_rep.M_y,dateFrom:dateTo);
 out_rep.IH_y = resize(out_rep.IH_y,dateFrom:dateTo);
 out_rep.IH_o = resize(out_rep.IH_o,dateFrom:dateTo);
 out_rep.HR_y = resize(out_rep.HR_y,dateFrom:dateTo);
@@ -252,6 +267,7 @@ out_rep.HR_o = resize(out_rep.HR_o,dateFrom:dateTo);
 out_rep.X = out_rep.X_o+out_rep.X_y;
 out_full.I = out_rep.I_o+out_rep.I_y;
 out_full.H = out_rep.H_o+out_rep.H_y;
+out_full.M = out_rep.M_o+out_rep.M_y;
 out_full.S = out_rep.S_o+out_rep.S_y;
 out_full.D = out_rep.D_o+out_rep.D_y;
 out_full.F = out_rep.F_o+out_rep.F_y;
@@ -271,23 +287,23 @@ grid on;
 legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
     'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
     'Serious cases - reported', 'Serious cases - implied'});
-
-figure;
-subplot(2,1,1)
-pp1=bar(resize(init.A,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
-pp2=plot(out_rep.IH,'linewidth',2);
-pp3=plot(tseries(dateFrom:dateTo,IH0),'linewidth',2,'Color',[1 1 1]*0.5);
-grid on;
-legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
-title('Hospital admissions');
-
-subplot(2,1,2)
-pp1=bar(resize(init.R,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
-pp2=plot(out_rep.HR,'linewidth',2);
-pp3=plot(tseries(dateFrom:dateTo,HR0),'linewidth',2,'Color',[1 1 1]*0.5);
-grid on;
-legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
-title('Hospital discharges');
+% 
+% figure;
+% subplot(2,1,1)
+% pp1=bar(resize(init.A,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+% pp2=plot(out_rep.IH,'linewidth',2);
+% pp3=plot(tseries(dateFrom:dateTo,IH0),'linewidth',2,'Color',[1 1 1]*0.5);
+% grid on;
+% legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
+% title('Hospital admissions');
+% 
+% subplot(2,1,2)
+% pp1=bar(resize(init.R,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+% pp2=plot(out_rep.HR,'linewidth',2);
+% pp3=plot(tseries(dateFrom:dateTo,HR0),'linewidth',2,'Color',[1 1 1]*0.5);
+% grid on;
+% legend([pp1 pp2 pp3],{'Reported','Implied top-down (2x)','Implied bottom-up'});
+% title('Hospital discharges');
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);

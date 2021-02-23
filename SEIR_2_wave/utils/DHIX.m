@@ -9,7 +9,7 @@ firstData = -tshift+dateFrom;
 cut = 0*params.cutoff;
 try
     hcut = 0*params.hosp_cutoff;
-catch err
+catch err %#ok<NASGU>
     hcut = 4;
 end
 
@@ -126,12 +126,14 @@ IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_o+IH_y;
 % ***** serious cases
 % shares
-s_o = theta_o(:,1)./eta_o(:,1).*T_hosp_o_mean./T_ser_o_mean.*H_o;
-s_y = theta_y(:,1)./eta_y(:,1).*T_hosp_y_mean./T_ser_y_mean.*H_y;
+s_o = theta_o(:,1)./eta_o(:,1).*H_o;
+s_y = theta_y(:,1)./eta_y(:,1).*H_y;
 s_tot = max(1,(s_o+s_y));
 S_o = s_o./s_tot.*S;
 S_y = S-S_o;
 kappa_s = method_params(S./s_tot); 
+theta_o = kappa_s.*theta_o;
+theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
 % conditions than expected
 % deaths
@@ -153,10 +155,9 @@ i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y,k_ser+1)); i_y = method_params(e
 % i = i_o+i_y;
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
-I = I_o+I_y;
 % admission
-kappa_h_o = method_params(I_o./i_o); eta_o = eta_o.*kappa_h_o;
-kappa_h_y = method_params(I_y./i_y); eta_y = eta_y.*kappa_h_y;
+kappa_h_o = method_params(max(1,I_o)./max(1,i_o)); eta_o = eta_o.*kappa_h_o;
+kappa_h_y = method_params(max(1,I_y)./max(1,i_y)); eta_y = eta_y.*kappa_h_y;
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
@@ -203,20 +204,6 @@ Dis_rep = method_data(tseries(dateFrom:dateTo,data.R(end-length(Xts)+1:end)));
 Dis = tseries(dateFrom:dateTo,HR(end-length(Xts)+1:end));
 Adm_rep = method_data(tseries(dateFrom:dateTo,data.A(end-length(Xts)+1:end)));
 Adm = tseries(dateFrom:dateTo,IH(end-length(Xts)+1:end));
-
-figure;
-subplot(2,1,1)
-bar(Adm_rep);hold on;
-plot(Adm,'linewidth',2); 
-grid on;
-title('Admissions');
-legend({'Reported','Implied'});
-subplot(2,1,2)
-bar(Dis_rep);hold on;
-plot(Dis,'linewidth',2); 
-grid on;
-title('Discharges');
-legend({'Reported','Implied'});
 
 %
 Len = length(Xts)-fcast_per;
@@ -403,7 +390,7 @@ p.nu = nu;
     function [x] = adjust_tail(x,k,xt)
         x(end) = xt;
         x(end-k:end-1) = NaN;
-        x = interp1(find(~isnan(x)),x(find(~isnan(x))),1:length(x));
+        x = interp1(find(~isnan(x)),x(find(~isnan(x))),1:length(x)); %#ok<FNDSB>
     end
 
     function [x,x_mat] = get_wa(weight,Z,alpha,idxFrom)
