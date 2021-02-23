@@ -80,16 +80,16 @@ title('Moderate conditions (no ICU,ECMO,V needed)');
 figure('Name','Situation in Hospitals III.');
 subplot(2,1,1)
 pp1=bar(resize(db_rep.A,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
-pp2=plot(db.IH,'linewidth',2);
-pp3=plot(db_alt.IH,'linewidth',2,'Color',[1 1 1]*0.5);
+pp2=plot(resize(db.IH,dateFrom:dateTo),'linewidth',2);
+pp3=plot(resize(db_alt.IH,dateFrom:dateTo),'linewidth',2,'Color',[1 1 1]*0.5);
 grid on;
 legend([pp1 pp2 pp3],{'Reported','reconstructed from implied cases','implied by reported daily new cases'});
 title('Hospital Admissions');
 
 subplot(2,1,2)
 pp1=bar(resize(db_rep.R,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
-pp2=plot(db.HR,'linewidth',2);
-pp3=plot(db_alt.HR,'linewidth',2,'Color',[1 1 1]*0.5);
+pp2=plot(resize(db.HR,dateFrom:dateTo),'linewidth',2);
+pp3=plot(resize(db_alt.HR,dateFrom:dateTo),'linewidth',2,'Color',[1 1 1]*0.5);
 grid on;
 legend([pp1 pp2 pp3],{'Reported','reconstructed from implied cases','implied by reported daily new cases'});
 title('Hospital Discharges');
