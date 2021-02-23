@@ -7,11 +7,16 @@ method_params = s.smoothing_method_params;
 tshift = s.firstData_offset;
 firstData = -tshift+dateFrom;
 cut = 0*params.cutoff;
+try
+    hcut = 0*params.hosp_cutoff;
+catch err
+    hcut = 4;
+end
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
-delta = 1+0*extend(double(resize(params.death_adj,dateFrom:dateTo)),tshift);
+nu = extend(double(resize(params.death_adj,dateFrom:dateTo)),tshift);
 
 %% testing
 % delay in testing (gradual)
@@ -22,9 +27,12 @@ T_obs = T_delay+s.T_test.mean;
 % initialization
 dI_data = method_data(x.NewCases(dateFrom:dateTo-cut));
 dI_data_all = method_data(x.NewCases(dateFrom:dateTo));
-D = method_data(data.D(firstData:dateTo)); % cummulative datehs
-H = method_data(data.H(firstData:dateTo)); % hospitalizations
-S = method_data(data.S(firstData:end)); % serious cases in hospitals
+D = method_data(data.D_raw(firstData:dateTo)); % cummulative deaths
+HD = (data.D_raw(firstData+1:dateTo)-data.D_raw(firstData:dateTo-1));
+delta_HD = mean(HD(end-3*hcut:end-hcut));
+HD = extend(adjust_tail(HD,hcut,delta_HD)',1);
+H = (data.H(firstData:dateTo)); % hospitalizations
+S = (data.S(firstData:end)); % serious cases in hospitals
 r0 = set_yo_ratios_params();
 
 %% params initialization
@@ -33,7 +41,7 @@ r0 = set_yo_ratios_params();
 k_death = s.k_death;
 pdf_hd_y = repmat(s.pdf_hd_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_hd_o',length(varsigma),1);
-omega_o = r0.omega_o./delta;   omega_y = r0.omega_y./delta;
+omega_o = r0.omega_o./nu;   omega_y = r0.omega_y./nu;
 % B./ recovery
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
@@ -65,7 +73,7 @@ T_ser_o_mean = s.T_ser_o_mean;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
-omega_o_s = r0.omega_o_s./delta;   omega_y_s = r0.omega_y_s./delta;
+omega_o_s = r0.omega_o_s./nu;   omega_y_s = r0.omega_y_s./nu;
 % C./ recovery
 zeta_o_s = repmat(1-omega_o_s(:,1),1,k_rec+1);
 zeta_y_s = repmat(1-omega_y_s(:,1),1,k_rec+1);
@@ -95,7 +103,7 @@ M_y_ini = H_y_ini-S_y_ini;
 %% calculation
 % **** Hospital:
 % deaths
-HD = extend(D(2:end)-D(1:end-1),1); 
+% HD = extend(D(2:end)-D(1:end-1),1); 
 HD_o = HD.*varsigma;                
 HD_y = HD-HD_o;
 h_o = max(0,method_data(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1)));
@@ -328,7 +336,7 @@ p.kappa_d = kappa_d;
 p.kappa_s = kappa_s;
 p.kappa_h_o = kappa_h_o;
 p.kappa_h_y = kappa_h_y;
-p.delta = delta;
+p.nu = nu;
 
     function [r] = set_yo_ratios_params()
         % death (h+s)
@@ -392,13 +400,10 @@ p.delta = delta;
         ys = method_data(y);
     end
 
-    function [x] = adjust_tail(x,k) %#ok<DEFNU>
-        dx = x(T-k)-x(T-k-1);
-        x(T-k+1) = x(T-k)+2/3*dx;
-        x(T-k+2) = x(T-k+1)+1/3*dx;
-        for j=3:k
-            x(T-k+j) = x(T-k+j-1)+1/3*1/(j-1)*dx;
-        end        
+    function [x] = adjust_tail(x,k,xt)
+        x(end) = xt;
+        x(end-k:end-1) = NaN;
+        x = interp1(find(~isnan(x)),x(find(~isnan(x))),1:length(x));
     end
 
     function [x,x_mat] = get_wa(weight,Z,alpha,idxFrom)
