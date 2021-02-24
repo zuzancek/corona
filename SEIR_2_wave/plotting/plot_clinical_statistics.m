@@ -10,7 +10,7 @@ raw = results.raw;
 mm = results.mm;
 smooth = results.smooth;
 
-figure('Name','Clinical statistics');
+figure('Name','Clinical statistics I.');
 %
 subplot(2,2,1)
 if mm
@@ -68,5 +68,29 @@ grid on;
 legend('total','on','with');
 title('Cummulative deaths');
 
+
+figure('Name','Clinical statistics II.');
+%
+subplot(2,1,1)
+if mm
+    bar(100*resize(data.old_ratio,dateFrom:dateTo));hold on;
+end
+if smooth
+    plot(100*resize(data.old_ratio_smooth,dateFrom:dateTo),'b','linewidth',2);hold on;
+end
+grid on;
+ylabel('%');
+title('Share of 65+ in deaths');
+
+subplot(2,1,2)
+if mm
+    bar(100*resize(1-data.hosp_y_ratio,dateFrom:dateTo));hold on;
+end
+if smooth
+    plot(100*smooth_series(resize(1-data.hosp_y_ratio,dateFrom:dateTo)),'b','linewidth',2);hold on;
+end
+ylabel('%');
+grid on;
+title('Share of 65+ in hospitals');
 
 end

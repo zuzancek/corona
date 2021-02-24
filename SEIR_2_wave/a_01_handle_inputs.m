@@ -3,7 +3,6 @@ initialize;
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
-hosp_ratio = dbload('data/hospital_ratio.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','freq','daily');

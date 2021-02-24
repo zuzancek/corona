@@ -4,6 +4,7 @@ x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
+hosp_ratio = dbload('data/hospital_ratio.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_asympt = dbload('data/asymptomatical_cases_share.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -34,14 +35,15 @@ asymp_ratio = db_asympt.Net;
 [asymp_ratio,asymp_ratio_smooth,asymp_ratio_raw] = extend_series(asymp_ratio,t0,t1,[],[]);
 cases_data.asymp_ratio = asymp_ratio;      cases_data.asymp_ratio_smooth = asymp_ratio_smooth; cases_data.asymp_ratio_raw = asymp_ratio_raw;
 
-% old-age share (in cases, dead)
+% old-age share (in cases, hospitals, dead)
 old_ratio = db_age.Old./db_age.Total;
 [old_ratio,old_ratio_smooth,old_ratio_raw] = extend_series(old_ratio,t0,t1,s.old_share,[]);
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;     cases_data.old_ratio_raw = old_ratio_raw;
+cases_data.hosp_y_ratio = extend_series(hosp_ratio.HY_share,t0,t1,[],[]);
 
 %% plotting
 % clinical statistics
-plot_clinical_statistics(hosp_data+deaths_data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
+plot_clinical_statistics(hosp_data+deaths_data+cases_data,dateFrom,dateTo,'raw',false,'smooth',true,'mm',true);
 % mobility
 mob_data = plot_mobility(mob,dateFrom,dateTo);
 % epidemiology
