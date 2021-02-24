@@ -18,7 +18,7 @@ tt0 = t0+dt;
 t1 = enddate(x.ActiveCases)-cut;
 dateFrom = dd(2020,9,1);
 dateTo = t1;
-out_filename = 'results/inputs_full.mat';
+out_filename = 'results/inputs.mat';
 
 %% data processing
 % epidemiological
