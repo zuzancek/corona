@@ -94,4 +94,22 @@ grid on;
 legend([pp1 pp2 pp3],{'Reported','reconstructed from implied cases','implied by reported daily new cases'});
 title('Hospital Discharges');
 
+%%
+figure('Name','Situation in Hospitals IV.');
+subplot(2,1,1)
+pp1=bar(100*resize(db_rep.varsigma,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+pp2=plot(100*resize(db.varsigma,dateFrom:dateTo),'linewidth',2);
+pp3=plot(100*resize(db_alt.varsigma,dateFrom:dateTo),'linewidth',2,'Color',[1 1 1]*0.5);
+grid on;
+legend([pp1 pp2 pp3],{'Reported','reconstructed from implied cases','implied by reported daily new cases'});
+title('Death share (65+)');
+
+subplot(2,1,2)
+pp1=bar(100*resize(db_rep.mu,dateFrom:dateTo),'FaceAlpha',0.5);hold on;
+pp2=plot(100*resize(db.mu,dateFrom:dateTo),'linewidth',2);
+pp3=plot(100*resize(db_alt.mu,dateFrom:dateTo),'linewidth',2,'Color',[1 1 1]*0.5);
+grid on;
+legend([pp1 pp2 pp3],{'Reported','reconstructed from implied cases','implied by reported daily new cases'});
+title('Hospital share (65+)');
+
 end

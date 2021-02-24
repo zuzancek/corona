@@ -72,10 +72,8 @@ y.NewCases = res_implied.X_all;
 init.rho = params.rho;
 init.kappa_d_y = params.kappa_d_y;
 init.kappa_d_o = params.kappa_d_o;
-% init.nu = params.nu;
 init.kappa_h_o = params.kappa_h_o;
 init.kappa_h_y = params.kappa_h_y;
-% init.kappa_s = params.kappa_s;
 init.omega_o = params.omega_o; init.omega_y = params.omega_y;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
@@ -83,13 +81,14 @@ hosp_data.alt = out;
 %% plotting stuff
 % hospitals
 reported_data = hosp_data+deaths_data;
+reported_data.mu = cases_data.hosp_y_ratio;
+reported_data.varsigma = deaths_data.death_old_ratio;
 true_data = out_check;
 counterfact_data = out;
 plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',true,'reported',true);
 
 % epidemiology
 plot_epidemiology_cmp(res_implied,counterfact_data,reported_data,dateFrom,dateTo,'implied',true,'reported',true);
-
 
 figure('Name','New cases (reported vs.true, lost cases)');
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
