@@ -73,10 +73,10 @@ figure('Name','Clinical statistics II.');
 %
 subplot(2,1,1)
 if mm
-    bar(100*resize(data.old_ratio,dateFrom:dateTo));hold on;
+    bar(100*resize(data.death_old_ratio,dateFrom:dateTo));hold on;
 end
 if smooth
-    plot(100*resize(data.old_ratio_smooth,dateFrom:dateTo),'b','linewidth',2);hold on;
+    plot(100*resize(data.death_old_ratio_smooth,dateFrom:dateTo),'b','linewidth',2);hold on;
 end
 grid on;
 ylabel('%');

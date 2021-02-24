@@ -15,8 +15,8 @@ end
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
+mu = method_params(params.hy_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
-nu = extend(double(resize(params.death_adj,dateFrom:dateTo)),tshift);
 
 %% testing
 % delay in testing (gradual)
@@ -41,7 +41,7 @@ r0 = set_yo_ratios_params();
 k_death = s.k_death;
 pdf_hd_y = repmat(s.pdf_hd_y',length(varsigma),1);
 pdf_hd_o = repmat(s.pdf_hd_o',length(varsigma),1);
-omega_o = r0.omega_o./nu;   omega_y = r0.omega_y./nu;
+omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % B./ recovery
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
@@ -69,7 +69,7 @@ theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
-omega_o_s = r0.omega_o_s./nu;   omega_y_s = r0.omega_y_s./nu;
+omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
 % C./ recovery
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
@@ -96,18 +96,16 @@ M_y_ini = H_y_ini-S_y_ini;
 
 %% calculation
 % **** Hospital:
-% deaths
-% HD = extend(D(2:end)-D(1:end-1),1); 
+H_y = mu.*H;
+H_o = H-H_y;
+HD_o_imp = (extend(get_wa(pdf_hd_o,H_o,omega_o,k_death+1),k_death));
+HD_y_imp = (extend(get_wa(pdf_hd_y,H_y,omega_y,k_death+1),k_death));
+% kappa_d>1 <=> more people die than expected (based on hospitalization data)
+% indication of more seriou cases
 HD_o = HD.*varsigma;                
 HD_y = HD-HD_o;
-h_o = max(0,method_data(get_wa_inv(pdf_hd_o,HD_o,H_o_ini,omega_o,k_death+1)));
-h_y = max(0,method_data(get_wa_inv(pdf_hd_y,HD_y,H_y_ini,omega_y,k_death+1)));
-H_o = method_data(h_o./max(1,h_o+h_y)).*H; 
-H_y = H-H_o;
-kappa_d = method_params((h_o+h_y)./H);  
-% kappa_d>1 <=> more deaths than expected from hospitalizations data H, indication of more seriou cases
-omega_o = min(1,omega_o.*repmat(kappa_d,1,k_death+1));
-omega_y = min(1,omega_y.*repmat(kappa_d,1,k_death+1));
+kappa_d_y = method_params(HD_y./HD_y_imp); omega_y = omega_y.*kappa_d_y;
+kappa_d_o = method_params(HD_o./HD_o_imp); omega_o = omega_o.*kappa_d_o;
 % recovery
 zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
 zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
@@ -131,8 +129,8 @@ theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
 % conditions than expected
 % deaths
-omega_o_s = min(1,omega_o_s.*repmat(kappa_d,1,k_death+1));
-omega_y_s = min(1,omega_y_s.*repmat(kappa_d,1,k_death+1));
+omega_o_s = min(1,omega_o_s.*repmat(kappa_d_o,1,k_death+1));
+omega_y_s = min(1,omega_y_s.*repmat(kappa_d_y,1,k_death+1));
 SD_o = (extend(get_wa(pdf_sd_o,S_o,omega_o_s,k_death+1),k_death));
 SD_y = (extend(get_wa(pdf_sd_y,S_y,omega_y_s,k_death+1),k_death));
 SD = SD_o+SD_y;
@@ -198,7 +196,6 @@ Ots0 = smooth_series(Orts0);
 % legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by hospitals', 'Hospitalizations', 'Intensive Care'});
 % title('New cases: reported vs. real');
 
-%
 Len = length(Xts)-fcast_per;
 res = struct();
 res.X_all = tseries(firstData:dateTo,[X;X(end)]);
@@ -317,7 +314,6 @@ p.kappa_d = kappa_d;
 p.kappa_s = kappa_s;
 p.kappa_h_o = kappa_h_o;
 p.kappa_h_y = kappa_h_y;
-p.nu = nu;
 
     function [r] = set_yo_ratios_params()
         % death (h+s)

@@ -1,4 +1,4 @@
-function [X,res,p] = DHIXn(x,data,s,dateFrom,dateTo,t0,params,delay)
+function [X,res,p] = DHIX(x,data,s,dateFrom,dateTo,t0,params,delay)
 
 %% initialization
 T = dateTo-dateFrom+1;
@@ -15,7 +15,6 @@ end
 
 varsigma = extend(double(resize(params.death_old_ratio,dateFrom:dateTo)),tshift);
 rho = method_params(params.cases_old_ratio(firstData:dateTo));
-mu = method_params(params.hy_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
 
 %% testing
@@ -96,17 +95,6 @@ M_y_ini = H_y_ini-S_y_ini;
 
 %% calculation
 % **** Hospital:
-H_y = mu.*H;
-H_o = H-H_y;
-zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
-zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
-HD_o_imp = (extend(get_wa(pdf_hd_o,H_o,omega_o,k_death+1),k_death));
-HD_y_imp = (extend(get_wa(pdf_hd_y,H_y,omega_y,k_death+1),k_death));
-HD_imp = HD_o_imp+HD_y_imp;
-kappa_d = HD./HD_imp;
-
-
-
 % deaths
 % HD = extend(D(2:end)-D(1:end-1),1); 
 HD_o = HD.*varsigma;                

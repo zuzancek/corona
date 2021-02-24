@@ -9,7 +9,7 @@ db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','fr
 load('results/inputs.mat','dates','cases_data','test_data','hosp_data','deaths_data','s');
 
 idx_fun = 1;
-fun_opt_0 = {'DHIX','DHIXt'}; fun_0 = str2func(fun_opt_0{idx_fun});
+fun_opt_0 = {'DHIX','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
 fun_opt_1 = {'XIHD','XIHDt'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 indiff = true; 
@@ -33,10 +33,11 @@ dateTo = t1;
 % 1./ daily cases implied by hospitals
 delay.v = 1*([1 0.5 0]);  delay.at = [dd(2020,10,30),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
-params.death_old_ratio = deaths_data.old_ratio;
+params.death_old_ratio = deaths_data.death_old_ratio;
 params.cases_old_ratio = cases_data.old_ratio;
 params.asymp_ratio = cases_data.asymp_ratio;
 params.death_adj = deaths_data.delta;
+params.hy_ratio = cases_data.hosp_y_ratio;
 params.serious_cases_ratio = hosp_data.S_H_rate;
 params.cutoff = 3;
 params.adj = 0; 

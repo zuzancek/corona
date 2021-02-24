@@ -44,12 +44,11 @@ asymp_ratio = db_asympt.Net;
 [asymp_ratio,asymp_ratio_smooth,asymp_ratio_raw] = extend_series(asymp_ratio,t0,t1,[],[]);
 cases_data.asymp_ratio = asymp_ratio;      cases_data.asymp_ratio_smooth = asymp_ratio_smooth; cases_data.asymp_ratio_raw = asymp_ratio_raw;
 
-% old_age sahre in hospitals
-hosp_y_ratio = extend_series(hosp_ratio.HY_share,t0,t1,[],[]);
-% old-age share (in cases, dead)
+% old-age share (in cases, hospitals, dead)
 old_ratio = db_age.Old./db_age.Total;
 [old_ratio,old_ratio_smooth,old_ratio_raw] = extend_series(old_ratio,t0,t1,s.old_share,[]);
 cases_data.old_ratio = old_ratio;          cases_data.old_ratio_smooth = old_ratio_smooth;     cases_data.old_ratio_raw = old_ratio_raw;
+cases_data.hosp_y_ratio = extend_series(hosp_ratio.HY_share,t0,t1,[],[]);
 
 % observed ratio
 delay.v = 1*([0.5 1 0.5 0]);  delay.at = [dd(2020,9,15),dd(2020,10,15),dd(2020,11,15),dd(2020,12,15)];
@@ -57,7 +56,7 @@ params = struct;
 params.death_old_ratio = deaths_data.old_ratio;
 params.cases_old_ratio = old_ratio;
 params.asymp_ratio = asymp_ratio;
-params.hy_ratio = hosp_y_ratio;
+params.hy_ratio = cases_data.hosp_y_ratio;
 params.serious_cases_ratio = hosp_data.S_H_rate;
 params.cutoff = 3;
 params.adj = 0; 

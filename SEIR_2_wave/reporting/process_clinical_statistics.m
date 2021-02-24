@@ -67,9 +67,9 @@ db_h.S_H_rate = smooth_series((db_h.C+db_h.V+db_h.E)/db_h.H);
 db_h.M_H_rate = 1-db_h.S_H_rate;
 
 % deaths
-db_d.old_ratio_raw = a.TotalDeathRatioOld;
-db_d.old_ratio = mov_median_adj(db_d.old_ratio_raw);
-db_d.old_ratio_smooth = smooth_series(db_d.old_ratio);
+db_d.death_old_ratio_raw = a.TotalDeathRatioOld;
+db_d.death_old_ratio = mov_median_adj(db_d.death_old_ratio_raw);
+db_d.death_old_ratio_smooth = smooth_series(db_d.death_old_ratio);
 db_d.total_raw = db_h.D_raw;        db_d.total = db_h.D;        db_d.total_smooth = db_h.D_smooth;
 db_d.on_raw = db_h.D_on_raw;        db_d.on = db_h.D_on;        db_d.on_smooth = db_h.D_on_smooth;
 db_d.with_raw = db_h.D_with_raw;    db_d.with = db_h.D_with;    db_d.with_smooth = db_h.D_with_smooth;
