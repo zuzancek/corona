@@ -124,8 +124,8 @@ s_tot = max(1,(s_o+s_y));
 S_o = s_o./s_tot.*S;
 S_y = S-S_o;
 kappa_s = method_params(S./s_tot); 
-theta_o = kappa_s.*theta_o;
-theta_y = kappa_s.*theta_y;
+% theta_o = kappa_s.*theta_o;
+% theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
 % conditions than expected
 % deaths
@@ -227,14 +227,7 @@ dI_data_real = resize(X,firstData:dateTo_X);
 dI_data_reported = Ots;
 dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
-
-% idx = find(resize(dI_data_real,dateFrom:dateTo_0)<s.cases_min & resize(dI_data_reported,dateFrom:dateTo_0)<s.cases_min); %#ok<MXFND> % & delta<1-s.ratio_threshold); %#ok<MXFND>
-% idx = dateFrom:max(idx);
-% dI_data_real(idx) = dI_data_reported(idx);             
-% X_o(idx) = dI_data_reported_old(idx);       X_o(dateFrom:min(idx)) = dI_data_reported_old(dateFrom:min(idx));
-% X_y(idx) = dI_data_reported_old(idx);       X_y(dateFrom:min(idx)) = dI_data_reported_young(dateFrom:min(idx));
 delta = method_params(resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0));
-% X = dI_data_real;
 
 obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio);
 
@@ -308,9 +301,11 @@ p.eta_o = eta_o;
 p.eta_y = eta_y;
 p.mu_o = mu_o;
 p.mu_y = mu_y;
+p.mu = mu;
 p.theta_y = theta_y;
 p.theta_o = theta_o;
-p.kappa_d = kappa_d;
+p.kappa_d_y = kappa_d_y;
+p.kappa_d_o = kappa_d_o;
 p.kappa_s = kappa_s;
 p.kappa_h_o = kappa_h_o;
 p.kappa_h_y = kappa_h_y;
