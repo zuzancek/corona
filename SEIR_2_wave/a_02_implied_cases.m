@@ -7,13 +7,12 @@ db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 load('results/inputs.mat','dates','cases_data','test_data','hosp_data','deaths_data','s');
-s = setparam();
 
 idx_fun = 1;
 fun_opt_0 = {'DHIX','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
 fun_opt_1 = {'XIHD','XIHDt'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
-indiff = true; 
+out_filename = 'results/results_impl.mat';
 
 %% handle data
 % definitions
@@ -92,8 +91,12 @@ plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',
 plot_epidemiology_cmp(res_implied,counterfact_data,reported_data,dateFrom,dateTo,'implied',true,'reported',true);
 
 % testing quality
-plot_quality_cmp(res_implied,reported_data,dateFrom,dateTo);
+plot_quality_cmp(res_implied,cases_data,dateFrom,dateTo);
 
 %% saving stuff
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
-save(out_filename,'dates','cases_data','test_data','hosp_data','deaths_data','mob_data','s');
+cases_implied_data = cases_data;
+hosp_implied_counterfact_data = out;
+hosp_implied_data = out;
+implied_data = cases_implied_data+hosp_implied_data;
+save(out_filename,'dates','cases_implied_data','hosp_implied_counterfact_data','implied_data','hosp_implied_data','s');

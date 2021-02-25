@@ -234,11 +234,11 @@ obs_ratio_adj_raw = delta_raw.*s.obs_ratio;
 obs_ratio_ideal = 0*obs_ratio_adj_raw+s.obs_ratio;
 
 sa = struct;
-sa.Xs = (1-sigma(1)).*X;
+sa.Xs = (1-sigma).*X;
 sa.Xo = X_o;
 sa.Xy = X_y;
 sa.Xa = X-sa.Xs;
-res.sympt_share_ideal = 1-sigma;
+res.sympt_share_ideal = s.symp_ratio_obs+0*X;
 res.sympt_share_real = sa.Xs./X;
 
 sa.dIa_data_reported = dI_data_reported.*sigma;
