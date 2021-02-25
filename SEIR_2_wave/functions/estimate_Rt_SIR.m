@@ -17,13 +17,13 @@ catch err %#ok<NASGU>
 end
 try
     eta_y = inputs.eta_y;
-    eta_y = eta_y(end-T:end);
+    eta_y = extend(eta_y,T-length(eta_y));
 catch err %#ok<NASGU>
     eta_y = s.eta_y+0*inputs.z;
 end
 try
     eta_o = inputs.eta_o;
-    eta_o = eta_o(end-T:end);
+    eta_o = extend(eta_o,T-length(eta_o));
 catch err %#ok<NASGU>
     eta_o = s.eta_o+0*inputs.z;
 end
@@ -52,10 +52,10 @@ alpha_ihy = s.eta_y/s.T_hosp_y_mean;
 alpha_iho = s.eta_o/s.T_hosp_o_mean;  
 x.T_sick_y.mean = s.T_sick_y-s.T_test.mean; x.T_sick_y.std = s.T_sick_std;
 T_sick_y_vec = get_rv(x.T_sick_y);
-alpha_iry_vec = (1-eta_y)./T_sick_y_vec;
+alpha_iry_vec = (1-eta_y)'./T_sick_y_vec;
 x.T_sick_o.mean = s.T_sick_o-s.T_test.mean; x.T_sick_o.std = s.T_sick_std;
 T_sick_o_vec = get_rv(x.T_sick_o);
-alpha_iro_vec = (1-eta_o)./T_sick_o_vec;
+alpha_iro_vec = (1-eta_o)'./T_sick_o_vec;
 % T_hosp = s.T_hosp.mean;
 alpha = 1.15; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values
@@ -81,8 +81,8 @@ for t = 1:T
     Rt_vec(:,t) = pop_size.*z(t)./S_vec(:,t).*T_si_vec./(alpha*I_unobs_vec(:,t)+I_obs_vec(:,t));
     S_vec(:,t+1) = S_vec(:,t)-z(t);
     I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);  
-    I_obs_y_vec(:,t+1) = I_obs_y_vec(:,t).*(1-alpha_ihy-alpha_iry_vec)+z_obs_y(t);
-    I_obs_o_vec(:,t+1) = I_obs_o_vec(:,t).*(1-alpha_iho-alpha_iro_vec)+z_obs_o(t);
+    I_obs_y_vec(:,t+1) = I_obs_y_vec(:,t).*(1-alpha_ihy-alpha_iry_vec(:,t))+z_obs_y(t);
+    I_obs_o_vec(:,t+1) = I_obs_o_vec(:,t).*(1-alpha_iho-alpha_iro_vec(:,t))+z_obs_o(t);
     I_obs_vec(:,t+1) = I_obs_y_vec(:,t+1)+I_obs_o_vec(:,t+1);
      
     I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
@@ -183,6 +183,13 @@ end
         shape0_vec = repmat(shape0,N,1);
         scale0_vec = scale0*ones(N,L);
         x = gamrnd(shape0_vec,scale0_vec);
+    end
+
+    function [y] = extend(x,t0)
+        [xlen,xwid] = size(x);
+        z = x(1,:)+zeros(xlen+t0,xwid);
+        z(t0+1:end,:) = x;
+        y = (z);
     end
 
 end
