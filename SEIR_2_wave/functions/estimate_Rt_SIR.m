@@ -28,9 +28,12 @@ catch err %#ok<NASGU>
     eta_o = s.eta_o+0*inputs.z;
 end
 try
-    rho = double(inputs.old_ratio);    
-    assert(length(rho)>=length(inputs.z));
-    rho = rho(1:T);
+    rho = double(inputs.old_ratio);
+    if length(rho)>=T
+        rho = rho(end-T+1:end);
+    else
+        rho = extend(rho,T-length(rho));
+    end
 catch err %#ok<NASGU>
     rho = s.old_share+0*inputs.z;
 end

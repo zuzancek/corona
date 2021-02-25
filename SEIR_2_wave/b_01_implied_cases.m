@@ -97,6 +97,6 @@ plot_quality_cmp(res_implied,cases_data,dateFrom,dateTo);
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
 cases_implied_data = res_implied;
 hosp_implied_counterfact_data = out;
-hosp_implied_data = out;
+hosp_implied_data = out_check;
 implied_data = cases_implied_data+hosp_implied_data;
 save(out_filename,'dates','cases_implied_data','hosp_implied_counterfact_data','implied_data','hosp_implied_data','s');

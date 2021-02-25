@@ -30,7 +30,7 @@ inputs_fnc = struct();
 init = struct();
 init.I0 = cases_data.I0;
 params = struct();
-params.obs_ratio = cases_implied_data.obs_ratio;           
+% params.obs_ratio = cases_implied_data.obs_ratio;           
 params.old_ratio = cases_data.old_ratio;
 
 % d0 = dd(2020,09,7); d1 = dd(2020,10,17);
@@ -41,18 +41,16 @@ s = setparam();
 cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
-inputs_fnc.obs_ratio = [];
-inputs_fnc.old_ratio = [];
+inputs_fnc.old_ratio = cases_data.old_ratio;
 inputs_fnc.eta_o = [];
 inputs_fnc.eta_y = [];
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
 
 % real (implied) data
 z0 = resize(cases_data.cases_pcr_smooth,t0:t2);
-z0(end-length(cases_implied_data.cases_pcr_implied_smooth)+1:end) = cases_implied_data.cases_pcr_implied_smooth;
+z0(end-length(cases_implied_data.X_smooth_all)+1:end) = cases_implied_data.X_smooth_all;
 inputs_fnc.z = double(z0);
-inputs_fnc.obs_ratio = [];
-inputs_fnc.old_ratio = params.old_ratio;
+inputs_fnc.old_ratio = cases_implied_data.rho_real;
 inputs_fnc.eta_o = hosp_implied_data.eta_o;
 inputs_fnc.eta_y = hosp_implied_data.eta_y;
 [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real] = model_fnc(inputs_fnc,s,true,true,false);
@@ -60,7 +58,7 @@ inputs_fnc.eta_y = hosp_implied_data.eta_y;
 %% plotting stuff
 % 0./ cases
 figure('Name','New cases (smooth data, means)')
-plot(resize(cases_implied_data.cases_pcr_implied_smooth,disp_from:t2),'linewidth',1); hold on;
+plot(resize(cases_implied_data.X_smooth_all,disp_from:t2),'linewidth',1); hold on;
 plot(resize(cases_data.cases_pcr_smooth,disp_from:t2),'k--', 'linewidth',1);
 grid on;
 title('New cases');
