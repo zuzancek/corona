@@ -90,6 +90,7 @@ plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',
 % epidemiology
 plot_epidemiology_cmp(res_implied,counterfact_data,reported_data,dateFrom,dateTo,'implied',true,'reported',true);
 
+% quality
 figure('Name','New cases (reported vs.true, lost cases)');
 plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
 plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
@@ -114,15 +115,7 @@ plot(100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1),'linewidth',1);grid on;
 title('Testing effectivity (implied by hospitals)');
 xls_out.test_eff = 100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1);
 % 
-figure('Name','Testing effectivity and Old-age cases share')
-subplot(2,1,1)
-obs_ratio = 0*obs_ratio_real+s.obs_ratio;
-plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
-plot(100*resize(obs_ratio_real,disp_from:t1),'linewidth',1);
-title('Observable ratio');
-legend({'stationary (optimistic)','real (implied by hospitalizations)'});
-grid on;
-ylabel('% of total cases');
+
 
 %% saving stuff
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
