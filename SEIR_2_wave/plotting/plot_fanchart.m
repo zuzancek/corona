@@ -26,8 +26,8 @@ ax.YAxis.Color = s.color_grid;
 f.Color = s.color_bkg;
 p0 = dt+(disp_from-t0+1);
 p1 = disp_to-t0+1;
-lab = {'marec','april','maj','jun','jul','august','september','oktober','november','december','januar'};
-mt = [0 31 30 31 30 31 31 30 31 30 31];
+lab = {'marec','april','maj','jun','jul','august','september','oktober','november','december','januar' 'februar'};
+mt = [0 31 30 31 30 31 31 30 31 30 31 31];
 mtt = cumsum(mt(lab_idx:end));
 xticks(mtt)
 xticklabels(lab(lab_idx:end));

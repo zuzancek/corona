@@ -81,8 +81,6 @@ plot_fancharts_cmp(q_mat_pcr(5:15,:),q_mat_real(5:15,:),s,disp_from+30,disp_to,.
 plot_fanchart(q_mat_real,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
 plot_fanchart(q_mat_pcr,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
 
-
-
 %% saving stuff
 x.Rt = Rt_smooth_series_pcr;
 x.Rt_real = Rt_smooth_series_real;
