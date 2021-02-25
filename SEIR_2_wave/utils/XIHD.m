@@ -287,6 +287,8 @@ out_rep.HD = out_rep.HD_o+out_rep.HD_y;
 
 out_rep.varsigma = out_rep.HD_o./out_rep.HD;
 out_rep.mu = out_rep.H_y./out_rep.H;
+out_rep.eta_o = s.eta_o.*kappa_h_o;
+out_rep.eta_y = s.eta_y.*kappa_h_y;
 
 % figure;
 % pp3=bar(out_rep.H); hold on;

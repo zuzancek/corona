@@ -8,7 +8,8 @@ cut = 0;
 dt = 1;
 
 %% load data
-load('inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s');
+load('results/inputs.mat','dates','cases_data','hosp_data','deaths_data','mob_data','s');
+load('results/results_impl.mat','cases_implied_data','hosp_implied_counterfact_data','implied_data','hosp_implied_data','s');
 
 t0 = dates.t0;
 t1 = dates.t1;
@@ -28,30 +29,22 @@ tshift = 6;
 inputs_fnc = struct();
 init = struct();
 init.I0 = cases_data.I0;
-init.H0 = hosp_data.H_smooth(t1-1);
-init.D0 = hosp_data.D_smooth(t1);
 params = struct();
-params.obs_ratio = cases_data.obs_ratio;           
-params.old_ratio = cases_data.old_ratio_smooth;
-params.old_ratio = smooth_series(params.old_ratio);
-params.death_ratio = deaths_data.old_ratio_smooth;
-params.asymp_ratio = cases_data.asymp_ratio_smooth;
+params.obs_ratio = cases_implied_data.obs_ratio;           
+params.old_ratio = cases_data.old_ratio;
 
 % d0 = dd(2020,09,7); d1 = dd(2020,10,17);
 %% calculations
 s = setparam();
-% _mm = moving median; _smooth = quasi-gaussian smoother
 
 % 1. reported data, PCR only, testing is optimal
 cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
 inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
 inputs_fnc.I0 = cases_data.I0;
-inputs_fnc.H0 = 0;
-inputs_fnc.D0 = 0;
 inputs_fnc.obs_ratio = [];
 inputs_fnc.old_ratio = [];
-inputs_fnc.death_ratio = []; 
-inputs_fnc.asymp_ratio = [];
+inputs_fnc.eta_o = [];
+inputs_fnc.eta_y = [];
 [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
 
 % real (implied) data
