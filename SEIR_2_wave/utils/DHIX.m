@@ -227,15 +227,20 @@ dI_data_real = resize(X,firstData:dateTo_X);
 dI_data_reported = Ots;
 dI_data_reported_old = dI_data_reported.*rho(tshift:tshift+length(dI_data_reported)-1);
 dI_data_reported_young = dI_data_reported-dI_data_reported_old;
-delta = method_params(resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0));
-
-obs_ratio_adj(dateFrom:dateTo_0) = smooth_series(delta*s.obs_ratio);
+delta_raw = resize(dI_data_reported,dateFrom:dateTo_0)./resize(dI_data_real,dateFrom:dateTo_0);
+delta = method_params(delta_raw);
+obs_ratio_adj(dateFrom:dateTo_0) = delta*s.obs_ratio;
+obs_ratio_adj_raw = delta_raw.*s.obs_ratio;
+obs_ratio_ideal = 0*obs_ratio_adj_raw+s.obs_ratio;
 
 sa = struct;
 sa.Xs = (1-sigma(1)).*X;
 sa.Xo = X_o;
 sa.Xy = X_y;
 sa.Xa = X-sa.Xs;
+res.sympt_share_ideal = 1-sigma;
+res.sympt_share_real = sa.Xs./X;
+
 sa.dIa_data_reported = dI_data_reported.*sigma;
 sa.dIs_data_reported = dI_data_reported-sa.dIa_data_reported;
 sa.loss_a = method_params(sa.Xa-sa.dIa_data_reported);
@@ -247,6 +252,11 @@ sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
 % results
 res.I = I;
 res.obs_ratio_adj = obs_ratio_adj;
+res.obs_ratio_adj_raw = obs_ratio_adj_raw;
+res.obs_ratio_ideal = obs_ratio_ideal;
+res.rho_real = rho_real;
+res.rho_real_smooth = rho_real_smooth;
+res.rho_obs = rho;
 res.sa = sa;
 res.D = D; res.SD = SD; res.SD_o = SD_o; res.SD_y = SD_y; 
 res.S = S; res.S_o = S_o; res.S_y = S_y;
@@ -270,6 +280,7 @@ p = struct();
 p.ini = ini;
 p.varsigma = varsigma;
 p.rho = rho_real;
+p.rho_obs = rho;
 p.rho_smooth = rho_real_smooth;
 p.sigma = sigma;
 p.burnin = tshift;

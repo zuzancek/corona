@@ -7,6 +7,7 @@ db_deaths = dbload('data/deaths.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','freq','daily');
 
 load('results/inputs.mat','dates','cases_data','test_data','hosp_data','deaths_data','s');
+s = setparam();
 
 idx_fun = 1;
 fun_opt_0 = {'DHIX','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
@@ -31,7 +32,7 @@ dateTo = t1;
 
 %% calculations
 % 1./ daily cases implied by hospitals
-delay.v = 1*([1 0.5 0]);  delay.at = [dd(2020,10,30),dd(2020,11,15),dd(2020,12,15)];
+delay.v = 2*([1 0.5 0]);  delay.at = [dd(2020,10,30),dd(2020,11,15),dd(2020,12,15)];
 params = struct;
 params.death_old_ratio = deaths_data.death_old_ratio;
 params.cases_old_ratio = cases_data.old_ratio;
@@ -90,32 +91,8 @@ plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',
 % epidemiology
 plot_epidemiology_cmp(res_implied,counterfact_data,reported_data,dateFrom,dateTo,'implied',true,'reported',true);
 
-% quality
-figure('Name','New cases (reported vs.true, lost cases)');
-plot(resize(dI_inflow_pcr,disp_from:t1),'linewidth',1,'linestyle','-.');hold on;
-plot(resize(dI_inflow_pcr_smooth,disp_from:t1),'linewidth',2);hold on;
-plot(resize(sa_cmp.loss_a,disp_from:t1),'linewidth',1);hold on;
-plot(resize(dI_inflow_real,disp_from:t1),'linewidth',2);hold on;
-plot(resize(sa_cmp.loss_s,disp_from:t1),'linewidth',1);hold on;
-title('New infections (PCR only)');
-legend({'reported, raw','reported, smooth', '"lost" asymptomatical new cases','hypothetically observable','"lost" symptomatical new cases'});
-grid on;
-% 
-figure('Name','Testing effectivity and Old-age cases share')
-subplot(2,1,1)
-obs_ratio = 0*obs_ratio_real+s.obs_ratio;
-plot(100*resize(obs_ratio,disp_from:t1),'linewidth',1); hold on;
-plot(100*resize(obs_ratio_real,disp_from:t1),'linewidth',1);
-title('Observable ratio');
-legend({'stationary (optimistic)','real (implied by hospitalizations)'});
-grid on;
-ylabel('% of total cases');
-subplot(2,1,2)
-plot(100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1),'linewidth',1);grid on;
-title('Testing effectivity (implied by hospitals)');
-xls_out.test_eff = 100/s.obs_ratio*resize(obs_ratio_real,disp_from:t1);
-% 
-
+% testing quality
+plot_quality_cmp(res_implied,reported_data,dateFrom,dateTo);
 
 %% saving stuff
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
