@@ -84,13 +84,13 @@ plot_fanchart(q_mat_pcr,s,dt,disp_from+30,disp_to,t0,'Effective reproduction num
 x.Rt = Rt_smooth_series_pcr;
 x.Rt_real = Rt_smooth_series_real;
 % x.Rt_test = Rt_smooth_series_test;
-dbsave(x,'results.csv');
+dbsave(x,'results/results_Rt_all.csv');
 
 Rt = tseries(t0+1:t2,Rt_pcr); %#ok<*NASGU>
 q_mat = q_mat_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
-save(strcat('results_Rt.mat'),'s','t0','t1','t2','q_mat',...
+save(strcat('results/results_Rt.mat'),'s','t0','t1','t2','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
 Rt = tseries(t0+1:t2,Rt_real);
 q_mat = q_mat_real; Rt = Rt_real; Yt = Yt_real; Rt_last = Rt_last_real; Rt_dist = Rt_dist_real; Rt_rnd = Rt_rnd_real;
-save(strcat('results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
+save(strcat('results/results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
     'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
