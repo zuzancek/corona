@@ -42,7 +42,7 @@ vent_share=0.081
 pred_int<-c(0.1, 0.25, 0.5, 0.75, 0.9)
 colnames_int<-sapply(pred_int, function(x) paste("X", x, sep=""))
 # Hospitalizations data
-hosp_data="data/hospitals.csv"
+hosp_data="data/hospitals_implied.csv"
 # Folder to output graphs
 output_folder="results/implied"
 
