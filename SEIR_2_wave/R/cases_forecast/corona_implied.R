@@ -27,7 +27,7 @@ library("distcrete")
 # *NIX: Sys.setlocale("LC_TIME", "en_US")
 
 # define some constants/variables
-data="C://Users/zuzan/Desktop/data/cases.csv"
+data="data/cases.csv"
 # Population of the forecasted area
 pop=5458000
 # Forecast window size in days
@@ -42,9 +42,9 @@ vent_share=0.081
 pred_int<-c(0.1, 0.25, 0.5, 0.75, 0.9)
 colnames_int<-sapply(pred_int, function(x) paste("X", x, sep=""))
 # Hospitalizations data
-hosp_data="C://Users/zuzan/Desktop/data/hospitals.csv"
+hosp_data="data/hospitals.csv"
 # Folder to output graphs
-output_folder="C://Users/zuzan/Desktop/data/res/"
+output_folder="res/reported"
 
 #### Functions
 # Forecasting function
