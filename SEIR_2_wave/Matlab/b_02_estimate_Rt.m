@@ -23,7 +23,6 @@ else
     model_fnc = @estimate_Rt_SIR;
 end
 disp_to = t2;
-tshift = 6;
 
 %% inputs definition
 inputs_fnc = struct();

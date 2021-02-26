@@ -84,8 +84,10 @@ for t = 1:T
     Rt_vec(:,t) = pop_size.*z(t)./S_vec(:,t).*T_si_vec./(alpha*I_unobs_vec(:,t)+I_obs_vec(:,t));
     S_vec(:,t+1) = S_vec(:,t)-z(t);
     I_unobs_vec(:,t+1) = I_unobs_vec(:,t).*(1-1./T_si_vec)+z_unobs(t);  
-    I_obs_y_vec(:,t+1) = I_obs_y_vec(:,t).*(1-alpha_ihy-alpha_iry_vec(:,t))+z_obs_y(t);
-    I_obs_o_vec(:,t+1) = I_obs_o_vec(:,t).*(1-alpha_iho-alpha_iro_vec(:,t))+z_obs_o(t);
+%     I_obs_y_vec(:,t+1) = I_obs_y_vec(:,t).*(1-alpha_ihy-alpha_iry_vec(:,t))+z_obs_y(t);
+%     I_obs_o_vec(:,t+1) = I_obs_o_vec(:,t).*(1-alpha_iho-alpha_iro_vec(:,t))+z_obs_o(t);
+    I_obs_y_vec(:,t+1) = I_obs_y_vec(:,t).*(1-1./T_si_vec)+z_obs_y(t);
+    I_obs_o_vec(:,t+1) = I_obs_o_vec(:,t).*(1-1./T_si_vec)+z_obs_o(t);
     I_obs_vec(:,t+1) = I_obs_y_vec(:,t+1)+I_obs_o_vec(:,t+1);
      
     I_vec(:,t) = I_obs_vec(:,t)+I_unobs_vec(:,t);
