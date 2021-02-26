@@ -1,0 +1,8 @@
+# vim swp files
+*.swp
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+inst/doc

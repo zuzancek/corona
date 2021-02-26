@@ -1,0 +1,8 @@
+fitRotavirus.R
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.travis\.yml$
+^codecov\.yml$
+^CRAN-RELEASE$
+^cran-comments\.md$
+^\.github$
