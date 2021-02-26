@@ -27,7 +27,7 @@ library("distcrete")
 # *NIX: Sys.setlocale("LC_TIME", "en_US")
 
 # define some constants/variables
-data="data/cases.csv"
+data="data/cases_implied.csv"
 # Population of the forecasted area
 pop=5458000
 # Forecast window size in days
@@ -44,7 +44,7 @@ colnames_int<-sapply(pred_int, function(x) paste("X", x, sep=""))
 # Hospitalizations data
 hosp_data="data/hospitals.csv"
 # Folder to output graphs
-output_folder="res/reported"
+output_folder="results/implied"
 
 #### Functions
 # Forecasting function
@@ -605,6 +605,6 @@ ggsave("ICU ventilated.pdf",
        dpi = 300
 )
 
-write.csv(hosp_summary, file = paste(output_folder,"Hospitalizations.csv",sep=""), )
-write.csv(vent_summary, file = paste(output_folder,"ICU ventilated.csv",sep=""), )
-write.csv(cases_summary, file = paste(output_folder,"Cases.csv",sep=""), )
+write.csv(hosp_summary, file = paste(output_folder,"/Hospitalizations.csv",sep=""), )
+write.csv(vent_summary, file = paste(output_folder,"/ICU ventilated.csv",sep=""), )
+write.csv(cases_summary, file = paste(output_folder,"/Cases.csv",sep=""), )
