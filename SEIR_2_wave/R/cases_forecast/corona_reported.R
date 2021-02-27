@@ -27,7 +27,7 @@ library("distcrete")
 # *NIX: Sys.setlocale("LC_TIME", "en_US")
 
 # define some constants/variables
-data="data/cases.csv"
+data="data/cases_mm.csv"
 # Population of the forecasted area
 pop=5458000
 # Forecast window size in days
