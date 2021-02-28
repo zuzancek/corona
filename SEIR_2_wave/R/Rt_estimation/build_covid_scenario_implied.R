@@ -1,28 +1,24 @@
-covid_data<-read.csv(('data/cases_implied.csv'), header = TRUE, sep=";")
+covid_data_imp<-read.csv(('data/cases_implied.csv'), header = TRUE, sep=";")
 covid_si_dist<-read.csv('data/dist.csv',header = TRUE, sep=";")
-covid_data$Datum <- as.Date(covid_data$Datum)
+covid_data_imp$Datum <- as.Date(covid_data_imp$Datum)
 
-date_from = "2020-10-31"
-idx<-which(covid_data$Datum==date_from)
-covid2020r <- list("incidence"=covid_data$Dennych.PCR.prirastkov[-seq(idx)],"si_dist"=covid_si_dist$y)
-covid2020r$date <- as.Date(covid_data$Datum[-seq(idx)])
-#covid2020r <- list("incidence"=covid_data$Dennych.PCR.prirastkov,"si_dist"=covid_si_dist$y)
-#covid2020r$date <- as.Date(covid_data$Datum)
+date_from = "2020-9-30"
+idx<-which(covid_data_imp$Datum==date_from)
+covid2020imp <- list("incidence"=covid_data_imp$Dennych.PCR.prirastkov[-seq(idx)],"si_dist"=covid_si_dist$y)
+covid2020imp$date <- as.Date(covid_data_imp$Datum[-seq(idx)])
 
-res_covid2020r <- estimate_R(covid2020r$incidence,
+T <- nrow(covid_data_imp$Dennych.PCR.prirastkov[-seq(idx)])
+ilen = 3
+t_start0 <- seq(2,T-ilen+1)
+t_end0 <- t_start0+ilen-1
+res_covid2020_imp <- estimate_R(covid2020imp$incidence,
                              method="non_parametric_si",
-                             config=make_config(list(si_distr=covid2020r$si_dist)))
+                             config=make_config(list(t_start=t_start0,
+                                                     t_end=t_end0,
+                                                     si_distr=covid2020imp$si_dist)))
 
-plot(res_covid2020r,legend=FALSE)
+plot(res_covid2020_imp,legend=FALSE)
 
-####################################
+res_covid2020_imp$date <- as.Date(covid_data_imp$Datum[-seq(idx)])
 
-# si_mean = 6.5
-# si_std = 0.62
-# res_covid2020rp <- estimate_R(covid2020r$incidence,
-#                              method="parametric_si",
-#                              config=make_config(list(
-#                                mean_si=si_mean*si_std*si_std,
-#                                std_si=1/(si_std*si_std))))
-# plot(res_covid2020rp,legend=FALSE)
-
+write.csv(res_covid2020_imp$R,file=paste("results/output_R_implied.csv",sep=""),)
