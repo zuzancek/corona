@@ -155,8 +155,8 @@ covid_data<-covid_data[seq(dim(covid_data)[1],1),]
 covid_data$date <- as.Date(covid_data$Datum)
 # Rename columns manually if needed
 # Column with cumulative number of positive cases should be called positive, daily new cases newcases
-names(covid_data)[names(covid_data) == "Pocet.potvrdenych.PCR.testami"] <- "positive"
-names(covid_data)[names(covid_data) == "Dennych.PCR.prirastkov"] <- "newcases"
+names(covid_data)[names(covid_data) == "Pocet_potvrdenych_PCR_testami"] <- "positive"
+names(covid_data)[names(covid_data) == "Dennych_PCR_prirastkov"] <- "newcases"
 covid_data$AgPosit[is.na(covid_data$AgPosit)]<-0
 covid_data$newcases<-covid_data$newcases+covid_data$AgPosit
 covid_data<-covid_data%>%mutate(positive=rev(cumsum(rev(newcases))))
