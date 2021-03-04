@@ -195,8 +195,8 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
   t_start <- x$R$t_start
   t_end <- x$R$t_end
   mean_posterior <- x$R[, "Mean(R)"]
-  quantile_0.025_posterior <- x$R[, "Quantile.0.025(R)"]
-  quantile_0.975_posterior <- x$R[, "Quantile.0.975(R)"]
+  Q_025_posterior <- x$R[, "Q_025"]
+  Q_975_posterior <- x$R[, "Q_975"]
   method <- x$method
   si_distr <- x$si_distr
   incid <- data.frame(local = x$I_local, imported = x$I_imported)
@@ -263,7 +263,7 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
       # non sliding windows
       if (!multiple_input) {
         if (is.null(options_R$ylim)) {
-          options_R$ylim <- c(0, max(quantile_0.975_posterior, na.rm = TRUE))
+          options_R$ylim <- c(0, max(Q_975_posterior, na.rm = TRUE))
         }
 
         if (is.null(options_R$xlim)) {
@@ -272,8 +272,8 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
 
         df <- melt(data.frame(
           start = dates[t_start]-0.5, end = dates[t_end]+0.5, meanR = mean_posterior,
-          lower = quantile_0.025_posterior,
-          upper = quantile_0.975_posterior
+          lower = Q_025_posterior,
+          upper = Q_975_posterior
         ), id = c("meanR", "lower", "upper"))
         df$group <- as.factor(rep(seq_len(length(t_start)), 
                                   dim(df)[1] / length(t_start)))
@@ -293,8 +293,8 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
       } else {
         df_tmp <- data.frame(
           start = dates[t_start], end = dates[t_end], meanR = mean_posterior,
-          lower = quantile_0.025_posterior,
-          upper = quantile_0.975_posterior
+          lower = Q_025_posterior,
+          upper = Q_975_posterior
         )
         df <- df_tmp
         id_tmp <- c("meanR", "lower", "upper")
@@ -310,12 +310,12 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
             dates2 <- seq_len(T)
           }
           mean_posterior2 <- x2$R[, "Mean(R)"]
-          quantile_0.025_posterior2 <- x2$R[, "Quantile.0.025(R)"]
-          quantile_0.975_posterior2 <- x2$R[, "Quantile.0.975(R)"]
+          Q_025_posterior2 <- x2$R[, "Q_025"]
+          Q_975_posterior2 <- x2$R[, "Q_975"]
           df_tmp2 <- data.frame(
             start2 = dates2[t_start2], end2 = dates2[t_end],
-            meanR2 = mean_posterior2, lower2 = quantile_0.025_posterior2,
-            upper2 = quantile_0.975_posterior2
+            meanR2 = mean_posterior2, lower2 = Q_025_posterior2,
+            upper2 = Q_975_posterior2
           )
           names(df_tmp2) <- paste0(names(df_tmp), i)
           df <- cbind(df, df_tmp2)
@@ -364,7 +364,7 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
     } else {
       if (!multiple_input) {
         if (is.null(options_R$ylim)) {
-          options_R$ylim <- c(0, max(quantile_0.975_posterior, na.rm = TRUE))
+          options_R$ylim <- c(0, max(Q_975_posterior, na.rm = TRUE))
         }
 
         if (is.null(options_R$xlim)) {
@@ -373,8 +373,8 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
 
         p2 <- ggplot(data.frame(
           start = dates[t_start], end = dates[t_end], meanR = mean_posterior,
-          lower = quantile_0.025_posterior,
-          upper = quantile_0.975_posterior
+          lower = Q_025_posterior,
+          upper = Q_975_posterior
         ), aes(end, meanR)) +
           geom_ribbon(aes(ymin = lower, ymax = upper, fill = "95%CrI")) +
           geom_line(aes(colour = "Mean")) +
@@ -391,8 +391,8 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
 
         df_tmp <- data.frame(
           start = dates[t_start], end = dates[t_end],
-          meanR = mean_posterior, lower = quantile_0.025_posterior,
-          upper = quantile_0.975_posterior
+          meanR = mean_posterior, lower = Q_025_posterior,
+          upper = Q_975_posterior
         )
         df <- df_tmp
 
@@ -406,12 +406,12 @@ plot.estimate_R <- function(x, what = c("all", "incid", "R", "SI"),
             dates2 <- seq_len(T)
           }
           mean_posterior2 <- x2$R[, "Mean(R)"]
-          quantile_0.025_posterior2 <- x2$R[, "Quantile.0.025(R)"]
-          quantile_0.975_posterior2 <- x2$R[, "Quantile.0.975(R)"]
+          Q_025_posterior2 <- x2$R[, "Q_025"]
+          Q_975_posterior2 <- x2$R[, "Q_975"]
           df_tmp2 <- data.frame(
             start2 = dates2[t_start2], end2 = dates2[t_end],
-            meanR2 = mean_posterior2, lower2 = quantile_0.025_posterior2,
-            upper2 = quantile_0.975_posterior2
+            meanR2 = mean_posterior2, lower2 = Q_025_posterior2,
+            upper2 = Q_975_posterior2
           )
           names(df_tmp2) <- paste0(names(df_tmp), i)
           df <- cbind(df, df_tmp2)

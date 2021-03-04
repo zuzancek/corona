@@ -527,13 +527,69 @@ estimate_R_func <- function(incid,
         0.05,
         na.rm = TRUE
       )
+	quantile_0.10_posterior <- apply(r_sample, 2, quantile,
+        0.10,
+        na.rm = TRUE
+      )
+	quantile_0.15_posterior <- apply(r_sample, 2, quantile,
+        0.15,
+        na.rm = TRUE
+      )
+	quantile_0.20_posterior <- apply(r_sample, 2, quantile,
+        0.20,
+        na.rm = TRUE
+      )
       quantile_0.25_posterior <- apply(r_sample, 2, quantile,
         0.25,
         na.rm = TRUE
       )
+	quantile_0.30_posterior <- apply(r_sample, 2, quantile,
+        0.30,
+        na.rm = TRUE
+      )
+	quantile_0.35_posterior <- apply(r_sample, 2, quantile,
+        0.35,
+        na.rm = TRUE
+      )
+	quantile_0.40_posterior <- apply(r_sample, 2, quantile,
+        0.40,
+        na.rm = TRUE
+      )
+	quantile_0.45_posterior <- apply(r_sample, 2, quantile,
+        0.45,
+        na.rm = TRUE
+      )
       median_posterior <- apply(r_sample, 2, median, na.rm = TRUE)
+	quantile_0.55_posterior <- apply(r_sample, 2, quantile,
+        0.55,
+        na.rm = TRUE
+      )
+	quantile_0.60_posterior <- apply(r_sample, 2, quantile,
+        0.60,
+        na.rm = TRUE
+      )
+	quantile_0.65_posterior <- apply(r_sample, 2, quantile,
+        0.65,
+        na.rm = TRUE
+      )
+	quantile_0.70_posterior <- apply(r_sample, 2, quantile,
+        0.70,
+        na.rm = TRUE
+      )
       quantile_0.75_posterior <- apply(r_sample, 2, quantile,
         0.75,
+        na.rm = TRUE
+      )
+	quantile_0.80_posterior <- apply(r_sample, 2, quantile,
+        0.80,
+        na.rm = TRUE
+      )
+	quantile_0.85_posterior <- apply(r_sample, 2, quantile,
+        0.85,
+        na.rm = TRUE
+      )	
+	quantile_0.90_posterior <- apply(r_sample, 2, quantile,
+        0.90,
         na.rm = TRUE
       )
       quantile_0.95_posterior <- apply(r_sample, 2, quantile,
@@ -582,13 +638,69 @@ estimate_R_func <- function(incid,
         0.05,
         na.rm = TRUE
       )
+	quantile_0.10_posterior <- apply(r_sample, 2, quantile,
+        0.10,
+        na.rm = TRUE
+      )
+	quantile_0.15_posterior <- apply(r_sample, 2, quantile,
+        0.15,
+        na.rm = TRUE
+      )
+	quantile_0.20_posterior <- apply(r_sample, 2, quantile,
+        0.20,
+        na.rm = TRUE
+      )
       quantile_0.25_posterior <- apply(r_sample, 2, quantile,
         0.25,
         na.rm = TRUE
       )
+	quantile_0.30_posterior <- apply(r_sample, 2, quantile,
+        0.30,
+        na.rm = TRUE
+      )
+	quantile_0.35_posterior <- apply(r_sample, 2, quantile,
+        0.35,
+        na.rm = TRUE
+      )
+	quantile_0.40_posterior <- apply(r_sample, 2, quantile,
+        0.40,
+        na.rm = TRUE
+      )
+	quantile_0.45_posterior <- apply(r_sample, 2, quantile,
+        0.45,
+        na.rm = TRUE
+      )
       median_posterior <- apply(r_sample, 2, median, na.rm = TRUE)
+      quantile_0.55_posterior <- apply(r_sample, 2, quantile,
+        0.55,
+        na.rm = TRUE
+      )
+	quantile_0.60_posterior <- apply(r_sample, 2, quantile,
+        0.60,
+        na.rm = TRUE
+      )
+	quantile_0.65_posterior <- apply(r_sample, 2, quantile,
+        0.65,
+        na.rm = TRUE
+      )
+	quantile_0.70_posterior <- apply(r_sample, 2, quantile,
+        0.70,
+        na.rm = TRUE
+      )
       quantile_0.75_posterior <- apply(r_sample, 2, quantile,
         0.75,
+        na.rm = TRUE
+      )
+	quantile_0.80_posterior <- apply(r_sample, 2, quantile,
+        0.80,
+        na.rm = TRUE
+      )
+	quantile_0.85_posterior <- apply(r_sample, 2, quantile,
+        0.85,
+        na.rm = TRUE
+      )	
+	quantile_0.90_posterior <- apply(r_sample, 2, quantile,
+        0.90,
         na.rm = TRUE
       )
       quantile_0.95_posterior <- apply(r_sample, 2, quantile,
@@ -628,7 +740,35 @@ estimate_R_func <- function(incid,
       shape = a_posterior,
       scale = b_posterior, lower.tail = TRUE, log.p = FALSE
     )
+    quantile_0.10_posterior <- qgamma(0.10,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.15_posterior <- qgamma(0.15,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.20_posterior <- qgamma(0.20,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
     quantile_0.25_posterior <- qgamma(0.25,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.30_posterior <- qgamma(0.30,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.35_posterior <- qgamma(0.35,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )    
+    quantile_0.40_posterior <- qgamma(0.40,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.45_posterior <- qgamma(0.45,
       shape = a_posterior,
       scale = b_posterior, lower.tail = TRUE, log.p = FALSE
     )
@@ -636,7 +776,35 @@ estimate_R_func <- function(incid,
       shape = a_posterior,
       scale = b_posterior, lower.tail = TRUE, log.p = FALSE
     )
+    quantile_0.55_posterior <- qgamma(0.55,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.60_posterior <- qgamma(0.60,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )    
+    quantile_0.65_posterior <- qgamma(0.65,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.70_posterior <- qgamma(0.70,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
     quantile_0.75_posterior <- qgamma(0.75,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.80_posterior <- qgamma(0.80,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )
+    quantile_0.85_posterior <- qgamma(0.85,
+      shape = a_posterior,
+      scale = b_posterior, lower.tail = TRUE, log.p = FALSE
+    )    
+    quantile_0.90_posterior <- qgamma(0.90,
       shape = a_posterior,
       scale = b_posterior, lower.tail = TRUE, log.p = FALSE
     )
@@ -652,16 +820,21 @@ estimate_R_func <- function(incid,
 
   results <- list(R = as.data.frame(cbind(
     config$t_start, config$t_end, mean_posterior,
-    std_posterior, quantile_0.025_posterior, quantile_0.05_posterior,
-    quantile_0.25_posterior, median_posterior, quantile_0.75_posterior,
-    quantile_0.95_posterior, quantile_0.975_posterior
+    std_posterior, median_posterior, quantile_0.025_posterior, quantile_0.05_posterior,
+    quantile_0.10_posterior, quantile_0.15_posterior, quantile_0.20_posterior, 
+    quantile_0.25_posterior, quantile_0.30_posterior, quantile_0.35_posterior,
+    quantile_0.40_posterior, quantile_0.45_posterior, median_posterior, 
+    quantile_0.55_posterior, quantile_0.60_posterior, quantile_0.65_posterior,
+    quantile_0.70_posterior, quantile_0.75_posterior, quantile_0.80_posterior, 
+    quantile_0.85_posterior, quantile_0.90_posterior, quantile_0.95_posterior, 
+    quantile_0.975_posterior
   )))
 
   names(results$R) <- c(
-    "t_start", "t_end", "Mean(R)", "Std(R)",
-    "Quantile.0.025(R)", "Quantile.0.05(R)", "Quantile.0.25(R)",
-    "Median(R)", "Quantile.0.75(R)", "Quantile.0.95(R)",
-    "Quantile.0.975(R)"
+    "t_start", "t_end", "Mean(R)", "Std(R)", "Median(R)",
+    "Q_025", "Q_05", "Q_10","Q_15", "Q_20", "Q_25", "Q_30", "Q_35", "Q_40", "Q_45",
+    "Q_50", "Q_55", "Q_60", "Q_65", "Q_70", "Q_75", "Q_80", "Q_85", "Q_90", "Q_95",
+    "Q_975"
   )
   results$method <- method
   results$si_distr <- config$si_distr
