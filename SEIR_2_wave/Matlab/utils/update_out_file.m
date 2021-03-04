@@ -35,7 +35,7 @@ for i=1:length(outdirs)
         t2_idx = find(datetime(xdates.t2,'ConvertFrom','datenum')==src_dates);
         T.Dennych_PCR_prirastkov(t1_idx:t2_idx) = x(xdates.t1:xdates.t2);
         T.Pocet_potvrdenych_PCR_testami = cumsum(T.Dennych_PCR_prirastkov);
-        T(t2_idx:end,:) = [];
+        T(t2_idx+1:end,:) = [];
         filepath_tar = fullfile(pwd,outdirs{i},filename_tar{j});
         writetable(T,filepath_tar,'Delimiter',';');
     end

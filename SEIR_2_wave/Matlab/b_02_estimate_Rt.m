@@ -3,7 +3,7 @@ initialize;
 
 %% setup
 disp_from = dd(2020,9,1);
-indiff = true; 
+indiff = true;
 cut = 0;
 dt = 1;
 
@@ -15,44 +15,49 @@ t0 = dates.t0;
 t1 = dates.t1;
 t2 = dates.t2;
 tt0 = t0+dt;
-s = setparam();
-s.model_seir = false;
-if s.model_seir
-    model_fnc = @estimate_Rt_SEIR;
-else
-    model_fnc = @estimate_Rt_SIR;
-end
 disp_to = t2;
-
-%% inputs definition
-inputs_fnc = struct();
-init = struct();
-init.I0 = cases_data.I0;
-params = struct();
-% params.obs_ratio = cases_implied_data.obs_ratio;           
-params.old_ratio = cases_data.old_ratio;
-
-% d0 = dd(2020,09,7); d1 = dd(2020,10,17);
-%% calculations
 s = setparam();
-
-% 1. reported data, PCR only, testing is optimal
-cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
-inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
-inputs_fnc.I0 = cases_data.I0;
-inputs_fnc.old_ratio = cases_data.old_ratio;
-inputs_fnc.eta_o = [];
-inputs_fnc.eta_y = [];
-[Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
-
-% real (implied) data
-z0 = resize(cases_data.cases_pcr_smooth,t0:t2);
-z0(end-length(cases_implied_data.X_smooth_all)+1:end) = cases_implied_data.X_smooth_all;
-inputs_fnc.z = double(z0);
-inputs_fnc.old_ratio = cases_implied_data.rho_real;
-inputs_fnc.eta_o = hosp_implied_data.eta_o;
-inputs_fnc.eta_y = hosp_implied_data.eta_y;
-[Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real] = model_fnc(inputs_fnc,s,true,true,false);
+s.estimate_Rt = false;
+if s.estimate_Rt
+    model_fnc = @estimate_Rt_SIR;
+    
+    
+    %% inputs definition
+    inputs_fnc = struct();
+    init = struct();
+    init.I0 = cases_data.I0;
+    params = struct();
+    % params.obs_ratio = cases_implied_data.obs_ratio;
+    params.old_ratio = cases_data.old_ratio;
+    
+    % d0 = dd(2020,09,7); d1 = dd(2020,10,17);
+    %% calculations
+    s = setparam();
+    
+    % 1. reported data, PCR only, testing is optimal
+    cases_data.cases_pcr_smooth = smooth_series(cases_data.cases_pcr_smooth);
+    inputs_fnc.z = double(resize(cases_data.cases_pcr_smooth,t0:t2));
+    inputs_fnc.I0 = cases_data.I0;
+    inputs_fnc.old_ratio = cases_data.old_ratio;
+    inputs_fnc.eta_o = [];
+    inputs_fnc.eta_y = [];
+    [Rt_pcr,q_mat_pcr,Yt_pcr,Rt_last_pcr,Rt_dist_pcr,Rt_rnd_pcr]  = model_fnc(inputs_fnc,s,true,true,false);
+    
+    % real (implied) data
+    z0 = resize(cases_data.cases_pcr_smooth,t0:t2);
+    z0(end-length(cases_implied_data.X_smooth_all)+1:end) = cases_implied_data.X_smooth_all;
+    inputs_fnc.z = double(z0);
+    inputs_fnc.old_ratio = cases_implied_data.rho_real;
+    inputs_fnc.eta_o = hosp_implied_data.eta_o;
+    inputs_fnc.eta_y = hosp_implied_data.eta_y;
+    [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real] = model_fnc(inputs_fnc,s,true,true,false);
+    
+else
+    % load results from external files produced by R-codes
+    % load data series containing mean&CI's for Rt calculated from
+    % official/implied cases
+    
+end
 
 %% plotting stuff
 % 0./ cases
@@ -76,7 +81,7 @@ grid on;
 
 plot_fancharts_cmp(q_mat_pcr(5:15,:),q_mat_real(5:15,:),s,disp_from+30,disp_to,...
     'offsetdate',t0,'title','Effective reproduction numbers (reported vs.implied, 75% CI)','legend',{'reported data (PCR)','implied data'});
-% 
+%
 plot_fanchart(q_mat_real,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
 plot_fanchart(q_mat_pcr,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
 
