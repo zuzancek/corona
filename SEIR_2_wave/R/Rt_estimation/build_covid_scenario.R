@@ -23,4 +23,4 @@ res_covid2020r$date <- as.Date(covid_data$Datum[-seq(idx)])
 res_covid2020r$R$Date <-res_covid2020r$date[-seq(ilen)]
 res_covid2020r$R$Cases<-res_covid2020r$I[-seq(ilen)]
 
-write.csv(res_covid2020r$R,file=paste("results/output_R_reported.csv",sep=""),)
+write.csv(res_covid2020r$R,file=paste("results/output_R_reported.csv",sep=";"),)

@@ -24,4 +24,4 @@ res_covid2020_imp$R$Date <-res_covid2020_imp$date[-seq(ilen)]
 res_covid2020_imp$R$Cases<-res_covid2020_imp$I[-seq(ilen)]
 
 
-write.csv(res_covid2020_imp$R,file=paste("results/output_R_implied.csv",sep=""),)
+write.csv(res_covid2020_imp$R,file=paste("results/output_R_implied.csv",sep=";"),)
