@@ -20,7 +20,8 @@ res_covid2020_imp <- estimate_R(covid2020imp$incidence,
 plot(res_covid2020_imp,legend=FALSE)
 
 res_covid2020_imp$date <- as.Date(covid_data_imp$Datum[-seq(idx)])
-res_covid2020_imp$R[,ncol(res_covid2020_imp$R)]<-res_covid2020_imp$date[-seq(ilen)]
-res_covid2020_imp$R[,ncol(res_covid2020_imp$R)]<-res_covid2020_imp$I[-seq(ilen)]
+res_covid2020_imp$R$Date <-res_covid2020_imp$date[-seq(ilen)]
+res_covid2020_imp$R$Cases<-res_covid2020_imp$I[-seq(ilen)]
+
 
 write.csv(res_covid2020_imp$R,file=paste("results/output_R_implied.csv",sep=""),)
