@@ -3,12 +3,12 @@ function [] = update_out_file(varargin)
 ip = inputParser;
 addParamValue(ip, 'outdirs', {'../R/cases_forecast/data','../R/Rt_estimation/data'}, @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'filename_tar_1', 'cases_implied.csv', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'filename_tar_0', 'cases_mm.csv', @ischar);%#ok<*NVREPL>
+addParamValue(ip, 'filename_tar_0', 'cases_smooth.csv', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'filename_src', 'cases.csv', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'data_src_1', 'results/results_impl.mat', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'data_src_0', 'results/inputs.mat', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'var_1', 'cases_implied_data.X_smooth_all', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'var_0', 'cases_data.cases_pcr_mm', @ischar);%#ok<*NVREPL>
+addParamValue(ip, 'var_0', 'cases_data.cases_pcr_smooth', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'reported',true, @islogical);
 parse(ip, varargin{:});
 

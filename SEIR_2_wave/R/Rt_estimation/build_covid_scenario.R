@@ -1,4 +1,4 @@
-covid_data<-read.csv(('data/cases_mm.csv'), header = TRUE, sep=";")
+covid_data<-read.csv(('data/cases_smooth.csv'), header = TRUE, sep=";")
 covid_si_dist<-read.csv('data/dist.csv',header = TRUE, sep=";")
 covid_data$Datum <- as.Date(covid_data$Datum)
 

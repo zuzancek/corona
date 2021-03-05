@@ -100,5 +100,6 @@ hosp_implied_counterfact_data = out;
 hosp_implied_data = out_check;
 implied_data = cases_implied_data+hosp_implied_data;
 save(out_filename,'dates','cases_implied_data','hosp_implied_counterfact_data','implied_data','hosp_implied_data','s');
+
 % update other files
 update_out_file();

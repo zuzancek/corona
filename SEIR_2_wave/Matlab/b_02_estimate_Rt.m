@@ -62,6 +62,9 @@ if s.estimate_Rt
     Rt_implied.mean = Rt_real;
     Rt_reported.mean = Rt_pcr;
     
+    Rt_reported.q = q_mat_pcr;
+    Rt_implied.q = q_mat_real;   
+    
 else
     % load results from external files produced by R-codes
     % load data series containing mean&CI's for Rt calculated from
@@ -75,6 +78,8 @@ else
     
     Rt_reported.mean = info{1}.mean_ts;
     Rt_implied.mean = info{2}.mean_ts;
+    Rt_reported.q = info{1}.Q_mat';
+    Rt_implied.q = info{2}.Q_mat';    
     
 end
 
@@ -95,11 +100,11 @@ title('Effective reproduction number (smooth inputs)');
 legend({'reported data (PCR)','implied data'});
 grid on;
 
-plot_fancharts_cmp(q_mat_pcr(5:15,:),q_mat_real(5:15,:),s,disp_from+30,disp_to,...
-    'offsetdate',t0,'title','Effective reproduction numbers (reported vs.implied, 75% CI)','legend',{'reported data (PCR)','implied data'});
+plot_fancharts_cmp(Rt_reported.q(3:19,:),Rt_implied.q(3:19,:),s,disp_from+30,disp_to,...
+    'offsetdate',t0,'title','Effective reproduction numbers (reported vs.implied, 90% CI)','legend',{'reported data (PCR)','implied data'});
 %
-plot_fanchart(q_mat_real,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
-plot_fanchart(q_mat_pcr,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
+plot_fanchart(Rt_reported.q,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
+plot_fanchart(Rt_implied.q,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
 
 %% saving stuff
 x.Rt = Rt_smooth_series_pcr;
