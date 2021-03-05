@@ -18,6 +18,7 @@ tt0 = t0+dt;
 disp_to = t2;
 s = setparam();
 s.estimate_Rt = false;
+
 if s.estimate_Rt
     model_fnc = @estimate_Rt_SIR;
     
@@ -52,18 +53,27 @@ if s.estimate_Rt
     inputs_fnc.eta_y = hosp_implied_data.eta_y;
     [Rt_real,q_mat_real,Yt_real,Rt_last_real,Rt_dist_real,Rt_rnd_real] = model_fnc(inputs_fnc,s,true,true,false);
     
+    cases.reported = cases_data.cases_pcr;
+    cases.implied = cases_implied_data.X_smooth_all;
+    
 else
     % load results from external files produced by R-codes
     % load data series containing mean&CI's for Rt calculated from
     % official/implied cases
+    info = load_fanchart_tseries('src_dir', {'../R/Rt_estimation/results'},...
+        'src_filenames', {'output_R_reported.csv','output_R_implied.csv'},...
+        'tar_dir','results','tar_filenames', {'Rt_reported.csv','Rt_implied.csv'});
+
+    cases.reported = info{1}.X_ts;
+    cases.implied = info{2}.X_ts;
     
 end
 
 %% plotting stuff
 % 0./ cases
 figure('Name','New cases (smooth data, means)')
-plot(resize(cases_implied_data.X_smooth_all,disp_from:t2),'linewidth',1); hold on;
-plot(resize(cases_data.cases_pcr_smooth,disp_from:t2),'k--', 'linewidth',1);
+plot(resize(cases.implied,disp_from:t2),'linewidth',1); hold on;
+plot(resize(cases.reported,disp_from:t2),'k--', 'linewidth',1);
 grid on;
 title('New cases');
 legend({'Implied by hospitals','PCR reported','AG+PCR reported'});

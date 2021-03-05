@@ -1,4 +1,4 @@
-function [info]=load_fanchart_tseries(varargin)
+function [info] = load_fanchart_tseries(varargin)
 
 ip = inputParser;
 addParamValue(ip, 'src_dir', {'../R/Rt_estimation/results'}, @ischar);%#ok<*NVREPL>
@@ -12,7 +12,6 @@ src_dir = results.src_dir;
 src_filenames = results.src_filenames;
 tar_dir = results.tar_dir;
 tar_filenames = results.tar_filenames;
-% "","t_start","t_end","Mean(R)","Std(R)","Quantile.0.025(R)","Quantile.0.05(R)","Quantile.0.25(R)","Median(R)","Quantile.0.75(R)","Quantile.0.95(R)","Quantile.0.975(R)","Date","Cases"
 info = cell(length(src_filenames),1);
 
 for i=1:length(src_filenames)
