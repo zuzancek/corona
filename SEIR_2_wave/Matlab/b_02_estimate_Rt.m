@@ -56,16 +56,25 @@ if s.estimate_Rt
     cases.reported = cases_data.cases_pcr;
     cases.implied = cases_implied_data.X_smooth_all;
     
+    nn = length(Rt_pcr);
+    Rt_smooth_series_pcr = tseries(t0:t0+nn-1,Rt_pcr);
+    Rt_smooth_series_real = tseries(t0:t0+nn-1,Rt_real);
+    Rt_implied.mean = Rt_real;
+    Rt_reported.mean = Rt_pcr;
+    
 else
     % load results from external files produced by R-codes
     % load data series containing mean&CI's for Rt calculated from
     % official/implied cases
-    info = load_fanchart_tseries('src_dir', {'../R/Rt_estimation/results'},...
+    info = load_fanchart_tseries('src_dir', '../R/Rt_estimation/results',...
         'src_filenames', {'output_R_reported.csv','output_R_implied.csv'},...
         'tar_dir','results','tar_filenames', {'Rt_reported.csv','Rt_implied.csv'});
-
+    
     cases.reported = info{1}.X_ts;
     cases.implied = info{2}.X_ts;
+    
+    Rt_reported.mean = info{1}.mean_ts;
+    Rt_implied.mean = info{2}.mean_ts;
     
 end
 
@@ -80,11 +89,8 @@ legend({'Implied by hospitals','PCR reported','AG+PCR reported'});
 
 % 1./ reproduction number
 figure('Name','Effective reproduction number, means');
-nn = length(Rt_pcr);
-Rt_smooth_series_pcr = tseries(t0:t0+nn-1,Rt_pcr);
-Rt_smooth_series_real = tseries(t0:t0+nn-1,Rt_real);
-plot(resize(Rt_smooth_series_pcr,disp_from+30:t2),'linewidth',2);hold on;
-plot(resize(Rt_smooth_series_real,disp_from+30:t2),'linewidth',2);hold on;
+plot(resize(Rt_reported.mean,disp_from+30:t2),'linewidth',2);hold on;
+plot(resize(Rt_implied.mean,disp_from+30:t2),'linewidth',2);hold on;
 title('Effective reproduction number (smooth inputs)');
 legend({'reported data (PCR)','implied data'});
 grid on;

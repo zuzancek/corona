@@ -1,10 +1,10 @@
 function [info] = load_fanchart_tseries(varargin)
 
 ip = inputParser;
-addParamValue(ip, 'src_dir', {'../R/Rt_estimation/results'}, @ischar);%#ok<*NVREPL>
+addParamValue(ip, 'src_dir', '../R/Rt_estimation/results', @ischar);%#ok<*NVREPL>
 addParamValue(ip, 'src_filenames', {'output_R_reported.csv','output_R_implied.csv'}, @iscell);%#ok<*NVREPL>
 addParamValue(ip, 'tar_dir', 'results', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'tar_filenames', {'Rt_reported.csv','Rt_implied.csv'}, @ischar);%#ok<*NVREPL>
+addParamValue(ip, 'tar_filenames', {'Rt_reported.csv','Rt_implied.csv'}, @iscell);%#ok<*NVREPL>
 parse(ip, varargin{:});
 
 results = ip.Results;
@@ -17,7 +17,7 @@ info = cell(length(src_filenames),1);
 for i=1:length(src_filenames)
     filepath_src = fullfile(pwd,src_dir,src_filenames{i});
     filepath_tar = fullfile(pwd,tar_dir,tar_filenames{i});
-    T = readtable(filepath_src{1},'Delimiter',';','ReadVariableNames',true);
+    T = readtable(filepath_src,'Delimiter',',','ReadVariableNames',true);
     NT = size(T,1);
     namelist = T.Properties.VariableNames;
     idxcol = find(startsWith(namelist,'Q_'));   
