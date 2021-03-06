@@ -2,23 +2,19 @@ function [] = update_out_file(varargin)
 
 ip = inputParser;
 addParamValue(ip, 'outdirs', {'../R/cases_forecast/data','../R/Rt_estimation/data'}, @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'filename_tar_1', 'cases_implied.csv', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'filename_tar_0', 'cases_smooth.csv', @ischar);%#ok<*NVREPL>
+addParamValue(ip, 'filename_tar', {'cases_mm.csv','cases_raw.csv','cases_smooth.csv','cases_implied_smooth.csv','cases_implied_raw.csv'}, @iscell);%#ok<*NVREPL>
 addParamValue(ip, 'filename_src', 'cases.csv', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'data_src_1', 'results/results_impl.mat', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'data_src_0', 'results/inputs.mat', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'var_1', 'cases_implied_data.X_smooth_all', @ischar);%#ok<*NVREPL>
-addParamValue(ip, 'var_0', 'cases_data.cases_pcr_smooth', @ischar);%#ok<*NVREPL>
+addParamValue(ip, 'data_src', {'results/inputs.mat','results/inputs.mat','results/inputs.mat','results/results_impl.mat','results/results_impl.mat'}, @iscell);%#ok<*NVREPL>
+addParamValue(ip, 'var', {'cases_data.cases_pcr_mm','cases_data.cases_pcr','cases_data.cases_pcr_smooth','cases_implied_data.X_smooth_all','cases_implied_data.X_all'}, @iscell);%#ok<*NVREPL>
 addParamValue(ip, 'reported',true, @islogical);
 parse(ip, varargin{:});
 
-
 results = ip.Results;
 outdirs = results.outdirs;
-filename_tar = {results.filename_tar_0,results.filename_tar_1};
-data_src = {results.data_src_0,results.data_src_1};
+filename_tar = results.filename_tar;
+data_src = results.data_src;
 filename_src = results.filename_src;
-var = {results.var_0,results.var_1};
+var = results.var;
 
 for i=1:length(outdirs)
     filepath_src = fullfile(pwd,outdirs{i},filename_src);
