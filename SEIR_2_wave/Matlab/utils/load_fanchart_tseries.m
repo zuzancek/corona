@@ -27,8 +27,12 @@ for i=1:length(src_filenames)
     Q_mat = zeros(NT,NQ);
     Q_mat_ts = cell(NQ,1);
     for j=1:length(idxcol)
-        vals=cellfun(@(x) strrep(x,'NA',''),T{:,idxcol(j)},'UniformOutput',false);
-        vals=cellfun(@(x) str2double(x),vals);
+        try 
+            vals=cellfun(@(x) strrep(x,'NA',''),T{:,idxcol(j)},'UniformOutput',false); 
+            vals=cellfun(@(x) str2double(x),vals);
+        catch
+            vals=T{:,idxcol(j)};
+        end
         Q_mat(:,j) = vals;        
         Q_mat_ts{j} = tseries(info{i}.dateFrom:info{i}.dateTo,vals);
         db.(namelist{idxcol(j)}) = Q_mat_ts{j};
