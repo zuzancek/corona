@@ -90,39 +90,52 @@ else
 end
 
 %% plotting stuff
-% 0./ cases
-figure('Name','New cases (smooth data, means)')
-plot(resize(cases.implied,disp_from:t2),'linewidth',1); hold on;
-plot(resize(cases.reported,disp_from:t2),'k--', 'linewidth',1);
+tshift=30;
+% 1./ cases
+figure('Name','New cases')
+plot(double(resize(cases.reported,disp_from:t2)), 'linewidth',2);hold on;
+plot(double(resize(cases.implied,disp_from:t2)),'linewidth',2); 
 grid on;
+dp = t0-dd(2020,3,1);
+p0 = (disp_from-t0+1+tshift);
+p1 = disp_to-t0+1;
+lab = {'marec','april','maj','jun','jul','august','september','oktober','november','december','januar','februar','marec'};
+mt = [0 31 30 31 30 31 31 30 31 30 31 28 31];
+mtt = cumsum(mt)-dp;
+lab_idx_0 = find(p0<mtt+dp,1)-1;
+lab_idx_1 = find(p1<mtt+dp,1);
+if isempty(lab_idx_1) 
+    lab_idx_1 = length(mt); 
+end
+xticks(mtt(lab_idx_0:lab_idx_1)-mtt(lab_idx_0))
+xticklabels(lab(lab_idx_0:lab_idx_1));
+xlim([p0 p1]-mtt(lab_idx_0)-1);
 title('New cases');
 legend({'Implied by hospitals','PCR reported','AG+PCR reported'});
 
-% 1./ reproduction number
-figure('Name','Effective reproduction number, means');
-plot(resize(Rt_reported.mean,disp_from+30:t2),'linewidth',2);hold on;
-plot(resize(Rt_implied.mean,disp_from+30:t2),'linewidth',2);hold on;
-title('Effective reproduction number (smooth inputs)');
-legend({'reported data (PCR)','implied data'});
-grid on;
+% 2./ reproduction number
+% figure('Name','Effective reproduction number, means');
+% plot(resize(Rt_reported.mean,disp_from+30:t2),'linewidth',2);hold on;
+% plot(resize(Rt_implied.mean,disp_from+30:t2),'linewidth',2);hold on;
+% title('Effective reproduction number (smooth inputs)');
+% legend({'reported data (PCR)','implied data'});
+% grid on;
 
-plot_fancharts_cmp(Rt_reported.q(idx_q_0:idx_q_1,:),Rt_implied.q(idx_q_0:idx_q_1,:),s,disp_from+30,disp_to,...
-    'offsetdate',t0,'CI',ci,'title','Effective reproduction numbers (reported vs.implied, 90% CI)','legend',{'reported data (PCR)','implied data'});
-%
-plot_fanchart(Rt_reported.q,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, implied data)',true);
-plot_fanchart(Rt_implied.q,s,dt,disp_from+30,disp_to,t0,'Effective reproduction number (Rt, PCR only, reported data)',true);
+plot_fancharts_cmp(Rt_reported.q(idx_q_0:idx_q_1,:),Rt_implied.q(idx_q_0:idx_q_1,:),s,disp_from+tshift,disp_to,...
+    'offsetdate',t0,'CI',ci,'figtitle','Effective reproduction numbers','title','Effective reproduction numbers (reported vs.implied, 90% CI)','legend',{'reported data (PCR)','implied data'});
 
 %% saving stuff
-x.Rt = Rt_smooth_series_pcr;
-x.Rt_real = Rt_smooth_series_real;
-% x.Rt_test = Rt_smooth_series_test;
-dbsave(x,'results/results_Rt_all.csv');
+if s.estimate_Rt
+    x.Rt = Rt_smooth_series_pcr;
+    x.Rt_real = Rt_smooth_series_real;
+    dbsave(x,'results/results_Rt_all.csv');
 
-Rt = tseries(t0+1:t2,Rt_pcr); %#ok<*NASGU>
-q_mat = q_mat_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
-save(strcat('results/results_Rt.mat'),'s','t0','t1','t2','q_mat',...
-    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
-Rt = tseries(t0+1:t2,Rt_real);
-q_mat = q_mat_real; Rt = Rt_real; Yt = Yt_real; Rt_last = Rt_last_real; Rt_dist = Rt_dist_real; Rt_rnd = Rt_rnd_real;
-save(strcat('results/results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
-    'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+    Rt = tseries(t0+1:t2,Rt_pcr); %#ok<*NASGU>
+    q_mat = q_mat_pcr; Yt = Yt_pcr; Rt_last = Rt_last_pcr; Rt_dist = Rt_dist_pcr; Rt_rnd = Rt_rnd_pcr;
+    save(strcat('results/results_Rt.mat'),'s','t0','t1','t2','q_mat',...
+        'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+    Rt = tseries(t0+1:t2,Rt_real);
+    q_mat = q_mat_real; Rt = Rt_real; Yt = Yt_real; Rt_last = Rt_last_real; Rt_dist = Rt_dist_real; Rt_rnd = Rt_rnd_real;
+    save(strcat('results/results_Rt_real.mat'),'s','t0','t1','t2','q_mat',...
+        'Rt','Yt','Rt_last','Rt_dist','Rt_rnd');
+end

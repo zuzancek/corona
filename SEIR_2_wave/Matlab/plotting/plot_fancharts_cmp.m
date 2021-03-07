@@ -4,6 +4,7 @@ ip = inputParser;
 addParamValue(ip, 'lab_idx', 1, @isnumeric); %#ok<*NVREPL>
 addParamValue(ip, 'legend', {'A','B'}, @iscell);
 addParamValue(ip, 'title','', @ischar);
+addParamValue(ip, 'figtitle','', @ischar);
 addParamValue(ip, 'darkcenter',false, @islogical);
 addParamValue(ip, 'offsetdate',dd(2020,9,1), @isnumeric);
 addParamValue(ip, 'CI',[0.05:0.05:0.95], @isnumeric);
@@ -12,10 +13,11 @@ results = ip.Results;
 lab_idx = results.lab_idx;
 leg = results.legend;
 tit = results.title;
+figtitle = results.figtitle;
 offsetdate = results.offsetdate;
 ci = results.CI;
 
-figure;
+figure('Name',figtitle);
 cm = lines(2);
 idx_central1 = ceil(size(q1_mat,1)/2);
 idx1 = (length(ci)-size(q1_mat,1))/2; quant1 = ci(idx1+1:end-idx1);
