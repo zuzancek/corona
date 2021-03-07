@@ -94,6 +94,10 @@ s.quant = [0.05:0.05:0.95]; %#ok<*NBRAK>
 s.quant_idx_central = 10;
 s.quant_legend = cellstr(strcat(num2str((s.quant*100)'),'%'));
 
+s.quant_ext = [0.025 s.quant 0.975];
+s.quant_ext_idx_central = 11;
+s.quant_ext_legend = cellstr(strcat(num2str((s.quant*100)'),'%'));
+
 s.color_bkg = [0.176 0.176 .427];
 s.color_grid = [0.69 0.91 0.973];
 s.color_graph = [0.122 0.478 0.847];

@@ -48,8 +48,12 @@ for i=1:length(src_filenames)
     info{i}.dateFrom = datenum(T.Date(1));
     info{i}.dateTo = datenum(T.Date(end));
     for j=1:length(idxcol)
-        vals=cellfun(@(x) strrep(x,'NA',''),T{:,idxcol(j)},'UniformOutput',false);
-        vals=cellfun(@(x) str2double(x),vals);
+        try
+            vals=cellfun(@(x) strrep(x,'NA',''),T{:,idxcol(j)},'UniformOutput',false);
+            vals=cellfun(@(x) str2double(x),vals);
+        catch
+            vals = T{:,idxcol(j)};
+        end
         vals_ts = tseries(info{i}.dateFrom:info{i}.dateTo,vals);
         info{i}.(varlist{j}) = vals;
         info{i}.(strcat(varlist{j},'_ts')) = vals_ts;
