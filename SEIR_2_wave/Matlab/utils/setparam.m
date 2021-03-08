@@ -133,7 +133,9 @@ s.smoothing_method_params = @smooth_series;
         s.omega_y_s = db_s.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
         s.omega_o_s = db_s.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
         s.pdf_sd_y = max(0,cut_tail(db_s.opt_fit_d_y.pdf(1:s.k_death+1),cutoff));
-        s.pdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.pdf(1:s.k_death+1),cutoff));
+        s.pdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.pdf(1:s.k_death+1),cutoff));        
+        s.obj_sd_y = db_s.opt_fit_d_y.obj;
+        s.obj_sd_o = db_s.opt_fit_d_o.obj;
         s.T_death_y_mean_s = db_s.opt_fit_d_y.mean;
         s.T_death_o_mean_s = db_s.opt_fit_d_o.mean;
         s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
@@ -165,6 +167,8 @@ s.smoothing_method_params = @smooth_series;
         s.T_rec_h_o_mean = db_t.opt_fit_r_o.mean;        
         s.pdf_sr_y = cut_tail(db_s.opt_fit_r_y.pdf(1:s.k_rec+1),cutoff);
         s.pdf_sr_o = cut_tail(db_s.opt_fit_r_o.pdf(1:s.k_rec+1),cutoff);
+        s.obj_sr_y = db_s.opt_fit_r_y.obj;
+        s.obj_sr_o = db_s.opt_fit_r_o.obj;
         s.T_rec_s_y_mean = db_s.opt_fit_r_y.mean;
         s.T_rec_s_o_mean = db_s.opt_fit_r_o.mean;
         s.pdf_mr_y = cut_tail(db_m.opt_fit_r_y.pdf(1:s.k_rec+1),cutoff);
@@ -191,8 +195,8 @@ s.smoothing_method_params = @smooth_series;
             n=length(y);
             y(end-k:end-1) = NaN;
             y(end)=0;
-            y = interp1(find(~isnan(y)),y(find(~isnan(y))),1:n,'spline');
-            y = y/sum(y);
+            y = interp1(find(~isnan(y)),y(find(~isnan(y))),1:n,'spline'); %#ok<FNDSB>
+            y = y'/sum(y);
         end
     end
 

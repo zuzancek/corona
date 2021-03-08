@@ -47,8 +47,8 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
-T_rec_y_rv = random(s.obj_hr_y, N,1);
-T_rec_o_rv = random(s.obj_hr_o, N,1);
+T_rec_y_rv = random(s.obj_hr_y, 1,N);
+T_rec_o_rv = random(s.obj_hr_o, 1,N);
 
 % ******** 2./ home
 % A./ admission to hospital
@@ -64,6 +64,7 @@ T_rec_i_y = s.T_sick_y;
 T_rec_i_o = s.T_sick_o;
 [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_y-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2); 
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2);
+
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
 k_ser = s.k_ser;
@@ -73,11 +74,14 @@ theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
+T_death_s_o_rv = random(s.obj_sd_o,1,N);
+T_death_s_y_rv = random(s.obj_sd_y,1,N);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
 % C./ recovery
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
-
+T_rec_s_o_rv = random(s.obj_sr_o,1,N); 
+T_rec_s_y_rv = random(s.obj_sr_y,1,N);
 % initialization
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 I_o_ini = extend(r0.io_i,length(I_ini)-length(r0.io_i)).*I_ini; 
@@ -111,15 +115,14 @@ HD_y = HD-HD_o;
 kappa_d_y = method_params(HD_y./HD_y_imp); omega_y = omega_y.*kappa_d_y;
 kappa_d_o = method_params(HD_o./HD_o_imp); omega_o = omega_o.*kappa_d_o;
 % recovery
-zeta_o = repmat(1-omega_o(:,1),1,k_rec+1);
-zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
-HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec));
-HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec));
+zeta_o = 1-omega_o;
+zeta_y = 1-omega_y;
+HR_y = extend(get_wa_rnd(T_rec_y_rv,pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec);
+HR_o = extend(get_wa_rnd(T_rec_o_rv,pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec);
 HR = HR_o+HR_y;
-xx = get_wa_rnd(T_rec_y_rv,pdf_hr_y,H_y,zeta_y,k_rec+1);
 % admission to hospital
-IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
-IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
+IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end,:)+HD_o(2:end),1));
+IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end,:)+HD_y(2:end),1));
 IH = IH_o+IH_y;
 % ***** serious cases
 % shares
@@ -129,21 +132,19 @@ s_tot = max(1,(s_o+s_y));
 S_o = s_o./s_tot.*S;
 S_y = S-S_o;
 kappa_s = method_params(S./s_tot); 
-% theta_o = kappa_s.*theta_o;
-% theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
 % conditions than expected
 % deaths
-omega_o_s = min(1,omega_o_s.*repmat(kappa_d_o,1,k_death+1));
-omega_y_s = min(1,omega_y_s.*repmat(kappa_d_y,1,k_death+1));
-SD_o = (extend(get_wa(pdf_sd_o,S_o,omega_o_s,k_death+1),k_death));
-SD_y = (extend(get_wa(pdf_sd_y,S_y,omega_y_s,k_death+1),k_death));
+omega_o_s = min(1,omega_o_s.*kappa_d_o);
+omega_y_s = min(1,omega_y_s.*kappa_d_y);
+SD_o = extend(get_wa_rnd(T_death_s_o_rv,pdf_sd_o,S_o,omega_o_s,k_death+1),k_death);
+SD_y = extend(get_wa_rnd(T_death_s_y_rv,pdf_sd_y,S_y,omega_y_s,k_death+1),k_death);
 SD = SD_o+SD_y;
 % recovery
-zeta_o_s = repmat(1-omega_o_s(:,1),1,k_rec+1);
-zeta_y_s = repmat(1-omega_y_s(:,1),1,k_rec+1);
-SR_o = (extend(get_wa(pdf_sr_o,S_o,zeta_o_s,k_rec+1),k_rec));
-SR_y = (extend(get_wa(pdf_sr_y,S_y,zeta_y_s,k_rec+1),k_rec));
+zeta_o_s = 1-omega_o_s;
+zeta_y_s = 1-omega_y_s;
+SR_o = extend(get_wa_rnd(T_rec_s_o_rv,pdf_sr_o,S_o,zeta_o_s,k_rec+1),k_rec);
+SR_y = extend(get_wa_rnd(T_rec_s_y_rv,pdf_sr_y,S_y,zeta_y_s,k_rec+1),k_rec);
 SR = SR_o+SR_y;
 % admission
 IS_o = method_data(extend(S_o(2:end)-S_o(1:end-1)+SR_o(2:end)+SD_o(2:end),1));
@@ -394,16 +395,16 @@ p.kappa_h_y = kappa_h_y;
         x = interp1(find(~isnan(x)),x(find(~isnan(x))),1:length(x)); %#ok<FNDSB>
     end
 
-    function []=get_wa_rnd(tvec,tgrid,Z,alpha,idxFrom)
-        tmax = tgrid(end);
+    function [z]=get_wa_rnd(tvec,tgrid,Z,alpha,idxFrom)
+        tmax = size(tgrid,2);
         tidx = min(floor(tvec),tmax-1);
         tlam = tvec-tidx;
         tvecinv = 1./tvec;
-        Z = Z(idxFrom:end);
         len = length(Z);
-        zidx = -tidx+(1:len);
-        zmat = tlam.*Z(zidx+1)+(1-tlam).*Z(zidx);
-        z = alpha*tvecinv.*zmat;
+        alpha = alpha(idxFrom:end,1);
+        zidx = -tidx+(idxFrom:len)';
+        zmat = tlam.*Z(min(zidx+1,len))+(1-tlam).*Z(zidx);
+        z = alpha.*tvecinv.*zmat;
     end
 
     function [x,x_mat] = get_wa(weight,Z,alpha,idxFrom)
