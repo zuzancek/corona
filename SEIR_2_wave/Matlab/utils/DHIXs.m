@@ -47,8 +47,8 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
-T_rec_y_rv = random(s.obs_hr_y, N,1);
-T_rec_o_rv = random(s.obs_hr_o, N,1);
+T_rec_y_rv = random(s.obj_hr_y, N,1);
+T_rec_o_rv = random(s.obj_hr_o, N,1);
 
 % ******** 2./ home
 % A./ admission to hospital

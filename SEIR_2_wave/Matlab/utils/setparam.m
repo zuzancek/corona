@@ -119,20 +119,21 @@ s.smoothing_method_params = @smooth_series;
 
     function[]=set_prob_data()
         % dbs definitions
+        cutoff = 5;
         db_t = db.stat_total; db_s = db.stat_severe; db_m = db.stat_mild;
         % death (serious cases only, use db_s database)
         s.k_death = 40;
         s.omega_y = db_t.opt_fit_d_y.alpha;%/(1-s.deaths_with_covid_share);
         s.omega_o = db_t.opt_fit_d_o.alpha;%/(1-s.deaths_with_covid_share);
-        s.pdf_hd_y = max(0,db_t.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_t.opt_fit_d_y.pdf(1:s.k_death+1)));
-        s.pdf_hd_o = max(0,db_t.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_t.opt_fit_d_o.pdf(1:s.k_death+1)));
+        s.pdf_hd_y = max(0,cut_tail(db_t.opt_fit_d_y.pdf(1:s.k_death+1),cutoff));
+        s.pdf_hd_o = max(0,cut_tail(db_t.opt_fit_d_o.pdf(1:s.k_death+1),cutoff));
         s.T_death_y_mean = db_t.opt_fit_d_y.mean;
         s.T_death_o_mean = db_t.opt_fit_d_o.mean;
         s.time_d = reshape(db_t.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
         s.omega_y_s = db_s.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
         s.omega_o_s = db_s.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
-        s.pdf_sd_y = max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_y.pdf(1:s.k_death+1)));
-        s.pdf_sd_o = max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1))/sum(max(0,db_s.opt_fit_d_o.pdf(1:s.k_death+1)));
+        s.pdf_sd_y = max(0,cut_tail(db_s.opt_fit_d_y.pdf(1:s.k_death+1),cutoff));
+        s.pdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.pdf(1:s.k_death+1),cutoff));
         s.T_death_y_mean_s = db_s.opt_fit_d_y.mean;
         s.T_death_o_mean_s = db_s.opt_fit_d_o.mean;
         s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
@@ -140,8 +141,8 @@ s.smoothing_method_params = @smooth_series;
         s.k_ser = 15;
         s.theta_y = db_s.opt_fit_h_y.alpha;
         s.theta_o = db_s.opt_fit_h_o.alpha;
-        s.pdf_is_y = db_s.opt_fit_h_y.pdf(1:s.k_ser+1)/sum(db_s.opt_fit_h_y.pdf(1:s.k_ser+1));
-        s.pdf_is_o = db_s.opt_fit_h_o.pdf(1:s.k_ser+1)/sum(db_s.opt_fit_h_o.pdf(1:s.k_ser+1));
+        s.pdf_is_y = cut_tail(db_s.opt_fit_h_y.pdf(1:s.k_ser+1),cutoff);   
+        s.pdf_is_o = cut_tail(db_s.opt_fit_h_o.pdf(1:s.k_ser+1),cutoff);    
         s.T_ser_y_mean = db_s.opt_fit_h_y.mean;
         s.T_ser_o_mean = db_s.opt_fit_h_o.mean;
         s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
@@ -149,25 +150,25 @@ s.smoothing_method_params = @smooth_series;
         s.k_hosp = 25;        
         s.eta_y =1*db_t.opt_fit_h_y.alpha; % 1.25
         s.eta_o = 1*db_t.opt_fit_h_o.alpha; % 0.85   
-        s.pdf_ih_y = db_t.opt_fit_h_y.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1));
-        s.pdf_ih_o = db_t.opt_fit_h_o.pdf(1:s.k_hosp+1)/sum(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1));        
+        s.pdf_ih_y = cut_tail(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1),cutoff);    
+        s.pdf_ih_o = cut_tail(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1),cutoff);       
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;
         s.T_hosp_o_mean = db_t.opt_fit_h_o.mean;
         s.time_h = reshape(db_t.opt_fit_h_y.time_grid(1:s.k_hosp+1),1,[]);
         % recovery (hospital (incl.serious),home)
         s.k_rec = 40;
-        s.pdf_hr_y = db_t.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_t.opt_fit_r_y.pdf(1:s.k_rec+1));
-        s.pdf_hr_o = db_t.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db_t.opt_fit_r_o.pdf(1:s.k_rec+1));
+        s.pdf_hr_y = cut_tail(db_t.opt_fit_r_y.pdf(1:s.k_rec+1),cutoff);
+        s.pdf_hr_o = cut_tail(db_t.opt_fit_r_o.pdf(1:s.k_rec+1),cutoff);
         s.obj_hr_y = db_t.opt_fit_r_y.obj;
         s.obj_hr_o = db_t.opt_fit_r_o.obj;
         s.T_rec_h_y_mean = db_t.opt_fit_r_y.mean;
         s.T_rec_h_o_mean = db_t.opt_fit_r_o.mean;        
-        s.pdf_sr_y = db_s.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_s.opt_fit_r_y.pdf(1:s.k_rec+1));
-        s.pdf_sr_o = db_s.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db_s.opt_fit_r_o.pdf(1:s.k_rec+1));
+        s.pdf_sr_y = cut_tail(db_s.opt_fit_r_y.pdf(1:s.k_rec+1),cutoff);
+        s.pdf_sr_o = cut_tail(db_s.opt_fit_r_o.pdf(1:s.k_rec+1),cutoff);
         s.T_rec_s_y_mean = db_s.opt_fit_r_y.mean;
         s.T_rec_s_o_mean = db_s.opt_fit_r_o.mean;
-        s.pdf_mr_y = db_m.opt_fit_r_y.pdf(1:s.k_rec+1)/sum(db_m.opt_fit_r_y.pdf(1:s.k_rec+1));
-        s.pdf_mr_o = db_m.opt_fit_r_o.pdf(1:s.k_rec+1)/sum(db_m.opt_fit_r_o.pdf(1:s.k_rec+1));
+        s.pdf_mr_y = cut_tail(db_m.opt_fit_r_y.pdf(1:s.k_rec+1),cutoff);
+        s.pdf_mr_o = cut_tail(db_m.opt_fit_r_o.pdf(1:s.k_rec+1),cutoff);
         s.T_rec_m_y_mean = db_m.opt_fit_r_y.mean;
         s.T_rec_m_o_mean = db_m.opt_fit_r_o.mean;
         s.T_rec_y_mean = db_t.opt_fit_r_y.mean;
@@ -184,7 +185,15 @@ s.smoothing_method_params = @smooth_series;
         s.pdf_ir_o = s.pdf_ir_o./sum(s.pdf_ir_o);
         s.T_rec_i_o_mean = dot(s.time_k,s.pdf_ir_o); 
         s.obj_sick_y = makedist('Gamma','a',s.T_sick_y*s.T_sick_std^2,'b',1/s.T_sick_std^2);
-        s.obj_sick_o = makedist('Gamma','a',s.T_sick_o*s.T_sick_std^2,'b',1/s.T_sick_std^2);        
+        s.obj_sick_o = makedist('Gamma','a',s.T_sick_o*s.T_sick_std^2,'b',1/s.T_sick_std^2);     
+        
+        function [y]=cut_tail(y,k)
+            n=length(y);
+            y(end-k:end-1) = NaN;
+            y(end)=0;
+            y = interp1(find(~isnan(y)),y(find(~isnan(y))),1:n,'spline');
+            y = y/sum(y);
+        end
     end
 
 %     function[]=set_prob_data()
