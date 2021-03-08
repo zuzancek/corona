@@ -47,6 +47,9 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
+T_rec_y_rv = random(s.obs_hr_y, N,1);
+T_rec_o_rv = random(s.obs_hr_o, N,1);
+
 % ******** 2./ home
 % A./ admission to hospital
 k_hosp = s.k_hosp;
@@ -113,6 +116,7 @@ zeta_y = repmat(1-omega_y(:,1),1,k_rec+1);
 HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o,k_rec+1),k_rec));
 HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y,k_rec+1),k_rec));
 HR = HR_o+HR_y;
+xx = get_wa_rnd(T_rec_y_rv,pdf_hr_y,H_y,zeta_y,k_rec+1);
 % admission to hospital
 IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
 IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
@@ -390,6 +394,18 @@ p.kappa_h_y = kappa_h_y;
         x = interp1(find(~isnan(x)),x(find(~isnan(x))),1:length(x)); %#ok<FNDSB>
     end
 
+    function []=get_wa_rnd(tvec,tgrid,Z,alpha,idxFrom)
+        tmax = tgrid(end);
+        tidx = min(floor(tvec),tmax-1);
+        tlam = tvec-tidx;
+        tvecinv = 1./tvec;
+        Z = Z(idxFrom:end);
+        len = length(Z);
+        zidx = -tidx+(1:len);
+        zmat = tlam.*Z(zidx+1)+(1-tlam).*Z(zidx);
+        z = alpha*tvecinv.*zmat;
+    end
+
     function [x,x_mat] = get_wa(weight,Z,alpha,idxFrom)
         sz = size(weight);
         weight = weight(idxFrom:end,:);
@@ -463,5 +479,13 @@ p.kappa_h_y = kappa_h_y;
         y = method_params(interp1(find(~isnan(y)),y(find(~isnan(y))),1:T)'); %#ok<FNDSB>
         y = extend(y,length(varsigma)-length(y));
     end
+
+%     function [x] = get_rv(y)
+%         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
+%         L = length(shape0);
+%         shape0_vec = repmat(shape0,N,1);
+%         scale0_vec = scale0*ones(N,L);
+%         x = gamrnd(shape0_vec,scale0_vec);
+%     end
 
 end
