@@ -47,8 +47,8 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
-T_rec_y_rv = random(s.obj_hr_y, 1,N);
-T_rec_o_rv = random(s.obj_hr_o, 1,N);
+T_rec_y_rv = random(s.eobj_hr_y, 1,N);
+T_rec_o_rv = random(s.eobj_hr_o, 1,N);
 
 % ******** 2./ home
 % A./ admission to hospital
@@ -75,20 +75,22 @@ T_sick_o_rv = random(obj_ir_o, 1,N);
 k_ser = s.k_ser;
 pdf_is_y = repmat(s.pdf_is_y',length(varsigma),1);
 pdf_is_o = repmat(s.pdf_is_o',length(varsigma),1);
-T_ser_o_rv = random(s.obj_is_o,1,N);
-T_ser_y_rv = random(s.obj_is_y,1,N);
+T_ser_o_rv = random(s.eobj_is_o,1,N);
+T_ser_y_rv = random(s.eobj_is_y,1,N);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
-T_death_s_o_rv = random(s.obj_sd_o,1,N);
-T_death_s_y_rv = random(s.obj_sd_y,1,N);
+T_death_s_o_rv = random(s.eobj_sd_o,1,N);
+T_death_s_y_rv = random(s.eobj_sd_y,1,N);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
 % C./ recovery
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
-T_rec_s_o_rv = random(s.obj_sr_o,1,N); 
-T_rec_s_y_rv = random(s.obj_sr_y,1,N);
+T_rec_s_o_rv = random(s.eobj_sr_o,1,N); 
+T_rec_s_y_rv = random(s.eobj_sr_y,1,N);
+
+
 % initialization
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
 I_o_ini = extend(r0.io_i,length(I_ini)-length(r0.io_i)).*I_ini; 

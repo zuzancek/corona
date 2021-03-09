@@ -85,6 +85,7 @@ if do_fitdist
     opt_fit = d{idx_opt};
     opt_fit.epdf = d{idx_ker}.pdf;
     opt_fit.ecdf = d{idx_ker}.cdf;
+    opt_fit.eobj = d{idx_ker}.obj;
     fprintf('\n********** Error minimizing distribution: %s\n',opt_fit.type);
     if do_plot
         figure('Name',strcat('Fitting Distribution (',tit,')'));

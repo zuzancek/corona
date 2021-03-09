@@ -39,18 +39,18 @@ r0 = set_yo_ratios_params();
 % ******* 1./ hospital
 % A./ death
 k_death = s.k_death;
-pdf_hd_y = repmat(s.pdf_hd_y',length(varsigma),1);
-pdf_hd_o = repmat(s.pdf_hd_o',length(varsigma),1);
+pdf_hd_y = repmat(s.epdf_hd_y',length(varsigma),1);
+pdf_hd_o = repmat(s.epdf_hd_o',length(varsigma),1);
 omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % B./ recovery
 k_rec = s.k_rec;
-pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
-pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
+pdf_hr_y = repmat(s.epdf_hr_y',length(varsigma),1);
+pdf_hr_o = repmat(s.epdf_hr_o',length(varsigma),1);
 % ******** 2./ home
 % A./ admission to hospital
 k_hosp = s.k_hosp;
-pdf_ih_y = repmat(s.pdf_ih_y',length(varsigma),1);
-pdf_ih_o = repmat(s.pdf_ih_o',length(varsigma),1);
+pdf_ih_y = repmat(s.epdf_ih_y',length(varsigma),1);
+pdf_ih_o = repmat(s.epdf_ih_o',length(varsigma),1);
 eta_o = r0.eta_o;   eta_y = r0.eta_y;
 % B./ recovery
 k_sick = s.k_sick;
@@ -63,16 +63,16 @@ pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_re
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
 k_ser = s.k_ser;
-pdf_is_y = repmat(s.pdf_is_y',length(varsigma),1);
-pdf_is_o = repmat(s.pdf_is_o',length(varsigma),1);
+pdf_is_y = repmat(s.epdf_is_y',length(varsigma),1);
+pdf_is_o = repmat(s.epdf_is_o',length(varsigma),1);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
-pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
-pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
+pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
+pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
 % C./ recovery
-pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
-pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
+pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
+pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
 
 % initialization
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
