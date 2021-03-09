@@ -64,8 +64,10 @@ T_rec_i_y = s.T_sick_y;
 T_rec_i_o = s.T_sick_o;
 [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_y-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2); 
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2);
-obj_ir_o = makedist('Gamma','a',(T_rec_i_o-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2);
-obj_ir_y = makedist('Gamma','a',(T_rec_i_y-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2); 
+% obj_ir_o = makedist('Gamma','a',(T_rec_i_o-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2+0*(T_rec_i_o-T_obs));
+% obj_ir_y = makedist('Gamma','a',(T_rec_i_y-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2+0*(T_rec_i_y-T_obs)); 
+obj_ir_o = makedist('Gamma','a',(T_rec_i_o)*T_rec_i_std^2,'b',1./T_rec_i_std^2);
+obj_ir_y = makedist('Gamma','a',(T_rec_i_y)*T_rec_i_std^2,'b',1./T_rec_i_std^2); 
 T_sick_y_rv = random(obj_ir_y, 1,N);
 T_sick_o_rv = random(obj_ir_o, 1,N);
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
@@ -73,6 +75,8 @@ T_sick_o_rv = random(obj_ir_o, 1,N);
 k_ser = s.k_ser;
 pdf_is_y = repmat(s.pdf_is_y',length(varsigma),1);
 pdf_is_o = repmat(s.pdf_is_o',length(varsigma),1);
+T_ser_o_rv = random(s.obj_is_o,1,N);
+T_ser_y_rv = random(s.obj_is_y,1,N);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
@@ -155,9 +159,11 @@ IS_y = method_data(extend(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SD_y(2:end),1));
 IS = IS_o+IS_y;
 % ***** home
 % shares
-i_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o,k_ser+1)); i_o = method_params(extend(i_o(1:end-1),1));
-i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y,k_ser+1)); i_y = method_params(extend(i_y(1:end-1),1));
-% i = i_o+i_y;
+i_o = (get_wa_inv_rnd(T_ser_o_rv,pdf_is_o,IS_o,theta_o,k_ser+1));
+i_y = (get_wa_inv_rnd(T_ser_y_rv,pdf_is_y,IS_y,theta_y,k_ser+1));
+% i_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o,k_ser+1)); i_o = method_params(extend(i_o(1:end-1),1));
+% i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y,k_ser+1)); i_y = method_params(extend(i_y(1:end-1),1));
+% % i = i_o+i_y;
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 % admission
@@ -393,6 +399,18 @@ p.kappa_h_y = kappa_h_y;
         zidx = -tidx+(idxFrom:len)';
         zmat = tlam.*Z(min(zidx+1,len))+(1-tlam).*Z(zidx);
         z = alpha.*tvecinv.*zmat;
+    end
+
+    function [x]=get_wa_inv_rnd(tvec,tgrid,Z,alpha,idxFrom)
+        tmax = size(tgrid,2);
+        tidx = min(floor(tvec),tmax-1);
+        tlam = tvec-tidx;
+        tvecinv = 1./tvec;
+        pvec = -(1-tlam)./tlam;
+        y=tvec./alpha.*Z;
+        len = length(Z);
+        ix = (1:len)'+idxFrom-tidx;
+        x = y(ix);        
     end
 
     function [x,x_mat] = get_wa(weight,Z,alpha,idxFrom)
