@@ -410,7 +410,7 @@ p.kappa_h_y = kappa_h_y;
             A = phi(:,end:-1:1);
         end
         J = repmat(1:k,t,1)+repmat((0:t-1)',1,k);
-        L = 0*(k-1)+repmat((1:t)',1,k);
+        L = repmat((1:t)',1,k);
         Weight_mat = sparse(L,J,W);
         Alpha_mat = sparse(L,J,A);
         Weight_mat = Weight_mat./sum(Weight_mat,2);
@@ -440,9 +440,9 @@ p.kappa_h_y = kappa_h_y;
         L = repmat((1:t)',1,k);
         Weight_mat = sparse(L(:),J(:),W(:));
         Alpha_mat = sparse(L(:),J(:),A(:));
+        Weight_mat = Weight_mat./sum(Weight_mat,2);
         x = zeros(t+k-1,1);
         x(1:k-1) = x0(1:idxFrom-1);
-        Weight_mat = Weight_mat./sum(Weight_mat,2);
         function [d] = solve_lineqn(xx0)
             d=(Weight_mat.*Alpha_mat)*xx0 - zvec(end-t+1:end);
         end
