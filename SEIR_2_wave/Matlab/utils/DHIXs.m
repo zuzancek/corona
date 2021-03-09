@@ -190,21 +190,6 @@ Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
 
-% figure;
-% pp1=bar(Orts,'FaceAlpha',0.85);hold on;
-% p=bar(resize(Xrts,dateFrom:dateTo-fcast_per-1),'FaceAlpha',0.7);
-% bar(resize(Xrts,dateTo-fcast_per:dateTo),'FaceAlpha',0.4,'FaceColor',p.FaceColor);
-% pp2=bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor',[0.5 0.5 0.5]);
-% pp3=bar(mov_median(resize(params.s,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor','k');
-% plot(Ots,'b','linewidth',2);
-% plot(resize(Xts,dateFrom:dateTo-fcast_per-1),'r','linewidth',2);
-% plot(resize(Xts,dateTo-fcast_per:dateTo),'r-.','linewidth',2);
-% plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'--','Color',[0.25 0.25 0.25],'linewidth',1);
-% plot(smooth_series(mov_median(resize(params.s,dateFrom:dateTo))),'k-.','linewidth',1);
-% grid on;
-% legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by hospitals', 'Hospitalizations', 'Intensive Care'});
-% title('New cases: reported vs. real');
-
 Len = length(Xts)-fcast_per;
 res = struct();
 res.X_all = tseries(firstData:dateTo,[X;X(end)]);
