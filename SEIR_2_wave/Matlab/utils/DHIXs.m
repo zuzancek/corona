@@ -64,7 +64,10 @@ T_rec_i_y = s.T_sick_y;
 T_rec_i_o = s.T_sick_o;
 [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_y-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2); 
 pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2);
-
+obj_ir_o = makedist('Gamma','a',(T_rec_i_o-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2);
+obj_ir_y = makedist('Gamma','a',(T_rec_i_y-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2); 
+T_sick_y_rv = random(obj_ir_y, 1,N);
+T_sick_o_rv = random(obj_ir_o, 1,N);
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
 k_ser = s.k_ser;
@@ -164,10 +167,10 @@ I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o,k_hosp+1)); I_o = method_params(ex
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
 % recovery
-mu_o = repmat(1-eta_o(:,1),1,k_sick+1);
-mu_y = repmat(1-eta_y(:,1),1,k_sick+1);
-IR_o = (extend(get_wa(pdf_ir_o(:,:),I_o,mu_o,k_sick+1),k_sick));
-IR_y = (extend(get_wa(pdf_ir_y(:,:),I_y,mu_y,k_sick+1),k_sick));
+mu_o = 1-eta_o;
+mu_y = 1-eta_y;
+IR_o = extend(get_wa_rnd(T_sick_o_rv,pdf_ir_o,I_o,mu_o,k_sick+1),k_sick);
+IR_y = extend(get_wa_rnd(T_sick_y_rv,pdf_ir_o,I_o,mu_o,k_sick+1),k_sick);
 IR = IR_o+IR_y;
 % inflow of new cases
 X_o = method_data(I_o(2:end)-I_o(1:end-1)+IR_o(2:end)+IH_o(2:end));
