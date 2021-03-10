@@ -16,33 +16,32 @@ s.S_H_rate = 0.16;
 s.S_H_rate_0 = 0.25;
 s.scale_s_h = s.S_H_rate_0/s.S_H_rate;
 
+% **** epidemiology
 % serial interval (generation period)
 s.SI.mean = 7.5;                s.SI.std = 0.62;
-% time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test.mean = 2;              s.T_test.std = s.SI.std;      
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
+s.T_inc_obj = makedist('Gamma','a',s.T_inc.mean*s.T_inc.std*s.T_inc.std,'b',1/(s.T_inc.std*s.T_inc.std));
 % infectious period
 s.T_inf.mean = 4.3;             s.T_inf.std = 0.62;
-s.T_inf_asymp.mean = 4.3;       s.T_inf_asymp.std = 0.62;
-s.T_inf_symp.mean = 4.3;        s.T_inf_symp.std = 0.62;
-s.T_inf_obs.mean = 4.3;         s.T_inf_obs.std = 0.62;
-s.T_inf_unobs.mean = 4.3;       s.T_inf_unobs.std = 0.62;
+s.T_inf_obj = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T_inf.std*s.T_inf.std));
+% presymptomatic period 
+s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;     
+s.T_pre.std = s.SI.std;
+s.T_pre_obj = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
+% latent period
+s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
+s.T_lat_obj = makedist('Gamma','a',s.T_lat.mean*s.T_lat.std*s.T_lat.std,'b',1/(s.T_lat.std*s.T_lat.std));
+
+% **** testing
+% time to test (observation period, from symptoms onset): "steady_state value"
+s.T_test.mean = 2;              s.T_test.std = s.SI.std;      
+
+% **** clinical characteristics
 % sickness/symptoms period
 s.T_sick_y = 9;                 s.T_sick_o = 13;       s.T_sick = 10;
 s.T_sick_std = s.SI.std;
 s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma'; 
-% presymptomatic period 
-s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;           
-s.T_pre.std = s.SI.std;
-s.T_inf_obs0.mean = s.T_inf_obs.mean-s.T_pre.mean-s.T_test.mean;
-s.T_inf_obs0.std = s.T_inf_obs.std;
-s.SI_obs.mean = s.SI.mean-s.T_inf_obs.mean;
-s.SI_obs.std = 0.62;
-% latent period
-s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
-s.share_reas = 1;
-
 try
     db = load('results/optimal_fit.mat','stat_total','stat_severe','stat_mild');
     set_prob_data();
@@ -52,8 +51,6 @@ catch err %#ok<NASGU>
     set_prob_data();
 end
 
-% total time shift in clinical model
-s.t_shift_clin = 30;
 
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
@@ -86,10 +83,12 @@ s.case_isolation_effect = 1/(1-1/3);
 s.threshold = 0.05;
 s.scale_fact = 4;
 
+% smoothing
 s.smooth_width = 7;
 s.smooth_type = 5;
 s.smooth_ends = 1;
 
+% fancharts - quantiles
 s.quant = [0.05:0.05:0.95]; %#ok<*NBRAK>
 s.quant_idx_central = 10;
 s.quant_legend = cellstr(strcat(num2str((s.quant*100)'),'%'));

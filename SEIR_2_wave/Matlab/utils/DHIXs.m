@@ -47,8 +47,8 @@ omega_o = r0.omega_o;   omega_y = r0.omega_y;
 k_rec = s.k_rec;
 pdf_hr_y = repmat(s.pdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.pdf_hr_o',length(varsigma),1);
-T_rec_y_rv = random(s.eobj_hr_y, 1,N);
-T_rec_o_rv = random(s.eobj_hr_o, 1,N);
+T_rec_y_rv = gen_random_pos(s.obj_hr_y);
+T_rec_o_rv = gen_random_pos(s.obj_hr_o);
 
 % ******** 2./ home
 % A./ admission to hospital
@@ -68,28 +68,27 @@ pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_re
 % obj_ir_y = makedist('Gamma','a',(T_rec_i_y-T_obs)*T_rec_i_std^2,'b',1./T_rec_i_std^2+0*(T_rec_i_y-T_obs)); 
 obj_ir_o = makedist('Gamma','a',(T_rec_i_o)*T_rec_i_std^2,'b',1./T_rec_i_std^2);
 obj_ir_y = makedist('Gamma','a',(T_rec_i_y)*T_rec_i_std^2,'b',1./T_rec_i_std^2); 
-T_sick_y_rv = random(obj_ir_y, 1,N);
-T_sick_o_rv = random(obj_ir_o, 1,N);
+T_sick_y_rv = gen_random_pos(obj_ir_y);
+T_sick_o_rv = gen_random_pos(obj_ir_o);
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
 k_ser = s.k_ser;
 pdf_is_y = repmat(s.pdf_is_y',length(varsigma),1);
 pdf_is_o = repmat(s.pdf_is_o',length(varsigma),1);
-T_ser_o_rv = random(s.eobj_is_o,1,N);
-T_ser_y_rv = random(s.eobj_is_y,1,N);
+T_ser_o_rv = gen_random_pos(s.obj_is_o);
+T_ser_y_rv = gen_random_pos(s.obj_is_y);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
 pdf_sd_y = repmat(s.pdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.pdf_sd_o',length(varsigma),1);
-T_death_s_o_rv = random(s.eobj_sd_o,1,N);
-T_death_s_y_rv = random(s.eobj_sd_y,1,N);
+T_death_s_o_rv = gen_random_pos(s.obj_sd_o);
+T_death_s_y_rv = gen_random_pos(s.obj_sd_y);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
 % C./ recovery
 pdf_sr_y = repmat(s.pdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.pdf_sr_o',length(varsigma),1);
-T_rec_s_o_rv = random(s.eobj_sr_o,1,N); 
-T_rec_s_y_rv = random(s.eobj_sr_y,1,N);
-
+T_rec_s_o_rv = gen_random_pos(s.obj_sr_o); 
+T_rec_s_y_rv = gen_random_pos(s.obj_sr_y);
 
 % initialization
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
@@ -156,8 +155,8 @@ SR_o = extend(get_wa_rnd(T_rec_s_o_rv,pdf_sr_o,S_o,zeta_o_s,k_rec+1),k_rec);
 SR_y = extend(get_wa_rnd(T_rec_s_y_rv,pdf_sr_y,S_y,zeta_y_s,k_rec+1),k_rec);
 SR = SR_o+SR_y;
 % admission
-IS_o = method_data(extend(S_o(2:end)-S_o(1:end-1)+SR_o(2:end)+SD_o(2:end),1));
-IS_y = method_data(extend(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SD_y(2:end),1));
+IS_o = method_data(extend(S_o(2:end,:)-S_o(1:end-1,:)+SR_o(2:end,:)+SD_o(2:end,:),1));
+IS_y = method_data(extend(S_y(2:end,:)-S_y(1:end-1,:)+SR_y(2:end,:)+SD_y(2:end,:),1));
 IS = IS_o+IS_y;
 % ***** home
 % shares
@@ -409,8 +408,9 @@ p.kappa_h_y = kappa_h_y;
         tlam = tvec-tidx;
         tvecinv = 1./tvec;
         pvec = -(1-tlam)./tlam;
-        y=tvec./alpha.*Z;
-        len = length(Z);
+        alpha = alpha(:,1);
+        y=(tvec.*Z)./alpha;
+        len = size(Z,1);
         ix = (1:len)'+idxFrom-tidx;
         x = y(ix);        
     end
@@ -489,12 +489,18 @@ p.kappa_h_y = kappa_h_y;
         y = extend(y,length(varsigma)-length(y));
     end
 
-%     function [x] = get_rv(y)
-%         shape0 = y.mean.*(y.std)^2; scale0 = 1./(y.std)^2;
-%         L = length(shape0);
-%         shape0_vec = repmat(shape0,N,1);
-%         scale0_vec = scale0*ones(N,L);
-%         x = gamrnd(shape0_vec,scale0_vec);
-%     end
+    function [v]=gen_random_pos(obj)
+        v = random(obj,1,N);
+        i0 = find(v<=0);
+        v(i0) = [];
+        cont=~isempty(i0);
+        while cont
+            v0 = random(obj,1,2*length(i0));
+            v = [v,v0];
+            v = v(v>0);
+            cont = length(v)<N;
+        end
+        v = v(1:N);
+    end
 
 end
