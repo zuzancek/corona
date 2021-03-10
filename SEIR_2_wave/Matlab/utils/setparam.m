@@ -21,21 +21,30 @@ s.scale_s_h = s.S_H_rate_0/s.S_H_rate;
 s.SI.mean = 7.5;                s.SI.std = 0.62;
 % incubation period 
 s.T_inc.mean = 5.2;             s.T_inc.std = s.SI.std;
-s.T_inc_obj = makedist('Gamma','a',s.T_inc.mean*s.T_inc.std*s.T_inc.std,'b',1/(s.T_inc.std*s.T_inc.std));
+s.obj_inc = makedist('Gamma','a',s.T_inc.mean*s.T_inc.std*s.T_inc.std,'b',1/(s.T_inc.std*s.T_inc.std));
 % infectious period
 s.T_inf.mean = 4.3;             s.T_inf.std = 0.62;
-s.T_inf_obj = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T_inf.std*s.T_inf.std));
+s.obj_inf = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T_inf.std*s.T_inf.std));
 % presymptomatic period 
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;     
 s.T_pre.std = s.SI.std;
-s.T_pre_obj = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
+s.obj_pre = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
+s.obj_pre_inf = makedist('Gamma','a',(s.T_pre.mean+s.T_inf.mean)*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
 % latent period
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
-s.T_lat_obj = makedist('Gamma','a',s.T_lat.mean*s.T_lat.std*s.T_lat.std,'b',1/(s.T_lat.std*s.T_lat.std));
+s.obj_lat = makedist('Gamma','a',s.T_lat.mean*s.T_lat.std*s.T_lat.std,'b',1/(s.T_lat.std*s.T_lat.std));
+
+% **** immunity, vaccination
+s.psi_im_i = .15;  s.psi_im_h = .05;    s.psi_vac = .1;
+s.phi_im_i = .15;  s.phi_im_h = .05;    s.phi_vac = .1;
+s.T_im_i = 1.5*30; s.obj_im_i = makedist('Exponential','mu',s.T_im_i);
+s.T_im_h = 4*30;   s.obj_im_h = makedist('Exponential','mu',s.T_im_h);
 
 % **** testing
 % time to test (observation period, from symptoms onset): "steady_state value"
 s.T_test.mean = 2;              s.T_test.std = s.SI.std;      
+s.T_pre_test = s.T_test; s.T_pre_test.mean = s.T_pre_test.mean+s.T_pre.mean;
+s.T_pre_test_obj = makedist('Gamma','a',s.T_pre_test.mean*s.T_pre_test.std*s.T_pre_test.std,'b',1/(s.T_pre_test.std*s.T_pre_test.std));
 
 % **** clinical characteristics
 % sickness/symptoms period
@@ -162,7 +171,9 @@ s.smoothing_method_params = @smooth_series;
         s.pdf_ih_y = cut_tail(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1),cutoff);    
         s.pdf_ih_o = cut_tail(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1),cutoff);      
         s.epdf_ih_y = cut_tail(db_t.opt_fit_h_y.epdf(1:s.k_hosp+1),cutoff);    
-        s.epdf_ih_o = cut_tail(db_t.opt_fit_h_o.epdf(1:s.k_hosp+1),cutoff);       
+        s.epdf_ih_o = cut_tail(db_t.opt_fit_h_o.epdf(1:s.k_hosp+1),cutoff);     
+        s.obj_ih_y = db_t.opt_fit_h_y.eobj;
+        s.obj_ih_o = db_t.opt_fit_h_o.eobj;
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;
         s.T_hosp_o_mean = db_t.opt_fit_h_o.mean;
         s.time_h = reshape(db_t.opt_fit_h_y.time_grid(1:s.k_hosp+1),1,[]);
