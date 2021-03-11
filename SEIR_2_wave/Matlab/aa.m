@@ -42,6 +42,8 @@ create_Q_matrix();
 % Pmat: state-transition probabilities, size Ns x Ns, different for o and y
 % STmat: state-transition mapping, size Ns x Ns
 % TSmat: transition-state mapping, size Nt x 2
+% Umat: U-distr. random vectors for transition probabilities in nodes with
+% multiple out-paths, size 3 x N, different for o and y
 
 % *** vectors
 Vvec = zeros(1,N); % vaccination
