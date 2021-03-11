@@ -38,8 +38,10 @@ Ns = 8;
 Nt = 10;
 % *** matrices
 % Q_mat: transition times between states, size: Nt x N, different for o and y
+Q_mat_y = []; Q_mat_o = [];
 create_Q_matrix();
 % S_mat: current state for each agent, size Ns x N, different for o and y
+S_mat_y = []; S_mat_o = []; SR_mat_y = []; SR_mat_o = []; St_mat_y=[]; St_mat_o=[];
 create_S_matrix();
 % P_mat: state-transition probabilities, size Ns x Ns, different for o and y
 create_P_matrix();
@@ -53,7 +55,11 @@ create_aux_matrices();
 %%
 % reproduction number
 Rt_vec = init.Rt(1:T_total);
-betta_vec = Rt_vec./
+T_inf_vec = random(s.obj_inf,1,N);
+% transmission rate (per capita)
+betta_vec = Rt_vec./T_inf_vec.*(1/N);
+profile_U_y = []; profile_I_y = []; profile_U_o = []; profile_I_o = [];
+get_inf_profile();
 
 % *** _vectors
 V_vec = zeros(1,N); % vaccination
@@ -75,6 +81,7 @@ I_vec = zeros(1,N); % immunity (after infection)
     end
 
     function []=get_E_inflow()
+        
     end
 
     function []=create_Q_matrix()
@@ -82,7 +89,7 @@ I_vec = zeros(1,N); % immunity (after infection)
         Q_mat_y(1,:) = 1;                                % SE
         Q_mat_y(2,:) = random(s.obj_lat,1,N);            % EU
         Q_mat_y(3,:) = random(s.obj_pre_test,1,N);       % UI
-        Q_mat_y(4,:) = random(s.obj_pre_inf,1,N);        % URi
+        Q_mat_y(4,:) = random(s.obj_inf,1,N);            % URi
         Q_mat_y(5,:) = random(s.obj_ih_y,1,N);           % IH
         Q_mat_y(6,:) = random(s.obj_ir_y,1,N);           % IRi
         Q_mat_y(7,:) = random(s.obj_hd_y,1,N);           % HD
@@ -103,6 +110,10 @@ I_vec = zeros(1,N); % immunity (after infection)
         S_mat_o(1,:) = 1;
         SR_mat_y = mod(find(S_mat_y==1)-1,Ns)+1;
         SR_mat_o = mod(find(S_mat_o==1)-1,Ns)+1;
+        St_mat_y = zeros(T,Ns);
+        St_mat_y(1,:) = sum(SR_mat_y,2)';
+        St_mat_o = zeros(T,Ns);
+        St_mat_o(1,:) = sum(SR_mat_o,2)';
     end
 
     function []=create_P_matrix()
@@ -137,5 +148,16 @@ I_vec = zeros(1,N); % immunity (after infection)
         TS_mat(10,1) = 8;      TS_mat(10,2) = 1;                
         NT_mat = [3 5 7;4 6 8]; % p, 1-p
     end 
+
+    function []=get_inf_profile()
+        mu = max(Q_mat_y(4,:));
+        profile_U_y = ones(ceil(mu),N);        
+        mi = max(Q_mat_y(6,:));
+        profile_I_y = ones(ceil(mi),N);    
+        mu = max(Q_mat_o(4,:));
+        profile_U_o = ones(ceil(mu),N);        
+        mi = max(Q_mat_o(6,:));
+        profile_I_o = ones(ceil(mi),N);       
+    end
    
 end
