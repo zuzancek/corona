@@ -1,5 +1,5 @@
 covid_data_imp<-read.csv(('data/cases_implied_raw.csv'), header = TRUE, sep=";")
-covid_si_dist<-read.csv('data/dist.csv',header = TRUE, sep=";")
+covid_si_dist<-read.csv('data/dist_shift.csv',header = TRUE, sep=";")
 covid_data_imp$Datum <- as.Date(covid_data_imp$Datum)
 
 date_from = "2020-8-15"
@@ -9,7 +9,7 @@ covid2020imp <- list("incidence"=k*covid_data_imp$Dennych_PCR_prirastkov[-seq(id
 covid2020imp$date <- as.Date(covid_data_imp$Datum[-seq(idx)])
 
 T <- nrow(covid_data_imp$Dennych_PCR_prirastkov[-seq(idx)])
-ilen = 1
+ilen = 6
 t_start0 <- seq(2,T-ilen+1)
 t_end0 <- t_start0+ilen-1
 res_covid2020_imp <- estimate_R(covid2020imp$incidence,

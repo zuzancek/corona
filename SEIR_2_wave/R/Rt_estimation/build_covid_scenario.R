@@ -1,5 +1,5 @@
-covid_data<-read.csv(('data/cases_mm.csv'), header = TRUE, sep=";")
-covid_si_dist<-read.csv('data/dist.csv',header = TRUE, sep=";")
+covid_data<-read.csv(('data/cases_smooth.csv'), header = TRUE, sep=";")
+covid_si_dist<-read.csv('data/dist_shift.csv',header = TRUE, sep=";")
 covid_data$Datum <- as.Date(covid_data$Datum)
 
 date_from = "2020-8-15"
@@ -8,7 +8,7 @@ covid2020r <- list("incidence"=covid_data$Dennych_PCR_prirastkov[-seq(idx)],"si_
 covid2020r$date <- as.Date(covid_data$Datum[-seq(idx)])
 
 T <- length(covid_data$Dennych_PCR_prirastkov[-seq(idx)])
-ilen = 1
+ilen = 6
 t_start0 <- seq(2,T-ilen+1)
 t_end0 <- t_start0+ilen-1
 res_covid2020r <- estimate_R(covid2020r$incidence,
