@@ -34,36 +34,39 @@ method_data = s.smoothing_method_data;
 
 %%
 N = s.pop_size;
-Ns = 8;
-Nt = 10;
+N_o = s.pop_size_o;
+N_y = s.pop_size_y;
+N_s = 8;
+N_t = 10;
 % *** matrices
-% Q_mat: transition times between states, size: Nt x N, different for o and y
+% Q_mat: transition times between states, size: N_t x N, different for o and y
 Q_mat_y = []; Q_mat_o = [];
 create_Q_matrix();
-% S_mat: current state for each agent, size Ns x N, different for o and y
-S_mat_y = []; S_mat_o = []; SR_mat_y = []; SR_mat_o = []; St_mat_y=[]; St_mat_o=[];
+% S_mat: current state for each agent, size N_s x N, different for o and y
+% St_mat: time-evolution of states, aggregated, size T_total x N_s
+S_mat_y = []; S_mat_o = []; SR_mat_y = []; SR_mat_o = []; St_mat_y=[]; St_mat_o=[]; St_mat=[];
 create_S_matrix();
-% P_mat: state-transition probabilities, size Ns x Ns, different for o and y
+% P_mat: state-transition probabilities, size N_s x N_s, different for o and y
 create_P_matrix();
-% ST_mat: state-transition mapping, size Ns x Ns
-% TS_mat: transition-state mapping, size Nt x 2
+% ST_mat: state-transition mapping, size N_s x N_s
+% TS_mat: transition-state mapping, size N_t x 2
 % U_mat: U-distr. random _vectors for transition probabilities in nodes with
 % multiple out-paths, size 3 x N, different for o and y
 create_aux_matrices();
-
 
 %%
 % reproduction number
 Rt_vec = init.Rt(1:T_total);
 T_inf_vec = random(s.obj_inf,1,N);
 % transmission rate (per capita)
-betta_vec = Rt_vec./T_inf_vec.*(1/N);
+betta_vec = Rt_vec./T_inf_vec;
 profile_U_y = []; profile_I_y = []; profile_U_o = []; profile_I_o = [];
 get_inf_profile();
 
 % *** _vectors
-V_vec = zeros(1,N); % vaccination
-I_vec = zeros(1,N); % immunity (after infection)
+V_y_vec = zeros(1,N_y); V_o_vec = zeros(1,N_o); % vaccination
+Ii_y_vec = zeros(1,N_y); Ii_o_vec = zeros(1,N_o); % immunity (after infection)
+Ih_y_vec = zeros(1,N_y); Ih_o_vec = zeros(1,N_o); % immunity (after infection)
 
 
     function [v]=gen_random_pos(obj)
@@ -81,43 +84,61 @@ I_vec = zeros(1,N); % immunity (after infection)
     end
 
     function []=get_E_inflow()
+        Fy = S_mat_y(1,:).*(s.psi_im_i.^Ii_y_vec)...
+            .*(s.psi_im_h.^Ih_y_vec).*(s.psi_vac.^V_y_vec);
+        Fo = S_mat_o(1,:).*(s.psi_im_i.^Ii_o_vec)...
+            .*(s.psi_im_h.^Ih_o_vec).*(s.psi_vac.^V_o_vec);
         
+        
+s.alpha_s_o = 0.75; 
+s.alpha_i_o = 0.25; s.alpha_i_y = 0.5;
+
+        Zy = betta_vec.*Fy*G;
+        Zo = betta_vec.*Fo*G;
     end
 
     function []=create_Q_matrix()
         % transition time _matrix
+        Q_mat_y = zeros(N_t,N_y);
         Q_mat_y(1,:) = 1;                                % SE
-        Q_mat_y(2,:) = random(s.obj_lat,1,N);            % EU
-        Q_mat_y(3,:) = random(s.obj_pre_test,1,N);       % UI
-        Q_mat_y(4,:) = random(s.obj_inf,1,N);            % URi
-        Q_mat_y(5,:) = random(s.obj_ih_y,1,N);           % IH
-        Q_mat_y(6,:) = random(s.obj_ir_y,1,N);           % IRi
-        Q_mat_y(7,:) = random(s.obj_hd_y,1,N);           % HD
-        Q_mat_y(8,:) = random(s.obj_hr_y,1,N);           % HRh
-        Q_mat_y(9,:) = random(s.obj_im_i,1,N);           % RiS
-        Q_mat_y(10,:) = random(s.obj_im_h,1,N);          % RhS
-        Q_mat_o = Q_mat_y;
-        Q_mat_o(5,:) = random(s.obj_ih_o,1,N);           % IH
-        Q_mat_o(6,:) = random(s.obj_ir_o,1,N);           % IRi
-        Q_mat_o(7,:) = random(s.obj_hd_o,1,N);           % HD
-        Q_mat_o(8,:) = random(s.obj_hr_o,1,N);           % HRh
+        Q_mat_y(2,:) = random(s.obj_lat,1,N_y);            % EU
+        Q_mat_y(3,:) = random(s.obj_pre_test,1,N_y);       % UI
+        Q_mat_y(4,:) = random(s.obj_inf,1,N_y);            % URi
+        Q_mat_y(5,:) = random(s.obj_ih_y,1,N_y);           % IH
+        Q_mat_y(6,:) = random(s.obj_ir_y,1,N_y);           % IRi
+        Q_mat_y(7,:) = random(s.obj_hd_y,1,N_y);           % HD
+        Q_mat_y(8,:) = random(s.obj_hr_y,1,N_y);           % HRh
+        Q_mat_y(9,:) = random(s.obj_im_i,1,N_y);           % RiS
+        Q_mat_y(10,:) = random(s.obj_im_h,1,N_y);          % RhS
+        Q_mat_o = zeros(N_t,N_o);
+        Q_mat_o(1,:) = 1;                                % SE
+        Q_mat_o(2,:) = random(s.obj_lat,1,N_o);            % EU
+        Q_mat_o(3,:) = random(s.obj_pre_test,1,N_o);       % UI
+        Q_mat_o(4,:) = random(s.obj_inf,1,N_o);            % URi
+        Q_mat_o(5,:) = random(s.obj_ih_o,1,N_o);           % IH
+        Q_mat_o(6,:) = random(s.obj_ir_o,1,N_o);           % IRi
+        Q_mat_o(7,:) = random(s.obj_hd_o,1,N_o);           % HD
+        Q_mat_o(8,:) = random(s.obj_hr_o,1,N_o);           % HRh
+        Q_mat_o(9,:) = random(s.obj_im_i,1,N_o);           % RiS
+        Q_mat_o(10,:) = random(s.obj_im_h,1,N_o);          % RhS
     end
 
     function []=create_S_matrix() %%  add init data here !!!!
-        S_mat_y = zeros(Ns,N);
+        S_mat_y = zeros(N_s,N_y);
         S_mat_y(1,:) = 1;
-        S_mat_o = zeros(Ns,N);
+        S_mat_o = zeros(N_s,N_o);
         S_mat_o(1,:) = 1;
-        SR_mat_y = mod(find(S_mat_y==1)-1,Ns)+1;
-        SR_mat_o = mod(find(S_mat_o==1)-1,Ns)+1;
-        St_mat_y = zeros(T,Ns);
+        SR_mat_y = mod(find(S_mat_y==1)-1,N_s)+1;
+        SR_mat_o = mod(find(S_mat_o==1)-1,N_s)+1;
+        St_mat_y = zeros(T_total,N_s);
         St_mat_y(1,:) = sum(SR_mat_y,2)';
-        St_mat_o = zeros(T,Ns);
+        St_mat_o = zeros(T_total,N_s);
         St_mat_o(1,:) = sum(SR_mat_o,2)';
+        St_mat = St_mat_y+St_mat_o;
     end
 
     function []=create_P_matrix()
-        P_mat_y = zeros(Ns,Ns); % S E U I H D Ri Rh
+        P_mat_y = zeros(N_s,N_s); % S E U I H D Ri Rh
         P_mat_y(1,2) = 1; P_mat_y(2,3) = 1; P_mat_y(7,1) = 1; P_mat_y(8,1) = 1; P_mat_o = P_mat_y;
         P_mat_y(3,4) = init.obs_y_ss; P_mat_y(3,7) = 1-init.obs_y_ss;
         P_mat_y(4,5) = init.eta_y_ss; P_mat_y(4,7) = 1-init.eta_y_ss;
@@ -130,12 +151,12 @@ I_vec = zeros(1,N); % immunity (after infection)
     end
 
     function []=create_aux_matrices()
-        U_mat_y = rand([3,N]);
-        U_mat_o = rand([3,N]);  
-        ST_mat = zeros(Ns,Ns);
+        U_mat_y = rand([3,N_y]);
+        U_mat_o = rand([3,N_o]);  
+        ST_mat = zeros(N_s,N_s);
         ST_mat(1,2)=1;        ST_mat(2,3)=2;        ST_mat(3,4)=3;         ST_mat(3,7)=4;         ST_mat(4,5)=5;
         ST_mat(4,7)=6;        ST_mat(5,6)=7;        ST_mat(5,8)=8;         ST_mat(7,1)=9;         ST_mat(8,1)=10;   
-        TS_mat = zeros(Nt,2);
+        TS_mat = zeros(N_t,2);
         TS_mat(1,1) = 1;       TS_mat(1,2) = 2;
         TS_mat(2,1) = 2;       TS_mat(2,2) = 3;
         TS_mat(3,1) = 3;       TS_mat(3,2) = 4;
@@ -151,13 +172,13 @@ I_vec = zeros(1,N); % immunity (after infection)
 
     function []=get_inf_profile()
         mu = max(Q_mat_y(4,:));
-        profile_U_y = ones(ceil(mu),N);        
+        profile_U_y = ones(ceil(mu),N_y);        
         mi = max(Q_mat_y(6,:));
-        profile_I_y = ones(ceil(mi),N);    
+        profile_I_y = ones(ceil(mi),N_y);    
         mu = max(Q_mat_o(4,:));
-        profile_U_o = ones(ceil(mu),N);        
+        profile_U_o = ones(ceil(mu),N_o);        
         mi = max(Q_mat_o(6,:));
-        profile_I_o = ones(ceil(mi),N);       
+        profile_I_o = ones(ceil(mi),N_o);       
     end
    
 end

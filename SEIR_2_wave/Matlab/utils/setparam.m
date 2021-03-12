@@ -1,7 +1,9 @@
 function [s] = setparam(varargin)
 
 s = struct;
-s.pop_size = 5443120;
+s.pop_size = 5454147;
+s.pop_size_y = 456400;
+s.pop_size_o = 889747;
 s.sim_num = 10^4;
 s.T = 100;
 s.estimate_Rt = false;
@@ -37,10 +39,13 @@ s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.obj_lat = makedist('Gamma','a',s.T_lat.mean*s.T_lat.std*s.T_lat.std,'b',1/(s.T_lat.std*s.T_lat.std));
 
 % **** immunity, vaccination
-s.psi_im_i = .15;  s.psi_im_h = .05;    s.psi_vac = .1;
-s.phi_im_i = .15;  s.phi_im_h = .05;    s.phi_vac = .1;
+s.psi_im_i = .25;  s.psi_im_h = .05;    s.psi_vac = .1;
+s.phi_im_i = .25;  s.phi_im_h = .05;    s.phi_vac = .1;
 s.T_im_i = 1.5*30; s.obj_im_i = makedist('Exponential','mu',s.T_im_i);
 s.T_im_h = 4*30;   s.obj_im_h = makedist('Exponential','mu',s.T_im_h);
+% **** mobility loss, quaranteen
+s.alpha_s_o = 0.75; 
+s.alpha_i_o = 0.25; s.alpha_i_y = 0.5;
 
 % **** testing
 % time to test (observation period, from symptoms onset): "steady_state value"
@@ -62,7 +67,6 @@ catch err %#ok<NASGU>
     db = load('results/optimal_fit.mat','s');
     set_prob_data();
 end
-
 
 s.alpha_weight = 0.25;
 s.kappa_res_0 = 1/3;
