@@ -61,7 +61,7 @@ S_mat_y_next = S_mat_y; S_mat_o_next = S_mat_o_next;
 create_S_matrix();
 %
 % P_mat: state-transition probabilities, size N_s x N_s, different for o and y
-P_mat_y = zeros(N_s,N_s);
+P_mat_y = zeros(N_s,N_s); P_mat_o = zeros(N_s,N_s);
 create_P_matrix();
 %
 % ST_mat: state-transition mapping, size N_s x N_s
@@ -79,10 +79,10 @@ T_inf_vec = random(s.obj_inf,1,N);
 % transmission rate (per capita)
 betta_vec = Rt_vec./T_inf_vec;
 profile_U_y = []; profile_I_y = []; profile_U_o = []; profile_I_o = [];
-SE_y_vec = zeros(1,N_y); RiS_y_vec = SE_y_vec; RhS_y_vec = SE_y_vec; EU_y_vec = SE_y_vec;
-URi_y_vec = SE_y_vec; IRi_y_vec = SE_y_vec; HRh_y_vec = SE_y_vec; UI_y_vec = SE_y_vec;
-SE_o_vec = zeros(1,N_o); RiS_o_vec = SE_o_vec; RhS_o_vec = SE_o_vec; UI_o_vec = SE_o_vec;
-URi_o_vec = SE_o_vec; IRi_o_vec = SE_o_vec; HRh_o_vec = SE_o_vec; EU_o_vec = SE_o_vec;
+SE_y_vec = zeros(1,N_y); RiS_y_vec = SE_y_vec; RhS_y_vec = SE_y_vec; EU_y_vec = SE_y_vec; IH_y_vec = SE_y_vec;
+URi_y_vec = SE_y_vec; IRi_y_vec = SE_y_vec; HRh_y_vec = SE_y_vec; UI_y_vec = SE_y_vec; HD_y_vec = SE_y_vec;
+SE_o_vec = zeros(1,N_o); RiS_o_vec = SE_o_vec; RhS_o_vec = SE_o_vec; UI_o_vec = SE_o_vec; IH_o_vec = SE_o_vec;
+URi_o_vec = SE_o_vec; IRi_o_vec = SE_o_vec; HRh_o_vec = SE_o_vec; EU_o_vec = SE_o_vec; HD_o_vec = SE_o_vec;
 get_inf_profile();
 
 % *** _vectors
@@ -97,10 +97,11 @@ for t=1:T_total
     update_suspectible();
     update_exposed();
     update_unobserved();
-    
-    
+    update_observed();
+    update_hospitalized();
+    update_dead();    
     update_removed();
-    upddate_states_transitions(); % todo
+    update_states_transitions(); % todo
 end
 
     function []=store_states_transitions()
@@ -172,16 +173,79 @@ end
         UI_o_vec = (Q_mat_o_next(3,:)==0);   URi_o_vec = (Q_mat_o_next(4,:)==0);
         % newly infectious but yet unobserved (not tested/reported) time spent in this state is set to their
         % corresponding def.values
-        % determine observed agents
-        [~,ui_new_y_idx] = maxk(U_mat_y(1,:), ceil(P_mat_y(3,4)*sum(EU_y_vec)));
-        [~,ui_new_o_idx] = maxk(U_mat_o(1,:), ceil(P_mat_o(3,4)*sum(EU_o_vec)));
+        % determine observed agents (transition 3), the remainder stays
+        % uncovered (transition 4)
+        [~,ui_new_y_idx] = maxk(U_mat_y(1,:).*EU_y_vec, ceil(P_mat_y(3,4)*sum(EU_y_vec))); 
+        [~,ui_new_o_idx] = maxk(U_mat_o(1,:).*EU_o_vec, ceil(P_mat_o(3,4)*sum(EU_o_vec)));
+        ur_new_y_idx = EU_y_vec-ui_new_y_idx;
+        ur_new_o_idx = EU_o_vec-ui_new_o_idx;
         Q_mat_y_next(3,ui_new_y_idx) = Q0_mat_y(3,ui_new_y_idx);
         Q_mat_o_next(3,ui_new_o_idx) = Q0_mat_o(3,ui_new_o_idx);
-        Q_mat_y_next(4,ui_new_y_idx) = Q0_mat_y(4,ui_new_y_idx);
-        Q_mat_o_next(4,ui_new_o_idx) = Q0_mat_o(4,ui_new_o_idx);
+        Q_mat_y_next(4,ur_new_y_idx) = Q0_mat_y(4,ur_new_y_idx);
+        Q_mat_o_next(4,ur_new_o_idx) = Q0_mat_o(4,ur_new_o_idx);
         % update state
         S_mat_y_next(3,:) = S_mat_y_next(3,:)+EU_y_vec-UI_y_vec-URi_y_vec;
         S_mat_o_next(3,:) = S_mat_o_next(3,:)+EU_o_vec-UI_o_vec-URi_o_vec;
+    end
+
+    function []=update_observed()
+        % transitions: in 3 (UI); out 5 (IH), 6 (IRi)
+        % state: 4
+        % decrement time elapsed
+        Q_mat_y_next(5,:) = Q_mat_y(5,:)-1;  Q_mat_y_next(6,:) = Q_mat_y(6,:)-1;
+        Q_mat_o_next(5,:) = Q_mat_o(5,:)-1;  Q_mat_o_next(6,:) = Q_mat_o(6,:)-1;
+        % determine agents leaving current state
+        IH_y_vec = (Q_mat_y_next(5,:)==0);   IRi_y_vec = (Q_mat_y_next(6,:)==0);
+        IH_o_vec = (Q_mat_o_next(5,:)==0);   IRi_o_vec = (Q_mat_o_next(6,:)==0);
+        % newly observed (new confirmed/reported cases) time spent in this state is set to their
+        % corresponding def.values
+        % determine agents who need hospitalization (transition 5), the
+        % remainder is recovered at home (transition 6)
+        [~,ih_new_y_idx] = maxk(U_mat_y(2,:).*UI_y_vec, ceil(P_mat_y(4,5)*sum(UI_y_vec))); 
+        [~,ih_new_o_idx] = maxk(U_mat_o(2,:).*UI_o_vec, ceil(P_mat_o(4,5)*sum(UI_o_vec)));
+        ir_new_y_idx = UI_y_vec-ih_new_y_idx;
+        ir_new_o_idx = UI_o_vec-ih_new_o_idx;
+        Q_mat_y_next(5,ih_new_y_idx) = Q0_mat_y(5,ih_new_y_idx);
+        Q_mat_o_next(5,ih_new_o_idx) = Q0_mat_o(5,ih_new_o_idx);
+        Q_mat_y_next(6,ir_new_y_idx) = Q0_mat_y(6,ir_new_y_idx);
+        Q_mat_o_next(6,ir_new_o_idx) = Q0_mat_o(6,ir_new_o_idx);
+        % update state
+        S_mat_y_next(4,:) = S_mat_y_next(4,:)+UI_y_vec-IH_y_vec-IRi_y_vec;
+        S_mat_o_next(4,:) = S_mat_o_next(4,:)+UI_o_vec-IH_o_vec-IRi_o_vec;
+    end
+
+    function []=update_hospitalized()
+        % transitions: in 5 (IH); out 7 (HD), 8 (HRh)
+        % state: 5
+        % decrement time elapsed
+        Q_mat_y_next(7,:) = Q_mat_y(7,:)-1;  Q_mat_y_next(8,:) = Q_mat_y(8,:)-1;
+        Q_mat_o_next(7,:) = Q_mat_o(7,:)-1;  Q_mat_o_next(8,:) = Q_mat_o(8,:)-1;
+        % determine agents leaving current state
+        HD_y_vec = (Q_mat_y_next(7,:)==0);   HRh_y_vec = (Q_mat_y_next(8,:)==0);
+        HD_o_vec = (Q_mat_o_next(7,:)==0);   HRh_o_vec = (Q_mat_o_next(8,:)==0);
+        % newly hospitalized time spent in this state is set to their
+        % corresponding def.values
+        % determine agents who die (transition 7), the
+        % remainder is recovered at hospital (transition 8)
+        [~,hd_new_y_idx] = maxk(U_mat_y(3,:).*IH_y_vec, ceil(P_mat_y(5,6)*sum(IH_y_vec))); 
+        [~,hd_new_o_idx] = maxk(U_mat_o(3,:).*IH_o_vec, ceil(P_mat_o(5,6)*sum(IH_o_vec)));
+        hr_new_y_idx = IH_y_vec-hd_new_y_idx;
+        hr_new_o_idx = IH_o_vec-hd_new_o_idx;
+        Q_mat_y_next(7,hd_new_y_idx) = Q0_mat_y(7,hd_new_y_idx);
+        Q_mat_o_next(7,hd_new_o_idx) = Q0_mat_o(7,hd_new_o_idx);
+        Q_mat_y_next(8,hr_new_y_idx) = Q0_mat_y(8,hr_new_y_idx);
+        Q_mat_o_next(8,hr_new_o_idx) = Q0_mat_o(8,hr_new_o_idx);
+        % update state
+        S_mat_y_next(5,:) = S_mat_y_next(5,:)+IH_y_vec-HD_y_vec-HRh_y_vec;
+        S_mat_o_next(5,:) = S_mat_o_next(5,:)+IH_o_vec-HD_o_vec-HRh_o_vec;
+    end
+
+    function []=update_dead()
+        % transitions: in 7 (IH); out - (final state)
+        % state: 6
+        % update state
+        S_mat_y_next(6,:) = S_mat_y_next(6,:)+HD_y_vec;
+        S_mat_o_next(6,:) = S_mat_o_next(6,:)+HD_o_vec;
     end
 
     function []=update_removed()
