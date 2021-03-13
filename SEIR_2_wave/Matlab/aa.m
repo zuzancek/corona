@@ -76,10 +76,10 @@ T_inf_vec = random(s.obj_inf,1,N);
 % transmission rate (per capita)
 betta_vec = Rt_vec./T_inf_vec;
 profile_U_y = []; profile_I_y = []; profile_U_o = []; profile_I_o = [];
-SE_y_vec = zeros(1,N_y); RiS_y_vec = SE_y_vec; RhS_y_vec = SE_y_vec;
+SE_y_vec = zeros(1,N_y); RiS_y_vec = SE_y_vec; RhS_y_vec = SE_y_vec; EU_y_vec = SE_y_vec;
 URi_y_vec = SE_y_vec; IRi_y_vec = SE_y_vec; HRh_y_vec = SE_y_vec;
-SE_o_vec = zeros(1,N_o); RiS_o_vec = SE_o_vec; RhS_o_vec = SE_o_vec;
-URi_o_vec = SE_o_vec; IRi_o_vec = SE_o_vec; HRh_o_vec = SE_o_vec;
+SE_o_vec = zeros(1,N_o); RiS_o_vec = SE_o_vec; RhS_o_vec = SE_o_vec; 
+URi_o_vec = SE_o_vec; IRi_o_vec = SE_o_vec; HRh_o_vec = SE_o_vec; EU_o_vec = SE_o_vec;
 get_inf_profile();
 
 % *** _vectors
@@ -106,21 +106,23 @@ end
         S_mat_y_next = S_mat_y; S_mat_o_next = S_mat_o;
     end
 
-    function [v]=gen_random_pos(obj)
-        v = random(obj,1,N);
-        i0 = find(v<=0);
-        v(i0) = [];
-        cont=~isempty(i0);
-        while cont
-            v0 = random(obj,1,2*length(i0));
-            v = [v,v0];
-            v = v(v>0);
-            cont = length(v)<N;
-        end
-        v = v(1:N);
-    end
+%     function [v]=gen_random_pos(obj)
+%         v = random(obj,1,N);
+%         i0 = find(v<=0);
+%         v(i0) = [];
+%         cont=~isempty(i0);
+%         while cont
+%             v0 = random(obj,1,2*length(i0));
+%             v = [v,v0];
+%             v = v(v>0);
+%             cont = length(v)<N;
+%         end
+%         v = v(1:N);
+%     end
 
     function []=update_suspectible()
+        % transitions: in 9,10 (RiS, RhS); out 1 (SE)
+        % state: 1
         % calculate outflow of suspectible individuals (=inflow of exposed)
         calculate_E_inflow();
         % update transition matrices
@@ -138,10 +140,21 @@ end
     end
 
     function []=update_exposed()
+        % transitions: in 1 (SE), out 2 (EU)
+        % state: 2
+        % decrement time elapsed
+        Q_mat_y_next(2,:) = Q_mat_y(2,:)-1;        
+        Q_mat_o_next(2,:) = Q_mat_o(2,:)-1;    
+        % determine agents leaving current state
+        EU_y_vec = (Q_mat_y_next(2,:)==0);
+        EU_o_vec = (Q_mat_o_next(2,:)==0);
+        % newly exposed time spent in this state is set to their
+        % corresponding def.values
+        Q_mat_y_next(2,EU_y_vec) = Q0_mat_y(2,EU_y_vec);
+        Q_mat_o_next(2,EU_o_vec) = Q0_mat_o(2,EU_o_vec);  
         % update state
-        S_mat_y_next(2,:) = S_mat_y_next(2,:)+SE_y_vec;
-        S_mat_o_next(2,:) = S_mat_o_next(2,:)+SE_o_vec;
-    
+        S_mat_y_next(2,:) = S_mat_y_next(2,:)+SE_y_vec-EU_y_vec;
+        S_mat_o_next(2,:) = S_mat_o_next(2,:)+SE_o_vec-EU_o_vec;    
     end
 
     function []=update_removed()
@@ -201,24 +214,6 @@ end
         Ii_o_vec = Ii_o_vec.*(1+URi_o_vec+IRi_o_vec);
         Ih_o_vec = Ih_o_vec.*(1+HRh_o_vec);
         % vaccination
-    end
-
-    function[]=update_states_transitions()
-        % SE
-        Q_mat_y(1,:) = Q_mat_y(1,:)-1;
-        Q_mat_y(1,find(S_mat_y(1,:))) = 1;
-        Q_mat_y(1,SE_y_idx) = 1;
-        % EU
-        Q_mat_y(2,:) = Q_mat_y(2,:)-1;
-        Q_mat_y(2,SE_y_idx) = Q0_mat_y(2,SE_y_idx);
-        
-        % SE
-        Q_mat_o(1,:) = Q_mat_o(1,:)-1;
-        Q_mat_o(1,find(S_mat_o(1,:))) = 1;
-        Q_mat_o(1,SE_o_idx) = 1;
-        
-        S_mat_y(1,SE_y_idx) = 0;
-        S_mat_o(1,SE_o_idx) = 0;
     end
 
     function []=create_Q_matrix()
