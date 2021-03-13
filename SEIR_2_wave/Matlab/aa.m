@@ -90,7 +90,7 @@ Ih_y_vec = zeros(1,N_y); Ih_o_vec = zeros(1,N_o); % immunity (after infection)
 
 for t=1:T_total
     store_states_transitions();
-    update_vaccination(); % vymysliet
+    update_vaccination_immunity(); % vymysliet
     update_suspectible();
     update_exposed();
     
@@ -123,36 +123,58 @@ end
     function []=update_suspectible()
         % calculate outflow of suspectible individuals (=inflow of exposed)
         calculate_E_inflow();
-        % add inflow of suspectible agents (=outflow of removed, i.e
-        % those who lost immunity after recovery from infection
-        % calculate_S_inflow();
+        % update transition matrices
+        Q_mat_y_next(1,:) = Q_mat_y(1,:)-1;        
+        Q_mat_o_next(1,:) = Q_mat_o(1,:)-1;       
+        % newly suspectible time spent in this state is set to 1 and those
+        % who are exposed have 0
+        Q_mat_y_next(1,RiS_y_vec+RhS_y_vec) = T_total;   
+        Q_mat_o_next(1,RiS_o_vec+RhS_o_vec) = T_total;     
+        Q_mat_y_next(1,SE_y_vec) = 0;   
+        Q_mat_o_next(1,SE_o_vec) = 0;           
+        % update state
         S_mat_y_next(1,:) = S_mat_y_next(1,:)-SE_y_vec+RiS_y_vec+RhS_y_vec; % outflow of suspectible, new exposed
         S_mat_o_next(1,:) = S_mat_o_next(1,:)-SE_o_vec+RiS_o_vec+RhS_o_vec; % outflow of suspectible, new exposed
+    end
+
+    function []=update_exposed()
+        % update state
+        S_mat_y_next(2,:) = S_mat_y_next(2,:)+SE_y_vec;
+        S_mat_o_next(2,:) = S_mat_o_next(2,:)+SE_o_vec;
+    
     end
 
     function []=update_removed()
         % temporarily removed
         % decrement time elapsed
-        Q_mat_y(9,:) = Q_mat_y(9,:)-1;        Q_mat_y(10,:) = Q_mat_y(10,:)-1;
-        Q_mat_o(9,:) = Q_mat_o(9,:)-1;        Q_mat_o(10,:) = Q_mat_o(10,:)-1;
+        Q_mat_y_next(9,:) = Q_mat_y(9,:)-1;        Q_mat_y_next(10,:) = Q_mat_y(10,:)-1;
+        Q_mat_o_next(9,:) = Q_mat_o(9,:)-1;        Q_mat_o_next(10,:) = Q_mat_o(10,:)-1;
         % newly removed time spent in this state is set to their
         % corresponding def.values
-        Q_mat_y(9,URi_y_vec) = Q0_mat_y(9,URi_y_vec);   Q_mat_y(10,HRh_y_vec) = Q0_mat_y(10,HRh_y_vec);        
-        Q_mat_y(9,IRi_y_vec) = Q0_mat_y(9,IRi_y_vec);
-        Q_mat_o(9,URi_o_vec) = Q0_mat_o(9,URi_o_vec);   Q_mat_o(10,HRh_o_vec) = Q0_mat_o(10,HRh_o_vec);        
-        Q_mat_o(9,IRi_o_vec) = Q0_mat_o(9,IRi_o_vec);
-        % increase default removal time for those already temporarily removed
+        Q_mat_y_next(9,URi_y_vec) = Q0_mat_y(9,URi_y_vec);   
+        Q_mat_y_next(10,HRh_y_vec) = Q0_mat_y(10,HRh_y_vec);        
+        Q_mat_y_next(9,IRi_y_vec) = Q0_mat_y(9,IRi_y_vec);
+        Q_mat_o_next(9,URi_o_vec) = Q0_mat_o(9,URi_o_vec);   
+        Q_mat_o_next(10,HRh_o_vec) = Q0_mat_o(10,HRh_o_vec);        
+        Q_mat_o_next(9,IRi_o_vec) = Q0_mat_o(9,IRi_o_vec);
+        % increase default removal time for those already temporarily
+        % removed (better immunity)
         Q0_mat_y(9,URi_y_vec) = round(1.5*Q0_mat_y(9,URi_y_vec)); 
         Q0_mat_o(9,URi_o_vec) = round(1.5*Q0_mat_o(9,URi_o_vec));
         Q0_mat_y(9,iRi_y_vec) = round(1.5*Q0_mat_y(9,IRi_y_vec)); 
         Q0_mat_o(9,IRi_o_vec) = round(1.5*Q0_mat_o(9,IRi_o_vec));
         Q0_mat_o(10,HRh_y_vec) = round(1.5*Q0_mat_o(10,HRh_y_vec)); 
         Q0_mat_o(10,HRh_o_vec) = round(1.5*Q0_mat_o(10,HRh_o_vec));        
-        % newly suspectible - after loosing immunity
-        RiS_y_vec = (Q_mat_y(9,:)==0);
-        RhS_y_vec = (Q_mat_y(10,:)==0);
-        RiS_o_vec = (Q_mat_o(9,:)==0);
-        RhS_o_vec = (Q_mat_o(10,:)==0);        
+        % newly suspectible (= outflow) - after loosing immunity
+        RiS_y_vec = (Q_mat_y_next(9,:)==0);
+        RhS_y_vec = (Q_mat_y_next(10,:)==0);
+        RiS_o_vec = (Q_mat_o_next(9,:)==0);
+        RhS_o_vec = (Q_mat_o_next(10,:)==0);  
+        % update state (+inflow -outflow)
+        S_mat_y_next(7,:) = S_mat_y_next(7,:)+URi_y_vec+IRi_y_vec-RiS_y_vec;
+        S_mat_y_next(8,:) = S_mat_y_next(8,:)+HRh_y_vec-RhS_y_vec;
+        S_mat_o_next(7,:) = S_mat_o_next(7,:)+URi_o_vec+IRi_o_vec-RiS_o_vec;
+        S_mat_o_next(8,:) = S_mat_o_next(8,:)+HRh_o_vec-RhS_o_vec;
     end
 
     function []=calculate_E_inflow()
@@ -172,8 +194,13 @@ end
         SE_o_vec = 0*SE_o_vec; SE_o_vec(SE_o_idx) = 1;        
     end
 
-    function []=update_vaccination()
-        
+    function []=update_vaccination_immunity()
+        % immunity
+        Ii_y_vec = Ii_y_vec.*(1+URi_y_vec+IRi_y_vec);
+        Ih_y_vec = Ih_y_vec.*(1+HRh_y_vec);
+        Ii_o_vec = Ii_o_vec.*(1+URi_o_vec+IRi_o_vec);
+        Ih_o_vec = Ih_o_vec.*(1+HRh_o_vec);
+        % vaccination
     end
 
     function[]=update_states_transitions()
@@ -196,7 +223,7 @@ end
 
     function []=create_Q_matrix()
         % transition time matrix (max per agent)      
-        Q0_mat_y(1,:) = 1;                                         % SE
+        Q0_mat_y(1,:) = T_total;                                   % SE
         Q0_mat_y(2,:) = round(random(s.obj_lat,1,N_y));            % EU
         Q0_mat_y(3,:) = round(random(s.obj_pre_test,1,N_y));       % UI
         Q0_mat_y(4,:) = round(random(s.obj_inf,1,N_y));            % URi
@@ -206,7 +233,7 @@ end
         Q0_mat_y(8,:) = round(random(s.obj_hr_y,1,N_y));           % HRh
         Q0_mat_y(9,:) = round(random(s.obj_im_i,1,N_y));           % RiS
         Q0_mat_y(10,:) = round(random(s.obj_im_h,1,N_y));          % RhS
-        Q0_mat_o(1,:) = 1;                                         % SE
+        Q0_mat_o(1,:) = T_total;                                   % SE
         Q0_mat_o(2,:) = round(random(s.obj_lat,1,N_o));            % EU
         Q0_mat_o(3,:) = round(random(s.obj_pre_test,1,N_o));       % UI
         Q0_mat_o(4,:) = round(random(s.obj_inf,1,N_o));            % URi
