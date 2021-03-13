@@ -57,7 +57,7 @@ create_Q_matrix();
 % S_mat: current state for each agent, size N_s x N, different for o and y
 % St_mat: time-evolution of states, aggregated, size T_total x N_s
 S_mat_y = []; S_mat_o = []; SR_mat_y = []; SR_mat_o = []; St_mat_y=[]; St_mat_o=[]; St_mat=[];
-S_mat_y_next = S_mat_y; S_mat_o_next = S_mat_o_next;
+S_mat_y_next = S_mat_y; S_mat_o_next = S_mat_o;
 create_S_matrix();
 %
 % P_mat: state-transition probabilities, size N_s x N_s, different for o and y
@@ -70,7 +70,6 @@ create_P_matrix();
 % multiple out-paths, size 3 x N, different for o and y
 U_mat_y = rand([3,N_y]);
 U_mat_o = rand([3,N_o]);
-create_aux_matrices();
 
 %%
 % reproduction number
@@ -101,7 +100,7 @@ for t=1:T_total
     update_hospitalized();
     update_dead();    
     update_removed();
-    update_states_transitions(); % todo
+    update_states_transitions(t); % todo
 end
 
     function []=store_states_transitions()
@@ -109,6 +108,12 @@ end
         Q_mat_y_next = Q_mat_y; Q_mat_o_next = Q_mat_o;
         % states
         S_mat_y_next = S_mat_y; S_mat_o_next = S_mat_o;
+    end
+
+    function []=update_states_transitions(t)
+        Q_mat_y = Q_mat_y_next; Q_mat_o = Q_mat_o_next;
+        S_mat_y = S_mat_y_next; S_mat_o = S_mat_o_next;
+        update_state_time(t);        
     end
 
 %     function [v]=gen_random_pos(obj)
@@ -351,13 +356,17 @@ end
         S_mat_o(5,randperm(N_y,H0-H0_y)) = 1;
         S_mat_o(6,randperm(N_y,D0-D0_y)) = 1;
         S_mat_o(7,randperm(N_y,Ri0-Ri0_y)) = 1;
-        S_mat_o(8,randperm(N_y,Rh0-Rh0_y)) = 1;
+        S_mat_o(8,randperm(N_y,Rh0-Rh0_y)) = 1;   
+        update_state_time(1);
+    end
+
+    function []=update_state_time(t)
         SR_mat_y = mod(find(S_mat_y==1)-1,N_s)+1;
         SR_mat_o = mod(find(S_mat_o==1)-1,N_s)+1;
         St_mat_y = zeros(T_total,N_s);
-        St_mat_y(1,:) = sum(SR_mat_y,2)';
+        St_mat_y(t,:) = sum(SR_mat_y,2)';
         St_mat_o = zeros(T_total,N_s);
-        St_mat_o(1,:) = sum(SR_mat_o,2)';
+        St_mat_o(t,:) = sum(SR_mat_o,2)';
         St_mat = St_mat_y+St_mat_o;
     end
 
@@ -370,26 +379,6 @@ end
         P_mat_o(3,4) = init.obs_y_ss; P_mat_o(3,7) = 1-init.obs_y_ss;
         P_mat_o(4,5) = init.eta_y_ss; P_mat_o(4,7) = 1-init.eta_y_ss;
         P_mat_o(5,6) = init.omega_y_ss; P_mat_o(5,8) = 1-init.omega_y_ss;
-        PR_mat_y = P_mat_y(3:6,:);
-        PR_mat_o = P_mat_o(3:6,:);
-    end
-
-    function []=create_aux_matrices()
-        ST_mat = zeros(N_s,N_s);
-        ST_mat(1,2)=1;        ST_mat(2,3)=2;        ST_mat(3,4)=3;         ST_mat(3,7)=4;         ST_mat(4,5)=5;
-        ST_mat(4,7)=6;        ST_mat(5,6)=7;        ST_mat(5,8)=8;         ST_mat(7,1)=9;         ST_mat(8,1)=10;
-        TS_mat = zeros(N_t,2);
-        TS_mat(1,1) = 1;       TS_mat(1,2) = 2;
-        TS_mat(2,1) = 2;       TS_mat(2,2) = 3;
-        TS_mat(3,1) = 3;       TS_mat(3,2) = 4;
-        TS_mat(4,1) = 3;       TS_mat(4,2) = 7;
-        TS_mat(5,1) = 4;       TS_mat(5,2) = 5;
-        TS_mat(6,1) = 4;       TS_mat(6,2) = 7;
-        TS_mat(7,1) = 5;       TS_mat(7,2) = 6;
-        TS_mat(8,1) = 5;       TS_mat(8,2) = 8;
-        TS_mat(9,1) = 7;       TS_mat(9,2) = 1;
-        TS_mat(10,1) = 8;      TS_mat(10,2) = 1;
-        NT_mat = [3 5 7;4 6 8]; % p, 1-p
     end
 
     function []=get_inf_profile()
