@@ -173,7 +173,30 @@ alpha_sry = alpha_sry(:,end:-1:1);
 
 % ******* Calculation I.
 for t=1:T_total
-    tt = t+shift;
+    tt = t+shift; 
+    UI = (a_u_y*U_y(tt-1)+a_i_y*I_y(tt-1))/Ny+(a_u_o*U_o(tt-1)+a_i_o*I_o(tt-1))/No;
+    d_S_E_o(t) = Rt(t)/T_inf_mean.*UI.*S_o(tt-1)*mu.*zeta_o(t);
+    S_o(tt) = S_o(tt-1)-d_S_E_o(t);
+    %
+    d_S_E_y(t) = Rt(t)/T_inf_mean.*UI.*S_y(tt-1)*mu.*zeta_y(t);
+    S_y(tt) = S_y(tt-1)-d_S_E_y(t);
+    %
+    d_S_E_y(t) = dot(alpha_euo(t,1:end-1),E_o(tt-k_lat:tt-1)); 
+    S_y(tt) = S_y(tt-1)-d_S_E_y(t);
+    %
+    d_E_U_o(t) = dot(alpha_euo(t,1:end-1),E_o(tt-k_lat:tt-1)); 
+    E_o(tt) = E_o(tt-1)+d_S_E_o(t)-d_E_U_o(t);
+    %    
+    d_E_U_y(t) = dot(alpha_euy(t,1:end-1),E_y(tt-k_lat:tt-1)); 
+    E_y(tt) = E_y(tt-1)+d_S_E_y(t)-d_E_U_y(t);
+    %
+    d_U_I_o(t) = dot(alpha_uio(t,1:end-1),U_o(tt-k_obs:tt-1)); 
+    d_U_R_o(t) = dot(alpha_uro(t,1:end-1),U_o(tt-k_inf:tt-1));
+    U_o(tt) = U_o(tt-1)+d_E_U_o(t)-d_U_I_o(t)-d_U_R_o(t);
+    %
+    d_U_I_y(t) = dot(alpha_uiy(t,1:end-1),U_y(tt-k_obs:tt-1)); 
+    d_U_R_y(t) = dot(alpha_ury(t,1:end-1),U_y(tt-k_inf:tt-1));
+    U_y(tt) = U_o(tt-1)+d_E_U_y(t)-d_U_I_y(t)-d_U_R_y(t);
     %
     d_I_H_o(t) = dot(alpha_iho(t,1:end-1),I_o(tt-k_hosp:tt-1));     
     d_I_R_o(t) = dot(alpha_iro(t,1:end-1),I_o(tt-k_sick:tt-1));
