@@ -14,6 +14,7 @@ fun_opt_1 = {'XIHD','XIHD'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 out_filename = 'results/results_impl.mat';
 
+s=setparam();
 %% handle data
 % definitions
 cut = 0;

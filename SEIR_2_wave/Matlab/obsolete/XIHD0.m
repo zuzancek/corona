@@ -1,4 +1,4 @@
-function [out_rep,out_full] = XIHD(x,p,s,init,dateFrom,dateTo)
+function [out_rep,out_full] = XIHD0(x,p,s,init,dateFrom,dateTo)
 
 T = dateTo-dateFrom+1;
 burnin = s.firstData_offset;
@@ -53,11 +53,6 @@ try
 catch err %#ok<NASGU>
     kappa_d_o = ones(T,1);
 end
-try
-    T_delay = init.T_delay(end-T_total+1:end);
-catch err %#ok<NASGU>
-    T_delay = zeros(T,1);
-end 
 
 rho = extend(rho,shift);
 nu = extend(nu,T_total-length(nu));
@@ -67,7 +62,6 @@ kappa_h_y = extend(kappa_h_y,T_total-length(kappa_h_y));
 kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_d_y = extend(kappa_d_y,T_total-length(kappa_d_y));
 kappa_d_o = extend(kappa_d_o,T_total-length(kappa_d_o));
-T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift);
 varsigma = method_params(init.varsigma);
 varsigma = extend(varsigma(dateFrom:dateTo),burnin);
 
@@ -108,21 +102,18 @@ d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o; d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o;
 % ******* 1./ mild/asymptomatic cases, no hospital needed
 % A./ hospital admission
 k_hosp = s.k_hosp;      t_hosp = s.time_h;
-alpha_iho = s.eta_o.*kappa_h_o.*p.pdf_ih_o./repmat(t_hosp,T_total,1);
-alpha_ihy = s.eta_y.*kappa_h_y.*p.pdf_ih_y./repmat(t_hosp,T_total,1);
-alpha_iho = alpha_iho(:,end:-1:1);
-alpha_ihy = alpha_ihy(:,end:-1:1);
+alpha_iho = s.eta_o.*kappa_h_o.*p.pdf_ih_o./repmat(t_hosp,T_total,1);       alpha_iho = alpha_iho(:,end:-1:1);
+alpha_ihy = s.eta_y.*kappa_h_y.*p.pdf_ih_y./repmat(t_hosp,T_total,1);       alpha_ihy = alpha_ihy(:,end:-1:1);
+
 % B./ recovery from sickness at home
 k_sick = s.k_sick;      
-[pdf_ir_o,time_ir] = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_o-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-pdf_ir_y = create_weights(k_sick,T_total+0*k_sick,'Gamma',(s.T_sick_y-T_obs).*s.T_sick_std^2,1./s.T_sick_std^2);
-alpha_iro = (1-s.eta_o.*kappa_h_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
-alpha_iry = (1-s.eta_y.*kappa_h_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
+alpha_iro = (1-s.eta_o.*kappa_h_o).*p.pdf_ir_o./repmat(k_sick,T_total,1);    alpha_iro = alpha_iro(:,end:-1:1);
+alpha_iry = (1-s.eta_y.*kappa_h_y).*p.pdf_ir_y./repmat(k_sick,T_total,1);    alpha_iry = alpha_iry(:,end:-1:1);
 % ******** 2./ hospital care (general)
 % A./ death
 k_death = s.k_death; t_death = s.time_d;
-pdf_hd_y = repmat(s.epdf_hd_y',length(varsigma),1);
-pdf_hd_o = repmat(s.epdf_hd_o',length(varsigma),1);
+pdf_hd_y = p.pdf_hd_y;
+pdf_hd_o = p.pdf_hd_o;
 omega_o = s.omega_o.*repmat(kappa_d_o./nu,1,k_death+1);   
 omega_y = s.omega_y.*repmat(kappa_d_y./nu,1,k_death+1);
 alpha_hdo = omega_o.*pdf_hd_o./repmat(t_death,T_total,1);
@@ -131,39 +122,27 @@ alpha_hdo = alpha_hdo(:,end:-1:1);
 alpha_hdy = alpha_hdy(:,end:-1:1);
 % B./ recovery
 k_rec = s.k_rec; t_rec = s.time_r;
-pdf_hr_y = repmat(s.epdf_hr_y',length(varsigma),1);
-pdf_hr_o = repmat(s.epdf_hr_o',length(varsigma),1);
+pdf_hr_y = p.pdf_hr_y;
+pdf_hr_o = p.pdf_hr_o;
 alpha_hro = (1-s.omega_o.*kappa_d_o./nu).*pdf_hr_o./t_rec;    alpha_hro = alpha_hro(:,end:-1:1);
 alpha_hry = (1-s.omega_y.*kappa_d_y./nu).*pdf_hr_y./t_rec;    alpha_hry = alpha_hry(:,end:-1:1);
 % ******* 3./ serious cases (hospital+Intensive care needed)
 % A./ admission (ECMO, ICU, Ventilation)
 k_ser = s.k_ser; t_ser = 0:k_ser;
-alpha_jso = s.theta_o.*kappa_s./kappa_h_o.*p.pdf_is_o./repmat(t_ser,T_total,1);
-alpha_jsy = s.theta_y.*kappa_s./kappa_h_y.*p.pdf_is_y./repmat(t_ser,T_total,1);
-alpha_jso = alpha_jso(:,end:-1:1);
-alpha_jsy = alpha_jsy(:,end:-1:1);
-alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*pdf_ir_o./time_ir; 
-alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*pdf_ir_y./time_ir; 
-alpha_jro = alpha_jro(:,end:-1:1);
-alpha_jry = alpha_jry(:,end:-1:1);
+alpha_jso = s.theta_o.*kappa_s./kappa_h_o.*p.pdf_is_o./repmat(t_ser,T_total,1); alpha_jso = alpha_jso(:,end:-1:1);
+alpha_jsy = s.theta_y.*kappa_s./kappa_h_y.*p.pdf_is_y./repmat(t_ser,T_total,1); alpha_jsy = alpha_jsy(:,end:-1:1);
+alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*p.pdf_sr_o./repmat(t_rec,T_total,1);  alpha_jro = alpha_jro(:,end:-1:1);
+alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*p.pdf_sr_y./repmat(t_rec,T_total,1);  alpha_jry = alpha_jry(:,end:-1:1);
 % B./ deaths
-pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
-pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
-alpha_sdo = s.omega_o_s.*kappa_d_y./nu.*pdf_sd_o./repmat(t_death,T_total,1);
-alpha_sdy = s.omega_y_s.*kappa_d_o./nu.*pdf_sd_y./repmat(t_death,T_total,1);
-% alpha_sdo = s.omega_o_s.*pdf_sd_o./repmat(t_death,T_total,1);
-% alpha_sdy = s.omega_y_s.*pdf_sd_y./repmat(t_death,T_total,1);
-alpha_sdo = alpha_sdo(:,end:-1:1);
-alpha_sdy = alpha_sdy(:,end:-1:1);
+pdf_sd_y = p.pdf_sd_y;
+pdf_sd_o = p.pdf_sd_o;
+alpha_sdo = s.omega_o_s.*kappa_d_y./nu.*pdf_sd_o./repmat(t_death,T_total,1); alpha_sdo = alpha_sdo(:,end:-1:1);
+alpha_sdy = s.omega_y_s.*kappa_d_o./nu.*pdf_sd_y./repmat(t_death,T_total,1); alpha_sdy = alpha_sdy(:,end:-1:1);
 % C./ recovery
-pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
-pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
-alpha_sro = (1-s.omega_o_s.*kappa_d_y./nu).*pdf_sr_o./repmat(t_rec,T_total,1);
-alpha_sry = (1-s.omega_y_s.*kappa_d_o./nu).*pdf_sr_y./repmat(t_rec,T_total,1);
-% alpha_sro = (1-s.omega_o_s).*pdf_sr_o./repmat(t_rec,T_total,1);
-% alpha_sry = (1-s.omega_y_s).*pdf_sr_y./repmat(t_rec,T_total,1);
-alpha_sro = alpha_sro(:,end:-1:1);
-alpha_sry = alpha_sry(:,end:-1:1);
+pdf_sr_y = p.pdf_sr_y;
+pdf_sr_o = p.pdf_sr_o;
+alpha_sro = (1-s.omega_o_s.*kappa_d_y./nu).*pdf_sr_o./repmat(t_rec,T_total,1); alpha_sro = alpha_sro(:,end:-1:1);
+alpha_sry = (1-s.omega_y_s.*kappa_d_o./nu).*pdf_sr_y./repmat(t_rec,T_total,1); alpha_sry = alpha_sry(:,end:-1:1);
 
 % ******* Equations, both in O/Y version + aggregation
 % I(t) = I(t-1)+X(t)-I_M(t)-I_R(t);     
@@ -200,11 +179,11 @@ for t=1:T_total
     tt = t+shift;
     %
     d_J_S_o(t) = dot(alpha_jso(t,1:end-1),J_o(tt-k_ser:tt-1));     
-    d_J_R_o(t) = dot(alpha_jro(t,1:end-1),J_o(tt-k_sick:tt-1));
+    d_J_R_o(t) = dot(alpha_jro(t,1:end-1),J_o(tt-k_rec:tt-1));
     J_o(tt) = J_o(tt-1)+X_o(t)-d_J_S_o(t)-d_J_R_o(t);
     %
     d_J_S_y(t) = dot(alpha_jsy(t,1:end-1),J_y(tt-k_ser:tt-1));     
-    d_J_R_y(t) = dot(alpha_jry(t,1:end-1),J_y(tt-k_sick:tt-1));
+    d_J_R_y(t) = dot(alpha_jry(t,1:end-1),J_y(tt-k_rec:tt-1));
     J_y(tt) = J_y(tt-1)+X_y(t)-d_J_S_y(t)-d_J_R_y(t);
     %    
     d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));   
@@ -290,19 +269,19 @@ out_rep.mu = out_rep.H_y./out_rep.H;
 out_rep.eta_o = s.eta_o.*kappa_h_o;
 out_rep.eta_y = s.eta_y.*kappa_h_y;
 
-% figure;
-% pp3=bar(out_rep.H); hold on;
-% pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
-% pp7=bar(out_rep.S,'FaceColor',0.25*[1 1 1]); hold on;
-% pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
-% plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
-% pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
-% pp6=plot((resize(init.S,dateFrom:dateTo)),'k','linewidth',2);hold on;
-% pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
-% grid on;
-% legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
-%     'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
-%     'Serious cases - reported', 'Serious cases - implied'});
+figure;
+pp3=bar(out_rep.H); hold on;
+pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
+pp7=bar(out_rep.S,'FaceColor',0.25*[1 1 1]); hold on;
+pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
+plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
+pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
+pp6=plot((resize(init.S,dateFrom:dateTo)),'k','linewidth',2);hold on;
+pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
+grid on;
+legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
+    'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
+    'Serious cases - reported', 'Serious cases - implied'});
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);
@@ -311,11 +290,11 @@ out_rep.eta_y = s.eta_y.*kappa_h_y;
         y = method_data(z);
     end
 
-    function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
-        weights = 0:pnts_num;
-        pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
-        pdf_x = pdf_x./sum(pdf_x,2); 
-        pnt_x = repmat(weights,T_num,1);
-    end
+%     function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
+%         weights = 0:pnts_num;
+%         pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
+%         pdf_x = pdf_x./sum(pdf_x,2); 
+%         pnt_x = repmat(weights,T_num,1);
+%     end
 
 end
