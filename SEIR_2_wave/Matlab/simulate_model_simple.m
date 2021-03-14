@@ -8,20 +8,33 @@ T_total = dateTo-firstData+1;
 shift_i = max([s.k_hosp,s.k_sick, s.k_ser]);
 shift_h = max(s.k_death,s.k_rec);
 shift = max(shift_i,shift_h);
+method_params = s.smoothing_method_params;
+method_data = s.smoothing_method_data;
 
+%% process inputs
+% initial guesses
 I0 = init.I(firstData-shift_i+2:dateTo);
 H0 = init.H(firstData-shift_h+2:dateTo);
 S0 = init.S(firstData-shift_h+2:dateTo);
 D0 = init.D(firstData:dateTo);
+Rt = init.Rt(firstData:dateTo);
 
-method_params = s.smoothing_method_params;
-method_data = s.smoothing_method_data;
-
-try
+% tseries for key parameters
+try % proportion of old in observed cases
     rho = init.rho(end-T_total+1:end);
 catch err %#ok<NASGU>
     rho = method_params(init.rho);
     rho = rho(dateFrom:dateTo);
+end
+try % observation ratio (observed vs total)
+    varrho = init.varrho(end-T_total+1:end);
+catch err %#ok<NASGU>
+    try 
+        varrho = method_params(init.varrho);
+        varrho = varrho(dateFrom:dateTo);
+    catch eerr
+        varrho = s.obs_ratio+0*rho;
+    end
 end
 try
     nu = double(init.nu);
@@ -72,18 +85,30 @@ varsigma = method_params(init.varsigma);
 varsigma = extend(varsigma(dateFrom:dateTo),burnin);
 
 % ********* initialization
+% for comparison only
 X = method_data(x.NewCases(firstData:dateTo));
 
+% population
+N = s.pop_size;
+N_y = s.pop_size_y;
+N_o = s.pop_size_o;
+
 % ********* arrays (key)
+% exposed
+E0 = extend(E0,T_total+shift-length(E0));
+E_o = 0*E0;
+E_o(end-T_total-shift+1:end) = (E0.*rho(end-length(E0)+1:end));
+E_y = E0-E_o;
 % new cases: Old/Young
 X_o = X.*rho(end-T_total+1:end);
 X_y = X-X_o;
-% active cases: Young/old
+% active cases: Young/old, observed (I) vs. unobserved (U)
 I0 = extend(I0,T_total+shift-length(I0));
 I_o = 0*I0;
 I_o(end-T_total-shift+1:end) = (I0.*rho(end-length(I0)+1:end));
 I_y = I0-I_o;
 J_o = I_o; J_y = I_y;
+
 % hospitalizations: Old/Young, moderate cases (M) vs intensive care (S)
 H0 = extend(H0,T_total+shift-length(H0));
 H_o = H0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
@@ -103,8 +128,20 @@ d_I_H_o = zeros(T_total,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I
 d_J_S_o = d_I_H_o; d_J_S_y = d_I_H_o; d_J_R_o = d_I_H_o; d_J_R_y = d_I_H_o;
 d_S_R_o = d_I_H_o; d_S_R_y = d_I_H_o; d_S_D_o = d_I_H_o; d_S_D_y = d_I_H_o; 
 d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o; d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o;
-
+d_S_E_o = d_I_H_o; d_S_E_y = d_I_H_o; d_E_U_o = d_I_H_o; d_E_U_y = d_I_H_o;
+d_U_I_o = d_I_H_o; d_U_I_y = d_I_H_o; d_U_R_o = d_I_H_o; d_U_R_y = d_I_H_o;
 % ******* parameters
+% suspectibles
+a_u_y = s.alpha_s_y; a_u_o = s.alpha_s_o;
+a_i_y = s.alpha_i_y; a_i_o = s.alpha_i_o; 
+mu = .85; 
+T_inf_mean = s.T_inf.mean;
+% exposed
+k_lat = s.k_lat;
+[pdf_eu,time_lat] = create_weights(k_lat,T_total+0*k_lat,'Gamma',s.T_lat.mean.*s.T_lat.std^2,1./s.T_lat^2);
+alpha_eu = pdf_eu./time_lat;    
+%
+
 % ******* 1./ mild/asymptomatic cases, no hospital needed
 % A./ hospital admission
 k_hosp = s.k_hosp;      t_hosp = s.time_h;
@@ -174,20 +211,17 @@ alpha_sry = alpha_sry(:,end:-1:1);
 % ******* Calculation I.
 for t=1:T_total
     tt = t+shift; 
-    UI = (a_u_y*U_y(tt-1)+a_i_y*I_y(tt-1))/Ny+(a_u_o*U_o(tt-1)+a_i_o*I_o(tt-1))/No;
+    UI = (a_u_y*U_y(tt-1)+a_i_y*I_y(tt-1))/N_y+(a_u_o*U_o(tt-1)+a_i_o*I_o(tt-1))/N_o;
     d_S_E_o(t) = Rt(t)/T_inf_mean.*UI.*S_o(tt-1)*mu.*zeta_o(t);
     S_o(tt) = S_o(tt-1)-d_S_E_o(t);
     %
     d_S_E_y(t) = Rt(t)/T_inf_mean.*UI.*S_y(tt-1)*mu.*zeta_y(t);
     S_y(tt) = S_y(tt-1)-d_S_E_y(t);
     %
-    d_S_E_y(t) = dot(alpha_euo(t,1:end-1),E_o(tt-k_lat:tt-1)); 
-    S_y(tt) = S_y(tt-1)-d_S_E_y(t);
-    %
-    d_E_U_o(t) = dot(alpha_euo(t,1:end-1),E_o(tt-k_lat:tt-1)); 
+    d_E_U_o(t) = dot(alpha_eu(t,1:end-1),E_o(tt-k_lat:tt-1)); 
     E_o(tt) = E_o(tt-1)+d_S_E_o(t)-d_E_U_o(t);
     %    
-    d_E_U_y(t) = dot(alpha_euy(t,1:end-1),E_y(tt-k_lat:tt-1)); 
+    d_E_U_y(t) = dot(alpha_eu(t,1:end-1),E_y(tt-k_lat:tt-1)); 
     E_y(tt) = E_y(tt-1)+d_S_E_y(t)-d_E_U_y(t);
     %
     d_U_I_o(t) = dot(alpha_uio(t,1:end-1),U_o(tt-k_obs:tt-1)); 
