@@ -14,6 +14,7 @@ method_data = s.smoothing_method_data;
 %% process inputs
 % initial guesses
 I0 = init.I(firstData-shift_i+2:dateTo);
+E0 = init.E(firstData-shift_i+2:dateTo);
 H0 = init.H(firstData-shift_h+2:dateTo);
 S0 = init.S(firstData-shift_h+2:dateTo);
 D0 = init.D(firstData:dateTo);
@@ -26,14 +27,18 @@ catch err %#ok<NASGU>
     rho = method_params(init.rho);
     rho = rho(dateFrom:dateTo);
 end
-try % observation ratio (observed vs total)
-    varrho = init.varrho(end-T_total+1:end);
+try % observation ratios (observed vs total)
+    varrho_o = init.varrho_o(end-T_total+1:end);
+    varrho_y = init.varrho_y(end-T_total+1:end);
 catch err %#ok<NASGU>
     try 
-        varrho = method_params(init.varrho);
-        varrho = varrho(dateFrom:dateTo);
-    catch eerr
-        varrho = s.obs_ratio+0*rho;
+        varrho_o = method_params(init.varrho_o);
+        varrho_o = varrho_o(dateFrom:dateTo);
+        varrho_y = method_params(init.varrho_y);
+        varrho_y = varrho_y(dateFrom:dateTo);
+    catch eerr %#ok<NASGU>
+        varrho_o = s.obs_ratio_o+0*rho;
+        varrho_y = s.obs_ratio_y+0*rho;
     end
 end
 try
@@ -41,11 +46,11 @@ try
 catch err %#ok<NASGU>
     nu = ones(T,1);
 end
-try
-    kappa_s = init.kappa_s(end-T_total+1:end);
-catch err %#ok<NASGU>
-    kappa_s = ones(T,1);
-end
+% try
+%     kappa_s = init.kappa_s(end-T_total+1:end);
+% catch err %#ok<NASGU>
+%     kappa_s = ones(T,1);
+% end
 try
     kappa_h_y = init.kappa_h_y(end-T_total+1:end);
 catch err %#ok<NASGU>
@@ -77,23 +82,26 @@ nu = extend(nu,T_total-length(nu));
 % kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_h_o = extend(kappa_h_o,T_total-length(kappa_h_o));
 kappa_h_y = extend(kappa_h_y,T_total-length(kappa_h_y));
-kappa_s = extend(kappa_s,T_total-length(kappa_s));
+% kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_d_y = extend(kappa_d_y,T_total-length(kappa_d_y));
 kappa_d_o = extend(kappa_d_o,T_total-length(kappa_d_o));
 T_obs = extend(T_delay+s.T_test.mean, length(rho)-length(T_delay)-shift);
 varsigma = method_params(init.varsigma);
 varsigma = extend(varsigma(dateFrom:dateTo),burnin);
 
-% ********* initialization
+%% initialization
 % for comparison only
 X = method_data(x.NewCases(firstData:dateTo));
 
 % population
-N = s.pop_size;
 N_y = s.pop_size_y;
 N_o = s.pop_size_o;
 
 % ********* arrays (key)
+% suspectible
+S0 = extend(S0,T_total+shift-length(S0));
+S_o = S0.*mean(rho);
+S_y = S0-S_o;
 % exposed
 E0 = extend(E0,T_total+shift-length(E0));
 E_o = 0*E0;
@@ -107,15 +115,12 @@ I0 = extend(I0,T_total+shift-length(I0));
 I_o = 0*I0;
 I_o(end-T_total-shift+1:end) = (I0.*rho(end-length(I0)+1:end));
 I_y = I0-I_o;
-J_o = I_o; J_y = I_y;
-
-% hospitalizations: Old/Young, moderate cases (M) vs intensive care (S)
+U_o = I_o./varrho;
+U_y = I_y./varrho;
+% hospitalizations: Old/Young, all cases
 H0 = extend(H0,T_total+shift-length(H0));
 H_o = H0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
 H_y = H0-H_o;
-S0 = extend(S0,T_total+shift-length(S0));
-S_o = S0.*extend(p.par.ho_h,T_total+shift-length(p.par.ho_h));
-S_y = S0-S_o;
 % deaths: Old/Young
 D0 = extend(D0,T_total+shift-length(D0));
 D_o = zeros(T_total+shift,1); 
@@ -125,8 +130,8 @@ F_y = D_y; F_o = D_o;
 
 % other arrays
 d_I_H_o = zeros(T_total,1);  d_I_H_y = d_I_H_o; d_I_R_o = d_I_H_o; d_I_R_y = d_I_H_o;
-d_J_S_o = d_I_H_o; d_J_S_y = d_I_H_o; d_J_R_o = d_I_H_o; d_J_R_y = d_I_H_o;
-d_S_R_o = d_I_H_o; d_S_R_y = d_I_H_o; d_S_D_o = d_I_H_o; d_S_D_y = d_I_H_o; 
+% d_J_S_o = d_I_H_o; d_J_S_y = d_I_H_o; d_J_R_o = d_I_H_o; d_J_R_y = d_I_H_o;
+% d_S_R_o = d_I_H_o; d_S_R_y = d_I_H_o; d_S_D_o = d_I_H_o; d_S_D_y = d_I_H_o; 
 d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o; d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o;
 d_S_E_o = d_I_H_o; d_S_E_y = d_I_H_o; d_E_U_o = d_I_H_o; d_E_U_y = d_I_H_o;
 d_U_I_o = d_I_H_o; d_U_I_y = d_I_H_o; d_U_R_o = d_I_H_o; d_U_R_y = d_I_H_o;
@@ -140,7 +145,14 @@ T_inf_mean = s.T_inf.mean;
 k_lat = s.k_lat;
 [pdf_eu,time_lat] = create_weights(k_lat,T_total+0*k_lat,'Gamma',s.T_lat.mean.*s.T_lat.std^2,1./s.T_lat^2);
 alpha_eu = pdf_eu./time_lat;    
-%
+% infectious, unobserved vs observed, recovery for unobserved
+k_obs = s.k_pre_test;
+[pdf_ui,time_obs] = create_weights(k_obs,T_total+0*k_lat,'Gamma',(s.T_pre_test.mean).*s.T_pre_test.std^2,1./s.T_pre_test^2);
+alpha_uio = varrho_o.*pdf_ui./time_obs;
+alpha_uiy = varrho_y.*pdf_ui./time_obs;
+[pdf_ur,time_inf] = create_weights(k_obs,T_total+0*k_inf,'Gamma',(s.T_inf.mean).*s.T_inf.std^2,1./s.T_inf^2);
+alpha_uro = (1-varrho_o).*pdf_ur./time_inf;
+alpha_ury = (1-varrho_y).*pdf_ur./time_inf;
 
 % ******* 1./ mild/asymptomatic cases, no hospital needed
 % A./ hospital admission
@@ -172,35 +184,35 @@ pdf_hr_y = repmat(s.epdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.epdf_hr_o',length(varsigma),1);
 alpha_hro = (1-s.omega_o.*kappa_d_o./nu).*pdf_hr_o./t_rec;    alpha_hro = alpha_hro(:,end:-1:1);
 alpha_hry = (1-s.omega_y.*kappa_d_y./nu).*pdf_hr_y./t_rec;    alpha_hry = alpha_hry(:,end:-1:1);
-% ******* 3./ serious cases (hospital+Intensive care needed)
-% A./ admission (ECMO, ICU, Ventilation)
-k_ser = s.k_ser; t_ser = 0:k_ser;
-alpha_jso = s.theta_o.*kappa_s./kappa_h_o.*p.epdf_is_o./repmat(t_ser,T_total,1);
-alpha_jsy = s.theta_y.*kappa_s./kappa_h_y.*p.epdf_is_y./repmat(t_ser,T_total,1);
-alpha_jso = alpha_jso(:,end:-1:1);
-alpha_jsy = alpha_jsy(:,end:-1:1);
-alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*pdf_ir_o./time_ir; 
-alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*pdf_ir_y./time_ir; 
-alpha_jro = alpha_jro(:,end:-1:1);
-alpha_jry = alpha_jry(:,end:-1:1);
-% B./ deaths
-pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
-pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
-alpha_sdo = s.omega_o_s.*kappa_d_y./nu.*pdf_sd_o./repmat(t_death,T_total,1);
-alpha_sdy = s.omega_y_s.*kappa_d_o./nu.*pdf_sd_y./repmat(t_death,T_total,1);
-% alpha_sdo = s.omega_o_s.*pdf_sd_o./repmat(t_death,T_total,1);
-% alpha_sdy = s.omega_y_s.*pdf_sd_y./repmat(t_death,T_total,1);
-alpha_sdo = alpha_sdo(:,end:-1:1);
-alpha_sdy = alpha_sdy(:,end:-1:1);
-% C./ recovery
-pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
-pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
-alpha_sro = (1-s.omega_o_s.*kappa_d_y./nu).*pdf_sr_o./repmat(t_rec,T_total,1);
-alpha_sry = (1-s.omega_y_s.*kappa_d_o./nu).*pdf_sr_y./repmat(t_rec,T_total,1);
-% alpha_sro = (1-s.omega_o_s).*pdf_sr_o./repmat(t_rec,T_total,1);
-% alpha_sry = (1-s.omega_y_s).*pdf_sr_y./repmat(t_rec,T_total,1);
-alpha_sro = alpha_sro(:,end:-1:1);
-alpha_sry = alpha_sry(:,end:-1:1);
+% % ******* 3./ serious cases (hospital+Intensive care needed)
+% % A./ admission (ECMO, ICU, Ventilation)
+% k_ser = s.k_ser; t_ser = 0:k_ser;
+% alpha_jso = s.theta_o.*kappa_s./kappa_h_o.*p.epdf_is_o./repmat(t_ser,T_total,1);
+% alpha_jsy = s.theta_y.*kappa_s./kappa_h_y.*p.epdf_is_y./repmat(t_ser,T_total,1);
+% alpha_jso = alpha_jso(:,end:-1:1);
+% alpha_jsy = alpha_jsy(:,end:-1:1);
+% alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*pdf_ir_o./time_ir; 
+% alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*pdf_ir_y./time_ir; 
+% alpha_jro = alpha_jro(:,end:-1:1);
+% alpha_jry = alpha_jry(:,end:-1:1);
+% % B./ deaths
+% pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
+% pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
+% alpha_sdo = s.omega_o_s.*kappa_d_y./nu.*pdf_sd_o./repmat(t_death,T_total,1);
+% alpha_sdy = s.omega_y_s.*kappa_d_o./nu.*pdf_sd_y./repmat(t_death,T_total,1);
+% % alpha_sdo = s.omega_o_s.*pdf_sd_o./repmat(t_death,T_total,1);
+% % alpha_sdy = s.omega_y_s.*pdf_sd_y./repmat(t_death,T_total,1);
+% alpha_sdo = alpha_sdo(:,end:-1:1);
+% alpha_sdy = alpha_sdy(:,end:-1:1);
+% % C./ recovery
+% pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
+% pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
+% alpha_sro = (1-s.omega_o_s.*kappa_d_y./nu).*pdf_sr_o./repmat(t_rec,T_total,1);
+% alpha_sry = (1-s.omega_y_s.*kappa_d_o./nu).*pdf_sr_y./repmat(t_rec,T_total,1);
+% % alpha_sro = (1-s.omega_o_s).*pdf_sr_o./repmat(t_rec,T_total,1);
+% % alpha_sry = (1-s.omega_y_s).*pdf_sr_y./repmat(t_rec,T_total,1);
+% alpha_sro = alpha_sro(:,end:-1:1);
+% alpha_sry = alpha_sry(:,end:-1:1);
 
 % ******* Equations, both in O/Y version + aggregation
 % I(t) = I(t-1)+X(t)-I_M(t)-I_R(t);     
@@ -253,28 +265,28 @@ for t=1:T_total
 end
 
 % ******* Calculation II.
-for t=1:T_total
-    tt = t+shift;
-    %
-    d_J_S_o(t) = dot(alpha_jso(t,1:end-1),J_o(tt-k_ser:tt-1));     
-    d_J_R_o(t) = dot(alpha_jro(t,1:end-1),J_o(tt-k_sick:tt-1));
-    J_o(tt) = J_o(tt-1)+X_o(t)-d_J_S_o(t)-d_J_R_o(t);
-    %
-    d_J_S_y(t) = dot(alpha_jsy(t,1:end-1),J_y(tt-k_ser:tt-1));     
-    d_J_R_y(t) = dot(alpha_jry(t,1:end-1),J_y(tt-k_sick:tt-1));
-    J_y(tt) = J_y(tt-1)+X_y(t)-d_J_S_y(t)-d_J_R_y(t);
-    %    
-    d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));   
-    d_S_D_o(t) = dot(alpha_sdo(t,1:end-1),S_o(tt-k_death:tt-1));
-    S_o(tt) = S_o(tt-1)+d_J_S_o(t)-d_S_R_o(t)-d_S_D_o(t);
-    %
-    d_S_R_y(t) = dot(alpha_sry(t,1:end-1),S_y(tt-k_rec:tt-1));   
-    d_S_D_y(t) = dot(alpha_sdy(t,1:end-1),S_y(tt-k_death:tt-1));
-    S_y(tt) = S_y(tt-1)+d_J_S_y(t)-d_S_R_y(t)-d_S_D_y(t);
-    %
-    F_o(tt) = F_o(tt-1)+d_S_D_o(t);
-    F_y(tt) = F_y(tt-1)+d_S_D_y(t);
-end
+% for t=1:T_total
+%     tt = t+shift;
+%     %
+%     d_J_S_o(t) = dot(alpha_jso(t,1:end-1),J_o(tt-k_ser:tt-1));     
+%     d_J_R_o(t) = dot(alpha_jro(t,1:end-1),J_o(tt-k_sick:tt-1));
+%     J_o(tt) = J_o(tt-1)+X_o(t)-d_J_S_o(t)-d_J_R_o(t);
+%     %
+%     d_J_S_y(t) = dot(alpha_jsy(t,1:end-1),J_y(tt-k_ser:tt-1));     
+%     d_J_R_y(t) = dot(alpha_jry(t,1:end-1),J_y(tt-k_sick:tt-1));
+%     J_y(tt) = J_y(tt-1)+X_y(t)-d_J_S_y(t)-d_J_R_y(t);
+%     %    
+%     d_S_R_o(t) = dot(alpha_sro(t,1:end-1),S_o(tt-k_rec:tt-1));   
+%     d_S_D_o(t) = dot(alpha_sdo(t,1:end-1),S_o(tt-k_death:tt-1));
+%     S_o(tt) = S_o(tt-1)+d_J_S_o(t)-d_S_R_o(t)-d_S_D_o(t);
+%     %
+%     d_S_R_y(t) = dot(alpha_sry(t,1:end-1),S_y(tt-k_rec:tt-1));   
+%     d_S_D_y(t) = dot(alpha_sdy(t,1:end-1),S_y(tt-k_death:tt-1));
+%     S_y(tt) = S_y(tt-1)+d_J_S_y(t)-d_S_R_y(t)-d_S_D_y(t);
+%     %
+%     F_o(tt) = F_o(tt-1)+d_S_D_o(t);
+%     F_y(tt) = F_y(tt-1)+d_S_D_y(t);
+% end
 
 %% process results
 % store results

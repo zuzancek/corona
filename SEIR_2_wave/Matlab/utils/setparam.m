@@ -30,6 +30,7 @@ s.obj_inf = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T
 s.k_inf = 20;
 s.pdf_inf = cut_tail(pdf(s.obj_inf,0:s.k_inf),5);
 % presymptomatic period 
+s.k_pre = 15;
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;     
 s.T_pre.std = s.SI.std;
 s.obj_pre = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
@@ -50,7 +51,9 @@ s.alpha_i_o = 0.25; s.alpha_i_y = 0.5;
 
 % **** testing
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test.mean = 2;              s.T_test.std = s.SI.std;      
+s.T_test.mean = 2;              s.T_test.std = s.SI.std; 
+s.k_test = 5;
+s.k_pre_test = s.k_pre+s.k_test;
 s.T_pre_test = s.T_test; s.T_pre_test.mean = s.T_pre_test.mean+s.T_pre.mean;
 s.obj_pre_test = makedist('Gamma','a',s.T_pre_test.mean*s.T_pre_test.std*s.T_pre_test.std,'b',1/(s.T_pre_test.std*s.T_pre_test.std));
 s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);

@@ -373,12 +373,12 @@ end
     function []=create_P_matrix()
         % S E U I H D Ri Rh
         P_mat_y(1,2) = 1; P_mat_y(2,3) = 1; P_mat_y(7,1) = 1; P_mat_y(8,1) = 1; P_mat_o = P_mat_y;
-        P_mat_y(3,4) = init.obs_y_ss; P_mat_y(3,7) = 1-init.obs_y_ss;
-        P_mat_y(4,5) = init.eta_y_ss; P_mat_y(4,7) = 1-init.eta_y_ss;
-        P_mat_y(5,6) = init.omega_y_ss; P_mat_y(5,8) = 1-init.omega_y_ss;
-        P_mat_o(3,4) = init.obs_y_ss; P_mat_o(3,7) = 1-init.obs_y_ss;
-        P_mat_o(4,5) = init.eta_y_ss; P_mat_o(4,7) = 1-init.eta_y_ss;
-        P_mat_o(5,6) = init.omega_y_ss; P_mat_o(5,8) = 1-init.omega_y_ss;
+        P_mat_y(3,4) = init.xi_y; P_mat_y(3,7) = 1-init.xi_y;
+        P_mat_y(4,5) = init.eta_y; P_mat_y(4,7) = 1-init.eta_y;
+        P_mat_y(5,6) = init.omega_y; P_mat_y(5,8) = 1-init.omega_y;
+        P_mat_o(3,4) = init.xi_o; P_mat_o(3,7) = 1-init.xi_o;
+        P_mat_o(4,5) = init.eta_o; P_mat_o(4,7) = 1-init.eta_o;
+        P_mat_o(5,6) = init.omega_o; P_mat_o(5,8) = 1-init.omega_o;
     end
 
     function []=get_inf_profile()
