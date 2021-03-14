@@ -71,16 +71,16 @@ pdf_ir_o = get_weights_delayed(s.obj_ir_o,k_sick);
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
 k_ser = s.k_ser;
-pdf_is_y = repmat(s.epdf_is_y',length(varsigma),1);
-pdf_is_o = repmat(s.epdf_is_o',length(varsigma),1);
+pdf_is_y = get_weights_delayed(s.obj_is_y,k_ser);
+pdf_is_o = get_weights_delayed(s.obj_is_o,k_ser);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
 % B./ death
-pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
-pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
+pdf_sd_y = get_weights_delayed(s.obj_sd_y,k_death);
+pdf_sd_o = get_weights_delayed(s.obj_sd_o,k_death);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
 % C./ recovery
-pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
-pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
+pdf_sr_y = get_weights_delayed(s.obj_sr_y,k_rec);
+pdf_sr_o = get_weights_delayed(s.obj_sr_o,k_rec);
 
 % initialization
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
@@ -311,7 +311,6 @@ p.pdf_is_y = pdf_is_y;
 p.pdf_is_o = pdf_is_o;
 p.pdf_ih_y = pdf_ih_y;
 p.pdf_ih_o = pdf_ih_o;
-p.time_ir = time_ir;
 p.omega_o = omega_o;
 p.omega_y = omega_y;
 p.omega_o_s = omega_o_s;
@@ -371,15 +370,6 @@ p.kappa_h_y = kappa_h_y;
     function [yy]=get_weights_delayed(obj,k)
         xx = 0:k;
         yy = pdf(obj,T_obs-s.T_test_0+xx);
-        zz = sum(yy,2);
-        yy = yy./zz;
-    end
-
-    function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
-        weights = 0:pnts_num;
-        pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
-        pdf_x = pdf_x./sum(pdf_x,2); 
-        pnt_x = repmat(weights,T_num,1);
     end
 
     function [y,ys] = adjust_series(x) %#ok<DEFNU>
@@ -424,7 +414,7 @@ p.kappa_h_y = kappa_h_y;
         L = 0*(k-1)+repmat((1:t)',1,k);
         Weight_mat = sparse(L,J,W);
         Alpha_mat = sparse(L,J,A);
-        Weight_mat = Weight_mat./sum(Weight_mat,2);
+        % Weight_mat = Weight_mat./sum(Weight_mat,2);
         Z = Z(end-t-k+2:end);
         x = (Weight_mat.*Alpha_mat)*Z;
         zvec = repmat((1:t)',1,k)+repmat((0:k-1),t,1);
@@ -453,7 +443,7 @@ p.kappa_h_y = kappa_h_y;
         Alpha_mat = sparse(L(:),J(:),A(:));
         x = zeros(t+k-1,1);
         x(1:k-1) = x0(1:idxFrom-1);
-        Weight_mat = Weight_mat./sum(Weight_mat,2);
+        % Weight_mat = Weight_mat./sum(Weight_mat,2);
         function [d] = solve_lineqn(xx0)
             d=(Weight_mat.*Alpha_mat)*xx0 - zvec(end-t+1:end);
         end
