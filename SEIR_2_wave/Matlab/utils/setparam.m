@@ -2,8 +2,7 @@ function [s] = setparam(varargin)
 
 s = struct;
 s.pop_size = 5454147;
-s.pop_size_y = 456400;
-s.pop_size_o = 889747;
+s.dep_ratio_65 = 16.6/100;
 s.sim_num = 10^4;
 s.T = 100;
 s.estimate_Rt = false;
@@ -21,7 +20,7 @@ s.scale_s_h = s.S_H_rate_0/s.S_H_rate;
 % **** epidemiology
 % serial interval (generation period)
 s.SI.mean = 6.5;                s.SI.std = 0.62;
-% incubation period 
+% incubation period
 s.T_inc.mean = 5.1;             s.T_inc.std = s.SI.std;
 s.obj_inc = makedist('Gamma','a',s.T_inc.mean*s.T_inc.std*s.T_inc.std,'b',1/(s.T_inc.std*s.T_inc.std));
 % infectious period
@@ -29,9 +28,9 @@ s.T_inf.mean = 3.4;             s.T_inf.std = 0.62;
 s.obj_inf = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T_inf.std*s.T_inf.std));
 s.k_inf = 20;
 s.pdf_inf = cut_tail(pdf(s.obj_inf,0:s.k_inf),5);
-% presymptomatic period 
+% presymptomatic period
 s.k_pre = 15;
-s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;     
+s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;
 s.T_pre.std = s.SI.std;
 s.obj_pre = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
 s.obj_pre_inf = makedist('Gamma','a',(s.T_pre.mean+s.T_inf.mean)*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
@@ -51,7 +50,8 @@ s.alpha_i_o = 0.25; s.alpha_i_y = 0.5;
 
 % **** testing
 % time to test (observation period, from symptoms onset): "steady_state value"
-s.T_test.mean = 2;              s.T_test.std = s.SI.std; 
+s.T_test.mean = 2;              s.T_test.std = s.SI.std;
+s.T_test_0 = 1;
 s.k_test = 5;
 s.k_pre_test = s.k_pre+s.k_test;
 s.T_pre_test = s.T_test; s.T_pre_test.mean = s.T_pre_test.mean+s.T_pre.mean;
@@ -62,7 +62,7 @@ s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);
 % sickness/symptoms period
 s.T_sick_y = 9;                 s.T_sick_o = 13;       s.T_sick = 10;
 s.T_sick_std = s.SI.std;
-s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma'; 
+s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma';
 try
     db = load('results/optimal_fit.mat','stat_total','stat_severe','stat_mild');
     set_prob_data();
@@ -150,39 +150,41 @@ s.smoothing_method_params = @smooth_series;
         s.epdf_hd_o = max(0,cut_tail(db_t.opt_fit_d_o.epdf(1:s.k_death+1),cutoff));
         s.T_death_y_mean = db_t.opt_fit_d_y.mean;
         s.T_death_o_mean = db_t.opt_fit_d_o.mean;
-        s.time_d = reshape(db_t.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
+        s.time_d = reshape(db_t.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);
         s.omega_y_s = db_s.opt_fit_d_y.alpha/(1-s.deaths_with_covid_share);
         s.omega_o_s = db_s.opt_fit_d_o.alpha/(1-s.deaths_with_covid_share);
         s.pdf_sd_y = max(0,cut_tail(db_s.opt_fit_d_y.pdf(1:s.k_death+1),cutoff));
-        s.pdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.pdf(1:s.k_death+1),cutoff));  
+        s.pdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.pdf(1:s.k_death+1),cutoff));
         s.epdf_sd_y = max(0,cut_tail(db_s.opt_fit_d_y.epdf(1:s.k_death+1),cutoff));
-        s.epdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.epdf(1:s.k_death+1),cutoff));        
+        s.epdf_sd_o = max(0,cut_tail(db_s.opt_fit_d_o.epdf(1:s.k_death+1),cutoff));
         s.obj_sd_y = db_s.opt_fit_d_y.eobj;
         s.obj_sd_o = db_s.opt_fit_d_o.eobj;
+        s.obj_hd_y = db_t.opt_fit_d_y.eobj;
+        s.obj_hd_o = db_t.opt_fit_d_o.eobj;
         s.T_death_y_mean_s = db_s.opt_fit_d_y.mean;
         s.T_death_o_mean_s = db_s.opt_fit_d_o.mean;
-        s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);        
+        s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);
         % admission to ICU, ventilation, ECMO
         s.k_ser = 15;
         s.theta_y = db_s.opt_fit_h_y.alpha;
         s.theta_o = db_s.opt_fit_h_o.alpha;
-        s.pdf_is_y = cut_tail(db_s.opt_fit_h_y.pdf(1:s.k_ser+1),cutoff);   
-        s.pdf_is_o = cut_tail(db_s.opt_fit_h_o.pdf(1:s.k_ser+1),cutoff); 
-        s.epdf_is_y = cut_tail(db_s.opt_fit_h_y.epdf(1:s.k_ser+1),cutoff);   
-        s.epdf_is_o = cut_tail(db_s.opt_fit_h_o.epdf(1:s.k_ser+1),cutoff); 
+        s.pdf_is_y = cut_tail(db_s.opt_fit_h_y.pdf(1:s.k_ser+1),cutoff);
+        s.pdf_is_o = cut_tail(db_s.opt_fit_h_o.pdf(1:s.k_ser+1),cutoff);
+        s.epdf_is_y = cut_tail(db_s.opt_fit_h_y.epdf(1:s.k_ser+1),cutoff);
+        s.epdf_is_o = cut_tail(db_s.opt_fit_h_o.epdf(1:s.k_ser+1),cutoff);
         s.obj_is_o = db_s.opt_fit_h_y.eobj;
         s.obj_is_y = db_s.opt_fit_h_o.eobj;
         s.T_ser_y_mean = db_s.opt_fit_h_y.mean;
         s.T_ser_o_mean = db_s.opt_fit_h_o.mean;
         s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
         % hospital admission
-        s.k_hosp = 25;        
-        s.eta_y = 1*db_t.opt_fit_h_y.alpha; % 1.25
-        s.eta_o = 1*db_t.opt_fit_h_o.alpha; % 0.85   
-        s.pdf_ih_y = cut_tail(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1),cutoff);    
-        s.pdf_ih_o = cut_tail(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1),cutoff);      
-        s.epdf_ih_y = cut_tail(db_t.opt_fit_h_y.epdf(1:s.k_hosp+1),cutoff);    
-        s.epdf_ih_o = cut_tail(db_t.opt_fit_h_o.epdf(1:s.k_hosp+1),cutoff);     
+        s.k_hosp = 25;
+        s.eta_y = db_t.opt_fit_h_y.alpha; % 1.25
+        s.eta_o = db_t.opt_fit_h_o.alpha; % 0.85
+        s.pdf_ih_y = cut_tail(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1),cutoff);
+        s.pdf_ih_o = cut_tail(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1),cutoff);
+        s.epdf_ih_y = cut_tail(db_t.opt_fit_h_y.epdf(1:s.k_hosp+1),cutoff);
+        s.epdf_ih_o = cut_tail(db_t.opt_fit_h_o.epdf(1:s.k_hosp+1),cutoff);
         s.obj_ih_y = db_t.opt_fit_h_y.eobj;
         s.obj_ih_o = db_t.opt_fit_h_o.eobj;
         s.T_hosp_y_mean = db_t.opt_fit_h_y.mean;
@@ -197,7 +199,7 @@ s.smoothing_method_params = @smooth_series;
         s.obj_hr_y = db_t.opt_fit_r_y.eobj;
         s.obj_hr_o = db_t.opt_fit_r_o.eobj;
         s.T_rec_h_y_mean = db_t.opt_fit_r_y.mean;
-        s.T_rec_h_o_mean = db_t.opt_fit_r_o.mean;        
+        s.T_rec_h_o_mean = db_t.opt_fit_r_o.mean;
         s.pdf_sr_y = cut_tail(db_s.opt_fit_r_y.pdf(1:s.k_rec+1),cutoff);
         s.pdf_sr_o = cut_tail(db_s.opt_fit_r_o.pdf(1:s.k_rec+1),cutoff);
         s.epdf_sr_y = cut_tail(db_s.opt_fit_r_y.epdf(1:s.k_rec+1),cutoff);
@@ -218,23 +220,23 @@ s.smoothing_method_params = @smooth_series;
         s.k_sick = 25;
         s.time_k = reshape((0:s.k_sick),1,[]);
         s.obj_ir_y = makedist('Gamma','a',s.T_sick_y*s.T_sick_std^2,'b',1/s.T_sick_std^2);
-        s.pdf_ir_y = pdf(s.obj_ir_y,s.time_k); 
-        s.pdf_ir_y = s.pdf_ir_y./sum(s.pdf_ir_y);        
-        s.T_rec_i_y_mean = dot(s.time_k,s.pdf_ir_y);        
+        s.pdf_ir_y = pdf(s.obj_ir_y,s.time_k);
+        s.pdf_ir_y = s.pdf_ir_y./sum(s.pdf_ir_y);
+        s.T_rec_i_y_mean = dot(s.time_k,s.pdf_ir_y);
         s.obj_ir_o = makedist('Gamma','a',s.T_sick_o*s.T_sick_std^2,'b',1/s.T_sick_std^2);
-        s.pdf_ir_o = pdf(s.obj_ir_o,s.time_k); 
+        s.pdf_ir_o = pdf(s.obj_ir_o,s.time_k);
         s.pdf_ir_o = s.pdf_ir_o./sum(s.pdf_ir_o);
-        s.T_rec_i_o_mean = dot(s.time_k,s.pdf_ir_o); 
+        s.T_rec_i_o_mean = dot(s.time_k,s.pdf_ir_o);
         s.obj_sick_y = makedist('Gamma','a',s.T_sick_y*s.T_sick_std^2,'b',1/s.T_sick_std^2);
-        s.obj_sick_o = makedist('Gamma','a',s.T_sick_o*s.T_sick_std^2,'b',1/s.T_sick_std^2);     
-        
-        function [y]=cut_tail(y,k)
-            n=length(y);
-            y(end-k:end-1) = NaN;
-            y(end)=0;
-            y = interp1(find(~isnan(y)),y(find(~isnan(y))),1:n,'spline'); %#ok<FNDSB>
-            y = y'/sum(y);
-        end
+        s.obj_sick_o = makedist('Gamma','a',s.T_sick_o*s.T_sick_std^2,'b',1/s.T_sick_std^2);
+    end
+
+    function [y]=cut_tail(y,k)
+        n=length(y);
+        y(end-k:end-1) = NaN;
+        y(end)=0;
+        y = interp1(find(~isnan(y)),y(find(~isnan(y))),1:n,'spline'); %#ok<FNDSB>
+        y = y'/sum(y);
     end
 end
 

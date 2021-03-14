@@ -9,7 +9,7 @@ db_deaths_age = dbload('data/age_deaths_cases.csv','dateFormat','yyyy-mm-dd','fr
 load('results/inputs.mat','dates','cases_data','test_data','hosp_data','deaths_data','s');
 
 idx_fun = 1;
-fun_opt_0 = {'DHIXs','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
+fun_opt_0 = {'DHIX','DHIX'}; fun_0 = str2func(fun_opt_0{idx_fun});
 fun_opt_1 = {'XIHD','XIHD'}; fun_1 = str2func(fun_opt_1{idx_fun});
 disp_from = dd(2020,9,1);
 out_filename = 'results/results_impl.mat';

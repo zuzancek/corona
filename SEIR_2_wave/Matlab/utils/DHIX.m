@@ -39,27 +39,35 @@ r0 = set_yo_ratios_params();
 % ******* 1./ hospital
 % A./ death
 k_death = s.k_death;
-pdf_hd_y = repmat(s.epdf_hd_y',length(varsigma),1);
-pdf_hd_o = repmat(s.epdf_hd_o',length(varsigma),1);
+pdf_hd_y = get_weights_delayed(s.obj_hd_y,k_death);
+pdf_hd_o = get_weights_delayed(s.obj_hd_o,k_death);
+% pdf_hd_y = repmat(s.epdf_hd_y',length(varsigma),1);
+% pdf_hd_o = repmat(s.epdf_hd_o',length(varsigma),1);
 omega_o = r0.omega_o;   omega_y = r0.omega_y;
 % B./ recovery
 k_rec = s.k_rec;
-pdf_hr_y = repmat(s.epdf_hr_y',length(varsigma),1);
-pdf_hr_o = repmat(s.epdf_hr_o',length(varsigma),1);
+pdf_hr_y = get_weights_delayed(s.obj_hr_y,k_rec);
+pdf_hr_o = get_weights_delayed(s.obj_hr_o,k_rec);
+% pdf_hr_y = repmat(s.epdf_hr_y',length(varsigma),1);
+% pdf_hr_o = repmat(s.epdf_hr_o',length(varsigma),1);
 % ******** 2./ home
 % A./ admission to hospital
 k_hosp = s.k_hosp;
-pdf_ih_y = repmat(s.epdf_ih_y',length(varsigma),1);
-pdf_ih_o = repmat(s.epdf_ih_o',length(varsigma),1);
+pdf_ih_y = get_weights_delayed(s.obj_ih_y,k_hosp);
+pdf_ih_o = get_weights_delayed(s.obj_ih_o,k_hosp);
+% pdf_ih_y = repmat(s.epdf_ih_y',length(varsigma),1);
+% pdf_ih_o = repmat(s.epdf_ih_o',length(varsigma),1);
 eta_o = r0.eta_o;   eta_y = r0.eta_y;
-% B./ recovery
+% B./ recovery 
 k_sick = s.k_sick;
-% mu_o = r0.mu_o;   mu_y = r0.mu_y;
-T_rec_i_std = s.T_sick_std;
-T_rec_i_y = s.T_sick_y;
-T_rec_i_o = s.T_sick_o;
-[pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_y-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2); 
-pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2);
+% % mu_o = r0.mu_o;   mu_y = r0.mu_y;
+% T_rec_i_std = s.T_sick_std;
+% T_rec_i_y = s.T_sick_y;
+% T_rec_i_o = s.T_sick_o;
+% [pdf_ir_y,time_ir] = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_y-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2); 
+% pdf_ir_o = create_weights(k_sick,length(varsigma),'Gamma',(T_rec_i_o-T_obs)*T_rec_i_std^2,1./T_rec_i_std^2);
+pdf_ir_y = get_weights_delayed(s.obj_ir_y,k_sick);
+pdf_ir_o = get_weights_delayed(s.obj_ir_o,k_sick);
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
 k_ser = s.k_ser;
@@ -175,6 +183,8 @@ MD = HD-SD; MD_o = HD_o-SD_o; MD_y = HD_y-SD_y;
 
 fcast_per = ceil(max(r0.T_hosp_mean));
 Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-1,Xts);
+Xts_o = smooth_series(X_o(tshift:end)); Xts_o = tseries(dateFrom:dateFrom+length(Xts_o)-1,Xts_o);
+Xts_y = smooth_series(X_y(tshift:end)); Xts_y = tseries(dateFrom:dateFrom+length(Xts_y)-1,Xts_y);
 Xrts = (X(tshift:end)); Xrts = method_data(tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts));
 Orts = method_data(tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data));
 Ots = smooth_series(Orts);
@@ -356,6 +366,13 @@ p.kappa_h_y = kappa_h_y;
         r.rho_io_i = repmat(r.io_i,1,s.k_hosp+1); 
         r.T_hosp_mean = s.T_hosp_o_mean.*r.rho_io_i+s.T_hosp_y_mean.*(1-r.rho_io_i);
         r.T_hosp_mean = r.T_hosp_mean(:,1);
+    end
+
+    function [yy]=get_weights_delayed(obj,k)
+        xx = 0:k;
+        yy = pdf(obj,T_obs-s.T_test_0+xx);
+        zz = sum(yy,2);
+        yy = yy./zz;
     end
 
     function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)

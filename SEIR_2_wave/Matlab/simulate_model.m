@@ -42,8 +42,8 @@ method_data = s.smoothing_method_data;
 
 %%
 N = s.pop_size;
-N_o = s.pop_size_o;
-N_y = s.pop_size_y;
+N_o = s.dep_ratio_65.*N;
+N_y = N-N_o;
 N_s = 8;
 N_t = 10;
 % *** matrices
