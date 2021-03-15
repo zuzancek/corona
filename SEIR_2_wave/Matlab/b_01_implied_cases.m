@@ -92,7 +92,7 @@ plot_clinical_cmp(true_data,counterfact_data,reported_data,dateFrom,dateTo,'mm',
 plot_epidemiology_cmp(res_implied,counterfact_data,reported_data,dateFrom,dateTo,'implied',true,'reported',true);
 
 % testing quality
-plot_quality_cmp(res_implied,cases_data,dateFrom,dateTo);
+plot_quality_cmp(res_implied,cases_data,s,dateFrom,dateTo);
 
 %% saving stuff
 dates.t0 = t0;      dates.t1 = disp_from;   dates.t2 = t1;
