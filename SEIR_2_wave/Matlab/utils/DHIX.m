@@ -178,25 +178,37 @@ Xts = smooth_series(X(tshift:end)); Xts = tseries(dateFrom:dateFrom+length(Xts)-
 Xts_o = smooth_series(X_o(tshift:end)); Xts_o = tseries(dateFrom:dateFrom+length(Xts_o)-1,Xts_o);
 Xts_y = smooth_series(X_y(tshift:end)); Xts_y = tseries(dateFrom:dateFrom+length(Xts_y)-1,Xts_y);
 Xrts = (X(tshift:end)); Xrts = method_data(tseries(dateFrom:dateFrom+length(Xrts)-1,Xrts));
+Xrts_o = (X_o(tshift:end)); Xrts_o = method_data(tseries(dateFrom:dateFrom+length(Xrts_o)-1,Xrts_o));
+Xrts_y = (X_o(tshift:end)); Xrts_y = method_data(tseries(dateFrom:dateFrom+length(Xrts_y)-1,Xrts_y));
 Orts = method_data(tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data));
+Orts_o = method_data(tseries(dateFrom:dateFrom+length(dI_data)-1,dI_data.*rho(end-length(dI_data)+1:end)));
+Orts_y = Orts-Orts_o;
+Orts_o = (Orts_o(tshift:end)); 
+Orts_y = (Orts_y(tshift:end));
+Ots_o = smooth_series(Orts_o); 
+Ots_y = smooth_series(Orts_y); 
 Ots = smooth_series(Orts);
 Orts0 = tseries(dateFrom:dateFrom+length(dI_data_all)-1,dI_data_all);
 Ots0 = smooth_series(Orts0);
 
-% figure;
-% pp1=bar(Orts,'FaceAlpha',0.85);hold on;
-% p=bar(resize(Xrts,dateFrom:dateTo-fcast_per-1),'FaceAlpha',0.7);
-% bar(resize(Xrts,dateTo-fcast_per:dateTo),'FaceAlpha',0.4,'FaceColor',p.FaceColor);
-% pp2=bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor',[0.5 0.5 0.5]);
-% pp3=bar(mov_median(resize(params.s,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor','k');
-% plot(Ots,'b','linewidth',2);
-% plot(resize(Xts,dateFrom:dateTo-fcast_per-1),'r','linewidth',2);
-% plot(resize(Xts,dateTo-fcast_per:dateTo),'r-.','linewidth',2);
-% plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'--','Color',[0.25 0.25 0.25],'linewidth',1);
-% plot(smooth_series(mov_median(resize(params.s,dateFrom:dateTo))),'k-.','linewidth',1);
-% grid on;
-% legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by hospitals', 'Hospitalizations', 'Intensive Care'});
-% title('New cases: reported vs. real');
+figure;
+pp1=bar(Orts,'FaceAlpha',0.85);hold on;
+p=bar(resize(Xrts,dateFrom:dateTo-fcast_per-1),'FaceAlpha',0.7);
+bar(resize(Xrts,dateTo-fcast_per:dateTo),'FaceAlpha',0.4,'FaceColor',p.FaceColor);
+pp2=bar(mov_median(resize(params.h,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor',[0.5 0.5 0.5]);
+pp3=bar(mov_median(resize(params.s,dateFrom:dateTo)),'FaceAlpha',0.5,'FaceColor','k');
+plot(Ots,'b','linewidth',2);
+plot(resize(Xts,dateFrom:dateTo-fcast_per-1),'r','linewidth',2);
+plot(resize(Xts,dateTo-fcast_per:dateTo),'r-.','linewidth',2);
+plot(smooth_series(mov_median(resize(params.h,dateFrom:dateTo))),'--','Color',[0.25 0.25 0.25],'linewidth',1);
+plot(smooth_series(mov_median(resize(params.s,dateFrom:dateTo))),'k-.','linewidth',1);
+grid on;
+legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by hospitals', 'Hospitalizations', 'Intensive Care'});
+title('New cases: reported vs. real');
+
+figure;
+plot(100*Xts_o./Xts,'linewidth',2);
+grid on;
 
 Len = length(Xts)-fcast_per;
 res = struct();
@@ -250,6 +262,10 @@ sa.loss_s = sa.Xs-sa.dIs_data_reported; idx = find(sa.loss_s<0); sa.loss_s(idx) 
 sa.loss_s = method_params(sa.loss_s);
 sa.loss_o = method_params(sa.Xo-dI_data_reported_old);
 sa.loss_y = method_params(sa.Xy-dI_data_reported_young);
+
+% probability of being observed for Y/O
+varrho_o = method_params(dI_data_reported_old./sa.Xo);
+varrho_y = method_params(dI_data_reported_young./sa.Xy);
 
 % results
 res.I = I;
@@ -322,6 +338,8 @@ p.kappa_d_o = kappa_d_o;
 p.kappa_s = kappa_s;
 p.kappa_h_o = kappa_h_o;
 p.kappa_h_y = kappa_h_y;
+p.varrho_o = varrho_o;
+p.varrho_y = varrho_y;
 
     function [r] = set_yo_ratios_params()
         % death (h+s)

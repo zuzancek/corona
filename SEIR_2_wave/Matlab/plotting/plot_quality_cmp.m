@@ -29,6 +29,9 @@ legend([pp1 pp2],{'Observed','Ideal'});
 ylabel('% of total cases');
 title('Share symptomatic new cases');
 
-% params.asymp_ratio = cases_data.asymp_ratio;
+%% 
+figure('Name','Testing quality III.');
+subplot(2,1,1);
+
 
 end

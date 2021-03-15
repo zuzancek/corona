@@ -25,7 +25,6 @@ legend([pp1 p pp2 pp3],{'New cases: officially reported','New cases: implied by 
 title('New cases: reported vs. real');
 
 %%
-
 dt = dateTo-dateFrom;
 if implied
     figure('Name','Hospitalization/Deaths: backcheck');
