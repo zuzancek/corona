@@ -18,7 +18,7 @@ function [p]=make_init_guess(s,data,dateFrom,dateTo)
 
 % initialization
 T = dateTo-dateFrom+1;
-N_o = ceil(s.pop_size.*s.dep_ratio_65);
+N_o = ceil(s.sim_num.*s.dep_ratio_65);
 N_y = s.pop_size-N_o;
 alpha_o = s.alpha_i_o;
 alpha_y = s.alpha_i_y;
@@ -28,37 +28,45 @@ method_data = s.smoothing_method_data;
 
 % transition times
 T_lat_y = get_rv(s.T_lat,N_y);
-T_inf_y = get_rv(s.T_inf,N_y);  gamma_y = 1./T_inf_y;
+T_inf_y = get_rv(s.T_inf,N_y);  gamma_y = 1./T_inf_y';
 T_lat_o = get_rv(s.T_lat,N_o);
-T_inf_o = get_rv(s.T_inf,N_o);  gamma_o = 1./T_inf_o;
+T_inf_o = get_rv(s.T_inf,N_o);  gamma_o = 1./T_inf_o';
 
 % inputs
 rho = remove_nan(data.rho,dateFrom,dateTo);
-X_obs = method_data(data.X_obs);
-AC = method_data(data.AC);
-TC = method_data(data.TC);
+scale = s.sim_num/s.pop_size;
+X_obs = scale*method_data(data.X_obs);
+AC = scale*method_data(data.AC);
+TC = scale*method_data(data.TC);
 
 % new cases, infectious (observed/unoberved)
-X_o_obs = X_obs.*rho;
-X_y_obs = X_obs-X_o_obs;
-X_y_unobs = X_y_obs./s.obs_ratio;
-X_o_unobs = s.alpha_s_o*X_o_obs./s.obs_ratio;
+X_o_obs = X_obs.*rho;                           x_o_obs = double(X_o_obs);
+X_y_obs = X_obs-X_o_obs;                        x_y_obs = double(X_y_obs);
+X_y_unobs = X_y_obs./s.obs_ratio;               x_y_unobs = double(X_y_unobs);
+X_o_unobs = s.alpha_s_o*X_o_obs./s.obs_ratio;   x_o_unobs = double(X_o_unobs);
+x_o = x_o_obs+x_o_unobs;
+x_y = x_y_obs+x_y_unobs;
+
 U_o = zeros(T+1,N_o); O_o = U_o;
 U_y = zeros(T+1,N_y); O_y = U_y; 
-O_o(1,:) = AC(dateFrom)*rho(dateFrom);    O_y(1,:) = AC(dateFrom)-O_o(1);
-U_o(1,:) = O_o.*s.alpha_s_o./s.obs_ratio; U_y(1,:) = O_y./s.obs_ratio;
+O_o(1,:) = AC(dateFrom)*rho(dateFrom);              O_y(1,:) = AC(dateFrom)-O_o(1);
+U_o(1,:) = O_o(1,:).*s.alpha_s_o./s.obs_ratio;      U_y(1,:) = O_y(1,:)./s.obs_ratio;
+idx_y = ones(1,N_y);
+idx_o = ones(1,N_o);
 for t=1:T
-    O_o(t+1,:) = O_o(t,:).*(1-gamma_o)+X_o_obs(t);
-    O_y(t+1,:) = O_y(t,:).*(1-gamma_y)+X_y_obs(t);
-    U_o(t+1,:) = U_o(t,:).*(1-gamma_o)+X_o_unobs(t);
-    U_y(t+1,:) = U_y(t,:).*(1-gamma_y)+X_y_unobs(t);
+    O_o(t+1,idx_o) = O_o(t,idx_o).*(1-gamma_o(idx_o))+x_o_obs(t);
+    O_y(t+1,idx_y) = O_y(t,idx_y).*(1-gamma_y(idx_y))+x_y_obs(t);
+    U_o(t+1,idx_o) = U_o(t,idx_o).*(1-gamma_o(idx_o))+x_o_unobs(t);
+    U_y(t+1,idx_y) = U_y(t,idx_y).*(1-gamma_y(idx_y))+x_y_unobs(t);
+    idx_o = idx_o & O_o(t+1,:)>=0 & U_o(t+1,:)>=0;
+    idx_y = idx_y & O_y(t+1,:)>=0 & U_y(t+1,:)>=0;
 end
 
 % exposed and newly exposed
-E_o = (X_o_unobs+X_o_obs).*T_lat_o;
-E_y = (X_y_unobs+X_y_obs).*T_lat_y;
-F_o = extend(E_o(2:end)-E_o(1:end-1),1)+X_o; 
-F_y = extend(E_y(2:end)-E_y(1:end-1),1)+X_y;
+E_o = T_lat_o*(x_o_unobs+x_o_obs)'; d_E_o = E_o(2:end)-E_o(1:end-1);
+E_y = T_lat_y*(x_y_unobs+x_y_obs)'; d_E_y = E_y(2:end)-E_y(1:end-1);
+F_o = [d_E_o;d_E_o(end,:)]+x_o; 
+F_y = [d_E_y;d_E_y(end,:)]+x_y;
 
 % contact rate with infectious
 Z = (alpha_o*O_o(1:end-1,:)+mu.*U_o(1:end-1,:))/N_o+...
