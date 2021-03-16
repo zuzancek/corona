@@ -18,8 +18,8 @@ function [p]=make_init_guess(s,data,dateFrom,dateTo)
 
 % initialization
 T = dateTo-dateFrom+1;
-N_y = s.pop_size_y;
-N_o = s.pop_size_o;
+N_o = ceil(s.pop_size.*s.dep_ratio_65);
+N_y = s.pop_size-N_o;
 alpha_o = s.alpha_i_o;
 alpha_y = s.alpha_i_y;
 mu = s.alpha_s_o;
@@ -33,8 +33,8 @@ T_lat_o = get_rv(s.T_lat,N_o);
 T_inf_o = get_rv(s.T_inf,N_o);  gamma_o = 1./T_inf_o;
 
 % inputs
-rho = method_data(data.rho);
-X_obs = method_data(data.Xobs);
+rho = remove_nan(data.rho,dateFrom,dateTo);
+X_obs = method_data(data.X_obs);
 AC = method_data(data.AC);
 TC = method_data(data.TC);
 
@@ -97,6 +97,38 @@ legend({'S_o','S_y','S_o alt','S_y alt'});
         z = x(1,:)+zeros(xlen+t0,xwid);
         z(t0+1:end,:) = x;
         y = method_data(z);
+    end
+
+    function [x] = remove_nan(x,t0,t1)
+        if isnan(x(t0))
+            i0 = find(isnan(x(t0:t1)));
+            if length(i0)>1
+                di0 = i0(2:end)-i0(1:end-1);
+                ii0 = find(di0>1,1);
+                if isempty(ii0)
+                    i0 = i0(end);
+                else
+                    i0 = i0(ii0)-1;
+                end
+            else
+                i0=2;
+            end
+            x(t0) = x(t0+i0); 
+        end
+        if isnan(x(t1))
+            i1 = find(isnan(x(t0:t1)));
+            if length(i1)>1
+                di1 = i1(2:end)-i1(1:end-1);
+                i1 = i1(find(di1>1,1)-1);
+                if isempty(i1)
+                    i1 = di1(end);
+                end
+            else
+                i1=t1-1;
+            end
+            x(t1) = x(i1);
+        end
+        x = interp(x);   
     end
 
 end
