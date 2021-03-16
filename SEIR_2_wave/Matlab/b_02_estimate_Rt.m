@@ -20,8 +20,8 @@ s = setparam();
 s.estimate_Rt = false;
 
 if s.estimate_Rt
-    model_fnc = @estimate_Rt_SIR;
     
+    model_fnc = @estimate_Rt_SIR;    
     
     %% inputs definition
     inputs_fnc = struct();

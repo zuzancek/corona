@@ -19,7 +19,7 @@ function [p]=make_init_guess(s,data,dateFrom,dateTo)
 % initialization
 T = dateTo-dateFrom+1;
 N_o = ceil(s.sim_num.*s.dep_ratio_65);
-N_y = s.pop_size-N_o;
+N_y = s.sim_num-N_o;
 alpha_o = s.alpha_i_o;
 alpha_y = s.alpha_i_y;
 mu = s.alpha_s_o;
@@ -63,14 +63,14 @@ for t=1:T
 end
 
 % exposed and newly exposed
-E_o = T_lat_o*(x_o_unobs+x_o_obs)'; d_E_o = E_o(2:end)-E_o(1:end-1);
-E_y = T_lat_y*(x_y_unobs+x_y_obs)'; d_E_y = E_y(2:end)-E_y(1:end-1);
-F_o = [d_E_o;d_E_o(end,:)]+x_o; 
-F_y = [d_E_y;d_E_y(end,:)]+x_y;
+E_o = T_lat_o*(x_o_unobs+x_o_obs)'; d_E_o = E_o(2:end,:)-E_o(1:end-1,:);
+E_y = T_lat_y*(x_y_unobs+x_y_obs)'; d_E_y = E_y(2:end,:)-E_y(1:end-1,:);
+F_o = d_E_o+x_o'; 
+F_y = d_E_y+x_y';
 
 % contact rate with infectious
-Z = (alpha_o*O_o(1:end-1,:)+mu.*U_o(1:end-1,:))/N_o+...
-    (alpha_y*O_o(1:end-1,:)+U_y(1:end-1,:))/N_y;
+Z = dot(alpha_o*O_o(1:end-1,:)+mu.*U_o(1:end-1,:),gamma_o)/N_o+...
+    dot(alpha_y*O_o(1:end-1,:)+U_y(1:end-1,:),gamma_y)/N_y;
 
 S_y = zeros(T+1,N_y);           S_y(1,:) = N_y-TC(dateFrom)*(1-rho(dateFrom))./s.obs_ratio;         S_y_alt = S_y;
 S_o = zeros(T+1,N_o);           S_o(1,:) = N_o-TC(dateFrom)*(rho(dateFrom))./s.obs_ratio;           S_o_alt = S_o;
