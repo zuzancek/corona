@@ -15,18 +15,18 @@ try
 catch err %#ok<NASGU>
     obs_ratio = s.obs_ratio+0*inputs.z;
 end
-try
-    eta_y = inputs.eta_y;
-    eta_y = extend(eta_y,T-length(eta_y));
-catch err %#ok<NASGU>
-    eta_y = s.eta_y+0*inputs.z;
-end
-try
-    eta_o = inputs.eta_o;
-    eta_o = extend(eta_o,T-length(eta_o));
-catch err %#ok<NASGU>
-    eta_o = s.eta_o+0*inputs.z;
-end
+% try
+%     eta_y = inputs.eta_y;
+%     eta_y = extend(eta_y,T-length(eta_y));
+% catch err %#ok<NASGU>
+%     eta_y = s.eta_y+0*inputs.z;
+% end
+% try
+%     eta_o = inputs.eta_o;
+%     eta_o = extend(eta_o,T-length(eta_o));
+% catch err %#ok<NASGU>
+%     eta_o = s.eta_o+0*inputs.z;
+% end
 try
     rho = double(inputs.old_ratio);
     if length(rho)>=T
@@ -51,14 +51,15 @@ T_si_vec = get_rv(s.SI);
 % lambda = s.lambda; % 0.0579;
 % T_death = s.T_death.mean; % 7.17; 
 % T_rec = s.T_rec;
-alpha_ihy = s.eta_y/s.T_hosp_y_mean;        
-alpha_iho = s.eta_o/s.T_hosp_o_mean;  
-x.T_sick_y.mean = s.T_sick_y-s.T_test.mean; x.T_sick_y.std = s.T_sick_std;
-T_sick_y_vec = get_rv(x.T_sick_y);
-alpha_iry_vec = (1-eta_y)'./T_sick_y_vec;
-x.T_sick_o.mean = s.T_sick_o-s.T_test.mean; x.T_sick_o.std = s.T_sick_std;
-T_sick_o_vec = get_rv(x.T_sick_o);
-alpha_iro_vec = (1-eta_o)'./T_sick_o_vec;
+% alpha_ihy = s.eta_y/s.T_hosp_y_mean;        
+% alpha_iho = s.eta_o/s.T_hosp_o_mean;  
+xx = struct();
+xx.T_sick_y.mean = s.T_sick_y-s.T_test.mean; xx.T_sick_y.std = s.T_sick_std;
+% T_sick_y_vec = get_rv(x.T_sick_y);
+% alpha_iry_vec = (1-eta_y)'./T_sick_y_vec;
+xx.T_sick_o.mean = s.T_sick_o-s.T_test.mean; xx.T_sick_o.std = s.T_sick_std; %#ok<STRNU>
+% T_sick_o_vec = get_rv(x.T_sick_o);
+% alpha_iro_vec = (1-eta_o)'./T_sick_o_vec;
 % T_hosp = s.T_hosp.mean;
 alpha = 1.15; %((s.T_inf_obs.mean-s.T_inf_obs0.mean)+s.T_inf_obs0.mean/s.case_isolation_effect)/s.T_inf_unobs.mean;
 % set initial values

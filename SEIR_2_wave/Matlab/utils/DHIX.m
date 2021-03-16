@@ -344,8 +344,8 @@ p.kappa_d_o = kappa_d_o;
 p.kappa_s = kappa_s;
 p.kappa_h_o = kappa_h_o;
 p.kappa_h_y = kappa_h_y;
-p.varrho_o = varrho_o;
-p.varrho_y = varrho_y;
+p.varrho_o = res.varrho_o;
+p.varrho_y = res.varrho_y;
 
     function [r] = set_yo_ratios_params()
         % death (h+s)
