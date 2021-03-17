@@ -80,10 +80,10 @@ for t=2:T
 end
 
 %% data storage
-p.S_o = tseries(S_o,dateFrom:dateTo);    p.S_y = tseries(S_y,dateFrom:dateTo);    p.S = p.S_o+p.S_y;
-p.E_o = tseries(E_o,dateFrom:dateTo);    p.E_y = tseries(E_y,dateFrom:dateTo);    p.E = p.E_o+p.E_y;
-p.O_o = tseries(O_o,dateFrom:dateTo);    p.O_y = tseries(O_y,dateFrom:dateTo);    p.O = p.O_o+p.O_y;
-p.U_o = tseries(U_o,dateFrom:dateTo);    p.U_y = tseries(U_y,dateFrom:dateTo);    p.U = p.U_o+p.U_y;
+p.S_o = tseries(dateFrom:dateTo,S_o);    p.S_y = tseries(dateFrom:dateTo,S_y);    p.S = p.S_o+p.S_y;
+p.E_o = tseries(dateFrom:dateTo,E_o);    p.E_y = tseries(dateFrom:dateTo,E_y);    p.E = p.E_o+p.E_y;
+p.O_o = tseries(dateFrom:dateTo,O_o);    p.O_y = tseries(dateFrom:dateTo,O_y);    p.O = p.O_o+p.O_y;
+p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);    p.U = p.U_o+p.U_y;
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
 
 %% plotting
@@ -105,15 +105,15 @@ title('Exposed (E)');
 legend({'Old','Young','Total'});
 
 figure;
-hh1=plot(p.U_o,'linewidth',1,'linestyle',':'); hold on;
-hh2=plot(p.U_y,'linewidth',1,'linestyle',':');
-plot(p.U,'linewidth',1,'color',0.5*[1 1 1],'linestyle',':');
-plot(p.O_o,'linestyle','--','linewidth',1,'color',hh1.color);
-plot(p.O_y,'linestyle','--','linewidth',1,'color',hh2.color);
-plot(p.O,'linewidth',1,'color',0.5*[1 1 1],'linestyle','--');
-plot(p.I_o,'b','linewidth',2);
-plot(p.I_y,'r','linewidth',2);
-plot(p.I,'k','linewidth',2);
+hh1=plot(p.U_o,'linewidth',2,'linestyle',':'); hold on;
+hh2=plot(p.U_y,'linewidth',2,'linestyle',':');
+plot(p.U,'linewidth',2,'color',0.5*[1 1 1],'linestyle',':');
+plot(p.O_o,'linestyle','--','linewidth',2,'color',hh1.Color);
+plot(p.O_y,'linestyle','--','linewidth',2,'color',hh2.Color);
+plot(p.O,'linewidth',2,'color',0.5*[1 1 1],'linestyle','--');
+plot(p.I_o,'b','linewidth',3);
+plot(p.I_y,'r','linewidth',3);
+plot(p.I,'k','linewidth',3);
 grid on;
 title('Infectious (I)');
 legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...
