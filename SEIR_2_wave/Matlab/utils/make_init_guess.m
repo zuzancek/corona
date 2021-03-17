@@ -51,8 +51,8 @@ x_y = x_y_obs+x_y_unobs;
 
 U_o = zeros(T,1); O_o = U_o; E_o = O_o;
 U_y = zeros(T,1); O_y = U_y; E_y = O_y;
-sigma_o = s.obs_ratio+zeros(T,1); sigma_o(1) = s.obs_ratio;
-sigma_y = sigma_o;    sigma_y(1) = s.obs_ratio;
+sigma_o = s.obs_ratio*double(rho)*(N_y+N_o)/N_o;
+sigma_y = s.obs_ratio*(1-double(rho))*(N_y+N_o)/N_y;
 O_o(1) = AC(dateFrom)*rho(dateFrom);            O_y(1) = AC(dateFrom)-O_o(1);
 U_o(1) = O_o(1).*s.alpha_s_o./s.obs_ratio;      U_y(1) = O_y(1)./s.obs_ratio;
 E_o(1) = x_o_obs(2)*T_lat_o/s.obs_ratio;        E_y(1) = x_y_obs(2)*T_lat_o/s.obs_ratio;
@@ -85,13 +85,15 @@ p.E_o = tseries(dateFrom:dateTo,E_o);    p.E_y = tseries(dateFrom:dateTo,E_y);  
 p.O_o = tseries(dateFrom:dateTo,O_o);    p.O_y = tseries(dateFrom:dateTo,O_y);    p.O = p.O_o+p.O_y;
 p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);    p.U = p.U_o+p.U_y;
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
+p.sigma_o = tseries(dateFrom:dateTo,sigma_o);
+p.sigma_y = tseries(dateFrom:dateTo,sigma_y);
 
 %% plotting
 figure;
 subplot(2,1,1)
 plot(p.S_o,'linewidth',1); hold on;
 plot(p.S_y,'linewidth',1);
-plot(p.S);
+plot(p.S,'k','linewidth',2);
 grid on;
 title('Suspectible (S)');
 legend({'Old','Young','Total'});
@@ -99,7 +101,7 @@ legend({'Old','Young','Total'});
 subplot(2,1,2)
 plot(p.E_o,'linewidth',1); hold on;
 plot(p.E_y,'linewidth',1);
-plot(p.E);
+plot(p.E,'k','linewidth',2);
 grid on;
 title('Exposed (E)');
 legend({'Old','Young','Total'});
