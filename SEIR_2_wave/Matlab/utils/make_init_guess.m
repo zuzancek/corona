@@ -1,4 +1,4 @@
-function [p]=make_init_guess(s,data,dateFrom,dateTo)
+function [p,q]=make_init_guess(s,data,dateFrom,dateTo)
 
 %% scheme
 % Sy' = Sy-Fy,          Fy = R/Tinf*Sy*Z
@@ -23,7 +23,8 @@ N_o = ceil(s.sim_num.*s.dep_ratio_65);
 N_y = s.sim_num-N_o;
 alpha_o = s.alpha_i_o;
 alpha_y = s.alpha_i_y;
-mu = s.alpha_s_o;
+alpha_s = s.alpha_s_o;
+mu = s.mu;
 
 method_data = s.smoothing_method_data;
 
@@ -71,12 +72,12 @@ for t=2:T
     U_y(t) = U_y(t-1).*(1-gamma_y)+x_y_unobs(t);
     x_y(t) = x_y_obs(t)+x_y_unobs(t);
     x_o(t) = x_o_obs(t)+x_o_unobs(t);
-    Z = (alpha_o*O_o(t-1)+mu.*U_o(t-1))*gamma_o'/N_o+...
+    Z = (alpha_o*O_o(t-1)+alpha_s.*U_o(t-1))*gamma_o'/N_o+...
         (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;
-    S_o(t) = S_o(t-1)*(1-rt(t)*Z);
+    S_o(t) = S_o(t-1)*(1-mu*rt(t)*Z);
     S_y(t) = S_y(t-1)*(1-rt(t)*Z);
-    E_o(t) = E_o(t-1)+Z*S_o(t-1)-x_o(t);
-    E_y(t) = E_y(t-1)+Z*S_y(t-1)-x_y(t);
+    E_o(t) = E_o(t-1)+Z*S_o(t-1)*rt(t)*mu-x_o(t);
+    E_y(t) = E_y(t-1)+Z*S_y(t-1)*rt(t)-x_y(t);
 end
 
 %% data storage
@@ -87,6 +88,14 @@ p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);  
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
 p.sigma_o = tseries(dateFrom:dateTo,sigma_o);
 p.sigma_y = tseries(dateFrom:dateTo,sigma_y);
+
+q.S_o = S_o(T);    q.S_y = S_y(T);
+q.E_o = E_o(T);    q.E_y = E_y(T);
+q.O_o = S_o(T);    q.O_y = O_y(T);
+q.U_o = S_o(T);    q.U_y = U_y(T);
+q.Rt_avg = mean(resize(data.Rt,dateTo-7:dateTo));
+q.sigma_o_avg = mean(resize(p.sigma_o,dateTo-7:dateTo));
+q.sigma_y_avg = mean(resize(p.sigma_y,dateTo-7:dateTo));
 
 %% plotting
 figure;

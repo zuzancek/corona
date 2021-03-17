@@ -47,6 +47,7 @@ s.T_im_h = 4*30;   s.obj_im_h = makedist('Exponential','mu',s.T_im_h);
 % **** mobility loss, quaranteen
 s.alpha_s_o = 0.75; s.alpha_s_y = 1;
 s.alpha_i_o = 0.25; s.alpha_i_y = 0.5;
+s.mu = .85;
 
 % **** testing
 % time to test (observation period, from symptoms onset): "steady_state value"
@@ -55,6 +56,7 @@ s.T_test_0 = 1;
 s.k_test = 5;
 s.k_pre_test = s.k_pre+s.k_test;
 s.T_pre_test = s.T_test; s.T_pre_test.mean = s.T_pre_test.mean+s.T_pre.mean;
+s.T_inf_obs.mean = 2;           s.T_inf_obs.std = s.SI.std; 
 s.obj_pre_test = makedist('Gamma','a',s.T_pre_test.mean*s.T_pre_test.std*s.T_pre_test.std,'b',1/(s.T_pre_test.std*s.T_pre_test.std));
 s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);
 
