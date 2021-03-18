@@ -68,9 +68,9 @@ for t=2:T
     E_y(t) = E_y(t-1)*(1-1/T_lat_y)+S_y(t-1)*Z*rt(t);
     V_y(t) = E_y(t-1)/T_lat_y;
     X_o(t) = sigma_o/T_pre_test_o*U_o(t-1);
-    U_o(t) = U_o(t-1)+(1-sigma_o)*U_o(t-1)/T_inf_o-X_o(t)+V_o(t);
+    U_o(t) = U_o(t-1)-(1-sigma_o)*U_o(t-1)/T_inf_o-X_o(t)+V_o(t);
     X_y(t) = sigma_y/T_pre_test_y*U_y(t-1);
-    U_y(t) = U_y(t-1)+(1-sigma_y)*U_y(t-1)/T_inf_y-X_y(t)+V_y(t);
+    U_y(t) = U_y(t-1)-(1-sigma_y)*U_y(t-1)/T_inf_y-X_y(t)+V_y(t);
     O_o(t) = O_o(t-1)*(1-1/T_inf_obs_o)+X_o(t);
     O_y(t) = O_y(t-1)*(1-1/T_inf_obs_y)+X_y(t);
 end
