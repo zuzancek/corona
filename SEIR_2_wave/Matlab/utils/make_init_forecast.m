@@ -44,7 +44,13 @@ E_o_ini = data.E_o;       E_y_ini = data.E_y;
 O_o_ini = data.O_o;       O_y_ini = data.O_y;
 U_o_ini = data.U_o;       U_y_ini = data.U_y;
 
-Rt = data.Rt_avg; rt = double(Rt)+zeros(T,1); %
+try
+    rt = double(data.Rt);
+    assert(length(rt)>=T);
+catch err
+    rt = double(data.Rt_avg)+zeros(T,1);
+end
+% Rt = data.Rt_avg; rt = double(Rt)+zeros(T,1); %
 sigma_o = data.sigma_o_avg;
 sigma_y = data.sigma_y_avg;
 
@@ -64,15 +70,15 @@ for t=2:T
     S_o(t) = S_o(t-1)*(1-rt(t)*Z*mu);
     S_y(t) = S_y(t-1)*(1-rt(t)*Z);
     E_o(t) = E_o(t-1)*(1-1/T_lat_o)+S_o(t-1)*Z*rt(t)*mu;
-    V_o(t) = E_o(t-1)/T_lat_o;
     E_y(t) = E_y(t-1)*(1-1/T_lat_y)+S_y(t-1)*Z*rt(t);
-    V_y(t) = E_y(t-1)/T_lat_y;
-    X_o(t) = sigma_o/T_pre_test_o*U_o(t-1);
-    U_o(t) = U_o(t-1)-(1-sigma_o)*U_o(t-1)/T_inf_o-X_o(t)+V_o(t);
-    X_y(t) = sigma_y/T_pre_test_y*U_y(t-1);
-    U_y(t) = U_y(t-1)-(1-sigma_y)*U_y(t-1)/T_inf_y-X_y(t)+V_y(t);
-    O_o(t) = O_o(t-1)*(1-1/T_inf_obs_o)+X_o(t);
-    O_y(t) = O_y(t-1)*(1-1/T_inf_obs_y)+X_y(t);
+    X_o(t) = sigma_o/T_lat_o*E_o(t-1);
+    X_y(t) = sigma_y/T_lat_y*E_y(t-1);
+    O_o(t) = O_o(t-1).*(1-gamma_o)+X_o(t);
+    O_y(t) = O_y(t-1).*(1-gamma_y)+X_y(t);
+    V_o(t) = (1-sigma_o)/T_lat_o*E_o(t-1);
+    V_y(t) = (1-sigma_y)/T_lat_y*E_y(t-1);
+    U_o(t) = U_o(t-1).*(1-gamma_o)+V_o(t);
+    U_y(t) = U_y(t-1).*(1-gamma_y)+V_y(t);
 end
 
 %% data storage
