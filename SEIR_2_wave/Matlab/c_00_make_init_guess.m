@@ -40,7 +40,8 @@ validTo = dateTo;
 q = get_fcast_init_data(p,validFrom);
 
 % make simple cross-validation
-make_init_forecast(s,q,validFrom,validTo);
+p1=make_init_forecast(s,q,validFrom,validTo);
 
 % check results
-check_targets('dbs',{data,q},'dateFrom',validFrom,'dateTo',validTo);
+check_targets('dbs',{p,p1},'varlist',{'X_o_obs','X_y_obs','X_obs'},'titles',{'X_o_obs','X_y_obs','X_obs'},...
+    'dateFrom',validFrom,'dateTo',validTo);

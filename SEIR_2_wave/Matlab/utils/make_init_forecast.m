@@ -1,4 +1,4 @@
-function []=make_init_forecast(s,data,dateFrom,dateTo)
+function [p]=make_init_forecast(s,data,dateFrom,dateTo)
 
 %% scheme
 % Sy' = Sy-Fy,          Fy = R/Tinf*Sy*Z
@@ -33,10 +33,6 @@ T_lat_y = s.T_lat.mean;
 T_inf_y = s.T_inf.mean; gamma_y = 1/T_inf_y;
 T_lat_o = s.T_lat.mean;
 T_inf_o = s.T_inf.mean; gamma_o = 1/T_inf_o;
-T_pre_test_o = s.T_pre_test.mean;
-T_pre_test_y = s.T_pre_test.mean;
-T_inf_obs_o = s.T_inf_obs.mean;
-T_inf_obs_y = s.T_inf_obs.mean;
 
 % init values
 S_o_ini = data.S_o;       S_y_ini = data.S_y;
@@ -47,7 +43,7 @@ U_o_ini = data.U_o;       U_y_ini = data.U_y;
 try
     rt = double(data.Rt);
     assert(length(rt)>=T);
-catch err
+catch err %#ok<NASGU>
     rt = double(data.Rt_avg)+zeros(T,1);
 end
 % Rt = data.Rt_avg; rt = double(Rt)+zeros(T,1); %
@@ -55,8 +51,8 @@ sigma_o = data.sigma_o_avg;
 sigma_y = data.sigma_y_avg;
 
 % arrays
-U_o = zeros(T,1); O_o = U_o; E_o = O_o; S_o = O_o; X_o = O_o; V_o = O_o;
-U_y = zeros(T,1); O_y = U_y; E_y = O_y; S_y = O_y; X_y = O_o; V_y = O_y;
+U_o = zeros(T,1); O_o = U_o; E_o = O_o; S_o = O_o; X_o_obs = O_o; X_o_unobs = O_o;
+U_y = zeros(T,1); O_y = U_y; E_y = O_y; S_y = O_y; X_y_obs = O_o; X_y_unobs = O_y;
 % 
 S_o(1) = S_o_ini;   S_y(1) = S_y_ini;
 E_o(1) = E_o_ini;   E_y(1) = E_y_ini;
@@ -71,14 +67,14 @@ for t=2:T
     S_y(t) = S_y(t-1)*(1-rt(t)*Z);
     E_o(t) = E_o(t-1)*(1-1/T_lat_o)+S_o(t-1)*Z*rt(t)*mu;
     E_y(t) = E_y(t-1)*(1-1/T_lat_y)+S_y(t-1)*Z*rt(t);
-    X_o(t) = sigma_o/T_lat_o*E_o(t-1);
-    X_y(t) = sigma_y/T_lat_y*E_y(t-1);
-    O_o(t) = O_o(t-1).*(1-gamma_o)+X_o(t);
-    O_y(t) = O_y(t-1).*(1-gamma_y)+X_y(t);
-    V_o(t) = (1-sigma_o)/T_lat_o*E_o(t-1);
-    V_y(t) = (1-sigma_y)/T_lat_y*E_y(t-1);
-    U_o(t) = U_o(t-1).*(1-gamma_o)+V_o(t);
-    U_y(t) = U_y(t-1).*(1-gamma_y)+V_y(t);
+    X_o_obs(t) = sigma_o/T_lat_o*E_o(t-1);
+    X_y_obs(t) = sigma_y/T_lat_y*E_y(t-1);
+    O_o(t) = O_o(t-1).*(1-gamma_o)+X_o_obs(t);
+    O_y(t) = O_y(t-1).*(1-gamma_y)+X_y_obs(t);
+    X_o_unobs(t) = (1-sigma_o)/T_lat_o*E_o(t-1);
+    X_y_unobs(t) = (1-sigma_y)/T_lat_y*E_y(t-1);
+    U_o(t) = U_o(t-1).*(1-gamma_o)+X_o_unobs(t);
+    U_y(t) = U_y(t-1).*(1-gamma_y)+X_y_unobs(t);
 end
 
 %% data storage
@@ -86,8 +82,9 @@ p.S_o = tseries(dateFrom:dateTo,S_o);    p.S_y = tseries(dateFrom:dateTo,S_y);  
 p.E_o = tseries(dateFrom:dateTo,E_o);    p.E_y = tseries(dateFrom:dateTo,E_y);    p.E = p.E_o+p.E_y;
 p.O_o = tseries(dateFrom:dateTo,O_o);    p.O_y = tseries(dateFrom:dateTo,O_y);    p.O = p.O_o+p.O_y;
 p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);    p.U = p.U_o+p.U_y;
-p.X_o = tseries(dateFrom:dateTo,X_o);    p.X_y = tseries(dateFrom:dateTo,X_y);    p.X = p.X_o+p.X_y;
-p.V_o = tseries(dateFrom:dateTo,V_o);    p.V_y = tseries(dateFrom:dateTo,V_y);    p.V = p.V_o+p.V_y;
+p.X_o_obs = tseries(dateFrom:dateTo,X_o_obs);        p.X_y_obs = tseries(dateFrom:dateTo,X_y_obs);        p.X_obs = p.X_o_obs+p.X_y_obs;
+p.X_o_unobs = tseries(dateFrom:dateTo,X_o_unobs);    p.X_y_unobs = tseries(dateFrom:dateTo,X_y_unobs);    p.X_unobs = p.X_o_unobs+p.X_y_unobs;
+p.X_o = p.X_o_obs+p.X_o_unobs;                       p.X_y = p.X_y_obs+p.X_y_unobs;                       p.X = p.X_obs+p.X_unobs;
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
 
 %% plotting
@@ -125,12 +122,12 @@ legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...
     'Old', 'Young', 'Total'});
 
 figure;
-plot(p.V_o,'linewidth',2,'linestyle','--'); hold on;
-plot(p.V_y,'linewidth',2,'linestyle','--');
-plot(p.V,'linewidth',2,'color',0.5*[1 1 1],'linestyle',':');
-plot(p.X_o,'linestyle','--','linewidth',2,'color','b');
-plot(p.X_y,'linestyle','--','linewidth',2,'color','r');
-plot(p.X,'linewidth',2,'color','k');
+plot(p.X_o_unobs,'linewidth',2,'linestyle','--'); hold on;
+plot(p.X_y_unobs,'linewidth',2,'linestyle','--');
+plot(p.X_unobs,'linewidth',2,'color',0.5*[1 1 1],'linestyle',':');
+plot(p.X_o_obs,'linestyle','--','linewidth',2,'color','b');
+plot(p.X_y_obs,'linestyle','--','linewidth',2,'color','r');
+plot(p.X_obs,'linewidth',2,'color','k');
 grid on;
 title('New cases');
 legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...

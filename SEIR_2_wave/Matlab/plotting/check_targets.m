@@ -20,10 +20,10 @@ n = length(dbs);
 m = length(varlist);
 
 for i=1:m
-    vars = varlist{i};
+    var = varlist{i};
     figure;
     for j=1:n
-    	plot(resize(dbs{j}.(vars{j}),dateFrom:dateTo),'linewidth',1); hold on;
+    	plot(resize(dbs{j}.(var),dateFrom:dateTo),'linewidth',1); hold on;
     end
     grid on;
     legend(leg);
