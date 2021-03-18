@@ -44,13 +44,14 @@ E_o_ini = data.E_o;       E_y_ini = data.E_y;
 O_o_ini = data.O_o;       O_y_ini = data.O_y;
 U_o_ini = data.U_o;       U_y_ini = data.U_y;
 
-Rt = data.Rt_avg; rt = double(Rt);
+Rt = data.Rt_avg; rt = double(Rt)+zeros(T,1); %
 sigma_o = data.sigma_o_avg;
 sigma_y = data.sigma_y_avg;
 
 % arrays
 U_o = zeros(T,1); O_o = U_o; E_o = O_o; S_o = O_o; X_o = O_o; V_o = O_o;
 U_y = zeros(T,1); O_y = U_y; E_y = O_y; S_y = O_y; X_y = O_o; V_y = O_y;
+% 
 S_o(1) = S_o_ini;   S_y(1) = S_y_ini;
 E_o(1) = E_o_ini;   E_y(1) = E_y_ini;
 O_o(1) = O_o_ini;   O_y(1) = O_y_ini;
@@ -67,9 +68,9 @@ for t=2:T
     E_y(t) = E_y(t-1)*(1-1/T_lat_y)+S_y(t-1)*Z*rt(t);
     V_y(t) = E_y(t-1)/T_lat_y;
     X_o(t) = sigma_o/T_pre_test_o*U_o(t-1);
-    U_o(t) = U_o(t-1)+(1-sigma_o)*E_o(t-1)/T_inf_o-X_o(t);
+    U_o(t) = U_o(t-1)+(1-sigma_o)*U_o(t-1)/T_inf_o-X_o(t)+V_o(t);
     X_y(t) = sigma_y/T_pre_test_y*U_y(t-1);
-    U_y(t) = U_y(t-1)+(1-sigma_y)*E_y(t-1)/T_inf_y-X_y(t);
+    U_y(t) = U_y(t-1)+(1-sigma_y)*U_y(t-1)/T_inf_y-X_y(t)+V_y(t);
     O_o(t) = O_o(t-1)*(1-1/T_inf_obs_o)+X_o(t);
     O_y(t) = O_y(t-1)*(1-1/T_inf_obs_y)+X_y(t);
 end
