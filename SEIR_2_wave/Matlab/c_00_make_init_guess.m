@@ -41,3 +41,6 @@ q = get_fcast_init_data(p,validFrom);
 
 % make simple cross-validation
 make_init_forecast(s,q,validFrom,validTo);
+
+% check results
+check_targets('dbs',{data,q},'dateFrom',validFrom,'dateTo',validTo);

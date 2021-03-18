@@ -89,6 +89,8 @@ p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                   
 p.sigma_o = tseries(dateFrom:dateTo,sigma_o);
 p.sigma_y = tseries(dateFrom:dateTo,sigma_y);
 p.Rt = Rt;
+p.X_o_obs = tseries(dateFrom:dateTo,X_o_obs);       p.X_y_obs = tseries(dateFrom:dateTo,X_y_obs);
+p.X_o_unobs = tseries(dateFrom:dateTo,X_o_unobs);   p.X_y_unobs = tseries(dateFrom:dateTo,X_y_unobs);
 
 %% plotting
 figure;
