@@ -12,10 +12,11 @@ s = setparam();
 cases_type = 1;
 
 %% inputs
-dateFrom = dd(2020,8,1);
+overlay = 31;
+dateFrom = dd(2020,9,1);
 dateTo = dd(2020,12,31);
-fcastFrom = dateTo;
-fcastTo = dateTo+30;
+validFrom = dateTo-overlay;
+validTo = dateTo+31+28;
 data = struct();
 data.rho = resize(db_age.Old/db_age.Total,dateFrom:dateTo);
 data.X_obs = resize(db.NewCases,dateFrom:dateTo);
@@ -31,9 +32,11 @@ data.Rt = resize(info{cases_type}.mean_ts,dateFrom:dateTo);
 
 %% run calculations
 
-% make guess of initial values
-[p,q] = make_init_guess(s,data,dateFrom,dateTo);
+% make guess of initial values/train model
+p = make_init_guess(s,data,dateFrom,dateTo);
 save(strcat('results/forecast_init',suff{cases_type},'.mat'),'p');
 
-% make simple forecast
+q = get_fcast_init_data(p,validFrom);
+
+% make simple cross-validation
 make_init_forecast(s,q,fcastFrom,fcastTo)

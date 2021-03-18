@@ -124,7 +124,7 @@ plot(p.V_y,'linewidth',2,'linestyle','--');
 plot(p.V,'linewidth',2,'color',0.5*[1 1 1],'linestyle',':');
 plot(p.X_o,'linestyle','--','linewidth',2,'color','b');
 plot(p.X_y,'linestyle','--','linewidth',2,'color','r');
-plot(p.X,'linewidth',2,'color','k','linestyle');
+plot(p.X,'linewidth',2,'color','k');
 grid on;
 title('New cases');
 legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...

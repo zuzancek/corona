@@ -1,4 +1,4 @@
-function [p,q]=make_init_guess(s,data,dateFrom,dateTo)
+function [p]=make_init_guess(s,data,dateFrom,dateTo)
 
 %% scheme
 % Sy' = Sy-Fy,          Fy = R/Tinf*Sy*Z
@@ -88,14 +88,7 @@ p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);  
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
 p.sigma_o = tseries(dateFrom:dateTo,sigma_o);
 p.sigma_y = tseries(dateFrom:dateTo,sigma_y);
-
-q.S_o = S_o(T);    q.S_y = S_y(T);
-q.E_o = E_o(T);    q.E_y = E_y(T);
-q.O_o = S_o(T);    q.O_y = O_y(T);
-q.U_o = S_o(T);    q.U_y = U_y(T);
-q.Rt_avg = mean(resize(data.Rt,dateTo-7:dateTo));
-q.sigma_o_avg = mean(resize(p.sigma_o,dateTo-7:dateTo));
-q.sigma_y_avg = mean(resize(p.sigma_y,dateTo-7:dateTo));
+p.Rt = Rt;
 
 %% plotting
 figure;
