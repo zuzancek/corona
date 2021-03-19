@@ -70,14 +70,13 @@ total_num = plan.pfizer.contract.*plan.pfizer.mult+plan.astrazeneca.contract*pla
 % supply_plan_an = p*(0:x1)'.^q+0*supply_plan_wcs;
 
 % supply plan 
-dbs.astra(today) = sum(double(db.astra),'omitnan');     
-plan.astrazeneca.data = interp(dbs.astra);
-dbs.pfizer(today) = sum(double(db.pfizer),'omitnan');   plan.pfizer.data = interp(dbs.pfizer);
-dbs.moderna(today) = sum(double(db.moderna),'omitnan'); plan.moderna.data = interp(dbs.moderna);
-dbs.johnson(today) = 0;      plan.johnson.data = interp(dbs.johnson);
-dbs.curevac(today) = 0; plan.curevac.data = interp(dbs.curevac);
-supply_plan = plan.astrazeneca.data+plan.moderna.data+plan.pfizer.data+plan.curevac.data+plan.johnson.data;
-supply_plan(dateFrom:today) = resize(supply_short,dateFrom:today);
+dbs.astra(today) = sum(double(db.astra),'omitnan'); dbs.astra = interp(dbs.astra);
+dbs.pfizer(today) = sum(double(db.pfizer),'omitnan');   dbs.pfizer = interp(dbs.pfizer); 
+dbs.moderna(today) = sum(double(db.moderna),'omitnan'); dbs.moderna = interp(dbs.moderna);
+dbs.johnson(today) = 0;      dbs.johnson = interp(dbs.johnson);
+dbs.curevac(today) = 0;      dbs.curevac = interp(dbs.curevac);
+supply_plan = dbs.astra+dbs.moderna+dbs.pfizer+dbs.curevac+dbs.johnson;
+supply_plan(dateFrom+1:dateTo_short-5) = NaN; supply_plan = interp(supply_plan);
 supply_plan_tnd = hpf(supply_plan,'lambda',14400);
 
 vaccination_plan = tseries(dateFrom:dateTo,NaN);
@@ -105,3 +104,14 @@ ylim([0 total_num]);
 legend([pp1 pp2 pp3 pp4],{'plan dodavky vakcin','planovana realizacia vakcinacie','realizacia dodavok','realizacia vakcinacie'});
 title('Priebeh vakcinacie v roku 2021');
 
+figure;
+cum_supply = zeros(5,length(dbs.astra));
+cum_supply(1,:) = dbs.pfizer;
+cum_supply(2,:) = dbs.moderna;
+cum_supply(3,:) = dbs.astra;
+cum_supply(4,:) = dbs.curevac;
+cum_supply(5,:) = dbs.johnson;
+bar(cum_supply','stacked');
+grid on;
+legend({'BioNTech/Pfizer','Moderna','Oxford/AstraZeneca','Curevac','Johnson&Johnson'});
+title('Plan dodavok vakcin');
