@@ -53,6 +53,7 @@ sigma_y = data.sigma_y_avg;
 % arrays
 U_o = zeros(T,1); O_o = U_o; E_o = O_o; S_o = O_o; X_o_obs = O_o; X_o_unobs = O_o;
 U_y = zeros(T,1); O_y = U_y; E_y = O_y; S_y = O_y; X_y_obs = O_o; X_y_unobs = O_y;
+Z = U_y; Z(1) = 0;
 % 
 S_o(1) = S_o_ini;   S_y(1) = S_y_ini;
 E_o(1) = E_o_ini;   E_y(1) = E_y_ini;
@@ -61,12 +62,12 @@ U_o(1) = U_o_ini;   U_y(1) = U_y_ini;
 
 %% calculation
 for t=2:T
-    Z = (alpha_o*O_o(t-1)+alpha_s.*U_o(t-1))*gamma_o'/N_o+...
-        (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;
-    S_o(t) = S_o(t-1)*(1-rt(t)*Z*mu);
-    S_y(t) = S_y(t-1)*(1-rt(t)*Z);
-    E_o(t) = E_o(t-1)*(1-1/T_lat_o)+S_o(t-1)*Z*rt(t)*mu;
-    E_y(t) = E_y(t-1)*(1-1/T_lat_y)+S_y(t-1)*Z*rt(t);
+    Z(t) = (alpha_o*O_o(t-1)+alpha_s.*U_o(t-1))*gamma_o'/N_o+...
+        (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;    
+    S_o(t) = S_o(t-1)*(1-mu*rt(t)*Z(t));
+    S_y(t) = S_y(t-1)*(1-rt(t)*Z(t));
+    E_o(t) = E_o(t-1)*(1-1/T_lat_o)+S_o(t-1)*Z(t)*rt(t)*mu;
+    E_y(t) = E_y(t-1)*(1-1/T_lat_y)+S_y(t-1)*Z(t)*rt(t);
     X_o_obs(t) = sigma_o/T_lat_o*E_o(t-1);
     X_y_obs(t) = sigma_y/T_lat_y*E_y(t-1);
     O_o(t) = O_o(t-1).*(1-gamma_o)+X_o_obs(t);
