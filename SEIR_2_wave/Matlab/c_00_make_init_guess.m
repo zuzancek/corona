@@ -31,11 +31,13 @@ data.Rt = resize(info{cases_type}.mean_ts,dateFrom:dateTo);
 %% run calculations
 
 % make guess of initial values/train model
-p = make_init_guess(s,data,dateFrom,dateTo);
+% p = make_init_guess(s,data,dateFrom,dateTo);
+p = train_model(s,data,dateFrom,dateTo);
+
 save(strcat('results/forecast_init',suff{cases_type},'.mat'),'p');
 
 % ********** 1./ train model
-validFrom = dateFrom+30;
+validFrom = dateFrom;%+30;
 validTo = dateTo;
 q = get_fcast_init_data(p,validFrom);
 

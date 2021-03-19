@@ -1,4 +1,4 @@
-function [p]=make_init_guess(s,data,dateFrom,dateTo)
+function [p]=train_model(s,data,dateFrom,dateTo)
 
 %% scheme
 % Sy' = Sy-Fy,          Fy = R/Tinf*Sy*Z
@@ -30,9 +30,9 @@ method_data = s.smoothing_method_data;
 
 % transition times
 T_lat_y = s.T_lat.mean;
-T_inf_y = s.T_inf.mean; T_inf_y = T_inf_y+3; gamma_y = 1/T_inf_y;
+T_inf_y = s.T_inf.mean; gamma_y = 1/T_inf_y;
 T_lat_o = s.T_lat.mean;
-T_inf_o = s.T_inf.mean; T_inf_o = T_inf_o+3; gamma_o = 1/T_inf_o;
+T_inf_o = s.T_inf.mean; gamma_o = 1/T_inf_o;
 
 % inputs
 rho = remove_nan(data.rho,dateFrom,dateTo);
@@ -40,21 +40,14 @@ scale = s.sim_num/s.pop_size;
 X_obs = scale*method_data(data.X_obs);
 AC = scale*method_data(data.AC);
 TC = scale*method_data(data.TC);
-Rt = data.Rt; rt = double(Rt);
-xx = 1:70;xx0=xx(1);xx1=xx(end);ax = 0.4;
-aa=ax*(2/(xx1-xx0))^2;bb=-aa*(xx1+xx0);cc=aa*xx0*xx1;
-yx=1+aa*xx.^2+bb*xx+cc;
-cr = 0*rt+1;
-cr(1:length(xx))=yx;
-rt = cr.*rt;
 
 % new cases, infectious (observed/unoberved)
 X_o_obs = X_obs.*rho;                           x_o_obs = double(X_o_obs);
 X_y_obs = X_obs-X_o_obs;                        x_y_obs = double(X_y_obs);
 X_y_unobs = X_y_obs./s.obs_ratio;               x_y_unobs = double(X_y_unobs);
 X_o_unobs = s.alpha_s_o*X_o_obs./s.obs_ratio;   x_o_unobs = double(X_o_unobs);
-x_o = x_o_obs+x_o_unobs;
-x_y = x_y_obs+x_y_unobs;
+x_o = x_o_obs+x_o_unobs; x_o = [x_o;x_o(end);];
+x_y = x_y_obs+x_y_unobs; x_y = [x_y;x_y(end);];
 
 U_o = zeros(T,1); O_o = U_o; E_o = O_o;
 U_y = zeros(T,1); O_y = U_y; E_y = O_y;
@@ -66,6 +59,7 @@ E_o(1) = x_o_obs(2)*T_lat_o/s.obs_ratio;        E_y(1) = x_y_obs(2)*T_lat_o/s.ob
 S_y = zeros(T,1);           S_y(1) = N_y-TC(dateFrom)*(1-rho(dateFrom))./s.obs_ratio;         
 S_o = zeros(T,1);           S_o(1) = N_o-TC(dateFrom)*(rho(dateFrom))./s.obs_ratio;           
 Z = S_o; Z(1) = 0;
+rt = ones(T,1); zeta = rt; F_o = rt; F_y = rt;
 
 %% calculation
 for t=2:T
@@ -73,12 +67,20 @@ for t=2:T
     O_y(t) = O_y(t-1).*(1-gamma_y)+x_y_obs(t);
     U_o(t) = U_o(t-1).*(1-gamma_o)+x_o_unobs(t);
     U_y(t) = U_y(t-1).*(1-gamma_y)+x_y_unobs(t);
+    x_o(t) = x_o_obs(t)+x_o_unobs(t);
+    x_y(t) = x_y_obs(t)+x_y_unobs(t);
+    E_o(t-1) = x_o(t)/T_lat_o;  E_o(t) = x_o(t+1)/T_lat_o;
+    E_y(t-1) = x_y(t)/T_lat_y;  E_y(t) = x_y(t+1)/T_lat_y;
+    F_o(t) = E_o(t)-E_o(t-1)+x_o(t);
+    F_y(t) = E_y(t)-E_y(t-1)+x_y(t);
+    zeta(t) = S_y(t-1)./S_o(t-1).*F_o(t)/F_y(t);
     Z(t) = (alpha_o*O_o(t-1)+alpha_s.*U_o(t-1))*gamma_o'/N_o+...
-        (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;    
+        (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;   
+    rt(t) = F_y(t)/(S_y(t-1)*Z(t));     
     S_o(t) = S_o(t-1)*(1-mu*rt(t)*Z(t));
     S_y(t) = S_y(t-1)*(1-rt(t)*Z(t));
-    E_o(t) = E_o(t-1)+Z(t)*S_o(t-1)*rt(t)*mu-(x_o_obs(t)+x_o_unobs(t));
-    E_y(t) = E_y(t-1)+Z(t)*S_y(t-1)*rt(t)-(x_y_obs(t)+x_y_unobs(t));
+    E_o(t) = E_o(t-1)+F_o(t)-x_o(t);
+    E_y(t) = E_y(t-1)+F_y(t)-x_y(t);
 end
 
 %% data storage
@@ -89,7 +91,8 @@ p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);  
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
 p.sigma_o = tseries(dateFrom:dateTo,sigma_o);
 p.sigma_y = tseries(dateFrom:dateTo,sigma_y);
-p.Rt = Rt;
+p.Rt = tseries(dateFrom:dateTo,rt);
+p.zeta = tseries(dateFrom:dateTo,zeta);
 p.X_o_obs = X_o_obs;       p.X_y_obs = X_y_obs;         p.X_obs = p.X_o_obs+p.X_y_obs;
 p.X_o_unobs = X_o_unobs;   p.X_y_unobs = X_y_unobs;     p.X_unobs = p.X_o_unobs+p.X_y_unobs;
 p.X_o = p.X_o_obs+p.X_o_unobs;      p.X_y = p.X_y_obs+p.X_y_unobs;  p.X = p.X_o+p.X_y;
