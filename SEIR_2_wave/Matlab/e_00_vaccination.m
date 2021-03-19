@@ -158,4 +158,4 @@ mnths = cumsum([0 31 28 31 30 31 30 31 31 30 31 30 31]);
 xticks(5+mnths);
 xticklabels({'januar','februar','marec','april','maj','jun','jul','august','september','oktober','november','december'});
 legend({'BioNTech/Pfizer','Moderna','Oxford/AstraZeneca','Curevac','Johnson&Johnson'});
-title('Plan dodavok vakcin');
+title('Plan dodavok vakcin v roku 2021');
