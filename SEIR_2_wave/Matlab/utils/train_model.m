@@ -40,6 +40,7 @@ scale = s.sim_num/s.pop_size;
 X_obs = scale*method_data(data.X_obs);
 AC = scale*method_data(data.AC);
 TC = scale*method_data(data.TC);
+R_ext = resize(method_data(data.Rt),dateFrom:dateTo);
 
 % new cases, infectious (observed/unoberved)
 X_o_obs = X_obs.*rho;                           x_o_obs = double(X_o_obs);
@@ -133,7 +134,11 @@ legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...
 
 figure;
 subplot(2,1,1); plot(Z);grid on;title('Z');
-subplot(2,1,2); plot(rt);grid on;title('R');
+
+subplot(2,1,2); 
+plot(rt);hold on;
+plot(double(R_ext));
+grid on;title('R');
 
 T_lat_imp_o = E_o(1:T-1)./(x_o_obs(2:T)+x_o_unobs(2:T));
 T_lat_imp_o_avg = mean(T_lat_imp_o);

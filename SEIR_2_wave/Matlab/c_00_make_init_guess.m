@@ -5,10 +5,11 @@ initialize;
 %% load data
 db = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
+db_r = dbload('data/Rt_extern.csv','dateFormat','yyyy-mm-dd','freq','daily');
 s = setparam();
 
 % 1 = reported/confirmed
-% 2 = implied by hospitals
+% 2 = implied bMy hospitals
 cases_type = 1;
 
 %% inputs
@@ -32,6 +33,7 @@ data.Rt = resize(info{cases_type}.mean_ts,dateFrom:dateTo);
 
 % make guess of initial values/train model
 % p = make_init_guess(s,data,dateFrom,dateTo);
+data.Rt = db_r.MeanR;
 p = train_model(s,data,dateFrom,dateTo);
 
 save(strcat('results/forecast_init',suff{cases_type},'.mat'),'p');
