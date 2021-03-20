@@ -1,4 +1,4 @@
-function [p]=train_model(s,data,dateFrom,dateTo)
+function [p]=train_model_SEIR(s,data,dateFrom,dateTo)
 
 %% scheme
 % Sy' = Sy-Fy,          Fy = R/Tinf*Sy*Z
@@ -17,27 +17,28 @@ function [p]=train_model(s,data,dateFrom,dateTo)
 % R - reproduction number (effective)
 
 %% initialization
+s.obs_ratio = .5;
 T = dateTo-dateFrom+1;
 s.sim_num = s.pop_size;
 N_o = ceil(s.sim_num.*s.dep_ratio_65);
 N_y = s.sim_num-N_o;
-alpha_o = s.alpha_i_o;
-alpha_y = s.alpha_i_y;
-alpha_s = s.alpha_s_o;
+alpha_o = 0*0.5; %s.alpha_i_o;
+alpha_y = 0*s.alpha_i_y;
+alpha_s = 1; %s.alpha_s_o;
 mu = s.mu;
 
 method_data = s.smoothing_method_data;
 
 % transition times
-T_lat_y = s.T_lat.mean;
+T_lat_y = s.T_inc.mean;
 T_inf_y = s.T_inf.mean; gamma_y = 1/T_inf_y;
-T_lat_o = s.T_lat.mean;
+T_lat_o = s.T_inc.mean;
 T_inf_o = s.T_inf.mean; gamma_o = 1/T_inf_o;
 
 % inputs
 rho = remove_nan(data.rho,dateFrom,dateTo);
 scale = s.sim_num/s.pop_size;
-X_obs = scale*method_data(data.X_obs);
+X_obs = scale*smooth_series(data.X_obs);
 AC = scale*method_data(data.AC);
 TC = scale*method_data(data.TC);
 R_ext = resize(method_data(data.Rt),dateFrom:dateTo);
@@ -70,8 +71,8 @@ for t=2:T
     U_y(t) = U_y(t-1).*(1-gamma_y)+x_y_unobs(t);
     x_o(t) = x_o_obs(t)+x_o_unobs(t);
     x_y(t) = x_y_obs(t)+x_y_unobs(t);
-    E_o(t-1) = x_o(t)/T_lat_o;  E_o(t) = x_o(t+1)/T_lat_o;
-    E_y(t-1) = x_y(t)/T_lat_y;  E_y(t) = x_y(t+1)/T_lat_y;
+    E_o(t-1) = x_o(t)*T_lat_o;  E_o(t) = x_o(t+1)*T_lat_o;
+    E_y(t-1) = x_y(t)*T_lat_y;  E_y(t) = x_y(t+1)*T_lat_y;
     F_o(t) = E_o(t)-E_o(t-1)+x_o(t);
     F_y(t) = E_y(t)-E_y(t-1)+x_y(t);
     zeta(t) = S_y(t-1)./S_o(t-1).*F_o(t)/F_y(t);
@@ -80,8 +81,6 @@ for t=2:T
     rt(t) = F_y(t)/(S_y(t-1)*Z(t));     
     S_o(t) = S_o(t-1)*(1-mu*rt(t)*Z(t));
     S_y(t) = S_y(t-1)*(1-rt(t)*Z(t));
-    E_o(t) = E_o(t-1)+F_o(t)-x_o(t);
-    E_y(t) = E_y(t-1)+F_y(t)-x_y(t);
 end
 
 %% data storage
@@ -99,61 +98,49 @@ p.X_o_unobs = X_o_unobs;   p.X_y_unobs = X_y_unobs;     p.X_unobs = p.X_o_unobs+
 p.X_o = p.X_o_obs+p.X_o_unobs;      p.X_y = p.X_y_obs+p.X_y_unobs;  p.X = p.X_o+p.X_y;
 
 %% plotting
-figure;
-subplot(2,1,1)
-plot(p.S_o,'linewidth',1); hold on;
-plot(p.S_y,'linewidth',1);
-plot(p.S,'k','linewidth',2);
-grid on;
-title('Suspectible (S)');
-legend({'Old','Young','Total'});
+% figure;
+% subplot(2,1,1)
+% plot(p.S_o,'linewidth',1); hold on;
+% plot(p.S_y,'linewidth',1);
+% plot(p.S,'k','linewidth',2);
+% grid on;
+% title('Suspectible (S)');
+% legend({'Old','Young','Total'});
+% 
+% subplot(2,1,2)
+% plot(p.E_o,'linewidth',1); hold on;
+% plot(p.E_y,'linewidth',1);
+% plot(p.E,'k','linewidth',2);
+% grid on;
+% title('Exposed (E)');
+% legend({'Old','Young','Total'});
+% 
+% figure;
+% hh1=plot(p.U_o,'linewidth',2,'linestyle',':'); hold on;
+% hh2=plot(p.U_y,'linewidth',2,'linestyle',':');
+% plot(p.U,'linewidth',2,'color',0.5*[1 1 1],'linestyle',':');
+% plot(p.O_o,'linestyle','--','linewidth',2,'color',hh1.Color);
+% plot(p.O_y,'linestyle','--','linewidth',2,'color',hh2.Color);
+% plot(p.O,'linewidth',2,'color',0.5*[1 1 1],'linestyle','--');
+% plot(p.I_o,'b','linewidth',3);
+% plot(p.I_y,'r','linewidth',3);
+% plot(p.I,'k','linewidth',3);
+% grid on;
+% title('Infectious (I)');
+% legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...
+%     'Observed - Old', 'Observed - Young', 'Observed - Total',...
+%     'Old', 'Young', 'Total'});
+% 
+% figure;
+% subplot(2,1,1); plot(X_obs);grid on;title('X_obs');
 
-subplot(2,1,2)
-plot(p.E_o,'linewidth',1); hold on;
-plot(p.E_y,'linewidth',1);
-plot(p.E,'k','linewidth',2);
-grid on;
-title('Exposed (E)');
-legend({'Old','Young','Total'});
-
-figure;
-hh1=plot(p.U_o,'linewidth',2,'linestyle',':'); hold on;
-hh2=plot(p.U_y,'linewidth',2,'linestyle',':');
-plot(p.U,'linewidth',2,'color',0.5*[1 1 1],'linestyle',':');
-plot(p.O_o,'linestyle','--','linewidth',2,'color',hh1.Color);
-plot(p.O_y,'linestyle','--','linewidth',2,'color',hh2.Color);
-plot(p.O,'linewidth',2,'color',0.5*[1 1 1],'linestyle','--');
-plot(p.I_o,'b','linewidth',3);
-plot(p.I_y,'r','linewidth',3);
-plot(p.I,'k','linewidth',3);
-grid on;
-title('Infectious (I)');
-legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...
-    'Observed - Old', 'Observed - Young', 'Observed - Total',...
-    'Old', 'Young', 'Total'});
-
-figure;
-subplot(2,1,1); plot(Z);grid on;title('Z');
-
-subplot(2,1,2); 
-plot(rt);hold on;
-plot(double(R_ext));
-grid on;title('R');
-
-T_lat_imp_o = E_o(1:T-1)./(x_o_obs(2:T)+x_o_unobs(2:T));
-T_lat_imp_o_avg = mean(T_lat_imp_o);
-T_lat_imp_y = E_y(1:T-1)./(x_y_obs(2:T)+x_y_unobs(2:T));
-T_lat_imp_y_avg = mean(T_lat_imp_y);
-figure;
-plot(T_lat_imp_o,'linewidth',1);hold on;
-plot(T_lat_imp_y,'linewidth',1);
-plot(T_lat_imp_o*0+T_lat_o,'k--','linewidth',2);
-plot(T_lat_imp_o*0+T_lat_imp_o_avg,'b-.','linewidth',2);
-plot(T_lat_imp_y*0+T_lat_imp_y_avg,'r-.','linewidth',2);
-grid on;
-legend({'implied : old','implied : young','target', 'target', 'mean implied : old', 'mean implied : young'});
-title('Latent period');
-
+% subplot(2,1,2); 
+% plot(rt,'--');hold on;
+% plot(method_data(rt));
+% plot(double(R_ext));
+% grid on;title('R');
+hold on;
+plot(method_data(rt));
 
     function [x] = remove_nan(x,t0,t1)
         if isnan(x(t0))

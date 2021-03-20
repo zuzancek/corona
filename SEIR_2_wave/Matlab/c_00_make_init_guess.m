@@ -1,6 +1,6 @@
 
 %% initialization
-initialize;
+% initialize;
 
 %% load data
 db = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -18,7 +18,7 @@ dateFrom = dd(2020,9,1);
 dateTo = dd(2020,12,31);
 data = struct();
 data.rho = resize(db_age.Old/db_age.Total,dateFrom:dateTo);
-data.X_obs = resize(db.NewCases,dateFrom:dateTo);
+data.X_obs = resize(s.smoothing_method_data(db.NewCases),dateFrom:dateTo);
 data.AC = resize(db.ActiveCases,dateFrom:dateTo);
 data.TC = resize(db.TotalCases,dateFrom:dateTo);
 
@@ -34,7 +34,8 @@ data.Rt = resize(info{cases_type}.mean_ts,dateFrom:dateTo);
 % make guess of initial values/train model
 % p = make_init_guess(s,data,dateFrom,dateTo);
 data.Rt = db_r.MeanR;
-p = train_model(s,data,dateFrom,dateTo);
+data.EnoughData = db_r.EnoughData;
+p = train_model_SIR(s,data,dateFrom,dateTo);
 
 save(strcat('results/forecast_init',suff{cases_type},'.mat'),'p');
 
