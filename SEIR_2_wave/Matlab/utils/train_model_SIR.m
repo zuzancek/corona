@@ -15,20 +15,20 @@ function [p]=train_model_SIR(s,data,dateFrom,dateTo)
 % R - reproduction number (effective)
 
 %% initialization
-s.obs_ratio = 1/3;
+s.obs_ratio = 1/4;
 T = dateTo-dateFrom+1;
 s.sim_num = s.pop_size;
 N_o = ceil(s.sim_num.*s.dep_ratio_65);
 N_y = s.sim_num-N_o;
-alpha_o = 0*0.5; %s.alpha_i_o;
-alpha_y = 0*s.alpha_i_y;
-alpha_s = s.alpha_s_o;
+alpha_o = 0; %s.alpha_i_o;
+alpha_y = .4;%0*s.alpha_i_y;
+alpha_s = 0.6;%s.alpha_s_o;
 
 method_data = s.smoothing_method_data;
 
 % transition times
-T_si_y = s.SI.mean+2;
-T_si_o = s.SI.mean+2;
+T_si_y = s.SI.mean+1.5;
+T_si_o = s.SI.mean+1.5;
 
 % inputs
 rho = remove_nan(data.rho,dateFrom,dateTo);

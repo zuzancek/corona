@@ -14,8 +14,8 @@ cases_type = 1;
 
 %% inputs
 overlay = 31;
-dateFrom = dd(2020,9,1);
-dateTo = dd(2020,12,31);
+dateFrom = dd(2020,4,1);
+dateTo = dd(2021,2,28);
 data = struct();
 data.rho = resize(db_age.Old/db_age.Total,dateFrom:dateTo);
 data.X_obs = resize(s.smoothing_method_data(db.NewCases),dateFrom:dateTo);
@@ -35,7 +35,7 @@ data.Rt = resize(info{cases_type}.mean_ts,dateFrom:dateTo);
 % p = make_init_guess(s,data,dateFrom,dateTo);
 data.Rt = db_r.MeanR;
 data.EnoughData = db_r.EnoughData;
-p = train_model_SIR(s,data,dateFrom,dateTo);
+p = train_model_SEIR(s,data,dateFrom,dateTo);
 
 save(strcat('results/forecast_init',suff{cases_type},'.mat'),'p');
 
