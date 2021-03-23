@@ -2,7 +2,7 @@ covid_data_imp<-read.csv(('data/cases_implied_raw.csv'), header = TRUE, sep=";")
 covid_si_dist<-read.csv('data/dist_shift.csv',header = TRUE, sep=";")
 covid_data_imp$Datum <- as.Date(covid_data_imp$Datum)
 
-date_from = "2020-7-15"
+date_from = "2020-3-15"
 k = 1
 idx<-which(covid_data_imp$Datum==date_from)
 covid2020imp <- list("incidence"=k*covid_data_imp$Dennych_PCR_prirastkov[-seq(idx)],"si_dist"=covid_si_dist$y)

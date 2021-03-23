@@ -2,7 +2,7 @@ covid_data<-read.csv(('data/cases_smooth.csv'), header = TRUE, sep=";")
 covid_si_dist<-read.csv('data/dist_shift.csv',header = TRUE, sep=";")
 covid_data$Datum <- as.Date(covid_data$Datum)
 
-date_from = "2020-7-15"
+date_from = "2020-7-1"
 idx<-which(covid_data$Datum==date_from)
 covid2020r <- list("incidence"=covid_data$Dennych_PCR_prirastkov[-seq(idx)],"si_dist"=covid_si_dist$y)
 covid2020r$date <- as.Date(covid_data$Datum[-seq(idx)])
