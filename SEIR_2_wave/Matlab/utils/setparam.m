@@ -28,6 +28,7 @@ s.T_inf.mean = 3.4;             s.T_inf.std = 0.62;
 s.obj_inf = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T_inf.std*s.T_inf.std));
 s.k_inf = 20;
 s.pdf_inf = cut_tail(pdf(s.obj_inf,0:s.k_inf),5);
+s.inf_share = 1-cdf(s.obj_inf,0:s.k_inf);
 % presymptomatic period
 s.k_pre = 15;
 s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;
@@ -38,6 +39,11 @@ s.obj_pre_inf = makedist('Gamma','a',(s.T_pre.mean+s.T_inf.mean)*s.T_pre.std*s.T
 s.k_lat = 20;
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.obj_lat = makedist('Gamma','a',s.T_lat.mean*s.T_lat.std*s.T_lat.std,'b',1/(s.T_lat.std*s.T_lat.std));
+% infectivity profile
+s.inf_prof.mean = 3.7; s.inf_prof.std = 0.8; % gamma dist.
+s.obj_inf_prof = makedist('Gamma','a',s.inf_prof.mean*s.inf_prof.std*s.inf_prof.std,'b',1/(s.inf_prof.std*s.inf_prof.std));
+s.pdf_inf_share = cut_tail(pdf(s.obj_inf_prof,0:s.k_inf),5);
+calculate_infectiousness_profile();
 
 % **** immunity, vaccination
 s.psi_im_i = .25;  s.psi_im_h = .05;    s.psi_vac = .1;
@@ -239,6 +245,15 @@ s.smoothing_method_params = @smooth_series;
         y(end)=0;
         y = interp1(find(~isnan(y)),y(find(~isnan(y))),1:n,'spline'); %#ok<FNDSB>
         y = y'/sum(y);
+    end
+
+    function []=calculate_infectiousness_profile()
+        x_inf = 0:0.005:s.k_inf;
+        pdf_ip = pdf(s.obj_inf_prof,0:0.005:s.k_inf);
+        [~,i1] = max(pdf_ip);
+        [~,idx]=min(abs(pdf_ip(1:i1)-pdf_ip(i1)/2));
+        s.inf_prof.fnc_s = interp1(x_inf,pdf_ip/pdf_ip(idx),0:s.k_inf);
+        s.inf_prof.fnc_a = interp1(x_inf,smooth_series(min(1,pdf_ip/pdf_ip(idx))),0:s.k_inf);
     end
 end
 
