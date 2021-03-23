@@ -1,6 +1,7 @@
 initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
+x0 = dbload('data/korona_data_new.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
 hosp = dbload('data/hospitals.csv','dateFormat','yyyy-mm-dd','freq','daily');
 db_age = dbload('data/new_cases_age.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -23,6 +24,7 @@ out_filename = 'results/inputs.mat';
 
 %% data processing
 % epidemiological
+y0 = process_inputs(x0,tt0,dd(2021,3,21));
 y = process_inputs(x,tt0,t1);
 [cases_data,test_data] = process_epidemiology_data(x,y,tt0,t1,s);
 
