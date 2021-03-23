@@ -15,20 +15,23 @@ function [p]=train_model_SIR(s,data,dateFrom,dateTo)
 % R - reproduction number (effective)
 
 %% initialization
-s.obs_ratio = 1/4;
+s.obs_ratio = 1/5;
 T = dateTo-dateFrom+1;
 s.sim_num = s.pop_size;
 N_o = ceil(s.sim_num.*s.dep_ratio_65);
 N_y = s.sim_num-N_o;
-alpha_o = 0; %s.alpha_i_o;
-alpha_y = .4;%0*s.alpha_i_y;
-alpha_s = 0.6;%s.alpha_s_o;
+N = N_o+N_y;
+alpha_o = s.alpha_i_o;
+alpha_y = s.alpha_i_y;
+alpha_s = s.alpha_s_o;
 
 method_data = s.smoothing_method_data;
 
 % transition times
-T_si_y = s.SI.mean+1.5;
-T_si_o = s.SI.mean+1.5;
+T_si_y = s.SI.mean+.5;
+T_si_o = s.SI.mean;
+T_inf = s.T_inf.mean; gamma = 1/T_si_y;
+T_lat = s.T_lat.mean;
 
 % inputs
 rho = remove_nan(data.rho,dateFrom,dateTo);
@@ -37,6 +40,7 @@ X_obs = scale*smooth_series(data.X_obs);
 AC = scale*method_data(data.AC);
 TC = scale*method_data(data.TC);
 R_ext = resize(smooth_series(data.Rt),dateFrom:dateTo);
+Rt = double(R_ext);
 
 % new cases, infectious (observed/unoberved)
 X_o_obs = X_obs.*rho;                           x_o_obs = double(X_o_obs);
@@ -45,6 +49,7 @@ X_y_unobs = X_y_obs./s.obs_ratio;               x_y_unobs = double(X_y_unobs);
 X_o_unobs = s.alpha_s_o*X_o_obs./s.obs_ratio;   x_o_unobs = double(X_o_unobs);
 x_o = x_o_obs+x_o_unobs; x_o = [x_o;x_o(end);];
 x_y = x_y_obs+x_y_unobs; x_y = [x_y;x_y(end);];
+x_obs = x_o_obs+x_y_obs;
 
 U_o = zeros(T,1); O_o = U_o; 
 U_y = zeros(T,1); O_y = U_y; 
@@ -56,21 +61,21 @@ S_y = zeros(T,1);           S_y(1) = N_y-TC(dateFrom)*(1-rho(dateFrom))./s.obs_r
 S_o = zeros(T,1);           S_o(1) = N_o-TC(dateFrom)*(rho(dateFrom))./s.obs_ratio;           
 Z = S_o; Z(1) = 0;
 rt = ones(T,1); zeta = rt; 
+O = O_o; O(1) = AC(dateFrom);
+U = O; U(1) = O(1);
+alpha_o = 1;
+F = U;
+S = S_o+S_y;
+delta = .5;x_unobs = x_obs;
 
 %% calculation
 for t=2:T
-    O_o(t) = O_o(t-1).*(1-1/T_si_o)+x_o_obs(t);
-    O_y(t) = O_y(t-1).*(1-1/T_si_y)+x_y_obs(t);
-    U_o(t) = U_o(t-1).*(1-1/T_si_o)+x_o_unobs(t);
-    U_y(t) = U_y(t-1).*(1-1/T_si_y)+x_y_unobs(t);
-    x_o(t) = x_o_obs(t)+x_o_unobs(t);
-    x_y(t) = x_y_obs(t)+x_y_unobs(t);
-    zeta(t) = S_y(t-1)./S_o(t-1).*x_o(t)/x_y(t);
-    Z(t) = (alpha_o*O_o(t-1)+alpha_s.*U_o(t-1))/(T_si_o*N_o)+...
-        (alpha_y*O_y(t-1)+U_y(t-1))/(T_si_y*N_y);   
-    rt(t) = x_y(t)/(S_y(t-1)*Z(t));     
-    S_o(t) = S_o(t-1)-x_o(t);
-    S_y(t) = S_y(t-1)-x_y(t);
+    O(t) = (1-gamma)*O(t-1)+x_obs(t);
+    Z(t) = (alpha_o*O(t-1)+U(t-1))*gamma/N;   
+    F(t) = Rt(t)*Z(t)*S(t-1);
+    x_unobs(t) = F(t)-x_obs(t);
+    S(t) = S(t-1)-F(t);
+    U(t) = (1-gamma)*U(t-1)+x_unobs(t);
 end
 
 %% data storage
