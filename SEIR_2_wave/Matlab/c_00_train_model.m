@@ -14,7 +14,7 @@ cases_type = 1;
 
 %% inputs
 overlay = 31;
-dateFrom = dd(2020,11,1);
+dateFrom = dd(2020,8,1);
 dateTo = dd(2021,2,28);
 data = struct();
 data.rho = resize(db_age.Old/db_age.Total,dateFrom:dateTo);
@@ -25,6 +25,7 @@ th = 10000;
 mm = mov_median(resize(db.Tests,dateFrom:dateTo));
 kk = (mm>th).*0+(mm<=th).*(th-mm);
 data.X_obs = data.X_obs.*(1+kk/th);
+data.from = dd(2020,11,1);
 
 suff = {'_default','_implied'};
 

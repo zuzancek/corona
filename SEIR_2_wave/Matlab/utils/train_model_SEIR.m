@@ -17,33 +17,22 @@ function [p]=train_model_SEIR(s,data,dateFrom,dateTo)
 % R - reproduction number (effective)
 
 %% initialization
-s.obs_ratio = 1/3;
+s.obs_ratio = .5;
 T = dateTo-dateFrom+1;
 s.sim_num = s.pop_size;
 N_o = ceil(s.sim_num.*s.dep_ratio_65);
 N_y = s.sim_num-N_o;
-alpha_o = 0; %s.alpha_i_o;
-alpha_y = 0.35;
-alpha_s = s.alpha_s_o;
+alpha_o = s.alpha_i_o;
+alpha_y = s.alpha_i_y;
+alpha_s = .5; %s.alpha_s_o;
 
 method_data = s.smoothing_method_data;
 
 % transition times
-sd = s.SI.std;
-T_lat_y = s.T_lat.mean;
+T_lat_y = s.T_inc.mean;
 T_inf_y = s.T_inf.mean; gamma_y = 1/T_inf_y;
-T_lat_o = s.T_lat.mean;
-T_inf_o = s.T_inf.mean+2; gamma_o = 1/T_inf_o;
-
-% weights
-k_T_inf = 20; 
-w_T_inf_y = create_weights_time(k_T_inf,T_inf_y,sd); 
-w_T_inf_o = create_weights_time(k_T_inf,T_inf_y,sd);
-k_T_lat = 25;
-[~,w_T_lat_y] = create_weights_time(k_T_lat,T_lat_y,sd); 
-[~,w_T_lat_o] = create_weights_time(k_T_lat,T_lat_y,sd); 
-
-T_shift = max(k_T_inf,k_T_lat);
+T_lat_o = s.T_inc.mean;
+T_inf_o = s.T_inf.mean; gamma_o = 1/T_inf_o;
 
 % inputs
 rho = remove_nan(data.rho,dateFrom,dateTo);
@@ -61,45 +50,38 @@ X_o_unobs = s.alpha_s_o*X_o_obs./s.obs_ratio;   x_o_unobs = double(X_o_unobs);
 x_o = x_o_obs+x_o_unobs; x_o = [x_o;x_o(end);];
 x_y = x_y_obs+x_y_unobs; x_y = [x_y;x_y(end);];
 
-U_o = zeros(T,1); O_o = U_o; E_o = O_o;
-U_y = zeros(T,1); O_y = U_y; E_y = O_y;
+U_o = zeros(T,1); O_o = U_o;
+U_y = zeros(T,1); O_y = U_y; 
 sigma_o = s.obs_ratio*(1+0*double(rho)*(N_y+N_o)/N_o);
 sigma_y = s.obs_ratio*(1+0*(1-double(rho))*(N_y+N_o)/N_y);
-O_o(1:T_shift) = AC(dateFrom:dateFrom+T_shift-1).*rho(dateFrom:dateFrom+T_shift-1);            
-O_y(1:T_shift) = AC(dateFrom:dateFrom+T_shift-1)-O_o(1:T_shift);
-U_o(1:T_shift) = O_o(1:T_shift).*s.alpha_s_o./s.obs_ratio;      
-U_y(1:T_shift) = O_y(1:T_shift)./s.obs_ratio;
-E_o(1:k_T_lat) = x_o_obs(2:k_T_lat+1)*T_lat_o/s.obs_ratio;        
-E_y(1:k_T_lat) = x_y_obs(2:k_T_lat+1)*T_lat_o/s.obs_ratio;
-E_o = get_wa_inv(repmat(w_T_lat_o,T+1,1),x_o,E_o(1:k_T_lat+2),1,k_T_lat+1);
-E_y = get_wa_inv(repmat(w_T_lat_y,T+1,1),x_y,E_y(1:k_T_lat+2),1,k_T_lat+1);
-
-S_y = zeros(T,1);           S_y(1) = N_y-TC(dateFrom)*(1-rho(dateFrom))./s.obs_ratio;         
-S_o = zeros(T,1);           S_o(1) = N_o-TC(dateFrom)*(rho(dateFrom))./s.obs_ratio;           
+O_o(1) = AC(dateFrom)*rho(dateFrom);            O_y(1) = AC(dateFrom)-O_o(1);
+U_o(1) = O_o(1).*s.alpha_s_o./s.obs_ratio;      U_y(1) = O_y(1)./s.obs_ratio;
+S_y = zeros(T,1);           S_y(1) = N_y-TC(dateFrom)*(1-rho(dateFrom))./s.obs_ratio;
+S_o = zeros(T,1);           S_o(1) = N_o-TC(dateFrom)*(rho(dateFrom))./s.obs_ratio;
+E_o = x_o*T_lat_o;          E_y = x_y*T_lat_y;
 Z = S_o; Z(1) = 0;
-rt = ones(T,1); zeta = rt; F_o = rt; F_y = rt;
+rt = ones(T,1); zeta = rt; 
+F_o = rt; F_y = rt;
 
 %% calculation
-for t=2+T_shift:T
-    O_o(t) = O_o(t-1)+x_o_obs(t)-dot(w_T_inf_o(1:end-1),O_o(t-k_T_inf:t-1));
-    O_y(t) = O_y(t-1)+x_y_obs(t)-dot(w_T_inf_y(1:end-1),O_y(t-k_T_inf:t-1));
-    U_o(t) = U_o(t-1)+x_o_unobs(t)-dot(w_T_inf_o(1:end-1),U_o(t-k_T_inf:t-1));
-    U_y(t) = U_y(t-1)+x_y_unobs(t)-dot(w_T_inf_y(1:end-1),U_y(t-k_T_inf:t-1));
-    % E_o(t-1) = x_o(t)*T_lat_o;  E_o(t) = x_o(t+1)*T_lat_o;
-    % E_y(t-1) = x_y(t)*T_lat_y;  E_y(t) = x_y(t+1)*T_lat_y;
-    F_o(t) = E_o(t)-E_o(t-1)+x_o(t);
-    F_y(t) = E_y(t)-E_y(t-1)+x_y(t);
+for t=2:T
+    O_o(t) = O_o(t-1).*(1-gamma_o)+x_o_obs(t);
+    O_y(t) = O_y(t-1).*(1-gamma_y)+x_y_obs(t);
+    U_o(t) = U_o(t-1).*(1-gamma_o)+x_o_unobs(t);
+    U_y(t) = U_y(t-1).*(1-gamma_y)+x_y_unobs(t);
+    F_o(t) = E_o(t+1)-E_o(t)+x_o(t);
+    F_y(t) = E_y(t+1)-E_y(t)+x_y(t);
     zeta(t) = S_y(t-1)./S_o(t-1).*F_o(t)/F_y(t);
     Z(t) = (alpha_o*O_o(t-1)+alpha_s.*U_o(t-1))*gamma_o'/N_o+...
-        (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;   
-    rt(t) = F_y(t)/(S_y(t-1)*Z(t));     
+        (alpha_y*O_y(t-1)+U_y(t-1))*gamma_y'/N_y;
+    rt(t) = F_y(t)/(S_y(t-1)*Z(t));
     S_o(t) = S_o(t-1)-F_o(t);
     S_y(t) = S_y(t-1)-F_y(t);
 end
 
 %% data storage
 p.S_o = tseries(dateFrom:dateTo,S_o);    p.S_y = tseries(dateFrom:dateTo,S_y);    p.S = p.S_o+p.S_y;
-p.E_o = tseries(dateFrom:dateTo,E_o);    p.E_y = tseries(dateFrom:dateTo,E_y);    p.E = p.E_o+p.E_y;
+p.E_o = tseries(dateFrom:dateTo,E_o(1:end-1));    p.E_y = tseries(dateFrom:dateTo,E_y(1:end-1));    p.E = p.E_o+p.E_y;
 p.O_o = tseries(dateFrom:dateTo,O_o);    p.O_y = tseries(dateFrom:dateTo,O_y);    p.O = p.O_o+p.O_y;
 p.U_o = tseries(dateFrom:dateTo,U_o);    p.U_y = tseries(dateFrom:dateTo,U_y);    p.U = p.U_o+p.U_y;
 p.I_o = p.O_o+p.U_o;                     p.I_y = p.O_y+p.U_y;                     p.I = p.I_o+p.I_y;
@@ -120,7 +102,7 @@ p.X_o = p.X_o_obs+p.X_o_unobs;      p.X_y = p.X_y_obs+p.X_y_unobs;  p.X = p.X_o+
 % grid on;
 % title('Suspectible (S)');
 % legend({'Old','Young','Total'});
-% 
+%
 % subplot(2,1,2)
 % plot(p.E_o,'linewidth',1); hold on;
 % plot(p.E_y,'linewidth',1);
@@ -128,7 +110,7 @@ p.X_o = p.X_o_obs+p.X_o_unobs;      p.X_y = p.X_y_obs+p.X_y_unobs;  p.X = p.X_o+
 % grid on;
 % title('Exposed (E)');
 % legend({'Old','Young','Total'});
-% 
+%
 % figure;
 % hh1=plot(p.U_o,'linewidth',2,'linestyle',':'); hold on;
 % hh2=plot(p.U_y,'linewidth',2,'linestyle',':');
@@ -144,17 +126,17 @@ p.X_o = p.X_o_obs+p.X_o_unobs;      p.X_y = p.X_y_obs+p.X_y_unobs;  p.X = p.X_o+
 % legend({'Unobserved - Old', 'Unobserved - Young', 'Unobserved - Total',...
 %     'Observed - Old', 'Observed - Young', 'Observed - Total',...
 %     'Old', 'Young', 'Total'});
-% 
+%
 % figure;
 % subplot(2,1,1); plot(X_obs);grid on;title('X_obs');
 
-% subplot(2,1,2); 
+% subplot(2,1,2);
 % plot(rt,'--');hold on;
 % plot(method_data(rt));
 % plot(double(R_ext));
 % grid on;title('R');
 hold on;
-plot(smooth_series(rt));
+plot(method_data(rt));
 
     function [x] = remove_nan(x,t0,t1)
         if isnan(x(t0))
@@ -170,7 +152,7 @@ plot(smooth_series(rt));
             else
                 i0=2;
             end
-            x(t0) = x(t0+i0); 
+            x(t0) = x(t0+i0);
         end
         if isnan(x(t1))
             i1 = find(isnan(x(t0:t1)));
@@ -185,42 +167,7 @@ plot(smooth_series(rt));
             end
             x(t1) = x(i1);
         end
-        x = interp(x);   
-    end
-
-    function [pdf_x,pdf_x0,weights] = create_weights_time(pnts_num,mean_x,std_x)
-        weights = 0:pnts_num;
-        pd_obj = makedist('Gamma','a',mean_x*std_x*std_x,'b',1/(std_x*std_x));
-        pdf_x = pdf(pd_obj,weights);
-        pdf_x = pdf_x./sum(pdf_x); 
-        pdf_x0 = pdf_x./weights;
-        pdf_x0(1) = 0;
-        pdf_x = pdf_x0(end:-1:1);
-    end
-
-    function [x] = get_wa_inv(weight,zvec,x0,alpha,idxFrom)
-        sz = size(weight);
-        weight = weight(idxFrom:end,:);
-        k = sz(2);k0 = sz(1);
-        tt = length(zvec)-idxFrom+1;        
-        phi = alpha./repmat((0:k-1),tt,1); phi(:,1)=0; 
-        if k0==1
-            W = repmat(weight(k:-1:1),tt,1);
-            A = repmat(phi(k:-1:1),tt,1);
-        else
-            W = weight(:,(k:-1:1));
-            A = phi(:,(k:-1:1));
-        end        
-        J = repmat(1:k,tt,1)+repmat((0:tt-1)',1,k);
-        L = repmat((1:tt)',1,k);
-        Weight_mat = sparse(L(:),J(:),W(:));
-        Alpha_mat = sparse(L(:),J(:),A(:));
-        x = zeros(tt+k-1,1);
-        x(1:k-1) = x0(1:idxFrom-1);
-        function [d] = solve_lineqn(xx0)
-            d=(Weight_mat.*Alpha_mat)*xx0 - zvec(end-tt+1:end);
-        end
-        x = max(0,fsolve(@solve_lineqn,x,optimoptions('fsolve','Display','off','Algorithm','Levenberg-Marquardt')));
+        x = interp(x);
     end
 
 end
