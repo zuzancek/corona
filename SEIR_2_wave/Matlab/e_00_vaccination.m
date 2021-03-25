@@ -139,7 +139,7 @@ xlim([0 length(supply_plan)-2])
 mnths = cumsum([0 31 28 31 30 31 30 31 31 30 31 30 31 31]);
 xticks(5+mnths);
 xticklabels({'januar','februar','marec','april','maj','jun','jul','august','september','oktober','november','december','januar'});
-ylim([0 total_num]);
+ylim([0 7*10^6]);
 legend([pp1 pp2 pp3],{'plan dodavok (1+2 doza)','planovana zaockovanost populacie','ciel zaockovanosti (60% populacie)'});
 title('Dosiahnutie ciela v zaockovanosti (60% populacie, cca 3.3mil), rok 2021');
 
