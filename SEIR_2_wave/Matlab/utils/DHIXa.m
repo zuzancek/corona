@@ -1,4 +1,4 @@
-function [X,res,p] = DHIX(x,data,s,dateFrom,dateTo,t0,params,adm_cut)
+function [X,res,p] = DHIXa(x,data,s,dateFrom,dateTo,t0,params,adm_cut)
 
 %% initialization
 T = dateTo-dateFrom+1;
