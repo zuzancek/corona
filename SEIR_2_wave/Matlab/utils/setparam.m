@@ -68,7 +68,7 @@ s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);
 
 % **** clinical characteristics
 % sickness/symptoms period
-s.T_sick_y = 7;                 s.T_sick_o = 7;       s.T_sick = 5;
+s.T_sick_y = 9;                 s.T_sick_o = 12;       s.T_sick = 5;
 s.T_sick_std = s.SI.std;
 s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma';
 try
