@@ -68,7 +68,7 @@ s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);
 
 % **** clinical characteristics
 % sickness/symptoms period
-s.T_sick_y = 8;                 s.T_sick_o = 8;       s.T_sick = 8;
+s.T_sick_y = 7;                 s.T_sick_o = 7;       s.T_sick = 5;
 s.T_sick_std = s.SI.std;
 s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma';
 try
@@ -174,8 +174,8 @@ s.smoothing_method_params = @smooth_series;
         s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);
         % admission to ICU, ventilation, ECMO
         s.k_ser = 15;
-        s.theta_y = 0.85*db_s.opt_fit_h_y.alpha;
-        s.theta_o = 0.85*db_s.opt_fit_h_o.alpha;
+        s.theta_y = .75*db_s.opt_fit_h_y.alpha;
+        s.theta_o = .75*db_s.opt_fit_h_o.alpha;
         s.pdf_is_y = cut_tail(db_s.opt_fit_h_y.pdf(1:s.k_ser+1),cutoff);
         s.pdf_is_o = cut_tail(db_s.opt_fit_h_o.pdf(1:s.k_ser+1),cutoff);
         s.epdf_is_y = cut_tail(db_s.opt_fit_h_y.epdf(1:s.k_ser+1),cutoff);
@@ -187,8 +187,8 @@ s.smoothing_method_params = @smooth_series;
         s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
         % hospital admission
         s.k_hosp = 25;
-        s.eta_y = 1.65*db_t.opt_fit_h_y.alpha; % 1.25
-        s.eta_o = db_t.opt_fit_h_o.alpha; % 0.85
+        s.eta_y = db_t.opt_fit_h_y.alpha; 
+        s.eta_o = db_t.opt_fit_h_o.alpha; 
         s.pdf_ih_y = cut_tail(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1),cutoff);
         s.pdf_ih_o = cut_tail(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1),cutoff);
         s.epdf_ih_y = cut_tail(db_t.opt_fit_h_y.epdf(1:s.k_hosp+1),cutoff);
