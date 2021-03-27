@@ -107,6 +107,8 @@ M_y_ini = H_y_ini-S_y_ini;
 
 %% calculation
 % **** Hospital:
+H_y = mu.*H;
+H_o = H-H_y;
 HD_o_imp = (extend(get_wa(pdf_hd_o,H_o,omega_o/T_death_o,k_death+1),k_death));
 HD_y_imp = (extend(get_wa(pdf_hd_y,H_y,omega_y/T_death_y,k_death+1),k_death));
 % kappa_d>1 <=> more people die than expected (based on hospitalization data)
@@ -122,9 +124,9 @@ HR_o = (extend(get_wa(pdf_hr_o,H_o,zeta_o/T_rec_o,k_rec+1),k_rec));
 HR_y = (extend(get_wa(pdf_hr_y,H_y,zeta_y/T_rec_y,k_rec+1),k_rec));
 HR = HR_o+HR_y;
 % admission to hospital
-% IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
-% IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
-% IH = IH_o+IH_y;
+IH_o = (extend(H_o(2:end)-H_o(1:end-1)+HR_o(2:end)+HD_o(2:end),1));
+IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
+IH = IH_o+IH_y;
 % ***** serious cases
 % shares
 % s_o = (theta_o(:,1)/T_ser_o)./(eta_o(:,1)/T_hosp_o).*H_o;
@@ -157,11 +159,11 @@ IS_y = method_data(extend(S_y(2:end)-S_y(1:end-1)+SR_y(2:end)+SD_y(2:end),1));
 IS = IS_o+IS_y;
 % ***** home
 % shares
-% i_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o/T_ser_o,k_ser+1)); i_o = method_params(extend(i_o(1:end-1),1));
-% i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y/T_ser_y,k_ser+1)); i_y = method_params(extend(i_y(1:end-1),1));
-% i = i_o+i_y;
-% I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o/T_hosp_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
-% I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y/T_hosp_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
+i_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o/T_ser_o,k_ser+1)); i_o = method_params(extend(i_o(1:end-1),1));
+i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y/T_ser_y,k_ser+1)); i_y = method_params(extend(i_y(1:end-1),1));
+i = i_o+i_y;
+I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o/T_hosp_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
+I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y/T_hosp_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 % admission
 % kappa_h_o = method_params(max(1,I_o)./max(1,i_o)); eta_o = eta_o.*kappa_h_o;
 % kappa_h_y = method_params(max(1,I_y)./max(1,i_y)); eta_y = eta_y.*kappa_h_y;

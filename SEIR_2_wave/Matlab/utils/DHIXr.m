@@ -150,9 +150,11 @@ mu = repmat(1-eta(:,1),1,k_sick+1);
 pdf_ir = xi.*pdf_ir_o+(1-xi).*pdf_ir_y;
 T_rec_i = T_rec_i_o*xi+T_rec_i_y*(1-xi);
 IR = (extend(get_wa(pdf_ir,I,mu./T_rec_i,k_sick+1),k_sick));
-X = method_data(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end));
+X = extend(I(2:end)-I(1:end-1)+IR(2:end)+IH(2:end),1);
 
 %% aggregations
+X_o = xi.*X; X_y = X-X_o; 
+H_o = mu.*H; H_y = H-H_o;
 % M = H-S; M_o = H_o-S_o; M_y = H_y-S_y;
 % MR = HR-SR; MR_o = HR_o-SR_o; MR_y = HR_y-SR_y;
 % MD = HD-SD; MD_o = HD_o-SD_o; MD_y = HD_y-SD_y;
