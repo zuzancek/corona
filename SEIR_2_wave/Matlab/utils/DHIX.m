@@ -67,12 +67,12 @@ pdf_ir_y = repmat(s.pdf_ir_y,length(varsigma),1);
 pdf_ir_o = repmat(s.pdf_ir_o,length(varsigma),1);
 % ******* 3./ Serious cases (ICU,ECMO,...) - separate submodel
 % A./ admission to ICU
-% k_ser = s.k_ser;
+k_ser = s.k_ser;
 pdf_is_y = repmat(s.epdf_is_y',length(varsigma),1);
 pdf_is_o = repmat(s.epdf_is_o',length(varsigma),1);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
-% T_ser_y = s.T_ser_y_mean;
-% T_ser_o = s.T_ser_o_mean;
+T_ser_y = s.T_ser_y_mean;
+T_ser_o = s.T_ser_o_mean;
 % B./ death
 pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
@@ -129,16 +129,14 @@ IH_y = (extend(H_y(2:end)-H_y(1:end-1)+HR_y(2:end)+HD_y(2:end),1));
 IH = IH_o+IH_y;
 % ***** serious cases
 % shares
-% s_o = (theta_o(:,1)/T_ser_o)./(eta_o(:,1)/T_hosp_o).*H_o;
-% s_y = (theta_y(:,1)/T_ser_y)./(eta_y(:,1)/T_hosp_y).*H_y;
 s_o = (theta_o(:,1))./(eta_o(:,1)).*H_o;
 s_y = (theta_y(:,1))./(eta_y(:,1)).*H_y;
 s_tot = max(1,(s_o+s_y));
 S_o = s_o./s_tot.*S;
 S_y = S-S_o;
 kappa_s = method_params(S./s_tot); 
-% theta_o = kappa_s.*theta_o;
-% theta_y = kappa_s.*theta_y;
+theta_o = kappa_s.*theta_o;
+theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
 % conditions than expected
 % deaths
@@ -161,14 +159,11 @@ IS = IS_o+IS_y;
 % shares
 i_o = (get_wa_inv(pdf_is_o,IS_o,I_o_ini,theta_o/T_ser_o,k_ser+1)); i_o = method_params(extend(i_o(1:end-1),1));
 i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y/T_ser_y,k_ser+1)); i_y = method_params(extend(i_y(1:end-1),1));
-i = i_o+i_y;
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o/T_hosp_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y/T_hosp_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 % admission
-% kappa_h_o = method_params(max(1,I_o)./max(1,i_o)); eta_o = eta_o.*kappa_h_o;
-% kappa_h_y = method_params(max(1,I_y)./max(1,i_y)); eta_y = eta_y.*kappa_h_y;
-I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o/T_hosp_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
-I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y/T_hosp_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
+kappa_h_o = method_params(max(1,I_o)./max(1,i_o)); theta_o = theta_o./kappa_h_o;
+kappa_h_y = method_params(max(1,I_y)./max(1,i_y)); theta_y = theta_y./kappa_h_y;
 I = I_o+I_y;
 % recovery
 mu_o = repmat(1-eta_o(:,1),1,k_sick+1);
@@ -490,7 +485,7 @@ p.varrho_y = res.varrho_y;
         y = NaN+zeros(T,1); y(1) = 0;
         dlen = length(str.v);
         for ii=1:dlen
-            y(str.at(ii)-dateFrom) = str.v(ii);
+            y(str.at(ii)-firstData) = str.v(ii);
         end
         if dlen
             y(T) = str.v(end);
