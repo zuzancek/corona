@@ -19,9 +19,8 @@ mu = method_params(params.hy_ratio(firstData:dateTo));
 sigma = method_params(params.asymp_ratio(dateFrom:dateTo));
 
 %% testing
-% adm_cut in testing (gradual)
+% adjustmnent in hospital admission rates (gradual)
 adm_cut = create_series(adm_cut);
-T_obs = adm_cut+s.T_test.mean;
 
 %% data processing
 % initialization
@@ -317,7 +316,6 @@ p.rho_smooth = rho_real_smooth;
 p.sigma = sigma;
 p.burnin = tshift;
 p.adm_cut = adm_cut;
-p.T_obs = T_obs;
 p.par = r0;
 p.pdf_sd_y = pdf_sd_y;
 p.pdf_sd_o = pdf_sd_o;

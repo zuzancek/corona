@@ -33,7 +33,7 @@ dateTo = t1;
 %% calculations
 % 1./ daily cases implied by hospitals
 % delay.v = 1*([0.5 1 1.25 1 0 1 1 0]);  delay.at = [dd(2020,9,2), dd(2020,10,25),dd(2020,11,01),dd(2020,11,15),dd(2020,11,30),dd(2020,12,15),dd(2021,01,06),dd(2021,01,10)];
-delay.v = 1*([-4 0.5 1 0]);  delay.at = [dd(2020,8,2), dd(2020,10,15),dd(2020,12,15),dd(2021,1,10)];
+delay.v = 1*([-4 -0.5 1 0]);  delay.at = [dd(2020,8,2), dd(2020,10,15),dd(2020,12,15),dd(2021,1,10)];
 params = struct;
 params.death_old_ratio = deaths_data.death_old_ratio;
 params.cases_old_ratio = cases_data.old_ratio;
