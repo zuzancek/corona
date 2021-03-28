@@ -58,7 +58,7 @@ cases_data.cases_pcr_implied_smooth = cases_data.X_total;
 % 2./ hospitals/deaths implied by reported cases 
 init = hosp_data;
 init.I = x.ActiveCases; 
-init.T_delay = params.T_delay;
+init.adm_cut = params.adm_cut;
 init.IH = res_implied.IH;
 init.HR = res_implied.HR;
 init.omega_o = s.omega_o; 

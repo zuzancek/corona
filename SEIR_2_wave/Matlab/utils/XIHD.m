@@ -110,16 +110,16 @@ d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o; d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o;
 k_hosp = s.k_hosp;      
 T_hosp_y = s.T_hosp_y_mean;
 T_hosp_o = s.T_hosp_o_mean;
-alpha_iho = s.eta_o./T_hosp_o.*p.epdf_ih_o;
-alpha_ihy = s.eta_y.*(1-.25*adm_cut)./T_hosp_y.*p.epdf_ih_y;
+alpha_iho = s.eta_o./T_hosp_o.*p.pdf_ih_o;
+alpha_ihy = s.eta_y.*(1-.25*adm_cut)./T_hosp_y.*p.pdf_ih_y;
 alpha_iho = alpha_iho(:,end:-1:1);
 alpha_ihy = alpha_ihy(:,end:-1:1);
 % B./ recovery from sickness at home
 k_sick = s.k_sick;  
 T_rec_i_y = s.T_sick_y;
 T_rec_i_o = s.T_sick_o;
-alpha_iro = (1-s.eta_o).*p.epdf_ih_o./T_rec_i_o;    alpha_iro = alpha_iro(:,end:-1:1);
-alpha_iry = (1-s.eta_y).*p.epdf_ih_y./T_rec_i_y;    alpha_iry = alpha_iry(:,end:-1:1);
+alpha_iro = (1-s.eta_o).*p.pdf_ir_o./T_rec_i_o;    alpha_iro = alpha_iro(:,end:-1:1);
+alpha_iry = (1-s.eta_y).*p.pdf_ir_y./T_rec_i_y;    alpha_iry = alpha_iry(:,end:-1:1);
 % ******** 2./ hospital care (general)
 % A./ death
 k_death = s.k_death; 
@@ -150,8 +150,8 @@ alpha_jso = s.theta_o./kappa_h_o.*p.pdf_is_o./T_ser_o;
 alpha_jsy = s.theta_y./kappa_h_y.*p.pdf_is_y./T_ser_y;
 alpha_jso = alpha_jso(:,end:-1:1);
 alpha_jsy = alpha_jsy(:,end:-1:1);
-alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*pdf_ir_o./time_ir; 
-alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*pdf_ir_y./time_ir; 
+alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*p.pdf_ir_o./T_rec_i_o; 
+alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*p.pdf_ir_y./T_rec_i_y; 
 alpha_jro = alpha_jro(:,end:-1:1);
 alpha_jry = alpha_jry(:,end:-1:1);
 % B./ deaths
@@ -161,8 +161,6 @@ pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
 alpha_sdo = s.omega_o_s.*kappa_d_y./nu.*pdf_sd_o/T_death_s_o;
 alpha_sdy = s.omega_y_s.*kappa_d_o./nu.*pdf_sd_y/T_death_s_y;
-% alpha_sdo = s.omega_o_s.*pdf_sd_o./repmat(t_death,T_total,1);
-% alpha_sdy = s.omega_y_s.*pdf_sd_y./repmat(t_death,T_total,1);
 alpha_sdo = alpha_sdo(:,end:-1:1);
 alpha_sdy = alpha_sdy(:,end:-1:1);
 % C./ recovery
@@ -300,19 +298,19 @@ out_rep.mu = out_rep.H_y./out_rep.H;
 out_rep.eta_o = s.eta_o.*kappa_h_o;
 out_rep.eta_y = s.eta_y.*kappa_h_y;
 
-% figure;
-% pp3=bar(out_rep.H); hold on;
-% pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
-% pp7=bar(out_rep.S,'FaceColor',0.25*[1 1 1]); hold on;
-% pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
-% plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
-% pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
-% pp6=plot((resize(init.S,dateFrom:dateTo)),'k','linewidth',2);hold on;
-% pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
-% grid on;
-% legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
-%     'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
-%     'Serious cases - reported', 'Serious cases - implied'});
+figure;
+pp3=bar(out_rep.H); hold on;
+pp5=bar(out_rep.D,'FaceAlpha',0.5);hold on;
+pp7=bar(out_rep.S,'FaceColor',0.25*[1 1 1]); hold on;
+pp1=plot(smooth_series(out_rep.X),'linewidth',2,'Color',[0.75 0.75 0]);hold on; 
+plot(out_rep.X,'Color',[0.5 0.5 0.5]);hold on;
+pp2=plot((resize(init.H,dateFrom:dateTo)),'b','linewidth',2);hold on;
+pp6=plot((resize(init.S,dateFrom:dateTo)),'k','linewidth',2);hold on;
+pp4=plot((resize(init.D,dateFrom:dateTo)),'r','linewidth',2);hold on;
+grid on;
+legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported', ...
+    'Hospitalizations - implied', 'Deaths - reported, cummulative','Deaths - implied, cummulative', ...
+    'Serious cases - reported', 'Serious cases - implied'});
 
     function [y] = extend(x,t0)
         [xlen,xwid] = size(x);
