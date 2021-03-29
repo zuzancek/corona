@@ -1,4 +1,4 @@
-% initialize;
+initialize;
 
 x = dbload('data/korona_data.csv','dateFormat','yyyy-mm-dd','freq','daily');
 mob = dbload('data/mobility.csv','dateFormat','yyyy-mm-dd','freq','daily');
@@ -76,7 +76,9 @@ init.kappa_d_y = params.kappa_d_y;
 init.kappa_d_o = params.kappa_d_o;
 init.kappa_h_o = params.kappa_h_o;
 init.kappa_h_y = params.kappa_h_y;
+init.kappa_s = params.kappa_s;
 init.omega_o = params.omega_o; init.omega_y = params.omega_y;
+init.res = res_implied;
 [out_check] = fun_1(y,params,s,init,disp_from,t1);
 hosp_data.alt = out;
 

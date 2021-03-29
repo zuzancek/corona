@@ -61,7 +61,6 @@ end
 
 rho = extend(rho,shift);
 nu = extend(nu,T_total-length(nu));
-% kappa_s = extend(kappa_s,T_total-length(kappa_s));
 kappa_h_o = extend(kappa_h_o,T_total-length(kappa_h_o));
 kappa_h_y = extend(kappa_h_y,T_total-length(kappa_h_y));
 kappa_s = extend(kappa_s,T_total-length(kappa_s));
@@ -110,16 +109,18 @@ d_H_R_o = d_I_H_o; d_H_R_y = d_I_H_o; d_H_D_o = d_I_H_o; d_H_D_y = d_I_H_o;
 k_hosp = s.k_hosp;      
 T_hosp_y = s.T_hosp_y_mean;
 T_hosp_o = s.T_hosp_o_mean;
-alpha_iho = s.eta_o./T_hosp_o.*p.pdf_ih_o;
-alpha_ihy = s.eta_y.*(1-.25*adm_cut)./T_hosp_y.*p.pdf_ih_y;
+eta_y = s.eta_y.*(1-.25*adm_cut);
+eta_o = s.eta_o;
+alpha_iho = eta_o.*kappa_h_o./T_hosp_o.*p.pdf_ih_o;
+alpha_ihy = eta_y.*kappa_h_y./T_hosp_y.*p.pdf_ih_y;
 alpha_iho = alpha_iho(:,end:-1:1);
 alpha_ihy = alpha_ihy(:,end:-1:1);
 % B./ recovery from sickness at home
 k_sick = s.k_sick;  
 T_rec_i_y = s.T_sick_y;
 T_rec_i_o = s.T_sick_o;
-alpha_iro = (1-s.eta_o).*p.pdf_ir_o./T_rec_i_o;    alpha_iro = alpha_iro(:,end:-1:1);
-alpha_iry = (1-s.eta_y).*p.pdf_ir_y./T_rec_i_y;    alpha_iry = alpha_iry(:,end:-1:1);
+alpha_iro = (1-eta_o).*p.pdf_ir_o./T_rec_i_o;    alpha_iro = alpha_iro(:,end:-1:1);
+alpha_iry = (1-eta_y).*p.pdf_ir_y./T_rec_i_y;    alpha_iry = alpha_iry(:,end:-1:1);
 % ******** 2./ hospital care (general)
 % A./ death
 k_death = s.k_death; 
@@ -146,12 +147,14 @@ alpha_hry = (1-s.omega_y.*kappa_d_y./nu).*pdf_hr_y./T_rec_y;    alpha_hry = alph
 k_ser = s.k_ser;
 T_ser_y = s.T_ser_y_mean;
 T_ser_o = s.T_ser_o_mean;
-alpha_jso = s.theta_o./kappa_h_o.*p.pdf_is_o./T_ser_o;
-alpha_jsy = s.theta_y./kappa_h_y.*p.pdf_is_y./T_ser_y;
+theta_o = s.theta_o.*kappa_s; %./kappa_h_o;
+theta_y = s.theta_y.*kappa_s;%./kappa_h_y;
+alpha_jso = theta_o.*p.pdf_is_o./T_ser_o;
+alpha_jsy = theta_y.*p.pdf_is_y./T_ser_y;
 alpha_jso = alpha_jso(:,end:-1:1);
 alpha_jsy = alpha_jsy(:,end:-1:1);
-alpha_jro = (1-s.theta_o.*kappa_s./kappa_h_o).*p.pdf_ir_o./T_rec_i_o; 
-alpha_jry = (1-s.theta_y.*kappa_s./kappa_h_y).*p.pdf_ir_y./T_rec_i_y; 
+alpha_jro = (1-theta_o).*p.pdf_ir_o./T_rec_i_o; 
+alpha_jry = (1-theta_y).*p.pdf_ir_y./T_rec_i_y; 
 alpha_jro = alpha_jro(:,end:-1:1);
 alpha_jry = alpha_jry(:,end:-1:1);
 % B./ deaths

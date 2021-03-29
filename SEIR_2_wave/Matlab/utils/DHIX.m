@@ -52,8 +52,8 @@ T_rec_o = s.T_rec_h_o_mean;
 % ******** 2./ home
 % A./ admission to hospital
 k_hosp = s.k_hosp;
-pdf_ih_y = repmat(s.epdf_ih_y',length(varsigma),1);
-pdf_ih_o = repmat(s.epdf_ih_o',length(varsigma),1);
+pdf_ih_y = repmat(s.pdf_ih_y',length(varsigma),1);
+pdf_ih_o = repmat(s.pdf_ih_o',length(varsigma),1);
 eta_o = r0.eta_o;   eta_y = r0.eta_y.*(1-.25*adm_cut);
 T_hosp_y = s.T_hosp_y_mean;
 T_hosp_o = s.T_hosp_o_mean;
@@ -133,7 +133,7 @@ s_y = (theta_y(:,1))./(eta_y(:,1)).*H_y;
 s_tot = max(1,(s_o+s_y));
 S_o = s_o./s_tot.*S;
 S_y = S-S_o;
-kappa_s = method_params(S./s_tot); 
+kappa_s = 1;% method_params(S./s_tot); 
 theta_o = kappa_s.*theta_o;
 theta_y = kappa_s.*theta_y;
 % kappa_s> 1 <=> larger proportion of hospitalised patients are in more serious
@@ -161,8 +161,10 @@ i_y = (get_wa_inv(pdf_is_y,IS_y,I_y_ini,theta_y/T_ser_y,k_ser+1)); i_y = method_
 I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o/T_hosp_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
 I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y/T_hosp_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 % admission
-kappa_h_o = method_params(max(1,I_o)./max(1,i_o)); theta_o = theta_o./kappa_h_o;
-kappa_h_y = method_params(max(1,I_y)./max(1,i_y)); theta_y = theta_y./kappa_h_y;
+kappa_h_o = method_params(max(1,I_o)./max(1,i_o)); eta_o = eta_o.*kappa_h_o;
+kappa_h_y = method_params(max(1,I_y)./max(1,i_y)); eta_y = eta_y.*kappa_h_y;
+I_o = (get_wa_inv(pdf_ih_o,IH_o,I_o_ini,eta_o/T_hosp_o,k_hosp+1)); I_o = method_params(extend(I_o(1:end-1),1));
+I_y = (get_wa_inv(pdf_ih_y,IH_y,I_y_ini,eta_y/T_hosp_y,k_hosp+1)); I_y = method_params(extend(I_y(1:end-1),1));
 I = I_o+I_y;
 % recovery
 mu_o = repmat(1-eta_o(:,1),1,k_sick+1);
@@ -331,13 +333,13 @@ p.pdf_is_y = pdf_is_y;
 p.pdf_is_o = pdf_is_o;
 p.pdf_ih_y = pdf_ih_y;
 p.pdf_ih_o = pdf_ih_o;
-p.omega_o = omega_o;
+p.omega_o = omega_o*.875;
 p.omega_y = omega_y;
 p.omega_o_s = omega_o_s;
 p.omega_y_s = omega_y_s;
 p.zeta_o = zeta_o;
 p.zeta_y = zeta_y;
-p.eta_o = eta_o;
+p.eta_o = eta_o*1.2;
 p.eta_y = eta_y;
 p.mu_o = mu_o;
 p.mu_y = mu_y;
