@@ -67,19 +67,13 @@ k_ser = s.k_ser;
 pdf_is_y = repmat(s.epdf_is_y',length(varsigma),1);
 pdf_is_o = repmat(s.epdf_is_o',length(varsigma),1);
 theta_o = r0.theta_o;   theta_y = r0.theta_y;
-T_ser_y = s.T_ser_y_mean;
-T_ser_o = s.T_ser_o_mean;
 % B./ death
 pdf_sd_y = repmat(s.epdf_sd_y',length(varsigma),1);
 pdf_sd_o = repmat(s.epdf_sd_o',length(varsigma),1);
 omega_o_s = r0.omega_o_s;   omega_y_s = r0.omega_y_s;
-T_death_s_o = s.T_death_o_mean_s;
-T_death_s_y = s.T_death_y_mean_s;
 % C./ recovery
 pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
-T_rec_s_o = s.T_rec_s_o_mean;
-T_rec_s_y = s.T_rec_s_y_mean;
 
 % initialization
 I_ini = method_data(x.ActiveCases(firstData-k_hosp+2:dateTo));
@@ -109,7 +103,7 @@ HD_o_imp = (extend(get_wa(pdf_hd_o,H_o,omega_o,k_death+1),k_death));
 HD_y_imp = (extend(get_wa(pdf_hd_y,H_y,omega_y,k_death+1),k_death));
 % kappa_d>1 <=> more people die than expected (based on hospitalization data)
 % indication of more seriou cases
-HD_o = method_params(HD.*varsigma);                
+HD_o = (HD.*varsigma);                
 HD_y = (HD)-HD_o;
 kappa_d_y = method_params(HD_y./HD_y_imp); omega_y = omega_y.*kappa_d_y;
 kappa_d_o = method_params(HD_o./HD_o_imp); omega_o = omega_o.*kappa_d_o;
@@ -330,13 +324,13 @@ p.pdf_is_y = pdf_is_y;
 p.pdf_is_o = pdf_is_o;
 p.pdf_ih_y = pdf_ih_y;
 p.pdf_ih_o = pdf_ih_o;
-p.omega_o = omega_o*.875;
+p.omega_o = omega_o;
 p.omega_y = omega_y;
 p.omega_o_s = omega_o_s;
 p.omega_y_s = omega_y_s;
 p.zeta_o = zeta_o;
 p.zeta_y = zeta_y;
-p.eta_o = eta_o*1.2;
+p.eta_o = eta_o;
 p.eta_y = eta_y;
 p.mu_o = mu_o;
 p.mu_y = mu_y;

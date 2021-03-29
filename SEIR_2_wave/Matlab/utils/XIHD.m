@@ -133,7 +133,7 @@ alpha_iro = (1-eta_o).*pdf_ir_o./time_ir;    alpha_iro = alpha_iro(:,end:-1:1);
 alpha_iry = (1-eta_y).*pdf_ir_y./time_ir;    alpha_iry = alpha_iry(:,end:-1:1);
 % ******** 2./ hospital care (general)
 % A./ death
-k_death = s.k_death; 
+k_death = s.k_death; t_death = s.time_d;
 pdf_hd_y = repmat(s.epdf_hd_y',length(varsigma),1);
 pdf_hd_o = repmat(s.epdf_hd_o',length(varsigma),1);
 % omega_o = s.omega_o.*repmat(kappa_d_o./nu,1,k_death+1);   
@@ -146,8 +146,8 @@ alpha_hdy = alpha_hdy(:,end:-1:1);
 k_rec = s.k_rec; 
 pdf_hr_y = repmat(s.epdf_hr_y',length(varsigma),1);
 pdf_hr_o = repmat(s.epdf_hr_o',length(varsigma),1);
-alpha_hro = (1-omega_o.*kappa_d_o./nu).*pdf_hr_o./s.time_r;    alpha_hro = alpha_hro(:,end:-1:1);
-alpha_hry = (1-omega_y.*kappa_d_y./nu).*pdf_hr_y./s.time_r;    alpha_hry = alpha_hry(:,end:-1:1);
+alpha_hro = (1-omega_o).*pdf_hr_o./s.time_r;    alpha_hro = alpha_hro(:,end:-1:1);
+alpha_hry = (1-omega_y).*pdf_hr_y./s.time_r;    alpha_hry = alpha_hry(:,end:-1:1);
 % ******* 3./ serious cases (hospital+Intensive care needed)
 % A./ admission (ECMO, ICU, Ventilation)
 k_ser = s.k_ser; t_ser = 0:k_ser;
@@ -169,8 +169,8 @@ alpha_sdy = alpha_sdy(:,end:-1:1);
 % C./ recovery
 pdf_sr_y = repmat(s.epdf_sr_y',length(varsigma),1);
 pdf_sr_o = repmat(s.epdf_sr_o',length(varsigma),1);
-alpha_sro = (1-omega_o_s).*pdf_sr_o./repmat(t_rec,T_total,1);
-alpha_sry = (1-omega_y_s).*pdf_sr_y./repmat(t_rec,T_total,1);
+alpha_sro = (1-omega_o_s).*pdf_sr_o./s.time_r;
+alpha_sry = (1-omega_y_s).*pdf_sr_y./s.time_r;
 alpha_sro = alpha_sro(:,end:-1:1);
 alpha_sry = alpha_sry(:,end:-1:1);
 
@@ -318,6 +318,13 @@ legend([pp1 pp2 pp3 pp4 pp5 pp6 pp7],{'New cases','Hospitalizations - reported',
         z = x(1,:)+zeros(xlen+t0,xwid);
         z(t0+1:end,:) = x;
         y = method_data(z);
+    end
+
+    function [pdf_x,pnt_x] = create_weights(pnts_num,T_num,type,mean_x,stdev_x)
+        weights = 0:pnts_num;
+        pdf_x = pdf(type,repmat(weights,T_num,1),repmat(mean_x,1,pnts_num+1),repmat(stdev_x,T_num,pnts_num+1));
+        pdf_x = pdf_x./sum(pdf_x,2); 
+        pnt_x = repmat(weights,T_num,1);
     end
 
 end

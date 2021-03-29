@@ -68,7 +68,7 @@ s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);
 
 % **** clinical characteristics
 % sickness/symptoms period
-s.T_sick_y = 7;                 s.T_sick_o = 7;       s.T_sick = 5;
+s.T_sick_y = 8;                 s.T_sick_o = 8;       s.T_sick = 5;
 s.T_sick_std = s.SI.std;
 s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma';
 try
@@ -146,7 +146,7 @@ s.smoothing_method_params = @smooth_series;
 
     function[]=set_prob_data()
         % dbs definitions
-        cutoff = 5; mul = .8;
+        cutoff = 5; mul = 1;
         db_t = db.stat_total; db_s = db.stat_severe; db_m = db.stat_mild;
         % death (serious cases only, use db_s database)
         s.k_death = 40;
