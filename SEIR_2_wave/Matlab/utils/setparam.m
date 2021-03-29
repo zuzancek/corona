@@ -68,8 +68,7 @@ s.pdf_pre_test = cut_tail(pdf(s.obj_pre_test,0:s.k_inf),5);
 
 % **** clinical characteristics
 % sickness/symptoms period
-s.T_sick_y = 9;                 s.T_sick_o = 12;       s.T_sick = 5;
-s.T_sick_y = 6;                s.T_sick_o = 7;       s.T_sick = 5;
+s.T_sick_y = 7;                 s.T_sick_o = 7;       s.T_sick = 5;
 s.T_sick_std = s.SI.std;
 s.k_sick = 25;                  s.T_sick_pdf_type = 'Gamma';
 try
@@ -147,7 +146,7 @@ s.smoothing_method_params = @smooth_series;
 
     function[]=set_prob_data()
         % dbs definitions
-        cutoff = 5;
+        cutoff = 5; mul = .8;
         db_t = db.stat_total; db_s = db.stat_severe; db_m = db.stat_mild;
         % death (serious cases only, use db_s database)
         s.k_death = 40;
@@ -175,8 +174,8 @@ s.smoothing_method_params = @smooth_series;
         s.time_d_s = reshape(db_s.opt_fit_d_y.time_grid(1:s.k_death+1),1,[]);
         % admission to ICU, ventilation, ECMO
         s.k_ser = 15;
-        s.theta_y = .75*db_s.opt_fit_h_y.alpha;
-        s.theta_o = .75*db_s.opt_fit_h_o.alpha;
+        s.theta_y = .85*db_s.opt_fit_h_y.alpha;
+        s.theta_o = .85*db_s.opt_fit_h_o.alpha;
         s.pdf_is_y = cut_tail(db_s.opt_fit_h_y.pdf(1:s.k_ser+1),cutoff);
         s.pdf_is_o = cut_tail(db_s.opt_fit_h_o.pdf(1:s.k_ser+1),cutoff);
         s.epdf_is_y = cut_tail(db_s.opt_fit_h_y.epdf(1:s.k_ser+1),cutoff);
@@ -188,8 +187,8 @@ s.smoothing_method_params = @smooth_series;
         s.time_s = reshape(db_s.opt_fit_h_y.time_grid(1:s.k_ser+1),1,[]);
         % hospital admission
         s.k_hosp = 25;
-        s.eta_y = db_t.opt_fit_h_y.alpha; 
-        s.eta_o = db_t.opt_fit_h_o.alpha; 
+        s.eta_y = mul*1.65*db_t.opt_fit_h_y.alpha; 
+        s.eta_o = mul*db_t.opt_fit_h_o.alpha; 
         s.pdf_ih_y = cut_tail(db_t.opt_fit_h_y.pdf(1:s.k_hosp+1),cutoff);
         s.pdf_ih_o = cut_tail(db_t.opt_fit_h_o.pdf(1:s.k_hosp+1),cutoff);
         s.epdf_ih_y = cut_tail(db_t.opt_fit_h_y.epdf(1:s.k_hosp+1),cutoff);
