@@ -35,10 +35,12 @@ s.T_pre.mean = s.T_inc.mean+s.T_inf.mean-s.SI.mean;
 s.T_pre.std = s.SI.std;
 s.obj_pre = makedist('Gamma','a',s.T_pre.mean*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
 s.obj_pre_inf = makedist('Gamma','a',(s.T_pre.mean+s.T_inf.mean)*s.T_pre.std*s.T_pre.std,'b',1/(s.T_pre.std*s.T_pre.std));
+s.pdf_pre = cut_tail(pdf(s.obj_pre,0:s.k_pre),4);
 % latent period
 s.k_lat = 20;
 s.T_lat.mean = s.T_inc.mean-s.T_pre.mean; s.T_lat.std  = s.SI.std;
 s.obj_lat = makedist('Gamma','a',s.T_lat.mean*s.T_lat.std*s.T_lat.std,'b',1/(s.T_lat.std*s.T_lat.std));
+s.pdf_lat = cut_tail(pdf(s.obj_lat,0:s.k_lat),5);
 % infectivity profile
 s.inf_prof.mean = 3.7; s.inf_prof.std = 0.8; % gamma dist.
 s.obj_inf_prof = makedist('Gamma','a',s.inf_prof.mean*s.inf_prof.std*s.inf_prof.std,'b',1/(s.inf_prof.std*s.inf_prof.std));
