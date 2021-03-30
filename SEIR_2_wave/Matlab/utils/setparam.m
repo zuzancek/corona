@@ -19,12 +19,12 @@ s.scale_s_h = s.S_H_rate_0/s.S_H_rate;
 
 % **** epidemiology
 % serial interval (generation period)
-s.SI.mean = 6.5;                s.SI.std = 0.62;
+s.SI.mean = 7.5;                s.SI.std = 0.62;
 % incubation period
 s.T_inc.mean = 5.1;             s.T_inc.std = s.SI.std;
 s.obj_inc = makedist('Gamma','a',s.T_inc.mean*s.T_inc.std*s.T_inc.std,'b',1/(s.T_inc.std*s.T_inc.std));
 % infectious period
-s.T_inf.mean = 3.4;             s.T_inf.std = 0.62;
+s.T_inf.mean = 4.4;             s.T_inf.std = 0.62;
 s.obj_inf = makedist('Gamma','a',s.T_inf.mean*s.T_inf.std*s.T_inf.std,'b',1/(s.T_inf.std*s.T_inf.std));
 s.k_inf = 20;
 s.pdf_inf = cut_tail(pdf(s.obj_inf,0:s.k_inf),5);
