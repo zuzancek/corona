@@ -80,7 +80,7 @@ for t=t0+1:T_total
     D_o(t,:) = D_o(t-1,:)+d_H_D_o(t,:);
     D_y(t,:) = D_y(t-1,:)+d_H_D_y(t,:);
     % (temporarily/permanently) removed
-    T_o(t,:) = T_o(t-1,:)+vaccine_intake_rem_o(t-1,:).*T_o(t-1,:)./R_o(t-1,:)+d_I_R_o+d_A_R_o;
+    T_o(t,:) = T_o(t-1,:)+vaccine_intake_rem_o(t-1,:).*T_o(t-1,:)./R_o(t-1,:)+d_I_R_o+d_A_R_o-d_T_;
     T_y(t,:) = T_y(t-1,:)+vaccine_intake_rem_y(t-1,:).*T_y(t-1,:)./R_y(t-1,:)+d_I_R_y+d_A_R_y;
     P_o(t,:) = P_o(t-1,:)+vaccine_intake_rem_o(t-1,:).*P_o(t-1,:)./R_o(t-1,:)+d_H_R_o(t,:);
     P_y(t,:) = P_y(t-1,:)+vaccine_intake_rem_y(t-1,:).*P_y(t-1,:)./R_y(t-1,:)+d_H_R_y(t,:);
