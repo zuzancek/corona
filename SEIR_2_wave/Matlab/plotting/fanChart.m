@@ -56,7 +56,7 @@ ncolors = floor(length(quant)/2);
 if iscell(cmapFun)
     col = feval(cmapFun{1}, cmapFun{2:end}, ncolors);
 else
-    col = feval(cmapFun, ncolors);
+    col = feval(cmapFun, ncolors,midcolor);
 end
 if darkcenter
     col = col([end:-1:1],:);
@@ -74,7 +74,7 @@ end
 lh = line(xvals, centerline, 'LineWidth', 2, 'Color',midcolor, 'Parent', parent);
 ph = flipud(ph);
 
-function map = boeRedMap(ncolors)
+function map = boeRedMap(ncolors,midcolor)
 colors = [254 230 222
     252 211 196
     250 190 171
@@ -85,7 +85,9 @@ colors = [254 230 222
     241 91 75
     237 27 46
     255 0 0];
+colors = colors(:,[3 2 1]);
 map = colors/256;
+map = 0.6*repmat(midcolor,10,1)+map*0.4;
 if nargin > 0
     map = interp1(1:size(map,1), map, 1:ncolors);
 end

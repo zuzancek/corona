@@ -2,7 +2,7 @@
 initialize;
 
 %% load data
-db = dbload('data/vaccination.csv','dateFormat','yyyy-mm-dd','freq','daily');
+db = dbload('data/vaccination_cum.csv','dateFormat','yyyy-mm-dd','freq','daily');
 dbs = dbload('data/supply_plan.csv','dateFormat','yyyy-mm-dd','freq','daily');
 today = dd(2021,3,19-1);
 dateFrom = startdate(db.Cum);
